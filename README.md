@@ -34,7 +34,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 - College name, leads, and social/join URLs live in one file: `src/lib/constants.ts`
 - Events and team members: `src/data/*.ts` (typed, ready to move to a DB later)
-- Implementation plan: `plan.md`
+- Community Day content: `src/data/community-day.ts` (agenda, speakers, perks, FAQs)
+- Implementation plans: `plan.md` (site), `plan-aws-student-community-day.md` (flagship event)
 
 ## Scripts
 
