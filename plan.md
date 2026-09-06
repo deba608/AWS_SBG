@@ -2,6 +2,8 @@
 
 > Generated 2026-09-06. Synthesized from 3 parallel planning agents (architecture, design system, content/data).
 > **Build note (2026-09-06):** kept the scaffold default **Tailwind CSS v4** (`@import "tailwindcss"` + `@theme` tokens in `globals.css`) instead of downgrading to v3 — verified working with `npm run build`. Brand icons (GitHub/LinkedIn/Instagram) are custom inline SVGs in `src/components/icons.tsx` because current `lucide-react` no longer ships brand icons.
+>
+> **Scope change (2026-09-06):** Learning and Projects sections removed completely — routes, components, data files, nav/footer links. Site is now Home + Events + Team.
 
 ## 0. Goal & Non-Goals
 

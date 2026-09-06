@@ -19,13 +19,11 @@ import FeatureCard from "@/components/FeatureCard";
 import HeroVisual from "@/components/HeroVisual";
 import JoinCTA from "@/components/JoinCTA";
 import Journey from "@/components/Journey";
-import ProjectCard from "@/components/ProjectCard";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import StatsSection from "@/components/StatsSection";
 import TechMarquee from "@/components/TechMarquee";
 import { upcomingEvents } from "@/data/events";
-import { projects } from "@/data/projects";
 import { SITE } from "@/lib/constants";
 
 const aboutCards = [
@@ -222,31 +220,6 @@ export default function HomePage() {
             {upcomingEvents.slice(0, 3).map((event, i) => (
               <Reveal key={event.id} delay={Math.min(i * 0.08, 0.16)}>
                 <EventCard event={event} compact />
-              </Reveal>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* FEATURED PROJECTS */}
-      <section aria-labelledby="featured-projects-heading" className="py-16 md:py-24">
-        <Container>
-          <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-xl">
-              <p className="mb-3 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                <span className="font-mono normal-case tracking-normal text-faint">05</span>
-                Showcase
-              </p>
-              <h2 id="featured-projects-heading" className="text-3xl font-bold tracking-tight text-cream md:text-4xl">
-                Built by students
-              </h2>
-            </div>
-            <SectionLink href="/projects">View all projects</SectionLink>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2">
-            {projects.slice(0, 2).map((project, i) => (
-              <Reveal key={project.id} delay={i * 0.08}>
-                <ProjectCard project={project} />
               </Reveal>
             ))}
           </div>

@@ -5,10 +5,8 @@ Built with Next.js (App Router), TypeScript, Tailwind CSS, Framer Motion, and Lu
 
 ## Routes
 
-- `/` — Hero, community stats, About, What We Do, featured events/projects, Join CTA
+- `/` — Hero, community stats, About, What We Do, journey, featured events, Join CTA
 - `/events` — Filterable upcoming events + past event recaps
-- `/learning` — Guided cloud learning paths
-- `/projects` — Student project showcase + submission CTA
 - `/team` — Community leadership + core team
 
 ## Getting started
@@ -23,7 +21,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Customizing
 
 - College name, leads, and social/join URLs live in one file: `src/lib/constants.ts`
-- Events, projects, team, and learning paths: `src/data/*.ts` (typed, ready to move to a DB later)
+- Events and team members: `src/data/*.ts` (typed, ready to move to a DB later)
 - Implementation plan: `plan.md`
 
 ## Scripts

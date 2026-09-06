@@ -62,15 +62,13 @@ primary CTA `0 8px 30px rgba(255,153,0,.25)`.
 
 - **Home:** Hero (copy left, terminal + floating chips right) → tech marquee →
   stat strip → About `01` (4 cards) → What We Do `02` on coal (6 cards) →
-  Journey rail `03` → Upcoming `04` → Projects `05` on coal → Join CTA.
+  Journey rail `03` → Upcoming `04` on coal → Join CTA.
 - **Events:** heading → filter tabs (active = orange pill) → cards with date
   blocks → Past Events on muted coal cards with recap links.
-- **Learning:** level badges (Beginner = emerald, else brand), duration with
-  clock icon, topic chips in mono, glowing progress, study-group dashed card.
-- **Projects:** terminal headers (`~/projects/id`), tech badges, mono `aws:` line,
-  primary View + icon GitHub buttons, submit CTA panel.
 - **Team:** leadership (large cards, gradient-ring avatars) → core grid →
   get-involved banner.
+
+> Scope change (2026-09-06): Learning and Projects sections removed completely.
 
 ## 6. Motion
 
