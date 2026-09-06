@@ -1,13 +1,20 @@
-import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { NAV_LINKS, SITE } from "@/lib/constants";
-import { GithubIcon, InstagramIcon, LinkedinIcon, Logo } from "./icons";
+import {
+  GithubIcon,
+  InstagramIcon,
+  LinkedinIcon,
+  Logo,
+  MailIcon,
+  WhatsAppIcon,
+} from "./icons";
 
 const socials = [
-  { label: "GitHub", href: SITE.links.github, Icon: GithubIcon },
+  { label: "WhatsApp", href: SITE.links.whatsapp, Icon: WhatsAppIcon },
   { label: "LinkedIn", href: SITE.links.linkedin, Icon: LinkedinIcon },
   { label: "Instagram", href: SITE.links.instagram, Icon: InstagramIcon },
-  { label: "Discord", href: SITE.links.discord, Icon: MessageCircle },
+  { label: "Email", href: SITE.links.email, Icon: MailIcon },
+  { label: "GitHub", href: SITE.links.github, Icon: GithubIcon },
 ];
 
 export default function Footer() {
@@ -34,8 +41,8 @@ export default function Footer() {
               <a
                 key={label}
                 href={href}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={href.startsWith("mailto:") ? undefined : "_blank"}
+                rel={href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
                 aria-label={`${SITE.name} on ${label}`}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line text-fog transition-colors hover:border-faint hover:text-cream"
               >
@@ -66,7 +73,7 @@ export default function Footer() {
           <ul className="mt-4 space-y-2.5 text-sm text-fog">
             <li>
               <a href={SITE.links.join} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-cream">
-                Join the community
+                Join WhatsApp channel
               </a>
             </li>
             <li>
@@ -78,6 +85,11 @@ export default function Footer() {
               <Link href="/team" className="transition-colors hover:text-cream">
                 Meet the team
               </Link>
+            </li>
+            <li>
+              <a href={SITE.links.email} className="transition-colors hover:text-cream">
+                {SITE.email}
+              </a>
             </li>
           </ul>
         </div>

@@ -3,10 +3,10 @@ import Container from "./Container";
 import { SITE } from "@/lib/constants";
 
 const channels = [
-  { label: "Discord", href: SITE.links.discord },
-  { label: "GitHub", href: SITE.links.github },
+  { label: "WhatsApp", href: SITE.links.whatsapp },
   { label: "LinkedIn", href: SITE.links.linkedin },
   { label: "Instagram", href: SITE.links.instagram },
+  { label: "GitHub", href: SITE.links.github },
 ];
 
 export default function JoinCTA() {
@@ -40,9 +40,17 @@ export default function JoinCTA() {
                 >
                   {channel.label}
                 </a>
-                {i < channels.length - 1 ? ", " : "."}
+                {i < channels.length - 1 ? ", " : " "}
               </span>
             ))}
+            or reach out at{" "}
+            <a
+              href={SITE.links.email}
+              className="inline-flex min-h-[44px] items-center underline decoration-line underline-offset-4 transition-colors hover:text-cream hover:decoration-brand"
+            >
+              {SITE.email}
+            </a>
+            .
           </p>
         </div>
       </Container>

@@ -56,7 +56,7 @@ const formats = [
   },
   {
     name: "Community",
-    description: "Meet fellow builders at SUIIT and stay in touch on Discord.",
+    description: "Meet fellow builders at SUIIT and stay in touch on WhatsApp.",
   },
 ];
 

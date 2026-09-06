@@ -5,13 +5,15 @@ export const SITE = {
   tagline: "Learn → Build → Deploy → Connect",
   description:
     "A student-led community where builders come together to explore cloud computing, AWS, AI, DevOps and modern technologies through hands-on learning and real-world projects.",
+  email: "awssbg@suiit.ac.in",
   links: {
-    join: "https://discord.gg",
+    join: "https://whatsapp.com/channel/0029VbBQOWtJUM2SSgFtil0O",
     github: "https://github.com",
-    linkedin: "https://linkedin.com",
+    linkedin: "https://www.linkedin.com/company/aws-sbg-suiit",
     discord: "https://discord.gg",
-    whatsapp: "https://chat.whatsapp.com",
+    whatsapp: "https://whatsapp.com/channel/0029VbBQOWtJUM2SSgFtil0O",
     instagram: "https://www.instagram.com/awssbg_suiit",
+    email: "mailto:awssbg@suiit.ac.in",
     eventDefault: "https://meetup.com",
     eventCommunityDay:
       "https://meetu.ps/e/Qgc6f/1fcHtj/i?utm_source=sbg-site&utm_medium=event-page&utm_campaign=scd-2026",
@@ -35,8 +37,9 @@ export const STATS = [
 ] as const;
 
 export const SOCIALS = [
-  { label: "GitHub", href: SITE.links.github, icon: "Github" },
+  { label: "WhatsApp", href: SITE.links.whatsapp, icon: "MessageCircle" },
   { label: "LinkedIn", href: SITE.links.linkedin, icon: "Linkedin" },
   { label: "Instagram", href: SITE.links.instagram, icon: "Instagram" },
-  { label: "Discord", href: SITE.links.discord, icon: "MessageCircle" },
+  { label: "Email", href: SITE.links.email, icon: "Mail" },
+  { label: "GitHub", href: SITE.links.github, icon: "Github" },
 ] as const;
