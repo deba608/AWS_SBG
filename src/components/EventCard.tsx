@@ -4,6 +4,18 @@ import { SITE } from "@/lib/constants";
 import type { EventItem } from "@/data/events";
 import { cn } from "@/lib/utils";
 
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+function dateBlock(date: string): { day: string; month: string } {
+  const first = date.split(" ")[0] ?? "";
+  const day = /^\d/.test(first) ? first.replace("–", "").trim() : "◆";
+  const full = MONTHS.find((m) => date.includes(m.slice(0, 5))) ?? "";
+  return { day, month: full.slice(0, 3).toUpperCase() };
+}
+
 const statusMeta = {
   open: { label: "Registration open", tone: "success" as const },
   "filling-fast": { label: "Filling fast", tone: "brand" as const },
@@ -18,15 +30,23 @@ export default function EventCard({
   compact?: boolean;
 }) {
   const status = statusMeta[event.status];
+  const { day, month } = dateBlock(event.date);
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface transition-all duration-200 hover:-translate-y-1 hover:border-white/15">
-      <div
-        aria-hidden
-        className="relative h-32 shrink-0 overflow-hidden border-b border-line bg-coal"
-      >
-        <div className="bg-grid absolute inset-0 opacity-70" />
-        <div className="glow-brand absolute -right-10 -top-10 h-40 w-40" />
-        <div className="absolute left-4 top-4">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:shadow-[0_16px_40px_rgba(0,0,0,0.4)]">
+      <div className="relative shrink-0 overflow-hidden border-b border-line bg-coal px-5 py-4">
+        <div className="bg-grid absolute inset-0 opacity-70" aria-hidden />
+        <div className="glow-brand absolute -right-10 -top-14 h-40 w-40" aria-hidden />
+        <div className="relative flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl border border-brand/30 bg-ink/80">
+              <span className="font-mono text-lg font-bold leading-none text-cream">{day}</span>
+              <span className="mt-1 font-mono text-[10px] font-semibold tracking-widest text-brand">{month}</span>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-cream">{event.date}</p>
+              <p className="mt-0.5 text-xs text-faint">{event.time}</p>
+            </div>
+          </div>
           <Badge tone="neutral">{event.category}</Badge>
         </div>
       </div>

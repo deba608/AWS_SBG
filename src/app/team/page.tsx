@@ -18,6 +18,7 @@ export default function TeamPage() {
       <Container>
         <SectionHeading
           eyebrow="Community"
+          index="●"
           title="Meet the builders behind the community."
           description="Students who organize workshops, mentor newcomers and keep the projects shipping."
         />

@@ -1,65 +1,57 @@
-const nodes = [
-  { x: 60, y: 60, r: 5 },
-  { x: 180, y: 40, r: 4 },
-  { x: 290, y: 90, r: 6 },
-  { x: 110, y: 150, r: 4 },
-  { x: 230, y: 170, r: 5 },
-  { x: 320, y: 200, r: 4 },
-  { x: 80, y: 240, r: 5 },
-  { x: 200, y: 260, r: 6 },
-];
+import { Hammer, Users } from "lucide-react";
 
-const edges: Array<[number, number]> = [
-  [0, 1],
-  [1, 2],
-  [0, 3],
-  [1, 4],
-  [2, 5],
-  [3, 4],
-  [4, 5],
-  [3, 6],
-  [4, 7],
-  [6, 7],
+const lines = [
+  { prompt: true, text: "aws sbg init campus-builder" },
+  { ok: true, text: "environment ready · ap-south-1" },
+  { prompt: true, text: "npm run deploy --prod" },
+  { ok: true, text: "live → campusconnect.sbg" },
 ];
 
 export default function HeroVisual() {
   return (
-    <div
-      aria-hidden
-      className="animate-drift relative mx-auto aspect-square w-full max-w-[420px] overflow-hidden rounded-3xl border border-line bg-coal"
-    >
-      <div className="bg-grid absolute inset-0" />
-      <div className="glow-brand absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 -translate-y-1/2" />
-      <svg
-        viewBox="0 0 360 320"
-        className="absolute inset-0 h-full w-full p-6"
-        fill="none"
+    <div className="relative mx-auto w-full max-w-[440px]">
+      <div className="glow-brand absolute -top-16 left-1/2 h-56 w-96 -translate-x-1/2" aria-hidden />
+      <div
+        className="animate-drift relative overflow-hidden rounded-2xl border border-line bg-coal/95 shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur"
       >
-        {edges.map(([a, b], i) => (
-          <line
-            key={i}
-            x1={nodes[a].x}
-            y1={nodes[a].y}
-            x2={nodes[b].x}
-            y2={nodes[b].y}
-            stroke="#FF9900"
-            strokeOpacity="0.35"
-            strokeWidth="1.5"
-            strokeDasharray="5 7"
-            className="animate-dash"
-          />
-        ))}
-        {nodes.map((n, i) => (
-          <g key={i}>
-            <circle cx={n.x} cy={n.y} r={n.r + 7} fill="#FF9900" opacity="0.12" />
-            <circle cx={n.x} cy={n.y} r={n.r} fill="#141A20" stroke="#FF9900" strokeWidth="1.5" />
-            <circle cx={n.x} cy={n.y} r={n.r - 2.5} fill="#FF9900" opacity={i % 3 === 0 ? 0.95 : 0.45} />
-          </g>
-        ))}
-      </svg>
-      <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-line bg-ink/85 p-3 font-mono text-[11px] leading-relaxed backdrop-blur">
-        <p className="text-faint">$ aws s3 ls sbg-workshops</p>
-        <p className="text-emerald-300">✓ deployed · cloud-fundamentals-lab</p>
+        <div className="flex items-center gap-2 border-b border-line px-4 py-3">
+          <span className="h-3 w-3 rounded-full bg-[#FF5F57]" aria-hidden />
+          <span className="h-3 w-3 rounded-full bg-[#FEBC2E]" aria-hidden />
+          <span className="h-3 w-3 rounded-full bg-[#28C840]" aria-hidden />
+          <span className="ml-2 truncate font-mono text-xs text-faint">
+            builder@aws-sbg: ~/cloud
+          </span>
+        </div>
+        <div className="bg-grid space-y-2.5 p-5 font-mono text-[13px] leading-relaxed" aria-hidden>
+          {lines.map((line, i) => (
+            <p key={i} className={line.ok ? "text-emerald-300" : "text-cream"}>
+              {line.prompt ? <span className="mr-2 text-brand">$</span> : null}
+              {line.ok ? <span className="mr-2">✔</span> : null}
+              {line.text}
+              {i === lines.length - 1 ? (
+                <span className="animate-blink ml-1 inline-block h-4 w-2 translate-y-0.5 bg-brand" />
+              ) : null}
+            </p>
+          ))}
+        </div>
+        <div className="flex items-center justify-between border-t border-line px-4 py-2.5 font-mono text-[11px] text-faint">
+          <span>λ 3 functions</span>
+          <span>⏱ 42s deploy</span>
+          <span className="text-emerald-300">● live</span>
+        </div>
+      </div>
+
+      <div className="absolute -left-4 top-8 hidden items-center gap-2 rounded-full border border-line bg-surface/95 py-2 pl-2.5 pr-4 shadow-xl backdrop-blur sm:flex">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand/15 text-brand">
+          <Users className="h-3.5 w-3.5" aria-hidden />
+        </span>
+        <span className="text-xs font-semibold text-cream">500+ builders</span>
+      </div>
+      <div className="absolute -right-3 bottom-10 hidden items-center gap-2 rounded-full border border-line bg-surface/95 py-2 pl-2.5 pr-4 shadow-xl backdrop-blur sm:flex">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand/15 text-brand">
+          <Hammer className="h-3.5 w-3.5" aria-hidden />
+        </span>
+        <span className="text-xs font-semibold text-cream">15+ shipped</span>
       </div>
     </div>
   );

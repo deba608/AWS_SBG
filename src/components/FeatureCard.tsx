@@ -15,11 +15,11 @@ export default function FeatureCard({
   return (
     <div
       className={cn(
-        "group rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-white/15 hover:bg-raised",
+        "group rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:bg-raised hover:shadow-[0_16px_40px_rgba(0,0,0,0.4)]",
         className
       )}
     >
-      <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-brand/25 bg-brand/10 text-brand">
+      <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand/30 to-brand/5 text-brand ring-1 ring-brand/30 transition-transform duration-200 group-hover:scale-105">
         <Icon className="h-5 w-5" aria-hidden />
       </div>
       <h3 className="text-lg font-semibold text-cream">{title}</h3>

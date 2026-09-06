@@ -21,6 +21,7 @@ export default function ProjectsPage() {
       <Container>
         <SectionHeading
           eyebrow="Showcase"
+          index="●"
           title="Built by students."
           description="Real applications designed, built and deployed by community members — with the AWS services behind each one."
         />

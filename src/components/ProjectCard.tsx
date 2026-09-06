@@ -5,14 +5,12 @@ import type { Project } from "@/data/projects";
 
 export default function ProjectCard({ project }: { project: Project }) {
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface transition-all duration-200 hover:-translate-y-1 hover:border-white/15">
-      <div
-        aria-hidden
-        className="relative h-32 shrink-0 overflow-hidden border-b border-line bg-coal"
-      >
-        <div className="bg-grid absolute inset-0 opacity-70" />
-        <div className="glow-brand absolute -left-10 -top-10 h-40 w-40" />
-        <span className="absolute bottom-3 left-4 font-mono text-xs text-faint">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:shadow-[0_16px_40px_rgba(0,0,0,0.4)]">
+      <div className="flex shrink-0 items-center gap-2 border-b border-line bg-coal px-4 py-3">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" aria-hidden />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]" aria-hidden />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#28C840]" aria-hidden />
+        <span className="ml-1 truncate font-mono text-xs text-faint">
           ~/projects/{project.id}
         </span>
       </div>

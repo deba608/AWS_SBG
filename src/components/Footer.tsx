@@ -12,11 +12,11 @@ const socials = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-line bg-coal">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-14 md:grid-cols-[1.4fr_1fr_1fr] md:px-8">
+    <footer className="relative overflow-hidden border-t border-line bg-coal">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 pb-4 pt-14 md:grid-cols-[1.4fr_1fr_1fr] md:px-8">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-brand text-black">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-amber-500 text-black">
               <Cloud className="h-5 w-5" aria-hidden />
             </span>
             <span className="text-sm font-bold text-cream">
@@ -89,7 +89,12 @@ export default function Footer() {
           </ul>
         </div>
       </div>
-      <div className="border-t border-line">
+      <div aria-hidden className="pointer-events-none select-none overflow-hidden">
+        <p className="-mb-4 text-center text-[19vw] font-bold leading-[0.85] tracking-tight text-white/[0.04] md:-mb-8 md:text-[11rem]">
+          BUILDERS
+        </p>
+      </div>
+      <div className="relative border-t border-line">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-2 px-5 py-5 text-xs text-faint sm:flex-row md:px-8">
           <p>© 2026 AWS Student Builder Group · {SITE.collegeName}</p>
           <p className="font-mono">Learn → Build → Deploy → Connect</p>

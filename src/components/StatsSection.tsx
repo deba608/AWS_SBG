@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { animate, useInView, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import Container from "./Container";
-import StatCard from "./StatCard";
 import { STATS } from "@/lib/constants";
 
 function Counter({ value, suffix, label }: { value: number; suffix: string; label: string }) {
@@ -24,8 +23,14 @@ function Counter({ value, suffix, label }: { value: number; suffix: string; labe
   }, [inView, value, reduce]);
 
   return (
-    <div ref={ref}>
-      <StatCard value={String(shown)} suffix={suffix} label={label} />
+    <div ref={ref} className="px-6 py-6 text-center md:py-8">
+      <p className="font-mono text-4xl font-bold tracking-tight text-cream md:text-5xl">
+        {shown}
+        <span className="text-brand">{suffix}</span>
+      </p>
+      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-faint">
+        {label}
+      </p>
     </div>
   );
 }
@@ -34,9 +39,11 @@ export default function StatsSection() {
   return (
     <section aria-label="Community statistics" className="py-10 md:py-14">
       <Container>
-        <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-line bg-surface lg:grid-cols-4 lg:divide-x lg:divide-line">
           {STATS.map((s) => (
-            <Counter key={s.label} value={s.value} suffix={s.suffix} label={s.label} />
+            <div key={s.label} className="border-line odd:border-r lg:odd:border-r-0 [&:nth-child(-n+2)]:border-b lg:[&:nth-child(-n+2)]:border-b-0">
+              <Counter value={s.value} suffix={s.suffix} label={s.label} />
+            </div>
           ))}
         </div>
       </Container>

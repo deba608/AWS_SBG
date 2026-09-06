@@ -5,7 +5,7 @@ import type { LearningPath } from "@/data/learning";
 
 export default function LearningCard({ path }: { path: LearningPath }) {
   return (
-    <article className="group flex h-full flex-col rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-white/15 hover:bg-raised">
+    <article className="group flex h-full flex-col rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:bg-raised hover:shadow-[0_16px_40px_rgba(0,0,0,0.4)]">
       <div className="flex items-center justify-between gap-2">
         <Badge tone={path.level === "Beginner" ? "success" : "brand"}>
           {path.level}
@@ -46,7 +46,7 @@ export default function LearningCard({ path }: { path: LearningPath }) {
           aria-label={`${path.title} progress`}
         >
           <div
-            className="h-full rounded-full bg-brand"
+            className="h-full rounded-full bg-gradient-to-r from-brand to-amber-300 shadow-[0_0_12px_rgba(255,153,0,0.6)]"
             style={{ width: `${path.progress}%` }}
           />
         </div>

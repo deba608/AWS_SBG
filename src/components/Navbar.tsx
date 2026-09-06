@@ -36,7 +36,7 @@ export default function Navbar() {
         className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-5 md:px-8"
       >
         <Link href="/" className="flex items-center gap-2.5" aria-label="AWS Student Builder Group — home">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-brand text-black">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-amber-500 text-black shadow-[0_4px_16px_rgba(255,153,0,0.4)]">
             <Cloud className="h-5 w-5" aria-hidden />
           </span>
           <span className="leading-tight">
@@ -64,7 +64,7 @@ export default function Navbar() {
                   className={cn(
                     "rounded-full px-4 py-2 text-sm font-medium transition-colors",
                     active
-                      ? "text-cream"
+                      ? "bg-white/10 text-cream"
                       : "text-fog hover:bg-white/5 hover:text-cream"
                   )}
                 >
@@ -80,7 +80,7 @@ export default function Navbar() {
             href={SITE.links.join}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-[44px] items-center rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-black transition-all hover:-translate-y-0.5 hover:bg-brandhover"
+            className="inline-flex min-h-[44px] items-center rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-black shadow-[0_8px_24px_rgba(255,153,0,0.35)] transition-all hover:-translate-y-0.5 hover:bg-brandhover"
           >
             Join Community
           </a>

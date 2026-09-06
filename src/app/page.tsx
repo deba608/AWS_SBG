@@ -18,10 +18,12 @@ import EventCard from "@/components/EventCard";
 import FeatureCard from "@/components/FeatureCard";
 import HeroVisual from "@/components/HeroVisual";
 import JoinCTA from "@/components/JoinCTA";
+import Journey from "@/components/Journey";
 import ProjectCard from "@/components/ProjectCard";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import StatsSection from "@/components/StatsSection";
+import TechMarquee from "@/components/TechMarquee";
 import { upcomingEvents } from "@/data/events";
 import { projects } from "@/data/projects";
 import { SITE } from "@/lib/constants";
@@ -82,6 +84,18 @@ const whatWeDo = [
   },
 ];
 
+function SectionLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-full border border-line px-4 py-2 text-sm font-semibold text-fog transition-colors hover:border-brand/60 hover:text-cream"
+    >
+      {children}
+      <ArrowRight className="h-4 w-4" aria-hidden />
+    </Link>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
@@ -90,12 +104,17 @@ export default function HomePage() {
         <div className="bg-grid bg-grid-fade absolute inset-0" aria-hidden />
         <div className="glow-brand absolute -top-24 left-1/2 h-96 w-[52rem] -translate-x-1/2" aria-hidden />
         <Container className="relative py-16 md:py-24">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
-              <Badge>
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" aria-hidden />
-                {SITE.name} — {SITE.collegeName}
-              </Badge>
+              <Reveal>
+                <Badge>
+                  <span className="relative flex h-1.5 w-1.5" aria-hidden>
+                    <span className="absolute h-full w-full animate-ping rounded-full bg-brand opacity-70" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                  </span>
+                  {SITE.name} — {SITE.collegeName}
+                </Badge>
+              </Reveal>
               <h1
                 id="hero-heading"
                 className="mt-5 text-5xl font-bold leading-[1.05] tracking-tight text-cream md:text-6xl lg:text-7xl"
@@ -116,9 +135,22 @@ export default function HomePage() {
                   Explore Events
                 </Button>
               </div>
-              <p className="mt-6 font-mono text-xs text-faint">
-                {SITE.tagline}
-              </p>
+              <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
+                {[
+                  ["No experience needed", "Beginner-friendly labs"],
+                  ["Free for students", "Swag, certs & mentorship"],
+                ].map(([term, detail]) => (
+                  <div key={term} className="flex items-center gap-2.5">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400/15 font-mono text-[11px] font-bold text-emerald-300" aria-hidden>
+                      ✓
+                    </span>
+                    <div>
+                      <dt className="text-sm font-semibold text-cream">{term}</dt>
+                      <dd className="text-xs text-faint">{detail}</dd>
+                    </div>
+                  </div>
+                ))}
+              </dl>
             </div>
             <Reveal delay={0.15}>
               <HeroVisual />
@@ -127,6 +159,7 @@ export default function HomePage() {
         </Container>
       </section>
 
+      <TechMarquee />
       <StatsSection />
 
       {/* ABOUT */}
@@ -134,6 +167,7 @@ export default function HomePage() {
         <Container>
           <SectionHeading
             eyebrow="About"
+            index="01"
             title="More than a community. A place to build."
             description="The AWS Student Builder Group is a student-led chapter where you learn cloud by doing — guided labs, real projects, and people who help you ship."
           />
@@ -148,10 +182,12 @@ export default function HomePage() {
       </section>
 
       {/* WHAT WE DO */}
-      <section aria-labelledby="what-we-do-heading" className="bg-coal py-16 md:py-24">
-        <Container>
+      <section aria-labelledby="what-we-do-heading" className="relative bg-coal py-16 md:py-24">
+        <div className="bg-dots absolute inset-0 opacity-40" aria-hidden />
+        <Container className="relative">
           <SectionHeading
             eyebrow="What we do"
+            index="02"
             title="Hands-on, every single week."
             description="Six formats, one goal: take you from curious to capable — and from capable to hired."
           />
@@ -165,25 +201,22 @@ export default function HomePage() {
         </Container>
       </section>
 
+      <Journey />
+
       {/* FEATURED EVENTS */}
-      <section aria-labelledby="featured-events-heading" className="py-16 md:py-24">
+      <section aria-labelledby="featured-events-heading" className="bg-coal py-16 md:py-24">
         <Container>
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-xl">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+              <p className="mb-3 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                <span className="font-mono normal-case tracking-normal text-faint">04</span>
                 Don&apos;t miss out
               </p>
               <h2 id="featured-events-heading" className="text-3xl font-bold tracking-tight text-cream md:text-4xl">
                 Upcoming events
               </h2>
             </div>
-            <Link
-              href="/events"
-              className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-cream transition-colors hover:text-brand"
-            >
-              View all events
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
+            <SectionLink href="/events">View all events</SectionLink>
           </div>
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {upcomingEvents.slice(0, 3).map((event, i) => (
@@ -196,24 +229,19 @@ export default function HomePage() {
       </section>
 
       {/* FEATURED PROJECTS */}
-      <section aria-labelledby="featured-projects-heading" className="bg-coal py-16 md:py-24">
+      <section aria-labelledby="featured-projects-heading" className="py-16 md:py-24">
         <Container>
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-xl">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+              <p className="mb-3 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                <span className="font-mono normal-case tracking-normal text-faint">05</span>
                 Showcase
               </p>
               <h2 id="featured-projects-heading" className="text-3xl font-bold tracking-tight text-cream md:text-4xl">
                 Built by students
               </h2>
             </div>
-            <Link
-              href="/projects"
-              className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-cream transition-colors hover:text-brand"
-            >
-              View all projects
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
+            <SectionLink href="/projects">View all projects</SectionLink>
           </div>
           <div className="grid gap-5 md:grid-cols-2">
             {projects.slice(0, 2).map((project, i) => (

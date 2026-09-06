@@ -17,14 +17,16 @@ export default function TeamCard({
         large ? "p-6 md:p-7" : "p-5"
       )}
     >
-      <div
-        aria-hidden
-        className={cn(
-          "flex items-center justify-center rounded-xl border border-brand/20 bg-gradient-to-br from-brand/25 via-raised to-coal font-mono font-bold text-brand",
-          large ? "h-20 w-20 text-2xl" : "h-14 w-14 text-lg"
-        )}
-      >
-        {initials(member.name)}
+      <div className="w-fit rounded-2xl bg-gradient-to-br from-brand/60 via-brand/10 to-transparent p-[1.5px]">
+        <div
+          aria-hidden
+          className={cn(
+            "flex items-center justify-center rounded-[14px] bg-gradient-to-br from-raised to-coal font-mono font-bold text-brand",
+            large ? "h-20 w-20 text-2xl" : "h-14 w-14 text-lg"
+          )}
+        >
+          {initials(member.name)}
+        </div>
       </div>
       <h3
         className={cn(

@@ -19,6 +19,7 @@ export default function EventsPage() {
       <Container>
         <SectionHeading
           eyebrow="Events"
+          index="●"
           title="Learn by showing up."
           description="Hands-on workshops, talks from engineers, and hackathons — every session is beginner-friendly and free for students."
         />

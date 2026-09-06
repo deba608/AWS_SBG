@@ -20,6 +20,7 @@ export default function LearningPage() {
       <Container>
         <SectionHeading
           eyebrow="Learning Hub"
+          index="●"
           title="Your cloud learning journey starts here."
           description="Structured, beginner-friendly paths with the exact AWS services and topics to focus on. Pick one and start building."
         />
