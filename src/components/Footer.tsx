@@ -1,8 +1,7 @@
 import { MessageCircle } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { NAV_LINKS, SITE } from "@/lib/constants";
-import { GithubIcon, InstagramIcon, LinkedinIcon } from "./icons";
+import { GithubIcon, InstagramIcon, LinkedinIcon, Logo } from "./icons";
 
 const socials = [
   { label: "GitHub", href: SITE.links.github, Icon: GithubIcon },
@@ -16,14 +15,8 @@ export default function Footer() {
     <footer className="relative overflow-hidden border-t border-line bg-coal">
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 pb-4 pt-14 md:grid-cols-[1.4fr_1fr_1fr] md:px-8">
         <div>
-          <div className="flex items-center gap-2.5">
-            <Image
-              src="/logo.png"
-              alt="SUIIT Logo"
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-lg object-contain bg-surface p-0.5 border border-line"
-            />
+          <div className="flex min-h-[44px] items-center gap-2.5">
+            <Logo />
             <span className="text-sm font-bold text-cream">
               AWS Student Builder Group
             </span>

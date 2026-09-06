@@ -15,7 +15,7 @@ export default function FeatureCard({
   return (
     <div
       className={cn(
-        "group rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:bg-raised hover:shadow-[0_16px_40px_rgba(0,0,0,0.4)]",
+        "group h-full min-w-0 rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:bg-raised hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]",
         className
       )}
     >

@@ -40,8 +40,9 @@ export default function Journey() {
           title="Learn → Build → Deploy → Connect"
           description="A loop, not a ladder. Every member moves through it at their own pace — and helps the next person do the same."
         />
-        <ol className="relative grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="relative">
           <div aria-hidden className="absolute left-0 right-0 top-10 hidden border-t border-dashed border-line lg:block" />
+          <ol className="relative grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => (
             <Reveal key={step.num} delay={Math.min(i * 0.08, 0.24)}>
               <li className="group relative rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40">
@@ -59,6 +60,7 @@ export default function Journey() {
             </Reveal>
           ))}
         </ol>
+        </div>
       </Container>
     </section>
   );

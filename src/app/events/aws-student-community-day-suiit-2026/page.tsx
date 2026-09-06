@@ -216,8 +216,8 @@ export default function CommunityDayPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {whyAttend.map((c, i) => (
               <Reveal key={c.title} delay={Math.min(i * 0.07, 0.21)}>
-                <article className="h-full rounded-2xl border border-line bg-surface p-6">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-brand/30 bg-brand/10 text-brand">
+                <article className="group h-full min-w-0 rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand/30 to-brand/5 text-brand ring-1 ring-brand/30 transition-transform duration-200 group-hover:scale-105">
                     <c.icon className="h-5 w-5" aria-hidden />
                   </span>
                   <h3 className="mt-4 text-base font-semibold text-cream">
@@ -244,7 +244,7 @@ export default function CommunityDayPage() {
           <ol className="relative space-y-4 border-l border-line pl-6 md:pl-8">
             {COMMUNITY_DAY_AGENDA.map((a, i) => (
               <Reveal key={a.time + a.title} delay={Math.min(i * 0.04, 0.2)}>
-                <li className="relative rounded-2xl border border-line bg-surface p-5 md:p-6">
+                <li className="relative rounded-2xl border border-line bg-surface p-5 transition-colors duration-200 hover:border-brand/40 md:p-6">
                   <span
                     className="absolute -left-[31px] top-6 h-3 w-3 rounded-full bg-brand md:-left-[39px]"
                     aria-hidden
@@ -305,7 +305,7 @@ export default function CommunityDayPage() {
                   const Icon = perkIcons[i % perkIcons.length];
                   return (
                     <Reveal key={p.title} delay={Math.min(i * 0.06, 0.18)}>
-                      <li className="h-full rounded-2xl border border-line bg-surface p-5">
+                      <li className="h-full min-w-0 rounded-2xl border border-line bg-surface p-5 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
                         <Icon className="h-5 w-5 text-brand" aria-hidden />
                         <p className="mt-3 text-sm font-semibold text-cream">{p.title}</p>
                         <p className="mt-1 text-sm leading-relaxed text-fog">{p.description}</p>

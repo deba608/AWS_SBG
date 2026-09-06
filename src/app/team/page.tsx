@@ -50,12 +50,14 @@ export default function TeamPage() {
         </section>
 
         <Reveal className="mt-14">
-          <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-line bg-surface p-6 text-center sm:flex-row sm:text-left">
-            <p className="text-sm text-fog">
+          <div className="relative flex flex-col items-center justify-between gap-4 overflow-hidden rounded-2xl border border-line bg-surface p-6 text-center sm:flex-row sm:text-left">
+            <div className="bg-grid absolute inset-0 opacity-50" aria-hidden />
+            <div className="glow-brand absolute -right-16 -top-20 h-48 w-48" aria-hidden />
+            <p className="relative text-sm leading-relaxed text-fog">
               <span className="font-semibold text-cream">Want to help run the community?</span>{" "}
               Core team applications open every semester.
             </p>
-            <Button href={SITE.links.join} external className="shrink-0">
+            <Button href={SITE.links.join} external className="relative shrink-0">
               Get Involved
             </Button>
           </div>

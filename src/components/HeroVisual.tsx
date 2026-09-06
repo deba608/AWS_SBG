@@ -1,4 +1,4 @@
-import { Hammer, Users } from "lucide-react";
+import { Check, Hammer, Users } from "lucide-react";
 
 const lines = [
   { prompt: true, text: "aws sbg init campus-builder" },
@@ -9,7 +9,7 @@ const lines = [
 
 export default function HeroVisual() {
   return (
-    <div className="relative mx-auto w-full max-w-[440px]">
+    <div className="relative mx-auto w-full max-w-[440px]" aria-hidden>
       <div className="glow-brand absolute -top-16 left-1/2 h-56 w-96 -translate-x-1/2" aria-hidden />
       <div
         className="animate-drift relative overflow-hidden rounded-2xl border border-line bg-coal/95 shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur"
@@ -22,11 +22,11 @@ export default function HeroVisual() {
             builder@aws-sbg: ~/cloud
           </span>
         </div>
-        <div className="bg-grid space-y-2.5 p-5 font-mono text-[13px] leading-relaxed" aria-hidden>
+        <div className="bg-grid space-y-2.5 p-5 font-mono text-[13px] leading-relaxed">
           {lines.map((line, i) => (
-            <p key={i} className={line.ok ? "text-emerald-300" : "text-cream"}>
+            <p key={i} className={line.ok ? "flex items-center text-emerald-300" : "text-cream"}>
               {line.prompt ? <span className="mr-2 text-brand">$</span> : null}
-              {line.ok ? <span className="mr-2">✔</span> : null}
+              {line.ok ? <Check className="mr-2 h-3.5 w-3.5 shrink-0" /> : null}
               {line.text}
               {i === lines.length - 1 ? (
                 <span className="animate-blink ml-1 inline-block h-4 w-2 translate-y-0.5 bg-brand" />
@@ -36,8 +36,11 @@ export default function HeroVisual() {
         </div>
         <div className="flex items-center justify-between border-t border-line px-4 py-2.5 font-mono text-[11px] text-faint">
           <span>λ 3 functions</span>
-          <span>⏱ 42s deploy</span>
-          <span className="text-emerald-300">● live</span>
+          <span>42s deploy</span>
+          <span className="inline-flex items-center gap-1.5 text-emerald-300">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            live
+          </span>
         </div>
       </div>
 

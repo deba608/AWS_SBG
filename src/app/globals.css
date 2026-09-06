@@ -178,6 +178,8 @@ input:focus-visible,
     scroll-behavior: auto;
   }
   .animate-drift,
+  .animate-float,
+  .animate-pulse-glow,
   .animate-dash,
   .animate-blink,
   .animate-marquee {

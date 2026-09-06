@@ -136,8 +136,8 @@ export default function HomePage() {
                 {SITE.description}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button href="/events/aws-student-community-day-suiit-2026">
-                  Register for Community Day
+                <Button href={SITE.links.join} external>
+                  Join {SITE.shortName}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Button>
                 <Button href="/events" variant="secondary">
@@ -146,7 +146,7 @@ export default function HomePage() {
               </div>
               <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
                 {[
-                  ["No experience needed", "Beginner-friendly labs"],
+                  ["Beginner-friendly", "No experience needed — guided labs"],
                   ["Free for students", "Swag, certs & mentorship"],
                 ].map(([term, detail]) => (
                   <div key={term} className="flex items-center gap-2.5">

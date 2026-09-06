@@ -45,12 +45,12 @@ export default function Countdown() {
     <div
       role="timer"
       aria-label={`Countdown to ${COMMUNITY_DAY_META.title}`}
-      className="flex items-center gap-2"
+      className="flex flex-wrap items-center gap-2"
     >
       {parts.map((p) => (
         <div
           key={p.label}
-          className="flex min-w-[64px] flex-col items-center rounded-xl border border-line bg-ink/70 px-3 py-2"
+          className="flex min-w-[64px] flex-1 flex-col items-center rounded-xl border border-line bg-ink/70 px-3 py-2 sm:flex-none"
         >
           <span className="font-mono text-xl font-bold tabular-nums text-cream">
             {String(p.value).padStart(2, "0")}

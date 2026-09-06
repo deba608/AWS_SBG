@@ -2,12 +2,12 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { NAV_LINKS, SITE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { Logo } from "./icons";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -16,9 +16,12 @@ export default function Navbar() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
+    const raf = requestAnimationFrame(onScroll);
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   const close = () => setOpen(false);
@@ -36,14 +39,8 @@ export default function Navbar() {
         aria-label="Primary"
         className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-5 md:px-8"
       >
-        <Link href="/" className="flex items-center gap-2.5" aria-label="AWS Student Builder Group — home">
-          <Image
-            src="/logo.png"
-            alt="SUIIT Logo"
-            width={36}
-            height={36}
-            className="h-9 w-9 rounded-lg object-contain bg-surface p-0.5 border border-line"
-          />
+        <Link href="/" className="flex min-h-[44px] items-center gap-2.5" aria-label="AWS Student Builder Group — home">
+          <Logo priority />
           <span className="leading-tight">
             <span className="block text-sm font-bold text-cream">
               AWS Student Builder Group
@@ -67,7 +64,7 @@ export default function Navbar() {
                   href={link.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                    "inline-flex min-h-[44px] items-center rounded-full px-4 py-2 text-sm font-medium transition-colors",
                     active
                       ? "bg-white/10 text-cream"
                       : "text-fog hover:bg-white/5 hover:text-cream"

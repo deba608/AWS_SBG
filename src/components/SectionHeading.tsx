@@ -20,8 +20,11 @@ export default function SectionHeading({
         align === "center" ? "mx-auto text-center" : "text-left"
       )}
     >
-      <p className="mb-3 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-        {align === "center" ? <span aria-hidden className="h-px w-6 bg-brand/60" /> : null}
+      <p className={cn(
+        "mb-3 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand",
+        align === "center" && "justify-center"
+      )}>
+        <span aria-hidden className="h-px w-6 bg-brand/60" />
         {index ? (
           <span className="font-mono normal-case tracking-normal text-faint">
             {index}

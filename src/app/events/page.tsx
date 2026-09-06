@@ -96,7 +96,7 @@ export default function EventsPage() {
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {pastEvents.map((event, i) => (
               <Reveal key={event.id} delay={Math.min(i * 0.08, 0.24)}>
-                <article className="flex h-full flex-col rounded-2xl border border-line bg-coal p-6">
+                <article className="flex h-full min-w-0 flex-col rounded-2xl border border-line bg-coal p-6 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
                   <p className="font-mono text-xs uppercase tracking-wider text-faint">
                     {event.date}
                   </p>

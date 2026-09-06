@@ -1,12 +1,24 @@
-# AWS Student Builder Group — [COLLEGE NAME]
+# AWS Student Builder Group — SUIIT
 
 A dark-first developer community website: Learn → Build → Deploy → Connect.
 Built with Next.js (App Router), TypeScript, Tailwind CSS, Framer Motion, and Lucide icons.
 
+## Flagship event
+
+**AWS Student Community Day SUIIT 2026** — Sat, Oct 3, 9 AM–4 PM IST,
+APJ Abdul Kalam Auditorium, SUIIT, Burla. Free entry, 300+ expected.
+Lunch + swag + certificate for registered participants.
+
+- Details page: `/events/aws-student-community-day-suiit-2026` (agenda, speakers, venue, FAQ, countdown)
+- Registration: Meetup only → https://meetu.ps/e/Qgc6f/1fcHtj/i
+  (single source of truth: `SITE.links.eventCommunityDay` in `src/lib/constants.ts`)
+- Event content lives in `src/data/community-day.ts` — agenda/speakers/FAQs are edited there, TBA where unconfirmed.
+
 ## Routes
 
 - `/` — Hero, community stats, About, What We Do, journey, featured events, Join CTA
-- `/events` — Filterable upcoming events + past event recaps
+- `/events` — Community Day spotlight + filterable upcoming events + past event recaps
+- `/events/aws-student-community-day-suiit-2026` — Flagship event page + Meetup registration
 - `/team` — Community leadership + core team
 
 ## Getting started
