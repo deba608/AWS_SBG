@@ -112,7 +112,7 @@ export default function CommunityDayPage() {
         <Container className="relative py-16 md:py-24">
           <Reveal>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge>Flagship · Oct 3 · Free</Badge>
+              <Badge>Flagship session on October 3, free entry</Badge>
               <Badge tone="success">Registration open on Meetup</Badge>
             </div>
           </Reveal>
@@ -122,8 +122,7 @@ export default function CommunityDayPage() {
                 id="scd-heading"
                 className="text-4xl font-bold leading-[1.05] tracking-tight text-cream md:text-6xl"
               >
-                AWS Student Community Day{" "}
-                <span className="text-brand">SUIIT 2026</span>
+                AWS Student Community Day SUIIT 2026
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-fog md:text-lg">
                 A community-driven meetup bringing together students, developers
@@ -158,13 +157,13 @@ export default function CommunityDayPage() {
                 </Button>
               </div>
               <p className="mt-4 text-xs text-faint">
-                300+ expected · Lunch + Swag + Certificate · {COMMUNITY_DAY_META.host}
+                300 expected, lunch, swag and certificate, {COMMUNITY_DAY_META.host}
               </p>
             </div>
             <Reveal delay={0.12}>
               <div className="rounded-2xl border border-line bg-surface/80 p-6 backdrop-blur">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                  Countdown to Oct 3
+                <p className="text-sm font-semibold text-cream">
+                  Countdown to October 3
                 </p>
                 <div className="mt-4">
                   <Countdown />
@@ -173,7 +172,7 @@ export default function CommunityDayPage() {
                   {COMMUNITY_DAY_STEPS.map((s, i) => (
                     <li key={s.title} className="flex gap-3">
                       <span
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand/15 font-mono text-xs font-bold text-brand"
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand/15 text-xs font-bold text-brand"
                         aria-hidden
                       >
                         {i + 1}
@@ -196,7 +195,7 @@ export default function CommunityDayPage() {
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </a>
                 <p className="mt-3 text-center text-xs text-faint">
-                  Opens Meetup in a new tab · show RSVP at entry
+                  Opens Meetup in a new tab, show RSVP at entry
                 </p>
               </div>
             </Reveal>
@@ -236,7 +235,7 @@ export default function CommunityDayPage() {
         <Container>
           <SectionHeading
             align="left"
-            eyebrow="Agenda · TBA"
+            eyebrow="Agenda (to be announced)"
             title="A full day of cloud."
             description="Timings follow the official Meetup (9 AM – 4 PM). Session titles marked TBA will be confirmed by organizers."
           />
@@ -250,7 +249,7 @@ export default function CommunityDayPage() {
                     aria-hidden
                   />
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs font-semibold text-brand">{a.time}</span>
+                    <span className="text-xs font-semibold tabular-nums text-cream">{a.time}</span>
                     {a.tag ? <Badge tone="neutral">{a.tag}</Badge> : null}
                   </div>
                   <h3 className="mt-2 text-base font-semibold text-cream">{a.title}</h3>
@@ -280,7 +279,7 @@ export default function CommunityDayPage() {
                     <Mic className="h-6 w-6" aria-hidden />
                   </span>
                   <h3 className="mt-4 text-base font-semibold text-cream">{s.role}</h3>
-                  <p className="mt-1 font-mono text-xs uppercase tracking-wider text-brand">{s.focus}</p>
+                  <p className="mt-1 text-xs font-medium text-fog">{s.focus}</p>
                   <p className="mt-2 text-sm text-faint">To be announced</p>
                 </article>
               </Reveal>
@@ -348,13 +347,13 @@ export default function CommunityDayPage() {
         <Container>
           <div className="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
             <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand">Venue</p>
+              <p className="mb-3 text-sm font-semibold text-cream">Venue</p>
               <h2 id="venue-heading" className="text-3xl font-bold tracking-tight text-cream md:text-4xl">
                 {COMMUNITY_DAY_META.venueShort}
               </h2>
               <p className="mt-3 max-w-xl text-base leading-relaxed text-fog">
-                {COMMUNITY_DAY_META.address} · {COMMUNITY_DAY_META.date},{" "}
-                {COMMUNITY_DAY_META.time} · Entry {COMMUNITY_DAY_META.entry}
+                {COMMUNITY_DAY_META.address}, {COMMUNITY_DAY_META.date},{" "}
+                {COMMUNITY_DAY_META.time}, entry {COMMUNITY_DAY_META.entry}
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
@@ -403,8 +402,8 @@ export default function CommunityDayPage() {
               <div className="bg-grid bg-grid-fade absolute inset-0" aria-hidden />
               <div className="glow-brand absolute left-1/2 top-0 h-72 w-[36rem] -translate-x-1/2 -translate-y-1/2" aria-hidden />
               <div className="relative">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                  Oct 3 · SUIIT · Free
+                <p className="text-sm font-semibold text-cream">
+                  October 3 at SUIIT, free for students
                 </p>
                 <h2 id="register-heading" className="mx-auto mt-3 max-w-xl text-3xl font-bold tracking-tight text-cream md:text-5xl">
                   See you at Community Day?
@@ -432,7 +431,7 @@ export default function CommunityDayPage() {
       <section aria-labelledby="related-heading" className="bg-coal py-16 md:py-24">
         <Container>
           <div className="mb-10">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand">Keep exploring</p>
+            <p className="mb-3 text-sm font-semibold text-cream">Keep exploring</p>
             <h2 id="related-heading" className="text-3xl font-bold tracking-tight text-cream md:text-4xl">
               More events
             </h2>

@@ -1,4 +1,13 @@
-# UI Design System — AWS Student Builder Group v2
+# UI Design System — AWS Student Builder Group v3
+
+> v3 (2026-09-06): rebuilt under Anthropic's frontend-design skill. The v2 look
+> was rejected as templated, so v3 removes the generic tells: single-word headline
+> accents, tracked all-caps eyebrows, numbered markers on non-sequences, fade-up on
+> every section, identical card hovers, middle-dot meta, mono spray, arrows on every
+> link. Voice: IBM Plex Sans + Plex Mono. Boldness lives in ONE place (the hero
+> deploy-log terminal, played once on load); everything else is a quiet ruled,
+> left-aligned editorial system. Numbers survive only on the Journey rail, which is
+> a true sequence.
 
 > Goal: premium developer-community aesthetic. Dark-first, technical, credible.
 > Principle: **one accent (AWS orange), one grid, one glow** — depth comes from
