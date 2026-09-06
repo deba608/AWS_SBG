@@ -11,8 +11,10 @@ export const SITE = {
     linkedin: "https://linkedin.com",
     discord: "https://discord.gg",
     whatsapp: "https://chat.whatsapp.com",
-    instagram: "https://instagram.com",
+    instagram: "https://www.instagram.com/awssbg_suiit",
     eventDefault: "https://meetup.com",
+    eventCommunityDay:
+      "https://meetu.ps/e/Qgc6f/1fcHtj/i?utm_source=sbg-site&utm_medium=event-page&utm_campaign=scd-2026",
   },
   communityLead: "[COMMUNITY LEAD]",
   technicalLead: "[TECHNICAL LEAD]",

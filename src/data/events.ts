@@ -1,8 +1,11 @@
+import { SITE } from "@/lib/constants";
+
 export type EventCategory =
   | "Workshop"
   | "Tech Talk"
   | "Hackathon"
-  | "Build Session";
+  | "Build Session"
+  | "Community Day";
 
 export type EventStatus = "open" | "filling-fast" | "closed";
 
@@ -16,6 +19,7 @@ export interface EventItem {
   description: string;
   status: EventStatus;
   registerUrl?: string;
+  detailsUrl?: string;
 }
 
 export const EVENT_FILTERS = [
@@ -41,7 +45,22 @@ export function filterEvents(events: EventItem[], filter: EventFilter) {
   return events.filter((e) => e.category === FILTER_TO_CATEGORY[filter]);
 }
 
+export const communityDay: EventItem = {
+  id: "aws-student-community-day-suiit-2026",
+  title: "AWS Student Community Day SUIIT 2026",
+  category: "Community Day",
+  date: "3 October 2026",
+  time: "9:00 AM – 4:00 PM IST",
+  location: "APJ Abdul Kalam Auditorium, SUIIT, Burla",
+  description:
+    "Flagship meetup: Cloud, AI/GenAI + DevOps with AWS pros, hands-on labs, networking, lunch, swag and certificate. Free for students — 300+ expected.",
+  status: "filling-fast",
+  registerUrl: SITE.links.eventCommunityDay,
+  detailsUrl: "/events/aws-student-community-day-suiit-2026",
+};
+
 export const upcomingEvents: EventItem[] = [
+  communityDay,
   {
     id: "aws-cloud-fundamentals",
     title: "AWS Cloud Fundamentals",
