@@ -4,7 +4,6 @@ export interface TeamMember {
   role: string;
   bio: string;
   lead?: boolean;
-  github?: string;
   linkedin?: string;
 }
 
@@ -15,7 +14,6 @@ export const teamLeads: TeamMember[] = [
     role: "Community Lead",
     bio: "Sets the vision, runs meetups and keeps the builder community thriving.",
     lead: true,
-    github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
   {
@@ -24,7 +22,6 @@ export const teamLeads: TeamMember[] = [
     role: "Technical Lead",
     bio: "Designs workshop curricula, reviews projects and mentors new builders.",
     lead: true,
-    github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
   {
@@ -33,7 +30,6 @@ export const teamLeads: TeamMember[] = [
     role: "Events Lead",
     bio: "Plans workshops, hackathons and speaker sessions end to end.",
     lead: true,
-    github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
   {
@@ -42,7 +38,6 @@ export const teamLeads: TeamMember[] = [
     role: "Design Lead",
     bio: "Owns the visual identity, event creatives and the website experience.",
     lead: true,
-    github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
 ];
@@ -53,7 +48,6 @@ export const coreTeam: TeamMember[] = [
     name: "[MEMBER NAME]",
     role: "Workshops",
     bio: "Hosts hands-on labs and learning sessions.",
-    github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
   {
@@ -61,7 +55,6 @@ export const coreTeam: TeamMember[] = [
     name: "[MEMBER NAME]",
     role: "Projects",
     bio: "Maintains community repos and reviews builds.",
-    github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
   {
@@ -69,7 +62,6 @@ export const coreTeam: TeamMember[] = [
     name: "[MEMBER NAME]",
     role: "Content",
     bio: "Writes recaps, guides and social posts.",
-    github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
   {
@@ -77,7 +69,6 @@ export const coreTeam: TeamMember[] = [
     name: "[MEMBER NAME]",
     role: "Outreach",
     bio: "Brings in speakers and partner communities.",
-    github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
   {
@@ -85,7 +76,6 @@ export const coreTeam: TeamMember[] = [
     name: "[MEMBER NAME]",
     role: "Design",
     bio: "Ships posters, decks and web UI.",
-    github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
   {
@@ -93,7 +83,6 @@ export const coreTeam: TeamMember[] = [
     name: "[MEMBER NAME]",
     role: "Operations",
     bio: "Keeps events, venues and checklists on track.",
-    github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
 ];

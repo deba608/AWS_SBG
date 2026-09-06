@@ -6,7 +6,7 @@ type Variant = "primary" | "secondary" | "ghost";
 const styles: Record<Variant, string> = {
   // Primary carries the single restrained glow on the site.
   primary:
-    "bg-brand text-black shadow-[0_2px_16px_rgba(255,153,0,0.28)] hover:bg-brandhover",
+    "bg-brand text-black shadow-[0_2px_16px_rgba(173,92,255,0.32)] hover:bg-brandhover",
   secondary:
     "border border-line bg-transparent text-cream hover:border-faint",
   ghost: "text-fog hover:bg-white/5 hover:text-cream",

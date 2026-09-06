@@ -9,9 +9,9 @@
   --color-cream: #f5f3ee;
   --color-fog: #a8b0bb;
   --color-faint: #6b7480;
-  --color-brand: #ff9900;
-  --color-brandhover: #e8890b;
-  --color-brandpressed: #cc7a00;
+  --color-brand: #ad5cff;
+  --color-brandhover: #c084fc;
+  --color-brandpressed: #9333ee;
 
   --font-sans: var(--font-plex-sans), "IBM Plex Sans", ui-sans-serif, system-ui,
     -apple-system, "Segoe UI", sans-serif;
@@ -65,7 +65,7 @@ pre {
 }
 
 ::selection {
-  background: rgba(255, 153, 0, 0.35);
+  background: rgba(173, 92, 255, 0.35);
   color: #fff;
 }
 
@@ -137,11 +137,11 @@ pre {
   background-size: 22px 22px;
 }
 
-/* Single warm glow — use sparingly */
+/* Single brand glow — use sparingly */
 .glow-brand {
   background: radial-gradient(
     closest-side,
-    rgba(255, 153, 0, 0.16),
+    rgba(173, 92, 255, 0.16),
     transparent 70%
   );
 }
