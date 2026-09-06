@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0b0e11;
+  --color-coal: #0f1317;
+  --color-surface: #141a20;
+  --color-raised: #1a2129;
+  --color-line: #232c36;
+  --color-cream: #f5f3ee;
+  --color-fog: #a8b0bb;
+  --color-faint: #6b7480;
+  --color-brand: #ff9900;
+  --color-brandhover: #e8890b;
+  --color-brandpressed: #cc7a00;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "Cascadia Code", monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-cream);
+  font-family: var(--font-sans);
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(255, 153, 0, 0.35);
+  color: #fff;
+}
+
+/* Subtle blueprint grid used on hero / CTA panels */
+.bg-grid {
+  background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.045) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to top, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.bg-grid-fade {
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 20%, black 30%, transparent 75%);
+}
+
+/* Single warm glow — use sparingly */
+.glow-brand {
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 153, 0, 0.16),
+    transparent 70%
+  );
+}
+
+/* Hero network drift */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(14px, -12px, 0);
+  }
+}
+
+@keyframes dash-move {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+.animate-drift {
+  animation: drift 14s ease-in-out infinite;
+}
+
+.animate-dash {
+  animation: dash-move 3.5s linear infinite;
+}
+
+/* Accessible focus everywhere */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-drift,
+  .animate-dash {
+    animation: none;
+  }
+}
