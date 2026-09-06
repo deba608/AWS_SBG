@@ -1,96 +1,91 @@
-import {
-  ArrowRight,
-  BookOpen,
-  Code2,
-  GitBranch,
-  Hammer,
-  Mic,
-  Trophy,
-  TrendingUp,
-  Users,
-  Wrench,
-} from "lucide-react";
 import Link from "next/link";
 import Button from "@/components/Button";
-import Badge from "@/components/Badge";
 import Container from "@/components/Container";
 import EventCard from "@/components/EventCard";
-import FeatureCard from "@/components/FeatureCard";
 import HeroVisual from "@/components/HeroVisual";
 import JoinCTA from "@/components/JoinCTA";
 import Journey from "@/components/Journey";
-import Reveal from "@/components/Reveal";
-import SectionHeading from "@/components/SectionHeading";
 import StatsSection from "@/components/StatsSection";
 import TechMarquee from "@/components/TechMarquee";
-import { upcomingEvents } from "@/data/events";
+import { communityDay, upcomingEvents } from "@/data/events";
 import { SITE } from "@/lib/constants";
 
-const aboutCards = [
+const about = [
   {
-    icon: BookOpen,
     title: "Learn",
-    description: "Hands-on workshops and guided learning paths, from cloud basics to certification prep.",
+    description:
+      "Hands-on workshops and guided learning paths, from cloud basics to certification prep.",
   },
   {
-    icon: Hammer,
     title: "Build",
-    description: "Work on real projects and solve practical problems with peers who ship.",
+    description:
+      "Work on real projects and solve practical problems with peers who ship.",
   },
   {
-    icon: Users,
     title: "Connect",
-    description: "Meet students, developers and industry professionals at meetups and talks.",
+    description:
+      "Meet students, developers and industry professionals at meetups and talks.",
   },
   {
-    icon: TrendingUp,
     title: "Grow",
-    description: "Develop technical and professional skills together — and lead while you learn.",
+    description:
+      "Develop technical and professional skills together, then mentor the next batch.",
   },
 ];
 
-const whatWeDo = [
+const formats = [
   {
-    icon: Wrench,
-    title: "Workshops",
-    description: "Hands-on sessions focused on AWS, cloud and modern technologies.",
+    name: "Workshops",
+    description: "Learn an AWS service by using it, with guided labs and mentors in the room.",
   },
   {
-    icon: Code2,
-    title: "Build Sessions",
-    description: "Collaborative sessions where students build real applications.",
+    name: "Build sessions",
+    description: "Bring a laptop and leave with something deployed.",
   },
   {
-    icon: Mic,
-    title: "Tech Talks",
-    description: "Learn from developers, engineers and industry professionals.",
+    name: "Tech talks",
+    description: "Engineers and alumni share how they cleared certs and shipped projects.",
   },
   {
-    icon: Trophy,
-    title: "Hackathons",
-    description: "Solve real-world problems and build innovative solutions.",
+    name: "Hackathons",
+    description: "Small teams, real problems, working demos at the end.",
   },
   {
-    icon: GitBranch,
-    title: "Open Source",
-    description: "Collaborate, contribute and learn through real projects.",
+    name: "Open source",
+    description: "Contribute to shared repos and learn review-driven development.",
   },
   {
-    icon: Users,
-    title: "Community",
-    description: "Meet like-minded builders and grow together.",
+    name: "Community",
+    description: "Meet fellow builders at SUIIT and stay in touch on Discord.",
   },
 ];
 
-function SectionLink({ href, children }: { href: string; children: React.ReactNode }) {
+const proof = [
+  ["Beginner friendly", "Guided labs, no experience needed"],
+  ["Free for students", "Mentorship, certificates and swag"],
+] as const;
+
+function QuietHeading({
+  label,
+  title,
+  description,
+  id,
+}: {
+  label: string;
+  title: string;
+  description?: string;
+  id: string;
+}) {
   return (
-    <Link
-      href={href}
-      className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-full border border-line px-4 py-2 text-sm font-semibold text-fog transition-colors hover:border-brand/60 hover:text-cream"
-    >
-      {children}
-      <ArrowRight className="h-4 w-4" aria-hidden />
-    </Link>
+    <div className="mb-10 max-w-2xl md:mb-12">
+      <p className="text-sm font-medium text-faint">{label}</p>
+      <h2 id={id} className="mt-2 text-3xl font-bold tracking-tight text-cream md:text-4xl">
+        {title}
+      </h2>
+      {description ? (
+        <p className="mt-3 text-base leading-relaxed text-fog">{description}</p>
+      ) : null}
+    </div>
   );
 }
 
@@ -98,59 +93,34 @@ export default function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section aria-labelledby="hero-heading" className="relative overflow-hidden">
-        <div className="bg-grid bg-grid-fade absolute inset-0" aria-hidden />
-        <div className="glow-brand absolute -top-24 left-1/2 h-96 w-[52rem] -translate-x-1/2" aria-hidden />
-        <Container className="relative py-16 md:py-24">
-          <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+      <section aria-labelledby="hero-heading">
+        <Container className="py-16 md:py-24">
+          <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
             <div>
-              <Reveal>
-                <Link
-                  href="/events/aws-student-community-day-suiit-2026"
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-brand/40 bg-brand/10 px-4 py-2 text-xs font-semibold text-brand transition-colors hover:border-brand hover:text-cream"
-                  aria-label="View AWS Student Community Day SUIIT 2026 details"
-                >
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" aria-hidden />
-                  Oct 3 · AWS Student Community Day SUIIT 2026 · Free
-                  <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-                </Link>
-              </Reveal>
-              <Reveal>
-                <Badge>
-                  <span className="relative flex h-1.5 w-1.5" aria-hidden>
-                    <span className="absolute h-full w-full animate-ping rounded-full bg-brand opacity-70" />
-                    <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-                  </span>
-                  {SITE.name} — {SITE.collegeName}
-                </Badge>
-              </Reveal>
+              <p className="text-sm text-faint">
+                {SITE.name}, {SITE.collegeName}
+              </p>
               <h1
                 id="hero-heading"
-                className="mt-5 text-5xl font-bold leading-[1.05] tracking-tight text-cream md:text-6xl lg:text-7xl"
+                className="mt-4 max-w-xl text-5xl font-bold leading-[1.05] tracking-tight text-cream md:text-6xl lg:text-7xl"
               >
-                Build. Learn.
-                <br />
-                Deploy. <span className="text-brand">Together.</span>
+                Build. Learn. Deploy. Together.
               </h1>
               <p className="mt-6 max-w-xl text-base leading-relaxed text-fog md:text-lg">
                 {SITE.description}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button href={SITE.links.join} external>
-                  Join {SITE.shortName}
-                  <ArrowRight className="h-4 w-4" aria-hidden />
+                  Join the community
                 </Button>
                 <Button href="/events" variant="secondary">
-                  Explore Events
+                  Explore events
                 </Button>
               </div>
               <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
-                {[
-                  ["Beginner-friendly", "No experience needed — guided labs"],
-                  ["Free for students", "Swag, certs & mentorship"],
-                ].map(([term, detail]) => (
+                {proof.map(([term, detail]) => (
                   <div key={term} className="flex items-center gap-2.5">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400/15 font-mono text-[11px] font-bold text-emerald-300" aria-hidden>
+                    <span className="font-mono text-sm font-bold text-emerald-300" aria-hidden>
                       ✓
                     </span>
                     <div>
@@ -160,10 +130,19 @@ export default function HomePage() {
                   </div>
                 ))}
               </dl>
+              {communityDay.detailsUrl ? (
+                <p className="mt-8 text-sm text-fog">
+                  Next up:{" "}
+                  <Link
+                    href={communityDay.detailsUrl}
+                    className="inline-flex min-h-[44px] items-center font-medium text-cream underline decoration-line underline-offset-4 transition-colors hover:text-brand hover:decoration-brand"
+                  >
+                    {communityDay.title}, {communityDay.date}
+                  </Link>
+                </p>
+              ) : null}
             </div>
-            <Reveal delay={0.15}>
-              <HeroVisual />
-            </Reveal>
+            <HeroVisual />
           </div>
         </Container>
       </section>
@@ -174,66 +153,96 @@ export default function HomePage() {
       {/* ABOUT */}
       <section aria-labelledby="about-heading" id="about" className="scroll-mt-20 py-16 md:py-24">
         <Container>
-          <SectionHeading
-            eyebrow="About"
-            index="01"
-            title="More than a community. A place to build."
-            description="The AWS Student Builder Group is a student-led chapter where you learn cloud by doing — guided labs, real projects, and people who help you ship."
+          <QuietHeading
+            id="about-heading"
+            label="About"
+            title="A place to build, not just belong"
+            description="A student-led chapter where you learn cloud by doing. Guided labs, real projects, and people who help you ship."
           />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {aboutCards.map((card, i) => (
-              <Reveal key={card.title} delay={Math.min(i * 0.07, 0.21)}>
-                <FeatureCard icon={card.icon} title={card.title} description={card.description} />
-              </Reveal>
+          <dl className="grid gap-x-12 gap-y-8 md:grid-cols-2">
+            {about.map((item, i) => (
+              <div
+                key={item.title}
+                className={i === 0 ? "border-t border-line pt-5 md:col-span-2" : "border-t border-line pt-5"}
+              >
+                <dt
+                  className={
+                    i === 0
+                      ? "text-2xl font-bold tracking-tight text-cream"
+                      : "text-lg font-semibold text-cream"
+                  }
+                >
+                  {item.title}
+                </dt>
+                <dd
+                  className={
+                    i === 0
+                      ? "mt-2 max-w-2xl text-base leading-relaxed text-fog"
+                      : "mt-1.5 text-sm leading-relaxed text-fog"
+                  }
+                >
+                  {item.description}
+                </dd>
+              </div>
             ))}
-          </div>
+          </dl>
         </Container>
       </section>
 
       {/* WHAT WE DO */}
-      <section aria-labelledby="what-we-do-heading" className="relative bg-coal py-16 md:py-24">
-        <div className="bg-dots absolute inset-0 opacity-40" aria-hidden />
-        <Container className="relative">
-          <SectionHeading
-            eyebrow="What we do"
-            index="02"
-            title="Hands-on, every single week."
-            description="Six formats, one goal: take you from curious to capable — and from capable to hired."
+      <section aria-labelledby="formats-heading" className="border-t border-line py-16 md:py-24">
+        <Container>
+          <QuietHeading
+            id="formats-heading"
+            label="What we do"
+            title="Hands-on, every single week"
+            description="Six formats, one goal: take you from curious to capable."
           />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {whatWeDo.map((card, i) => (
-              <Reveal key={card.title} delay={Math.min(i * 0.06, 0.3)}>
-                <FeatureCard icon={card.icon} title={card.title} description={card.description} />
-              </Reveal>
+          <ul>
+            {formats.map((format, i) => (
+              <li
+                key={format.name}
+                className={
+                  "grid gap-1 py-5 sm:grid-cols-[180px_1fr] sm:gap-6 " +
+                  (i === formats.length - 1 ? "border-y border-line" : "border-t border-line")
+                }
+              >
+                <p className="font-semibold text-cream">{format.name}</p>
+                <p className="max-w-2xl text-sm leading-relaxed text-fog">
+                  {format.description}
+                </p>
+              </li>
             ))}
-          </div>
+          </ul>
         </Container>
       </section>
 
-      <Journey />
+      <div className="border-t border-line">
+        <Journey />
+      </div>
 
-      {/* FEATURED EVENTS */}
-      <section aria-labelledby="featured-events-heading" className="bg-coal py-16 md:py-24">
+      {/* UPCOMING */}
+      <section aria-labelledby="upcoming-heading" className="border-t border-line py-16 md:py-24">
         <Container>
-          <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-xl">
-              <p className="mb-3 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                <span className="font-mono normal-case tracking-normal text-faint">04</span>
-                Don&apos;t miss out
-              </p>
-              <h2 id="featured-events-heading" className="text-3xl font-bold tracking-tight text-cream md:text-4xl">
-                Upcoming events
-              </h2>
-            </div>
-            <SectionLink href="/events">View all events</SectionLink>
-          </div>
+          <QuietHeading
+            id="upcoming-heading"
+            label="Upcoming"
+            title="Upcoming events"
+            description="Three sessions on the calendar. Join one and ship something."
+          />
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {upcomingEvents.slice(0, 3).map((event, i) => (
-              <Reveal key={event.id} delay={Math.min(i * 0.08, 0.16)}>
-                <EventCard event={event} compact />
-              </Reveal>
+            {upcomingEvents.slice(0, 3).map((event) => (
+              <EventCard key={event.id} event={event} compact />
             ))}
           </div>
+          <p className="mt-8">
+            <Link
+              href="/events"
+              className="inline-flex min-h-[44px] items-center text-sm font-medium text-fog underline decoration-line underline-offset-4 transition-colors hover:text-cream hover:decoration-brand"
+            >
+              View all events
+            </Link>
+          </p>
         </Container>
       </section>
 

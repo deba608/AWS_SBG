@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CalendarX2 } from "lucide-react";
 import EventCard from "./EventCard";
 import Tabs from "./Tabs";
@@ -9,6 +9,7 @@ import { useState } from "react";
 
 export default function EventsExplorer() {
   const [filter, setFilter] = useState<EventFilter>("All");
+  const reduce = useReducedMotion();
   const events = filterEvents(upcomingEvents, filter);
 
   return (
@@ -24,15 +25,15 @@ export default function EventsExplorer() {
         {filter !== "All" ? ` in ${filter}` : ""}
       </p>
       {events.length > 0 ? (
-        <motion.div layout className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div layout={!reduce} className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           <AnimatePresence mode="popLayout">
             {events.map((event) => (
               <motion.div
                 key={event.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
+                layout={!reduce}
+                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.97 }}
+                exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.97 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
               >
                 <EventCard event={event} />
@@ -45,9 +46,11 @@ export default function EventsExplorer() {
           <span className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-coal text-faint">
             <CalendarX2 className="h-5 w-5" aria-hidden />
           </span>
-          <p className="text-base font-medium text-cream">No events in this category yet.</p>
+          <p className="text-base font-medium text-cream">
+            No {filter.toLowerCase()} scheduled yet
+          </p>
           <p className="mx-auto mt-1 max-w-sm text-sm text-fog">
-            New sessions are announced every month — check back soon or browse everything.
+            New sessions post monthly. Check back soon or browse everything.
           </p>
           <button
             type="button"

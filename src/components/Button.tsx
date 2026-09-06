@@ -4,10 +4,11 @@ import { cn } from "@/lib/utils";
 type Variant = "primary" | "secondary" | "ghost";
 
 const styles: Record<Variant, string> = {
+  // Primary carries the single restrained glow on the site.
   primary:
-    "bg-brand text-black hover:bg-brandhover shadow-[0_8px_30px_rgba(255,153,0,0.25)]",
+    "bg-brand text-black shadow-[0_2px_16px_rgba(255,153,0,0.28)] hover:bg-brandhover",
   secondary:
-    "border border-line bg-surface text-cream hover:border-brand/60 hover:bg-raised",
+    "border border-line bg-transparent text-cream hover:border-faint",
   ghost: "text-fog hover:bg-white/5 hover:text-cream",
 };
 
@@ -31,7 +32,7 @@ export default function Button({
     href.startsWith("#");
 
   const classes = cn(
-    "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0",
+    "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors duration-150",
     styles[variant],
     className
   );

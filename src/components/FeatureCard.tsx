@@ -15,15 +15,20 @@ export default function FeatureCard({
   return (
     <div
       className={cn(
-        "group h-full min-w-0 rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:bg-raised hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]",
+        "group min-w-0 border-t border-line pt-5 transition-colors duration-200 hover:border-white/25",
         className
       )}
     >
-      <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand/30 to-brand/5 text-brand ring-1 ring-brand/30 transition-transform duration-200 group-hover:scale-105">
-        <Icon className="h-5 w-5" aria-hidden />
-      </div>
-      <h3 className="text-lg font-semibold text-cream">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-fog">{description}</p>
+      <Icon
+        className="h-5 w-5 text-brand transition-colors duration-200 group-hover:text-cream"
+        aria-hidden
+      />
+      <h3 className="mt-3 text-base font-semibold text-cream [overflow-wrap:anywhere]">
+        {title}
+      </h3>
+      <p className="mt-1.5 text-sm leading-relaxed text-fog [overflow-wrap:anywhere]">
+        {description}
+      </p>
     </div>
   );
 }

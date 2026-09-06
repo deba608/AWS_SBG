@@ -1,3 +1,5 @@
+import Container from "./Container";
+
 const services = [
   "EC2",
   "S3",
@@ -14,17 +16,15 @@ const services = [
 ];
 
 export default function TechMarquee() {
-  const row = [...services, ...services];
   return (
-    <div aria-hidden className="overflow-hidden border-y border-line bg-coal/60 py-4">
-      <div className="animate-marquee marquee-mask flex w-max items-center gap-8 pr-8">
-        {row.map((s, i) => (
-          <span key={i} className="flex items-center gap-8 font-mono text-sm text-faint">
-            {s}
-            <span className="text-brand">◆</span>
-          </span>
-        ))}
-      </div>
-    </div>
+    <section aria-label="Technologies we work with" className="border-y border-line">
+      <Container className="py-4">
+        <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[13px] text-faint">
+          {services.map((s) => (
+            <li key={s}>{s}</li>
+          ))}
+        </ul>
+      </Container>
+    </section>
   );
 }

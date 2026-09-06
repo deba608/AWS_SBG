@@ -17,48 +17,67 @@ export default function TeamPage() {
     <div className="py-16 md:py-24">
       <Container>
         <SectionHeading
-          eyebrow="Community"
-          index="●"
+          eyebrow="The people running the community"
           title="Meet the builders behind the community."
           description="Students who organize workshops, mentor newcomers and keep the projects shipping."
         />
 
         <section aria-labelledby="leadership">
-          <h2 id="leadership" className="mb-6 text-xl font-bold text-cream md:text-2xl">
-            Community Leadership
+          <h2
+            id="leadership"
+            className="text-xl font-bold text-cream md:text-2xl"
+          >
+            Community leadership
           </h2>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-4 border-t border-line">
             {teamLeads.map((member, i) => (
-              <Reveal key={member.id} delay={Math.min(i * 0.07, 0.21)}>
-                <TeamCard member={member} large />
-              </Reveal>
+              <li key={member.id} className="min-w-0 border-b border-line">
+                <Reveal delay={Math.min(i * 0.07, 0.21)}>
+                  <TeamCard member={member} large />
+                </Reveal>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
 
         <section aria-labelledby="core-team" className="mt-14 md:mt-20">
-          <h2 id="core-team" className="mb-6 text-xl font-bold text-cream md:text-2xl">
-            Core Team
+          <h2
+            id="core-team"
+            className="text-xl font-bold text-cream md:text-2xl"
+          >
+            Core team
           </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-4 grid gap-x-10 border-t border-line sm:grid-cols-2">
             {coreTeam.map((member, i) => (
-              <Reveal key={member.id} delay={Math.min(i * 0.05, 0.25)}>
-                <TeamCard member={member} />
-              </Reveal>
+              <li
+                key={member.id}
+                className="min-w-0 border-b border-line"
+              >
+                <Reveal delay={Math.min(i * 0.05, 0.25)}>
+                  <TeamCard member={member} />
+                </Reveal>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
 
         <Reveal className="mt-14">
-          <div className="relative flex flex-col items-center justify-between gap-4 overflow-hidden rounded-2xl border border-line bg-surface p-6 text-center sm:flex-row sm:text-left">
-            <div className="bg-grid absolute inset-0 opacity-50" aria-hidden />
-            <div className="glow-brand absolute -right-16 -top-20 h-48 w-48" aria-hidden />
-            <p className="relative text-sm leading-relaxed text-fog">
-              <span className="font-semibold text-cream">Want to help run the community?</span>{" "}
-              Core team applications open every semester.
-            </p>
-            <Button href={SITE.links.join} external className="relative shrink-0">
-              Get Involved
+          <div className="flex flex-col gap-4 border-y border-line py-8 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h2 className="text-lg font-semibold text-cream">
+                Get involved
+              </h2>
+              <p className="mt-1 max-w-prose text-sm leading-relaxed text-fog">
+                Want to help run the community? Core team applications open
+                every semester.
+              </p>
+            </div>
+            <Button
+              href={SITE.links.join}
+              external
+              className="shrink-0"
+            >
+              Get involved
             </Button>
           </div>
         </Reveal>

@@ -11,9 +11,9 @@ function getParts(target: number, now: number) {
   const secs = Math.floor((diff % 60_000) / 1000);
   return [
     { value: days, label: "Days" },
-    { value: hours, label: "Hrs" },
-    { value: mins, label: "Min" },
-    { value: secs, label: "Sec" },
+    { value: hours, label: "Hours" },
+    { value: mins, label: "Minutes" },
+    { value: secs, label: "Seconds" },
   ];
 }
 
@@ -33,8 +33,8 @@ export default function Countdown() {
   // SSR / no-JS fallback: static date, no ticking numbers
   if (now === null) {
     return (
-      <p className="font-mono text-xs text-faint">
-        {COMMUNITY_DAY_META.date} · {COMMUNITY_DAY_META.time}
+      <p className="text-sm text-fog">
+        {COMMUNITY_DAY_META.date}, {COMMUNITY_DAY_META.time}
       </p>
     );
   }
@@ -45,17 +45,14 @@ export default function Countdown() {
     <div
       role="timer"
       aria-label={`Countdown to ${COMMUNITY_DAY_META.title}`}
-      className="flex flex-wrap items-center gap-2"
+      className="grid max-w-md grid-cols-4 divide-x divide-line border-y border-line"
     >
       {parts.map((p) => (
-        <div
-          key={p.label}
-          className="flex min-w-[64px] flex-1 flex-col items-center rounded-xl border border-line bg-ink/70 px-3 py-2 sm:flex-none"
-        >
-          <span className="font-mono text-xl font-bold tabular-nums text-cream">
+        <div key={p.label} className="min-w-0 px-2 py-3 text-center">
+          <span className="block text-2xl font-bold tabular-nums text-cream">
             {String(p.value).padStart(2, "0")}
           </span>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-faint">
+          <span className="mt-1 block truncate text-xs text-fog">
             {p.label}
           </span>
         </div>

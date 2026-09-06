@@ -15,7 +15,7 @@ export default function Tabs<T extends string>({
     <div
       role="tablist"
       aria-label={label}
-      className="flex flex-wrap items-center gap-2"
+      className="flex flex-wrap items-center gap-x-6 gap-y-1 border-b border-line"
     >
       {options.map((option) => {
         const selected = option === active;
@@ -27,10 +27,10 @@ export default function Tabs<T extends string>({
             aria-selected={selected}
             onClick={() => onChange(option)}
             className={cn(
-              "inline-flex min-h-[44px] items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+              "relative inline-flex min-h-[44px] items-center pb-3 pt-2 text-sm transition-colors duration-150",
               selected
-                ? "border-brand bg-brand font-semibold text-black"
-                : "border-line bg-surface text-fog hover:border-white/20 hover:text-cream"
+                ? "font-semibold text-cream after:absolute after:inset-x-0 after:bottom-[-1px] after:h-0.5 after:rounded-full after:bg-brand"
+                : "font-normal text-faint hover:text-cream"
             )}
           >
             {option}

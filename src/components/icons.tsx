@@ -8,20 +8,14 @@ export function Logo({
   priority?: boolean;
 }) {
   return (
-    <span
-      className={`relative inline-flex shrink-0 ${className ?? ""}`}
-    >
-      <span
-        aria-hidden
-        className="absolute -inset-1 rounded-xl bg-purple-500/25 blur-md"
-      />
+    <span className={`inline-flex shrink-0 ${className ?? ""}`}>
       <Image
         src="/logo.png"
         alt="AWS SBG SUIIT logo"
         width={36}
         height={36}
         priority={priority}
-        className="relative h-9 w-9 rounded-lg border border-line bg-black object-cover"
+        className="h-9 w-9 object-contain"
       />
     </span>
   );

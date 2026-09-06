@@ -4,40 +4,33 @@ export default function SectionHeading({
   eyebrow,
   title,
   description,
-  align = "center",
+  align = "left",
   index,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   description?: string;
   align?: "center" | "left";
   index?: string;
 }) {
+  // `index` is accepted for backward compatibility but never rendered:
+  // sequence numbers on non-sequential content read as decoration.
+  void index;
   return (
     <div
       className={cn(
-        "mb-10 max-w-2xl md:mb-14",
-        align === "center" ? "mx-auto text-center" : "text-left"
+        "measure mb-10 md:mb-12",
+        align === "center" ? "mx-auto" : "mr-auto"
       )}
     >
-      <p className={cn(
-        "mb-3 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand",
-        align === "center" && "justify-center"
-      )}>
-        <span aria-hidden className="h-px w-6 bg-brand/60" />
-        {index ? (
-          <span className="font-mono normal-case tracking-normal text-faint">
-            {index}
-          </span>
-        ) : null}
-        {eyebrow}
-        {align === "center" ? <span aria-hidden className="h-px w-6 bg-brand/60" /> : null}
-      </p>
-      <h2 className="text-3xl font-bold tracking-tight text-cream md:text-4xl">
+      {eyebrow ? (
+        <p className="mb-2 text-sm font-medium text-faint">{eyebrow}</p>
+      ) : null}
+      <h2 className="text-3xl font-semibold tracking-tight text-cream md:text-4xl">
         {title}
       </h2>
       {description ? (
-        <p className="mt-4 text-base leading-relaxed text-fog md:text-lg">
+        <p className="mt-3 max-w-[68ch] text-base leading-relaxed text-fog">
           {description}
         </p>
       ) : null}

@@ -13,9 +13,10 @@
   --color-brandhover: #e8890b;
   --color-brandpressed: #cc7a00;
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "Cascadia Code", monospace;
+  --font-sans: var(--font-plex-sans), "IBM Plex Sans", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace,
+    "Cascadia Code", monospace;
 }
 
 html {
@@ -28,6 +29,39 @@ body {
   font-family: var(--font-sans);
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+ * Infrastructure-engineered voice.
+ * Display headlines sit tight; body copy breathes. Lines stay readable.
+ */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+body p {
+  line-height: 1.7;
+}
+
+.measure {
+  max-width: 68ch;
+}
+
+/* Code and deployment data only — never body labels. */
+.font-mono,
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
 }
 
 ::selection {
@@ -47,6 +81,39 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #334052;
+}
+
+/*
+ * Rank hierarchy — one radius language per rank.
+ * Row (flat, inline content): 10px, no shadow, hairline border.
+ * Card (grouped content): 14px, no shadow unless interactive lift.
+ * Panel (elevated overlay / hero moment): 20px, real shadow.
+ * Dividers carry separation before shadow is ever reached for.
+ */
+.rank-row {
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: transparent;
+}
+
+.rank-card {
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+
+.rank-panel {
+  border: 1px solid var(--color-line);
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hairline {
+  border-color: var(--color-line);
+  border-width: 1px 0 0 0;
 }
 
 /* Subtle blueprint grid used on hero / CTA panels */

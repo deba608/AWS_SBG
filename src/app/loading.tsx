@@ -3,26 +3,25 @@ import Container from "@/components/Container";
 export default function Loading() {
   return (
     <Container className="py-24" aria-busy="true" aria-label="Loading page">
-      <div className="mb-8 space-y-3" aria-hidden>
-        <div className="mx-auto h-3 w-40 animate-pulse rounded-full bg-line" />
-        <div className="mx-auto h-7 w-64 animate-pulse rounded-lg bg-line" />
+      <p className="sr-only" role="status">
+        Loading page content.
+      </p>
+      <div className="max-w-md space-y-3" aria-hidden>
+        <div className="h-5 w-2/3 animate-pulse rounded bg-line motion-reduce:animate-none" />
+        <div className="h-4 w-full animate-pulse rounded bg-line motion-reduce:animate-none" />
       </div>
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <ul className="mt-10 border-t border-line" aria-hidden>
         {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            aria-hidden
-            className="overflow-hidden rounded-2xl border border-line bg-surface"
-          >
-            <div className="h-24 animate-pulse border-b border-line bg-coal" />
-            <div className="space-y-3 p-6">
-              <div className="h-5 w-3/4 animate-pulse rounded bg-line" />
-              <div className="h-3 w-full animate-pulse rounded bg-line" />
-              <div className="h-3 w-5/6 animate-pulse rounded bg-line" />
+          <li key={i} className="flex gap-4 border-b border-line py-6">
+            <div className="h-12 w-12 shrink-0 animate-pulse rounded bg-line motion-reduce:animate-none" />
+            <div className="min-w-0 flex-1 space-y-3">
+              <div className="h-5 w-3/4 animate-pulse rounded bg-line motion-reduce:animate-none" />
+              <div className="h-3 w-full animate-pulse rounded bg-line motion-reduce:animate-none" />
+              <div className="h-3 w-5/6 animate-pulse rounded bg-line motion-reduce:animate-none" />
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </Container>
   );
 }
