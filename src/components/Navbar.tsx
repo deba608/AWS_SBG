@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  AnimatePresence,
-  LayoutGroup,
-  motion,
-  useReducedMotion,
-  useScroll,
-} from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -23,6 +17,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll();
+const bg = useTransform(scrollYProgress, [0, 0.5, 1], ["rgba(0,0,0,0)", "rgba(173,92,255,0.2)", "rgba(173,92,255,0.5)"]);
 
   // Smooth constant spring physics for fluid tab sliding
   const activeSpring = reduce
@@ -139,12 +134,16 @@ export default function Navbar() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 transition-all duration-300",
+        "sticky top-0 z-40 relative transition-all duration-300",
         scrolled
           ? "border-b border-line/80 bg-ink/90 shadow-[0_8px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl"
           : "border-b border-white/[0.04] bg-ink/60 backdrop-blur-md"
       )}
     >
+      <motion.div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: bg }}
+      />
       <nav
         aria-label="Primary"
         className={cn(
@@ -158,9 +157,9 @@ export default function Navbar() {
           className="group flex min-h-[44px] items-center gap-3"
           aria-label="AWS Student Builder Group — home"
         >
-          <span className="transition-all duration-300 group-hover:scale-105 group-hover:-rotate-3 drop-shadow-[0_0_10px_rgba(173,92,255,0.35)] group-hover:drop-shadow-[0_0_18px_rgba(173,92,255,0.7)]">
+          <motion.span whileHover={{ rotate: 5, scale: 1.05 }} className="transition-all duration-300 group-hover:scale-105 group-hover:-rotate-3 drop-shadow-[0_0_10px_rgba(173,92,255,0.35)] group-hover:drop-shadow-[0_0_18px_rgba(173,92,255,0.7)]">
             <Logo priority />
-          </span>
+          </motion.span>
           <span className="leading-snug">
             <span className="block text-sm font-semibold tracking-tight text-cream transition-colors group-hover:text-white">
               AWS Student Builder Group
