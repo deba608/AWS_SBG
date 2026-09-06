@@ -10,8 +10,8 @@
 > a true sequence.
 
 > Goal: premium developer-community aesthetic. Dark-first, technical, credible.
-> Principle: **one accent (AWS orange), one grid, one glow** — depth comes from
-> borders, spacing, and typography, not gradients everywhere.
+> Principle: **one accent (Electric Violet #AD5CFF from logo), one grid, one glow** — depth comes from
+> borders, spacing, glassmorphism, and typography.
 
 ## 1. Tokens
 
@@ -25,17 +25,17 @@
 | `cream` | `#F5F3EE` | Headings |
 | `fog` | `#A8B0BB` | Body copy |
 | `faint` | `#6B7480` | Captions, mono labels |
-| `brand` | `#FF9900` | CTA, active states, key highlights only |
-| `brandhover` | `#E8890B` | CTA hover |
+| `brand` | `#AD5CFF` | Primary brand accent, active states, key highlights (sampled from `logo.png`) |
+| `brandhover` | `#C084FC` | CTA hover |
+| `brandpressed` | `#9333EE` | CTA pressed / deep violet accent |
 
 Radius: cards `16px`, pills `999px`. Shadows: `card 0 8px 30px rgba(0,0,0,.35)`,
-primary CTA `0 8px 30px rgba(255,153,0,.25)`.
+primary CTA `0 2px 18px rgba(173,92,255,.35)`.
 
 ## 2. Typography
 
 - **Display (hero):** `text-5xl→7xl`, `font-bold`, `tracking-tight`, `leading-[1.05]`.
-  One gradient word max (`from-cream via-cream to-brand` is banned — use solid
-  `text-brand` for a single word).
+  Solid `text-brand` for single highlighted accent word.
 - **Section titles:** `text-3xl→4xl` with mono index prefix (`01`, `02`…) in
   `font-mono text-brand`.
 - **Eyebrow:** `text-xs font-semibold uppercase tracking-[0.2em] text-brand`
@@ -47,7 +47,7 @@ primary CTA `0 8px 30px rgba(255,153,0,.25)`.
 
 1. **Grid + fade:** `.bg-grid` with radial mask on heroes and CTA panels.
 2. **Terminal card:** traffic-light dots + mono path + command lines + blinking
-   cursor. Used in hero and project cards.
+   cursor. Used in hero.
 3. **Date block (events):** mono day/month tile instead of generic banners.
 4. **Stat strip:** single bordered container with `divide-x`, not 4 loose cards.
 5. **Tech marquee:** infinite mono ticker of AWS services, `aria-hidden`,
@@ -55,16 +55,19 @@ primary CTA `0 8px 30px rgba(255,153,0,.25)`.
 6. **Journey rail:** Learn → Build → Deploy → Connect as 4 numbered steps with
    a dashed connector on desktop.
 7. **Watermark footer:** giant `text-white/[0.04]` wordmark behind columns.
+8. **Scrollspy Navbar:** floating pill navigation with mutually exclusive active
+   tracking (Home vs About) and smooth animated layout pill.
 
 ## 4. Component contracts
 
-- **Button primary:** orange pill, black text, glow shadow, `hover:-translate-y-0.5`.
-- **Button secondary:** `border-line` outline, brightens border to `brand/60` on hover.
+- **Button primary:** purple gradient pill (`from-brand to-[#9333ea]`), crisp white text, violet glow shadow, hover brightness lift.
+- **Button secondary:** `border-line` outline, brightens border to `brand/50` + `bg-brand/5` on hover.
+- **Navbar:** Sticky frosted glass (`backdrop-blur-md/xl`), floating center links pill with active spring pill indicator (`bg-brand/20 border-brand/45 shadow-[0_0_14px_rgba(173,92,255,0.3)]`), live Community Day indicator badge with pulsing ping dot, and gradient Join CTA.
 - **Cards:** `rounded-2xl border-line bg-surface`, hover = `-translate-y-1` +
   `border-white/15` (+ `bg-raised` for feature cards). One glow accent per card max.
 - **Avatars:** initials on gradient tile with `brand/20` ring — no external photos.
-- **Progress bars:** `h-1.5` track `bg-white/10`, fill `bg-gradient-to-r from-brand to-amber-300`
-  with glow dot at the tip.
+- **Progress bars:** `h-0.5` track, fill `bg-gradient-to-r from-[#ad5cff] via-[#c084fc] to-[#e879f9]`
+  with purple glow.
 - **Focus:** `2px brand outline, 3px offset` everywhere. Min touch target `44px`.
 
 ## 5. Page specs
@@ -72,12 +75,12 @@ primary CTA `0 8px 30px rgba(255,153,0,.25)`.
 - **Home:** Hero (copy left, terminal + floating chips right) → tech marquee →
   stat strip → About `01` (4 cards) → What We Do `02` on coal (6 cards) →
   Journey rail `03` → Upcoming `04` on coal → Join CTA.
-- **Events:** heading → filter tabs (active = orange pill) → cards with date
+- **Events:** heading → filter tabs (active = purple pill) → cards with date
   blocks → Past Events on muted coal cards with recap links.
 - **Team:** leadership (large cards, gradient-ring avatars) → core grid →
   get-involved banner.
 
-> Scope change (2026-09-06): Learning and Projects sections removed completely.
+> Scope changes (2026-09-06): Learning and Projects sections removed. GitHub links removed; WhatsApp channel, Instagram, and college email active.
 
 ## 6. Motion
 
@@ -91,4 +94,4 @@ primary CTA `0 8px 30px rgba(255,153,0,.25)`.
 
 - Hero stacks (copy first) below `lg`; terminal max `420px` centered.
 - Grids: `1col → sm:2 → lg:3/4`. Marquee + stat strip scroll-safe (`overflow-x-clip`).
-- Mobile nav: slide-down panel, closes on link click. Footer stacks to 1 col.
+- Mobile nav: slide-down panel with clean dividers and active purple indicators, closes on link click. Footer stacks to 1 col.

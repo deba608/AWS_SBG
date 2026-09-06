@@ -53,7 +53,7 @@ src/
   lib/utils.ts          # cn(), formatDate
 ```
 
-Placeholders live in ONE file (`src/lib/constants.ts`): `COLLEGE_NAME="[COLLEGE NAME]"`, leads, `[EVENT LINK]`, `[GITHUB LINK]`, `[DISCORD LINK]`, `[LINKEDIN LINK]`, stats array. All components import from there — never hardcode.
+Placeholders live in ONE file (`src/lib/constants.ts`): `COLLEGE_NAME`, leads, `[EVENT LINK]`, WhatsApp channel, LinkedIn, Instagram, and email. All components import from there — never hardcode.
 
 ## 3. Data Schemas (TypeScript)
 
@@ -62,20 +62,16 @@ Placeholders live in ONE file (`src/lib/constants.ts`): `COLLEGE_NAME="[COLLEGE 
 type EventCategory = "Workshop"|"Tech Talk"|"Hackathon"|"Build Session";
 type EventStatus = "open"|"filling-fast"|"closed"|"past";
 interface EventItem { id, title, category, date, time, location, description, status, registerUrl? }
-// learning.ts
-interface LearningPath { id, title, description, difficulty, duration, topics: string[], progress: number }
-// projects.ts
-interface Project { id, title, description, tech: string[], aws: string[], githubUrl, demoUrl, image? }
 // team.ts
-interface TeamMember { id, name, role, bio, github?, linkedin?, initials }
+interface TeamMember { id, name, role, bio, linkedin?, initials }
 ```
 
-Seed content: 5 upcoming events (across 4 filter tabs + All), 3 past events with recap, 5 learning paths (Cloud Fundamentals, AWS Developer, DevOps, Cloud Security, AI/ML), 4 projects (incl. CampusConnect: React·Node·AWS / Lambda·DynamoDB·S3), 4 leads + 6-8 core members (initials avatars, placeholder names).
+Seed content: 5 upcoming events (across 4 filter tabs + All), 3 past events with recap, 4 leads + 6 core members (initials avatars, placeholder names).
 
 ## 4. Design System
 
-Tokens (`tailwind.config.ts` extend): `ink.base #0B0E11`, `ink.subtle #0F1317`, `surface #141A20 / raised #1A2129`, `line #232C36`, `cream #F5F3EE / muted #A8B0BB / faint #6B7480`, `brand #FF9900 / hover #E8890B / soft rgba(255,153,0,.12)`.
-Typography: Geist/Inter via `next/font`; Hero `5xl-7xl`, H2 `3xl-4xl`, body `base-lg muted`, eyebrow `xs uppercase tracking orange`. Container `max-w-7xl px-5 md:px-8`, section `py-16 md:py-24`. Cards: `rounded-2xl bg-surface border-line p-6 hover:border-white/15`. Buttons: primary orange pill, secondary outline, ghost; `focus-visible:ring-2 ring-brand`, min 44px. Hero visual: SVG node network + grid + single orange radial glow (aria-hidden), no stock images/particles. Animations: fade-up on scroll, staggered grids, navbar blur on scroll >8px, honor `prefers-reduced-motion`.
+Tokens (`globals.css` @theme): `ink #0B0E11`, `coal #0F1317`, `surface #141A20 / raised #1A2129`, `line #232C36`, `cream #F5F3EE / fog #A8B0BB / faint #6B7480`, `brand #AD5CFF / hover #C084FC / pressed #9333EE / soft rgba(173,92,255,.16)`.
+Typography: IBM Plex Sans / IBM Plex Mono via `next/font`; Hero `5xl-7xl`, H2 `3xl-4xl`, body `base-lg fog`. Container `max-w-7xl px-5 md:px-8`, section `py-16 md:py-24`. Cards: `rounded-2xl bg-surface border-line p-6 hover:border-white/15`. Buttons: primary purple gradient pill, secondary outline, ghost; `focus-visible:ring-2 ring-brand`, min 44px. Hero visual: Terminal card with build/deploy log. Animations: fade-up on scroll, staggered grids, scrollspy floating navbar blur on scroll >8px with mutually exclusive Home/About active tracking, honor `prefers-reduced-motion`.
 
 ## 5. Phased Build (agents + verification)
 

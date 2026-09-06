@@ -1,9 +1,15 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion, useScroll } from "framer-motion";
+import {
+  AnimatePresence,
+  LayoutGroup,
+  motion,
+  useReducedMotion,
+  useScroll,
+} from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { NAV_LINKS, SITE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Logo } from "./icons";
@@ -12,10 +18,23 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<"home" | "about">("home");
+  const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
+  const isNavigatingRef = useRef(false);
   const pathname = usePathname();
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll();
 
+  // Smooth constant spring physics for fluid tab sliding
+  const activeSpring = reduce
+    ? { duration: 0 }
+    : {
+        type: "spring" as const,
+        stiffness: 320,
+        damping: 28,
+        mass: 0.7,
+      };
+
+  // Header background blur on scroll
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     const raf = requestAnimationFrame(onScroll);
@@ -26,18 +45,22 @@ export default function Navbar() {
     };
   }, []);
 
-  // Section observer on home page: differentiate Home vs About cleanly
+  // Section observer & scrollspy on home page: cleanly toggles Home vs About
   useEffect(() => {
     if (pathname !== "/") return;
 
     const onScrollSpy = () => {
+      if (isNavigatingRef.current) return;
       const aboutElem = document.getElementById("about");
-      if (!aboutElem) return;
+      if (!aboutElem) {
+        if (window.scrollY < 400) setActiveSection("home");
+        return;
+      }
       const rect = aboutElem.getBoundingClientRect();
-      // If top of About section has entered upper viewport area
-      if (rect.top <= 240 && rect.bottom >= 120) {
+      // When the about section approaches viewport or is active
+      if (rect.top <= 280) {
         setActiveSection("about");
-      } else if (rect.top > 240) {
+      } else {
         setActiveSection("home");
       }
     };
@@ -57,6 +80,27 @@ export default function Navbar() {
     };
   }, [pathname]);
 
+  // Smooth scroll handler for anchor clicks
+  const scrollToSection = (section: "home" | "about") => {
+    isNavigatingRef.current = true;
+    setActiveSection(section);
+
+    if (section === "home") {
+      if (pathname === "/") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    } else if (section === "about") {
+      const elem = document.getElementById("about");
+      if (elem) {
+        elem.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+
+    setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, 700);
+  };
+
   // Close drawer on Escape + lock body scroll while open
   useEffect(() => {
     if (!open) return;
@@ -73,6 +117,7 @@ export default function Navbar() {
 
   const close = () => setOpen(false);
 
+  // Exactly one nav link is active at any time
   const isLinkActive = useCallback(
     (href: string): boolean => {
       if (pathname === "/") {
@@ -81,7 +126,7 @@ export default function Navbar() {
         return false;
       }
       if (href === "/" || href === "/#about") return false;
-      return pathname === href || pathname.startsWith(href + "/");
+      return pathname === href || pathname.startsWith(`${href}/`);
     },
     [pathname, activeSection]
   );
@@ -104,10 +149,7 @@ export default function Navbar() {
       >
         <Link
           href="/"
-          onClick={() => {
-            setActiveSection("home");
-            if (pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
+          onClick={() => scrollToSection("home")}
           className="group flex min-h-[44px] items-center gap-3"
           aria-label="AWS Student Builder Group — home"
         >
@@ -124,48 +166,65 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Center Nav Links with animated active pill */}
-        <ul className="hidden items-center gap-1 rounded-full border border-white/[0.07] bg-white/[0.02] p-1 lg:flex">
-          {NAV_LINKS.map((link) => {
-            const active = isLinkActive(link.href);
-            return (
-              <li key={link.label}>
-                <Link
-                  href={link.href}
-                  onClick={() => {
-                    if (link.href === "/") {
-                      setActiveSection("home");
-                      if (pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });
-                    } else if (link.href === "/#about") {
-                      setActiveSection("about");
-                    }
-                  }}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "relative inline-flex min-h-[36px] items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200",
-                    active ? "text-white" : "text-fog hover:text-cream hover:bg-white/[0.04]"
-                  )}
-                >
-                  {active && (
-                    reduce ? (
-                      <span className="absolute inset-0 rounded-full bg-brand/20 border border-brand/45" aria-hidden />
-                    ) : (
+        {/* Center Nav Links with smooth, continuous transition across sections */}
+        <LayoutGroup id="desktop-nav">
+          <ul
+            onMouseLeave={() => setHoveredLabel(null)}
+            className="hidden items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.02] p-1.5 backdrop-blur-md lg:flex"
+          >
+            {NAV_LINKS.map((link) => {
+              const active = isLinkActive(link.href);
+              const isHovered = hoveredLabel === link.label;
+
+              return (
+                <li key={link.label} className="relative">
+                  <Link
+                    href={link.href}
+                    onMouseEnter={() => setHoveredLabel(link.label)}
+                    onClick={() => {
+                      if (link.href === "/") {
+                        scrollToSection("home");
+                      } else if (link.href === "/#about") {
+                        scrollToSection("about");
+                      }
+                    }}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "relative inline-flex min-h-[36px] items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200",
+                      active
+                        ? "text-white font-semibold"
+                        : "text-fog hover:text-cream"
+                    )}
+                  >
+                    {/* Hover preview pill */}
+                    {isHovered && !active && (
                       <motion.span
-                        layoutId="nav-active-pill"
-                        className="absolute inset-0 rounded-full bg-brand/20 border border-brand/45 shadow-[0_0_14px_rgba(173,92,255,0.3)]"
-                        transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        layoutId="nav-hover-pill"
+                        className="absolute inset-0 rounded-full bg-white/[0.05]"
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
                         aria-hidden
                       />
-                    )
-                  )}
-                  <span className="relative z-10">{link.label}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                    )}
 
-        {/* Right actions: Community Day highlight + Join button */}
+                    {/* Smooth sliding active indicator pill with purple glow */}
+                    {active && (
+                      <motion.span
+                        layoutId="nav-active-pill"
+                        className="absolute inset-0 rounded-full border border-brand/45 bg-brand/20 shadow-[0_0_16px_rgba(173,92,255,0.35)]"
+                        transition={activeSpring}
+                        aria-hidden
+                      />
+                    )}
+
+                    <span className="relative z-10">{link.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </LayoutGroup>
+
+        {/* Right actions: Community Day live pill + Join CTA */}
         <div className="hidden items-center gap-3.5 lg:flex">
           <Link
             href="/events/aws-student-community-day-suiit-2026"
@@ -242,10 +301,9 @@ export default function Navbar() {
                       href={link.href}
                       onClick={() => {
                         if (link.href === "/") {
-                          setActiveSection("home");
-                          if (pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });
+                          scrollToSection("home");
                         } else if (link.href === "/#about") {
-                          setActiveSection("about");
+                          scrollToSection("about");
                         }
                         close();
                       }}

@@ -98,8 +98,9 @@ SEO: `title: "AWS Student Community Day SUIIT 2026 — Oct 3 | AWS SBG"`, descri
 
 ## 6. Design Notes (match existing system)
 
-- Dark-first tokens in `globals.css` (`ink/coalsurface/line/cream/fog/brand #FF9900`). Hero: `bg-grid + bg-grid-fade + glow-brand`, no stock images.
-- Type: H1 `5xl-7xl`, H2 `3xl-4xl`, eyebrow orange uppercase. Container `max-w-7xl px-5 md:px-8`, section `py-16 md:py-24`. Cards `rounded-2xl border-line bg-surface p-6`.
+- Dark-first tokens in `globals.css` (`ink/coal/surface/line/cream/fog/brand #AD5CFF`). Hero: `bg-grid + bg-grid-fade + glow-brand`, no stock images.
+- Type: H1 `5xl-7xl`, H2 `3xl-4xl`, eyebrow Electric Violet uppercase. Container `max-w-7xl px-5 md:px-8`, section `py-16 md:py-24`. Cards `rounded-2xl border-line bg-surface p-6`.
+- Navbar: Frosted glass sticky bar with live pulsing Community Day pill badge (`border-brand/25 bg-brand/5`), smooth spring tab transitions, and gradient CTA.
 - A11y: one `h1`, heading order, focus-visible rings, 44px targets, `aria-hidden` on decorative visuals, color contrast on `faint` text, reduced-motion disables countdown animation (show static date).
 
 ## 7. Phased Build
@@ -121,9 +122,9 @@ Each phase ends with `npm run build` green before proceeding.
 - [ ] Post-event plan noted: move to `pastEvents` with recap link
 
 ## 9. Open Questions for Organizers
-
+ 
 1. Final agenda timings + speaker names/photos/roles? (currently TBA)
 2. Is non-SUIIT / outsider entry allowed? On-spot registration or RSVP-only?
 3. RSVP cap on Meetup (300?) + waitlist policy?
-4. Contact person / helpline + event website URL (Meetup says "will be updated")?
-5. Approve replacing `[COLLEGE NAME]` placeholder with SUIIT publicly?
+4. Contact info: `awssbg@suiit.ac.in` and WhatsApp channel confirmed; event website canonical: `/events/aws-student-community-day-suiit-2026`.
+5. Approve replacing `[COLLEGE NAME]` placeholder with SUIIT publicly? (Resolved: SUIIT is active).

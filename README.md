@@ -35,7 +35,9 @@ Open [http://localhost:3000](http://localhost:3000).
 - College name, leads, and social/join URLs live in one file: `src/lib/constants.ts`
 - Events and team members: `src/data/*.ts` (typed, ready to move to a DB later)
 - Community Day content: `src/data/community-day.ts` (agenda, speakers, perks, FAQs)
-- Implementation plans: `plan.md` (site), `plan-aws-student-community-day.md` (flagship event)
+- Implementation plans: `plan.md` (site), `plan-aws-student-community-day.md` (flagship event), `ui-design.md` (design system)
+- Color Palette: Electric Violet / Purple (`#AD5CFF`) sampled from `public/logo.png`
+- Community Channels: WhatsApp Channel, LinkedIn, Instagram, and college email `awssbg@suiit.ac.in`
 
 ## Scripts
 
