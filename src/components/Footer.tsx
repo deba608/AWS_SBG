@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { NAV_LINKS, SITE } from "@/lib/constants";
 import {
-  GithubIcon,
   InstagramIcon,
   LinkedinIcon,
   Logo,
@@ -14,7 +13,6 @@ const socials = [
   { label: "LinkedIn", href: SITE.links.linkedin, Icon: LinkedinIcon },
   { label: "Instagram", href: SITE.links.instagram, Icon: InstagramIcon },
   { label: "Email", href: SITE.links.email, Icon: MailIcon },
-  { label: "GitHub", href: SITE.links.github, Icon: GithubIcon },
 ];
 
 export default function Footer() {

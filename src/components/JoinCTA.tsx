@@ -6,7 +6,6 @@ const channels = [
   { label: "WhatsApp", href: SITE.links.whatsapp },
   { label: "LinkedIn", href: SITE.links.linkedin },
   { label: "Instagram", href: SITE.links.instagram },
-  { label: "GitHub", href: SITE.links.github },
 ];
 
 export default function JoinCTA() {

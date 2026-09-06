@@ -8,7 +8,6 @@ export const SITE = {
   email: "awssbg@suiit.ac.in",
   links: {
     join: "https://whatsapp.com/channel/0029VbBQOWtJUM2SSgFtil0O",
-    github: "https://github.com",
     linkedin: "https://www.linkedin.com/company/aws-sbg-suiit",
     discord: "https://discord.gg",
     whatsapp: "https://whatsapp.com/channel/0029VbBQOWtJUM2SSgFtil0O",
@@ -41,5 +40,4 @@ export const SOCIALS = [
   { label: "LinkedIn", href: SITE.links.linkedin, icon: "Linkedin" },
   { label: "Instagram", href: SITE.links.instagram, icon: "Instagram" },
   { label: "Email", href: SITE.links.email, icon: "Mail" },
-  { label: "GitHub", href: SITE.links.github, icon: "Github" },
 ] as const;
