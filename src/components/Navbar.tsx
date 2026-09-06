@@ -65,16 +65,21 @@ export default function Navbar() {
       }
     };
 
-    if (window.location.hash === "#about") {
-      setActiveSection("about");
-    } else {
-      onScrollSpy();
-    }
+    // Deferred initial read: runs in an async callback, never synchronously
+    // in the effect body (react-hooks/set-state-in-effect).
+    const raf = requestAnimationFrame(() => {
+      if (window.location.hash === "#about") {
+        setActiveSection("about");
+      } else {
+        onScrollSpy();
+      }
+    });
 
     window.addEventListener("scroll", onScrollSpy, { passive: true });
     window.addEventListener("hashchange", onScrollSpy, { passive: true });
 
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScrollSpy);
       window.removeEventListener("hashchange", onScrollSpy);
     };
