@@ -29,7 +29,7 @@ export default function Footer() {
           </p>
           <div className="mt-5 flex items-center gap-2">
             {socials.map(({ label, href, Icon }) => (
-              <Link
+              <a
                 key={label}
                 href={href}
                 target="_blank"
@@ -38,7 +38,7 @@ export default function Footer() {
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-fog transition-colors hover:border-brand/60 hover:text-cream"
               >
                 <Icon className="h-4 w-4" aria-hidden />
-              </Link>
+              </a>
             ))}
           </div>
         </div>
@@ -67,9 +67,9 @@ export default function Footer() {
           </h2>
           <ul className="mt-4 space-y-2.5 text-sm text-fog">
             <li>
-              <Link href={SITE.links.join} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-brand">
+              <a href={SITE.links.join} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-brand">
                 Join the community
-              </Link>
+              </a>
             </li>
             <li>
               <Link href="/events" className="transition-colors hover:text-brand">

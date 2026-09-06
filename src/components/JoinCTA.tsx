@@ -1,5 +1,4 @@
 import { ArrowRight, MessageCircle } from "lucide-react";
-import Link from "next/link";
 import Button from "./Button";
 import Container from "./Container";
 import Reveal from "./Reveal";
@@ -44,7 +43,7 @@ export default function JoinCTA() {
               <ul className="mt-8 flex flex-wrap items-center justify-center gap-2" aria-label="Community channels">
                 {channels.map(({ label, href, Icon }) => (
                   <li key={label}>
-                    <Link
+                    <a
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -52,7 +51,7 @@ export default function JoinCTA() {
                     >
                       <Icon className="h-4 w-4" aria-hidden />
                       {label}
-                    </Link>
+                    </a>
                   </li>
                 ))}
               </ul>

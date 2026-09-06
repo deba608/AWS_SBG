@@ -1,5 +1,4 @@
 import { ArrowRight, Clock } from "lucide-react";
-import Link from "next/link";
 import Badge from "./Badge";
 import { SITE } from "@/lib/constants";
 import type { LearningPath } from "@/data/learning";
@@ -53,7 +52,7 @@ export default function LearningCard({ path }: { path: LearningPath }) {
         </div>
       </div>
       <div className="mt-5 pt-1">
-        <Link
+        <a
           href={SITE.links.join}
           target="_blank"
           rel="noopener noreferrer"
@@ -64,7 +63,7 @@ export default function LearningCard({ path }: { path: LearningPath }) {
             className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
             aria-hidden
           />
-        </Link>
+        </a>
       </div>
     </article>
   );

@@ -1,5 +1,4 @@
 import { ArrowRight, CalendarDays, Clock, MapPin } from "lucide-react";
-import Link from "next/link";
 import Badge from "./Badge";
 import { SITE } from "@/lib/constants";
 import type { EventItem } from "@/data/events";
@@ -70,7 +69,7 @@ export default function EventCard({
           <span className="text-xs font-medium text-fog">{status.label}</span>
         </div>
         <div className="mt-4 pt-2">
-          <Link
+          <a
             href={event.registerUrl ?? SITE.links.eventDefault}
             target="_blank"
             rel="noopener noreferrer"
@@ -82,7 +81,7 @@ export default function EventCard({
               className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
               aria-hidden
             />
-          </Link>
+          </a>
         </div>
       </div>
     </article>

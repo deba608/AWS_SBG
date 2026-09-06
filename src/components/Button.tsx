@@ -24,16 +24,33 @@ export default function Button({
   className?: string;
   external?: boolean;
 }) {
+  const isExternal =
+    external ||
+    href.startsWith("http://") ||
+    href.startsWith("https://") ||
+    href.startsWith("#");
+
+  const classes = cn(
+    "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0",
+    styles[variant],
+    className
+  );
+
+  if (isExternal) {
+    return (
+      <a
+        href={href}
+        target={href.startsWith("http") ? "_blank" : undefined}
+        rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+        className={classes}
+      >
+        {children}
+      </a>
+    );
+  }
+
   return (
-    <Link
-      href={href}
-      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={cn(
-        "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0",
-        styles[variant],
-        className
-      )}
-    >
+    <Link href={href} className={classes}>
       {children}
     </Link>
   );

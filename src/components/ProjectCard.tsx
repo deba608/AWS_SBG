@@ -1,5 +1,4 @@
 import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
 import Badge from "./Badge";
 import { GithubIcon } from "./icons";
 import type { Project } from "@/data/projects";
@@ -33,7 +32,7 @@ export default function ProjectCard({ project }: { project: Project }) {
           <span className="text-brand">aws:</span> {project.aws.join(" · ")}
         </p>
         <div className="mt-5 flex items-center gap-2 pt-1">
-          <Link
+          <a
             href={project.demoUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -41,8 +40,8 @@ export default function ProjectCard({ project }: { project: Project }) {
           >
             View Project
             <ArrowUpRight className="h-4 w-4" aria-hidden />
-          </Link>
-          <Link
+          </a>
+          <a
             href={project.githubUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -50,7 +49,7 @@ export default function ProjectCard({ project }: { project: Project }) {
             className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-line text-fog transition-colors hover:border-white/20 hover:text-cream"
           >
             <GithubIcon className="h-5 w-5" />
-          </Link>
+          </a>
         </div>
       </div>
     </article>

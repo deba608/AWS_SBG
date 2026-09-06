@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { initials } from "@/lib/utils";
 import type { TeamMember } from "@/data/team";
 import { cn } from "@/lib/utils";
@@ -41,7 +40,7 @@ export default function TeamCard({
       </p>
       <div className="mt-4 flex items-center gap-2">
         {member.linkedin ? (
-          <Link
+          <a
             href={member.linkedin}
             target="_blank"
             rel="noopener noreferrer"
@@ -49,10 +48,10 @@ export default function TeamCard({
             className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full border border-line text-fog transition-colors hover:border-brand/60 hover:text-cream"
           >
             <LinkedinIcon className="h-4 w-4" />
-          </Link>
+          </a>
         ) : null}
         {member.github ? (
-          <Link
+          <a
             href={member.github}
             target="_blank"
             rel="noopener noreferrer"
@@ -60,7 +59,7 @@ export default function TeamCard({
             className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full border border-line text-fog transition-colors hover:border-brand/60 hover:text-cream"
           >
             <GithubIcon className="h-4 w-4" />
-          </Link>
+          </a>
         ) : null}
       </div>
     </article>

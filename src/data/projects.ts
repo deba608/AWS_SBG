@@ -16,8 +16,8 @@ export const projects: Project[] = [
       "A student collaboration platform for events, clubs and project teams at [COLLEGE NAME].",
     tech: ["React", "Node.js", "AWS"],
     aws: ["Lambda", "DynamoDB", "S3"],
-    githubUrl: "[GITHUB LINK]",
-    demoUrl: "[EVENT LINK]",
+    githubUrl: "https://github.com",
+    demoUrl: "https://github.com",
   },
   {
     id: "noteshare-serverless",
@@ -26,8 +26,8 @@ export const projects: Project[] = [
       "Markdown notes app with realtime sync and serverless authentication.",
     tech: ["Next.js", "TypeScript", "Tailwind"],
     aws: ["Lambda", "DynamoDB", "Cognito"],
-    githubUrl: "[GITHUB LINK]",
-    demoUrl: "[EVENT LINK]",
+    githubUrl: "https://github.com",
+    demoUrl: "https://github.com",
   },
   {
     id: "attendance-tracker",
@@ -36,8 +36,8 @@ export const projects: Project[] = [
       "QR-based attendance system for workshops with an organizer dashboard.",
     tech: ["React", "Amplify", "GraphQL"],
     aws: ["Amplify", "Cognito", "AppSync"],
-    githubUrl: "[GITHUB LINK]",
-    demoUrl: "[EVENT LINK]",
+    githubUrl: "https://github.com",
+    demoUrl: "https://github.com",
   },
   {
     id: "cloud-resume-gallery",
@@ -46,7 +46,7 @@ export const projects: Project[] = [
       "A gallery of student resumes deployed the serverless way — open for contributions.",
     tech: ["HTML", "JavaScript", "S3"],
     aws: ["S3", "CloudFront", "Route 53"],
-    githubUrl: "[GITHUB LINK]",
-    demoUrl: "[EVENT LINK]",
+    githubUrl: "https://github.com",
+    demoUrl: "https://github.com",
   },
 ];

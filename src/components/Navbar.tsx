@@ -76,14 +76,14 @@ export default function Navbar() {
         </ul>
 
         <div className="hidden lg:block">
-          <Link
+          <a
             href={SITE.links.join}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex min-h-[44px] items-center rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-black transition-all hover:-translate-y-0.5 hover:bg-brandhover"
           >
             Join Community
-          </Link>
+          </a>
         </div>
 
         <button
@@ -118,7 +118,7 @@ export default function Navbar() {
                 </li>
               ))}
               <li className="pt-2">
-                <Link
+                <a
                   href={SITE.links.join}
                   onClick={close}
                   target="_blank"
@@ -126,7 +126,7 @@ export default function Navbar() {
                   className="flex min-h-[48px] items-center justify-center rounded-full bg-brand px-5 py-3 text-sm font-semibold text-black"
                 >
                   Join Community
-                </Link>
+                </a>
               </li>
             </ul>
           </motion.div>
