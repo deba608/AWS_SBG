@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import { ArrowRight, History } from "lucide-react";
+import { ArrowRight, CalendarDays, Clock, History, MapPin } from "lucide-react";
 import Link from "next/link";
+import Button from "@/components/Button";
+import Badge from "@/components/Badge";
 import Container from "@/components/Container";
 import EventsExplorer from "@/components/EventsExplorer";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import { pastEvents } from "@/data/events";
+import { COMMUNITY_DAY_META } from "@/data/community-day";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -23,6 +26,62 @@ export default function EventsPage() {
           title="Learn by showing up."
           description="Hands-on workshops, talks from engineers, and hackathons — every session is beginner-friendly and free for students."
         />
+        <Reveal>
+          <section
+            aria-labelledby="community-day-spotlight"
+            className="relative mb-12 overflow-hidden rounded-3xl border border-brand/30 bg-surface px-6 py-8 md:px-10 md:py-10"
+          >
+            <div className="bg-grid absolute inset-0 opacity-60" aria-hidden />
+            <div className="glow-brand absolute -top-20 left-1/4 h-64 w-[30rem]" aria-hidden />
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-2xl">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge>Flagship · Oct 3 · Free</Badge>
+                  <Badge tone="neutral">300+ expected</Badge>
+                </div>
+                <h2
+                  id="community-day-spotlight"
+                  className="mt-4 text-2xl font-bold tracking-tight text-cream md:text-3xl"
+                >
+                  {COMMUNITY_DAY_META.title}
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-fog md:text-base">
+                  Cloud, AI/GenAI + DevOps with AWS pros, hands-on labs,
+                  networking, lunch, swag and certificate.
+                </p>
+                <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-fog">
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4 shrink-0 text-brand" aria-hidden />
+                    <dt className="sr-only">Date</dt>
+                    <dd>{COMMUNITY_DAY_META.date}</dd>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 shrink-0 text-brand" aria-hidden />
+                    <dt className="sr-only">Time</dt>
+                    <dd>{COMMUNITY_DAY_META.time}</dd>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 shrink-0 text-brand" aria-hidden />
+                    <dt className="sr-only">Venue</dt>
+                    <dd>{COMMUNITY_DAY_META.venueShort}</dd>
+                  </div>
+                </dl>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                <Button href={SITE.links.eventCommunityDay} external>
+                  Register on Meetup
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Button>
+                <Button
+                  href="/events/aws-student-community-day-suiit-2026"
+                  variant="secondary"
+                >
+                  View details
+                </Button>
+              </div>
+            </div>
+          </section>
+        </Reveal>
         <EventsExplorer />
 
         <section aria-labelledby="past-events" className="mt-20 md:mt-28">

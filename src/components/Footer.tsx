@@ -1,4 +1,5 @@
-import { Cloud, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { NAV_LINKS, SITE } from "@/lib/constants";
 import { GithubIcon, InstagramIcon, LinkedinIcon } from "./icons";
@@ -16,9 +17,13 @@ export default function Footer() {
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 pb-4 pt-14 md:grid-cols-[1.4fr_1fr_1fr] md:px-8">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-amber-500 text-black">
-              <Cloud className="h-5 w-5" aria-hidden />
-            </span>
+            <Image
+              src="/logo.png"
+              alt="SUIIT Logo"
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-lg object-contain bg-surface p-0.5 border border-line"
+            />
             <span className="text-sm font-bold text-cream">
               AWS Student Builder Group
             </span>

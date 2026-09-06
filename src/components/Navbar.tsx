@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Cloud, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -36,9 +37,13 @@ export default function Navbar() {
         className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-5 md:px-8"
       >
         <Link href="/" className="flex items-center gap-2.5" aria-label="AWS Student Builder Group — home">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-amber-500 text-black shadow-[0_4px_16px_rgba(255,153,0,0.4)]">
-            <Cloud className="h-5 w-5" aria-hidden />
-          </span>
+          <Image
+            src="/logo.png"
+            alt="SUIIT Logo"
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-lg object-contain bg-surface p-0.5 border border-line"
+          />
           <span className="leading-tight">
             <span className="block text-sm font-bold text-cream">
               AWS Student Builder Group
@@ -75,7 +80,13 @@ export default function Navbar() {
           })}
         </ul>
 
-        <div className="hidden lg:block">
+        <div className="hidden items-center gap-2 lg:flex">
+          <Link
+            href="/events/aws-student-community-day-suiit-2026"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-brand/40 bg-brand/10 px-4 py-2 text-xs font-semibold text-brand transition-colors hover:border-brand hover:text-cream"
+          >
+            Oct 3 · Community Day
+          </Link>
           <a
             href={SITE.links.join}
             target="_blank"
@@ -117,6 +128,15 @@ export default function Navbar() {
                   </Link>
                 </li>
               ))}
+              <li className="pt-2">
+                <Link
+                  href="/events/aws-student-community-day-suiit-2026"
+                  onClick={close}
+                  className="flex min-h-[48px] items-center justify-center rounded-full border border-brand/40 bg-brand/10 px-5 py-3 text-sm font-semibold text-brand"
+                >
+                  Oct 3 · Community Day — Register
+                </Link>
+              </li>
               <li className="pt-2">
                 <a
                   href={SITE.links.join}

@@ -105,6 +105,17 @@ export default function HomePage() {
           <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
               <Reveal>
+                <Link
+                  href="/events/aws-student-community-day-suiit-2026"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-brand/40 bg-brand/10 px-4 py-2 text-xs font-semibold text-brand transition-colors hover:border-brand hover:text-cream"
+                  aria-label="View AWS Student Community Day SUIIT 2026 details"
+                >
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" aria-hidden />
+                  Oct 3 · AWS Student Community Day SUIIT 2026 · Free
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                </Link>
+              </Reveal>
+              <Reveal>
                 <Badge>
                   <span className="relative flex h-1.5 w-1.5" aria-hidden>
                     <span className="absolute h-full w-full animate-ping rounded-full bg-brand opacity-70" />
@@ -125,8 +136,8 @@ export default function HomePage() {
                 {SITE.description}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button href={SITE.links.join} external>
-                  Join the Community
+                <Button href="/events/aws-student-community-day-suiit-2026">
+                  Register for Community Day
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Button>
                 <Button href="/events" variant="secondary">

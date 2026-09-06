@@ -1,3 +1,32 @@
+import Image from "next/image";
+
+export function Logo({
+  className,
+  priority = false,
+}: {
+  className?: string;
+  priority?: boolean;
+}) {
+  return (
+    <span
+      className={`relative inline-flex shrink-0 ${className ?? ""}`}
+    >
+      <span
+        aria-hidden
+        className="absolute -inset-1 rounded-xl bg-purple-500/25 blur-md"
+      />
+      <Image
+        src="/logo.png"
+        alt="AWS SBG SUIIT logo"
+        width={36}
+        height={36}
+        priority={priority}
+        className="relative h-9 w-9 rounded-lg border border-line bg-black object-cover"
+      />
+    </span>
+  );
+}
+
 export function GithubIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>

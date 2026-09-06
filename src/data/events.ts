@@ -67,7 +67,7 @@ export const upcomingEvents: EventItem[] = [
     category: "Workshop",
     date: "12 September 2026",
     time: "10:00 AM",
-    location: "Seminar Hall, [COLLEGE NAME]",
+    location: "Seminar Hall, SUIIT",
     description:
       "Learn AWS fundamentals, cloud concepts and core AWS services with guided hands-on labs.",
     status: "open",
@@ -89,7 +89,7 @@ export const upcomingEvents: EventItem[] = [
     category: "Tech Talk",
     date: "10 October 2026",
     time: "5:00 PM",
-    location: "Seminar Hall, [COLLEGE NAME]",
+    location: "Seminar Hall, SUIIT",
     description:
       "Exam strategy, preparation resources and Q&A with a recently certified cloud engineer.",
     status: "filling-fast",
@@ -100,7 +100,7 @@ export const upcomingEvents: EventItem[] = [
     category: "Hackathon",
     date: "8 – 9 November 2026",
     time: "9:00 AM onwards",
-    location: "Hacker Lab, [COLLEGE NAME]",
+    location: "Hacker Lab, SUIIT",
     description:
       "Teams of four solve a real-world problem using serverless AWS services. Demos on day two.",
     status: "filling-fast",

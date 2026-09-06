@@ -1,7 +1,7 @@
 export const SITE = {
   name: "AWS Student Builder Group",
   shortName: "AWS SBG",
-  collegeName: "[COLLEGE NAME]",
+  collegeName: "Sambalpur University Institute of Information Technology",
   tagline: "Learn → Build → Deploy → Connect",
   description:
     "A student-led community where builders come together to explore cloud computing, AWS, AI, DevOps and modern technologies through hands-on learning and real-world projects.",
