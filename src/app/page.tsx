@@ -94,7 +94,7 @@ export default function HomePage() {
     <>
       {/* HERO */}
       <section aria-labelledby="hero-heading">
-        <Container className="py-16 md:py-24">
+        <Container className="pb-16 pt-10 md:pb-24 md:pt-14">
           <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
             <div>
               <p className="text-sm text-faint">

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function EventsPage() {
   return (
-    <div className="py-16 md:py-24">
+    <div className="pb-16 pt-10 md:pb-24 md:pt-14">
       <Container>
         <SectionHeading
           eyebrow="Upcoming and past sessions"

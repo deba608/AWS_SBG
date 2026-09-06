@@ -109,7 +109,7 @@ export default function CommunityDayPage() {
       <section aria-labelledby="scd-heading" className="relative overflow-hidden">
         <div className="bg-grid bg-grid-fade absolute inset-0" aria-hidden />
         <div className="glow-brand absolute -top-24 left-1/2 h-96 w-[52rem] -translate-x-1/2" aria-hidden />
-        <Container className="relative py-16 md:py-24">
+        <Container className="relative pb-16 pt-10 md:pb-24 md:pt-14">
           <Reveal>
             <div className="flex flex-wrap items-center gap-2">
               <Badge>Flagship session on October 3, free entry</Badge>
