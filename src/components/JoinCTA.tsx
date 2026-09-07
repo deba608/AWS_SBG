@@ -11,7 +11,7 @@ const channels = [
 export default function JoinCTA() {
   return (
     <section aria-labelledby="join-heading" className="border-t border-line">
-      <Container className="py-16 md:py-24">
+      <Container className="py-12 sm:py-16 lg:py-24">
         <div className="max-w-2xl">
           <h2
             id="join-heading"
@@ -22,12 +22,12 @@ export default function JoinCTA() {
           <p className="mt-4 text-base leading-relaxed text-fog md:text-lg">
             {SITE.description}
           </p>
-          <div className="mt-8">
+          <div className="mt-8 w-full sm:w-auto [&>*]:w-full sm:[&>*]:w-auto">
             <Button href={SITE.links.join} external>
               Join the community
             </Button>
           </div>
-          <p className="mt-8 text-sm leading-relaxed text-fog">
+          <p className="mt-8 text-sm leading-loose text-fog">
             Find us on{" "}
             {channels.map((channel, i) => (
               <span key={channel.label}>
@@ -35,7 +35,7 @@ export default function JoinCTA() {
                   href={channel.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-[44px] items-center underline decoration-line underline-offset-4 transition-colors hover:text-cream hover:decoration-brand"
+                  className="inline-flex items-center py-1 underline decoration-line underline-offset-4 transition-colors hover:text-cream hover:decoration-brand"
                 >
                   {channel.label}
                 </a>
@@ -45,7 +45,7 @@ export default function JoinCTA() {
             or reach out at{" "}
             <a
               href={SITE.links.email}
-              className="inline-flex min-h-[44px] items-center underline decoration-line underline-offset-4 transition-colors hover:text-cream hover:decoration-brand"
+              className="inline-flex items-center py-1 underline decoration-line underline-offset-4 break-all transition-colors hover:text-cream hover:decoration-brand"
             >
               {SITE.email}
             </a>

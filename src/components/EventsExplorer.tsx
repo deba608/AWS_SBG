@@ -25,11 +25,12 @@ export default function EventsExplorer() {
         {filter !== "All" ? ` in ${filter}` : ""}
       </p>
       {events.length > 0 ? (
-        <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <AnimatePresence mode="wait">
             {events.map((event) => (
               <motion.div
                 key={event.id}
+                className="min-w-0"
                 initial={reduce ? false : { opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
@@ -41,7 +42,7 @@ export default function EventsExplorer() {
           </AnimatePresence>
         </div>
       ) : (
-        <div className="mt-6 rounded-2xl border border-dashed border-line bg-surface/50 p-10 text-center">
+        <div className="mt-6 rounded-2xl border border-dashed border-line bg-surface/50 p-6 text-center sm:p-10">
           <span className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-coal text-faint">
             <CalendarX2 className="h-5 w-5" aria-hidden />
           </span>

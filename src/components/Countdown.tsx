@@ -48,11 +48,11 @@ export default function Countdown() {
       className="grid max-w-md grid-cols-4 divide-x divide-line border-y border-line"
     >
       {parts.map((p) => (
-        <div key={p.label} className="min-w-0 px-2 py-3 text-center">
-          <span className="block text-2xl font-bold tabular-nums text-cream">
+        <div key={p.label} className="min-w-0 px-1 py-3 text-center sm:px-2">
+          <span className="block text-xl font-bold tabular-nums text-cream sm:text-2xl">
             {String(p.value).padStart(2, "0")}
           </span>
-          <span className="mt-1 block truncate text-xs text-fog">
+          <span className="mt-1 block break-words text-[11px] leading-tight text-fog sm:text-xs">
             {p.label}
           </span>
         </div>

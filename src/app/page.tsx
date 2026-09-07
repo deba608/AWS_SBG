@@ -67,14 +67,14 @@ export default function HomePage() {
               </p>
               <h1
                 id="hero-heading"
-                className="mt-4 max-w-xl text-5xl font-bold leading-[1.05] tracking-tight text-cream md:text-6xl lg:text-7xl"
+                className="mt-4 max-w-xl text-4xl font-bold leading-[1.05] tracking-tight text-cream sm:text-5xl md:text-6xl lg:text-7xl"
               >
                 Build. Learn. Deploy. Together.
               </h1>
               <p className="mt-6 max-w-xl text-base leading-relaxed text-fog md:text-lg">
                 {SITE.description}
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
                 <Button href={SITE.links.join} external>
                   Join the community
                 </Button>
@@ -89,7 +89,7 @@ export default function HomePage() {
       </section>
 
       {/* ABOUT */}
-      <section aria-labelledby="about-heading" id="about" className="scroll-mt-24 py-16 md:py-24">
+      <section aria-labelledby="about-heading" id="about" className="scroll-mt-24 py-12 sm:py-16 lg:py-24">
         <Container>
           <QuietHeading
             id="about-heading"
@@ -97,7 +97,7 @@ export default function HomePage() {
             title="A place to build, not just belong"
             description="A student-led chapter where you learn cloud by doing. Guided labs, real projects, and people who help you ship."
           />
-          <dl className="grid gap-x-12 gap-y-8 md:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2">
             {about.map((item, i) => (
               <div
                 key={item.title}
@@ -128,7 +128,7 @@ export default function HomePage() {
       </section>
 
       {/* UPCOMING */}
-      <section aria-labelledby="upcoming-heading" className="border-t border-line py-16 md:py-24">
+      <section aria-labelledby="upcoming-heading" className="border-t border-line py-12 sm:py-16 lg:py-24">
         <Container>
           <QuietHeading
             id="upcoming-heading"
@@ -136,7 +136,7 @@ export default function HomePage() {
             title="Upcoming events"
             description="Three sessions on the calendar. Join one and ship something."
           />
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {upcomingEvents.slice(0, 3).map((event) => (
               <EventCard key={event.id} event={event} compact />
             ))}

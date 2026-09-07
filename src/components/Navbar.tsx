@@ -12,7 +12,6 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<"home" | "about">("home");
   const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
-  const [bannerDismissed, setBannerDismissed] = useState(false);
   const isNavigatingRef = useRef(false);
   const pathname = usePathname();
   const reduce = useReducedMotion();
@@ -108,55 +107,13 @@ export default function Navbar() {
     [pathname, activeSection]
   );
 
-  const showBanner = !bannerDismissed;
-
   return (
-    <>
-      {/* ─── Announcement Banner ─── */}
-      <AnimatePresence>
-        {showBanner && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-x-0 top-0 z-[60] overflow-hidden"
-          >
-            <div className="relative flex items-center justify-center gap-2 bg-gradient-to-r from-brand/90 via-purple-500/90 to-brand/90 px-5 py-2 text-center text-xs font-medium text-white backdrop-blur-sm sm:text-sm">
-              <span className="relative mr-1 flex h-2 w-2 shrink-0">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
-              </span>
-              <span>
-                <span className="font-semibold">AWS Student Community Day</span>
-                {" "}— Oct 3, 2026
-              </span>
-              <Link
-                href="/events/aws-student-community-day-suiit-2026"
-                className="ml-1 inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-0.5 text-xs font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/30"
-              >
-                Register →
-              </Link>
-              <button
-                onClick={() => setBannerDismissed(true)}
-                className="absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/20 hover:text-white"
-                aria-label="Dismiss banner"
-              >
-                ✕
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ─── Main Navbar ─── */}
-      <header
-        className={cn(
-          "fixed inset-x-0 z-50 transition-all duration-300",
-          "border-b border-white/[0.06] bg-ink/80 backdrop-blur-2xl",
-          showBanner ? "top-[36px]" : "top-0"
-        )}
-      >
+    <header
+      className={cn(
+        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
+        "border-b border-white/[0.06] bg-ink/80 backdrop-blur-2xl"
+      )}
+    >
         <nav
           aria-label="Primary"
           className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-4 px-5 md:px-8"
@@ -372,6 +329,5 @@ export default function Navbar() {
           ) : null}
         </AnimatePresence>
       </header>
-    </>
   );
 }

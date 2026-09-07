@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function EventsPage() {
   return (
-    <div className="pb-16 pt-10 md:pb-24 md:pt-14">
+    <div className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
       <Container>
         <SectionHeading
           eyebrow="Upcoming and past sessions"
@@ -25,7 +25,7 @@ export default function EventsPage() {
         <Reveal>
           <section
             aria-labelledby="community-day-spotlight"
-            className="mb-12 border-y border-line py-8 md:py-10"
+            className="mb-10 border-y border-line py-6 sm:mb-12 sm:py-8 md:py-10"
           >
             <p className="text-sm text-fog">
               Flagship session on October 3, free for students, 300 expected.
@@ -60,7 +60,7 @@ export default function EventsPage() {
                 </dd>
               </div>
             </dl>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
               <CommunityDayRegisterModal />
               <Button
                 href="/events/aws-student-community-day-suiit-2026"

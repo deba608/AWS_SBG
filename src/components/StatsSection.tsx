@@ -23,8 +23,8 @@ function Counter({ value, suffix, label }: { value: number; suffix: string; labe
   }, [inView, value, reduce]);
 
   return (
-    <div ref={ref} className="border-l border-line py-2 pl-5">
-      <p className="text-4xl font-bold tabular-nums tracking-tight text-cream md:text-5xl">
+    <div ref={ref} className="min-w-0 border-l border-line py-2 pl-5">
+      <p className="text-3xl font-bold tabular-nums tracking-tight text-cream sm:text-4xl md:text-5xl">
         {shown}
         {suffix}
       </p>
@@ -35,9 +35,9 @@ function Counter({ value, suffix, label }: { value: number; suffix: string; labe
 
 export default function StatsSection() {
   return (
-    <section aria-label="Community statistics" className="py-12 md:py-16">
+    <section aria-label="Community statistics" className="py-10 sm:py-12 md:py-16">
       <Container>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
           {STATS.map((s) => (
             <Counter key={s.label} value={s.value} suffix={s.suffix} label={s.label} />
           ))}

@@ -36,7 +36,7 @@ function TeamSection({
       <ul
         className={
           cols === 2
-            ? "mt-4 grid gap-x-10 border-t border-line sm:grid-cols-2"
+            ? "mt-4 grid grid-cols-1 gap-x-5 gap-y-2 border-t border-line sm:grid-cols-2 sm:gap-x-8"
             : "mt-4 border-t border-line"
         }
       >
@@ -54,7 +54,7 @@ function TeamSection({
 
 export default function TeamPage() {
   return (
-    <div className="pb-16 pt-10 md:pb-24 md:pt-14">
+    <div className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
       <Container>
         <SectionHeading
           eyebrow="AWS Cloud Club Team 2025–26"
@@ -62,7 +62,7 @@ export default function TeamPage() {
           description="36 students across 12 domains — organizing workshops, mentoring newcomers and keeping the projects shipping."
         />
 
-        <div className="space-y-14 md:space-y-20">
+        <div className="space-y-12 sm:space-y-14 md:space-y-20">
           <TeamSection
             id="leadership"
             title="Leadership"
@@ -90,7 +90,7 @@ export default function TeamPage() {
           />
         </div>
 
-        <Reveal className="mt-14">
+        <Reveal className="mt-12 sm:mt-14">
           <div className="flex flex-col gap-4 border-y border-line py-8 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-cream">
@@ -104,7 +104,7 @@ export default function TeamPage() {
             <Button
               href={SITE.links.join}
               external
-              className="shrink-0"
+              className="w-full shrink-0 sm:w-auto"
             >
               Get involved
             </Button>

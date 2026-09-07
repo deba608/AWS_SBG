@@ -48,7 +48,7 @@ export default function Modal({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="rank-panel w-full max-w-lg p-6 md:p-8"
+            className="rank-panel max-h-[90dvh] w-full max-w-lg overflow-y-auto p-5 sm:p-6 md:p-8"
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <h3 className="text-xl font-bold text-cream">{title}</h3>
@@ -56,7 +56,7 @@ export default function Modal({
                 type="button"
                 onClick={onClose}
                 aria-label="Close dialog"
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line text-fog transition-colors hover:border-white/20 hover:text-cream"
+                className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full border border-line text-fog transition-colors hover:border-white/20 hover:text-cream"
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
