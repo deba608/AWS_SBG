@@ -62,7 +62,7 @@ export default function Footer() {
                 target={href.startsWith("mailto:") ? undefined : "_blank"}
                 rel={href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
                 aria-label={`${SITE.name} on ${label}`}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-line text-fog transition-colors hover:border-brand/50 hover:text-cream"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line text-fog transition-colors hover:border-brand/50 hover:text-cream md:h-11 md:w-11"
               >
                 <Icon className="h-4 w-4" aria-hidden />
               </a>
@@ -134,13 +134,12 @@ export default function Footer() {
         </div>
       </div>
       <div className="relative border-t border-line">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-1.5 px-5 py-5 text-xs text-faint sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-4 text-xs text-faint md:px-8 md:py-5">
           <p>
             © 2026 AWS Student Builder Group,{" "}
             <span className="md:hidden">{SITE.collegeShortName}</span>
             <span className="hidden md:inline">{SITE.collegeName}</span>
           </p>
-          <p className="font-mono">{SITE.tagline}</p>
         </div>
       </div>
     </footer>
