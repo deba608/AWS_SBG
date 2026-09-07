@@ -18,8 +18,8 @@ export const teamLeads: TeamMember[] = [
     lead: true,
   },
   {
-    id: "manas-ranjan-diskhit",
-    name: "Manas Ranjan Diskhit",
+    id: "manas-ranjan-dikshit",
+    name: "Manas Ranjan Dikshit",
     role: "President",
     bio: "Drives overall club strategy, partnerships and community growth across campus.",
     lead: true,

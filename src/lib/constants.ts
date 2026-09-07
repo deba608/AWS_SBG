@@ -20,7 +20,7 @@ export const SITE = {
       "https://meetu.ps/e/Qgc6f/1fcHtj/i?utm_source=sbg-site&utm_medium=event-page&utm_campaign=scd-2026",
   },
   communityLead: "Pratik Samal",
-  technicalLead: "Manas Ranjan Diskhit",
+  technicalLead: "Manas Ranjan Dikshit",
 } as const;
 
 export const NAV_LINKS = [
