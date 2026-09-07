@@ -58,7 +58,7 @@ function persist(data: StoredRegistration) {
 }
 
 const inputClasses = (invalid: boolean) =>
-  `w-full rounded-xl border bg-surface px-3 py-2.5 text-sm text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand ${
+  `w-full min-h-[44px] rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm ${
     invalid ? "border-red-400/70" : "border-line"
   }`;
 
@@ -131,11 +131,13 @@ export default function CommunityDayRegisterModal({
     if (Object.keys(fieldErrors).length > 0) return;
 
     const contact = normalizedContact({ firstName, lastName, email, mobile });
-    // Open a blank tab synchronously inside the click gesture so popup
-    // blockers permit it — it navigates to Meetup after the save attempt.
-    const placeholderTab = window.open("about:blank", "_blank", "noopener");
-    if (!placeholderTab && process.env.NODE_ENV === "development") {
-      console.warn("[SCD] placeholder tab blocked — showing manual Continue button");
+    // Open Meetup synchronously inside the click gesture so popup blockers permit it.
+    let opened = false;
+    try {
+      const tab = window.open(SITE.links.eventCommunityDay, "_blank", "noopener,noreferrer");
+      opened = Boolean(tab);
+    } catch {
+      opened = false;
     }
     setStatus("submitting");
 
@@ -179,22 +181,6 @@ export default function CommunityDayRegisterModal({
         err instanceof Error ? err.message : err
       );
       saveOk = false;
-    }
-
-    // Mandatory step wins: Meetup opens whether or not the save worked.
-    let opened = false;
-    if (placeholderTab && !placeholderTab.closed) {
-      try {
-        placeholderTab.location.href = SITE.links.eventCommunityDay;
-        opened = true;
-      } catch {
-        try {
-          placeholderTab.close();
-        } catch {
-          // Tab already gone — manual Continue button covers it.
-        }
-        opened = false;
-      }
     }
 
     const stored: StoredRegistration = {

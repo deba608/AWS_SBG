@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
+import { ArrowRight } from "lucide-react";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
 import EventsExplorer from "@/components/EventsExplorer";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import { COMMUNITY_DAY_META } from "@/data/community-day";
-import CommunityDayRegisterModal from "@/components/CommunityDayRegisterModal";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -61,7 +61,10 @@ export default function EventsPage() {
               </div>
             </dl>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
-              <CommunityDayRegisterModal />
+              <Button href={SITE.links.eventCommunityDay} external>
+                Register on Meetup — Free
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Button>
               <Button
                 href="/events/aws-student-community-day-suiit-2026"
                 variant="secondary"

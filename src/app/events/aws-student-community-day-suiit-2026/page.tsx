@@ -109,19 +109,19 @@ export default function CommunityDayPage() {
       {/* HERO */}
       <section aria-labelledby="scd-heading" className="relative overflow-hidden">
         <div className="bg-grid bg-grid-fade absolute inset-0" aria-hidden />
-        <div className="glow-brand absolute -top-24 left-1/2 h-96 w-[52rem] -translate-x-1/2" aria-hidden />
-        <Container className="relative pb-16 pt-10 md:pb-24 md:pt-14">
+        <div className="glow-brand absolute -top-24 left-1/2 h-96 w-[36rem] max-w-none -translate-x-1/2 sm:w-[52rem]" aria-hidden />
+        <Container className="relative pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
           <Reveal>
             <div className="flex flex-wrap items-center gap-2">
               <Badge>Flagship session on October 3, free entry</Badge>
               <Badge tone="success">Registration open on Meetup</Badge>
             </div>
           </Reveal>
-          <div className="mt-5 grid items-start gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-            <div>
+          <div className="mt-5 grid items-start gap-8 sm:gap-10 lg:grid-cols-[1.15fr_0.85fr] [&>*]:min-w-0">
+            <div className="min-w-0">
               <h1
                 id="scd-heading"
-                className="text-4xl font-bold leading-[1.05] tracking-tight text-cream md:text-6xl"
+                className="break-words text-4xl font-bold leading-[1.05] tracking-tight text-cream sm:text-5xl md:text-6xl"
               >
                 AWS Student Community Day SUIIT 2026
               </h1>
@@ -142,13 +142,13 @@ export default function CommunityDayPage() {
                   <dt className="sr-only">Time</dt>
                   <dd>{COMMUNITY_DAY_META.time}</dd>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 items-center gap-2">
                   <MapPin className="h-4 w-4 shrink-0 text-brand" aria-hidden />
                   <dt className="sr-only">Venue</dt>
-                  <dd>{COMMUNITY_DAY_META.venue}</dd>
+                  <dd className="min-w-0 max-w-full break-words">{COMMUNITY_DAY_META.venue}</dd>
                 </div>
               </dl>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
                 <CommunityDayRegisterModal />
                 <Button href="#agenda" variant="secondary">
                   View agenda
@@ -159,7 +159,7 @@ export default function CommunityDayPage() {
               </p>
             </div>
             <Reveal delay={0.12}>
-              <div className="rounded-2xl border border-line bg-surface/80 p-6 backdrop-blur">
+              <div className="rounded-2xl border border-line bg-surface/80 p-5 backdrop-blur sm:p-6">
                 <p className="text-sm font-semibold text-cream">
                   Countdown to October 3
                 </p>
@@ -196,7 +196,7 @@ export default function CommunityDayPage() {
       </section>
 
       {/* WHY ATTEND */}
-      <section className="bg-coal py-16 md:py-24">
+      <section className="bg-coal py-12 sm:py-16 lg:py-24">
         <Container>
           <SectionHeading
             align="left"
@@ -223,7 +223,7 @@ export default function CommunityDayPage() {
       </section>
 
       {/* AGENDA */}
-      <section id="agenda" className="scroll-mt-20 py-16 md:py-24">
+      <section id="agenda" className="scroll-mt-20 py-12 sm:py-16 lg:py-24">
         <Container>
           <SectionHeading
             align="left"
@@ -235,7 +235,7 @@ export default function CommunityDayPage() {
           <ol className="relative space-y-4 border-l border-line pl-6 md:pl-8">
             {COMMUNITY_DAY_AGENDA.map((a, i) => (
               <Reveal key={a.time + a.title} delay={Math.min(i * 0.04, 0.2)}>
-                <li className="relative rounded-2xl border border-line bg-surface p-5 transition-colors duration-200 hover:border-brand/40 md:p-6">
+                <li className="relative rounded-2xl border border-line bg-surface p-6 transition-colors duration-200 hover:border-brand/40">
                   <span
                     className="absolute -left-[31px] top-6 h-3 w-3 rounded-full bg-brand md:-left-[39px]"
                     aria-hidden
@@ -254,7 +254,7 @@ export default function CommunityDayPage() {
       </section>
 
       {/* SPEAKERS */}
-      <section className="bg-coal py-16 md:py-24">
+      <section className="bg-coal py-12 sm:py-16 lg:py-24">
         <Container>
           <SectionHeading
             align="left"
@@ -266,7 +266,7 @@ export default function CommunityDayPage() {
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {COMMUNITY_DAY_SPEAKERS.map((s, i) => (
               <Reveal key={s.role} delay={Math.min(i * 0.07, 0.14)}>
-                <article className="flex h-full flex-col items-center rounded-2xl border border-dashed border-line bg-surface p-8 text-center">
+                <article className="flex h-full flex-col items-center rounded-2xl border border-dashed border-line bg-surface p-6 text-center">
                   <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-ink text-faint">
                     <Mic className="h-6 w-6" aria-hidden />
                   </span>
@@ -281,22 +281,23 @@ export default function CommunityDayPage() {
       </section>
 
       {/* PERKS + BRING */}
-      <section className="py-16 md:py-24">
+      <section className="py-12 sm:py-16 lg:py-24">
         <Container>
           <h2 id="perks-heading" className="sr-only">Perks and what to bring</h2>
-          <div className="grid gap-10 lg:grid-cols-2">
-            <div>
+          <div className="grid gap-8 sm:gap-10 lg:grid-cols-2">
+            <div className="min-w-0">
               <SectionHeading
                 align="left"
+                size="sm"
                 eyebrow="Included"
                 title="Lunch, swag + certificate."
               />
-              <ul className="grid gap-5 sm:grid-cols-2">
+              <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 {COMMUNITY_DAY_PERKS.map((p, i) => {
                   const Icon = perkIcons[i % perkIcons.length];
                   return (
                     <Reveal key={p.title} delay={Math.min(i * 0.06, 0.18)}>
-                      <li className="h-full min-w-0 rounded-2xl border border-line bg-surface p-5 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
+                      <li className="h-full min-w-0 rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
                         <Icon className="h-5 w-5 text-brand" aria-hidden />
                         <p className="mt-3 text-sm font-semibold text-cream">{p.title}</p>
                         <p className="mt-1 text-sm leading-relaxed text-fog">{p.description}</p>
@@ -306,9 +307,10 @@ export default function CommunityDayPage() {
                 })}
               </ul>
             </div>
-            <div>
+            <div className="min-w-0">
               <SectionHeading
                 align="left"
+                size="sm"
                 eyebrow="Good to know"
                 title="Who + what to bring."
               />
@@ -335,12 +337,12 @@ export default function CommunityDayPage() {
       </section>
 
       {/* VENUE */}
-      <section aria-labelledby="venue-heading" className="bg-coal py-16 md:py-24">
+      <section aria-labelledby="venue-heading" className="bg-coal py-12 sm:py-16 lg:py-24">
         <Container>
-          <div className="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
-            <div>
+          <div className="grid items-center gap-8 sm:gap-10 lg:grid-cols-[1fr_auto]">
+            <div className="min-w-0">
               <p className="mb-3 text-sm font-semibold text-cream">Venue</p>
-              <h2 id="venue-heading" className="text-3xl font-bold tracking-tight text-cream md:text-4xl">
+              <h2 id="venue-heading" className="break-words text-3xl font-bold tracking-tight text-cream sm:text-4xl">
                 {COMMUNITY_DAY_META.venueShort}
               </h2>
               <p className="mt-3 max-w-xl text-base leading-relaxed text-fog">
@@ -348,7 +350,7 @@ export default function CommunityDayPage() {
                 {COMMUNITY_DAY_META.time}, entry {COMMUNITY_DAY_META.entry}
               </p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+            <div className="flex flex-col gap-3 sm:flex-row sm:[&>*]:w-auto sm:[&>*]:flex-1 lg:flex-col lg:[&>*]:w-full [&>*]:w-full">
               <Button href={COMMUNITY_DAY_META.mapsUrl} external>
                 Get directions
                 <ArrowRight className="h-4 w-4" aria-hidden />
@@ -363,7 +365,7 @@ export default function CommunityDayPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-16 md:py-24">
+      <section className="py-12 sm:py-16 lg:py-24">
         <Container>
           <SectionHeading
             eyebrow="FAQ"
@@ -388,24 +390,24 @@ export default function CommunityDayPage() {
       </section>
 
       {/* FINAL CTA */}
-      <section aria-labelledby="register-heading" className="pb-16 md:pb-24">
+      <section aria-labelledby="register-heading" className="pb-12 sm:pb-16 lg:pb-24">
         <Container>
           <Reveal>
-            <div className="relative overflow-hidden rounded-3xl border border-brand/30 bg-surface px-6 py-14 text-center md:px-12">
+            <div className="relative overflow-hidden rounded-3xl border border-brand/30 bg-surface px-5 py-10 text-center sm:px-8 sm:py-12 md:px-12 md:py-16">
               <div className="bg-grid bg-grid-fade absolute inset-0" aria-hidden />
-              <div className="glow-brand absolute left-1/2 top-0 h-72 w-[36rem] -translate-x-1/2 -translate-y-1/2" aria-hidden />
+              <div className="glow-brand absolute left-1/2 top-0 h-72 w-[28rem] max-w-none -translate-x-1/2 -translate-y-1/2 sm:w-[36rem]" aria-hidden />
               <div className="relative">
                 <p className="text-sm font-semibold text-cream">
                   October 3 at SUIIT, free for students
                 </p>
-                <h2 id="register-heading" className="mx-auto mt-3 max-w-xl text-3xl font-bold tracking-tight text-cream md:text-5xl">
+                <h2 id="register-heading" className="mx-auto mt-3 max-w-xl break-words text-3xl font-bold tracking-tight text-cream sm:text-4xl md:text-5xl">
                   See you at Community Day?
                 </h2>
                 <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-fog">
                   RSVP on Meetup now — 300+ builders already in. Lunch, swag and
                   certificate for registered participants.
                 </p>
-                <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:[&>*]:w-auto [&>*]:w-full [&>*]:max-w-sm">
                   <CommunityDayRegisterModal />
                   <Button href={SITE.links.instagram} variant="secondary" external>
                     Follow on Instagram
@@ -418,15 +420,15 @@ export default function CommunityDayPage() {
       </section>
 
       {/* RELATED */}
-      <section aria-labelledby="related-heading" className="bg-coal py-16 md:py-24">
+      <section aria-labelledby="related-heading" className="bg-coal py-12 sm:py-16 lg:py-24">
         <Container>
-          <div className="mb-10">
+          <div className="mb-10 md:mb-12">
             <p className="mb-3 text-sm font-semibold text-cream">Keep exploring</p>
-            <h2 id="related-heading" className="text-3xl font-bold tracking-tight text-cream md:text-4xl">
+            <h2 id="related-heading" className="text-3xl font-bold tracking-tight text-cream sm:text-4xl">
               More events
             </h2>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((event, i) => (
               <Reveal key={event.id} delay={Math.min(i * 0.08, 0.16)}>
                 <EventCard event={event} compact />
