@@ -8,8 +8,8 @@ const styles: Record<Variant, string> = {
   primary:
     "bg-brand text-black shadow-[0_2px_16px_rgba(173,92,255,0.32)] hover:bg-brandhover",
   secondary:
-    "border border-line bg-transparent text-cream hover:border-brand/50 hover:bg-brand/5 hover:text-white",
-  ghost: "text-fog hover:bg-brand/10 hover:text-white",
+    "border border-line bg-transparent text-cream hover:border-brand/50 hover:bg-brand/5",
+  ghost: "text-fog hover:bg-brand/10 hover:text-cream",
 };
 
 export default function Button({

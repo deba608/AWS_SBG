@@ -142,7 +142,7 @@ export default function Navbar() {
             <Logo priority />
           </motion.span>
           <span className="leading-snug">
-            <span className="block text-sm font-semibold tracking-tight text-cream transition-colors group-hover:text-white">
+            <span className="block text-sm font-semibold tracking-tight text-cream">
               AWS Student Builder Group
             </span>
             <span className="block text-xs font-normal text-faint transition-colors group-hover:text-fog">
@@ -177,7 +177,7 @@ export default function Navbar() {
                     className={cn(
                       "relative inline-flex min-h-[44px] items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200",
                       active
-                        ? "text-white font-semibold"
+                        ? "text-cream font-semibold"
                         : "text-fog hover:text-cream"
                     )}
                   >

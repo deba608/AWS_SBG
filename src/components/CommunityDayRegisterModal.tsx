@@ -337,7 +337,7 @@ export default function CommunityDayRegisterModal({
                   checked={consent}
                   onChange={(e) => setConsent(e.target.checked)}
                   aria-describedby={errors.consent ? "scd-consent-error" : undefined}
-                  className="mt-1 h-4 w-4 shrink-0 accent-[#FF9900]"
+                  className="mt-1 h-4 w-4 shrink-0 accent-brand"
                 />
                 <span>
                   I agree to be contacted by AWS SBG SUIIT about Community Day
