@@ -181,7 +181,7 @@ export default function CommunityDayRegisterModal({
                 id="scd-first-name"
                 name="firstName"
                 autoComplete="given-name"
-                placeholder="e.g. Priya"
+                placeholder="e.g. Debashish"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 aria-invalid={Boolean(errors.firstName)}
@@ -211,7 +211,7 @@ export default function CommunityDayRegisterModal({
                 id="scd-last-name"
                 name="lastName"
                 autoComplete="family-name"
-                placeholder="e.g. Sharma"
+                placeholder="e.g. Pradhan"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 aria-invalid={Boolean(errors.lastName)}
@@ -244,7 +244,7 @@ export default function CommunityDayRegisterModal({
               type="email"
               autoComplete="email"
               inputMode="email"
-              placeholder="you@college.edu"
+              placeholder="24btcse26@suiit.ac.in"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               aria-invalid={Boolean(errors.email)}
