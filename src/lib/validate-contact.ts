@@ -1,23 +1,28 @@
 export interface ContactInput {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   mobile: string;
 }
 
 export interface ContactErrors {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
   mobile?: string;
 }
 
 export interface NormalizedContact {
+  /** Combined for the Sheet ("First Last"). */
   name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   mobile: string;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const NAME_RE = /^[A-Za-z][A-Za-z.'\- ]*$/;
+const NAME_PART_RE = /^[A-Za-z][A-Za-z.'\-]*$/;
 
 export function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -38,14 +43,28 @@ export function collapseName(value: string): string {
   return value.trim().replace(/\s+/g, " ");
 }
 
+function validateNamePart(value: string): string | undefined {
+  const part = collapseName(value);
+  if (!part) return "This field is required.";
+  if (!NAME_PART_RE.test(part)) {
+    return "Letters only ( . ' - allowed).";
+  }
+  return undefined;
+}
+
 export function validateContact(input: ContactInput): ContactErrors {
   const errors: ContactErrors = {};
 
-  const name = collapseName(input.name);
-  if (name.length < 2) {
-    errors.name = "Please enter your full name.";
-  } else if (!NAME_RE.test(name)) {
-    errors.name = "Name can only contain letters, spaces, . ' -";
+  const firstError = validateNamePart(input.firstName);
+  if (firstError) {
+    errors.firstName = input.firstName.trim() ? firstError : "First name is required.";
+  } else if (collapseName(input.firstName).length < 2) {
+    errors.firstName = "Please enter your first name.";
+  }
+
+  const lastError = validateNamePart(input.lastName);
+  if (lastError) {
+    errors.lastName = input.lastName.trim() ? lastError : "Last name is required.";
   }
 
   const email = normalizeEmail(input.email);
@@ -66,8 +85,12 @@ export function validateContact(input: ContactInput): ContactErrors {
 }
 
 export function normalizedContact(input: ContactInput): NormalizedContact {
+  const firstName = collapseName(input.firstName);
+  const lastName = collapseName(input.lastName);
   return {
-    name: collapseName(input.name),
+    name: `${firstName} ${lastName}`.trim(),
+    firstName,
+    lastName,
     email: normalizeEmail(input.email),
     mobile: normalizeMobile(input.mobile),
   };

@@ -16,7 +16,8 @@ const SHEET_URL = process.env.NEXT_PUBLIC_SCD_SHEET_URL ?? "";
 type Status = "form" | "submitting" | "success" | "error";
 
 interface StoredRegistration {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   mobile: string;
   submitted: boolean;
@@ -25,7 +26,21 @@ interface StoredRegistration {
 function readStored(): StoredRegistration | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as StoredRegistration) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as StoredRegistration & { name?: string };
+    if (!parsed || typeof parsed !== "object") return null;
+    // Migrate old single-name shape { name } → { firstName, lastName }.
+    if (!parsed.firstName && typeof parsed.name === "string") {
+      const parts = parsed.name.trim().split(/\s+/).filter(Boolean);
+      return {
+        firstName: parts[0] ?? "",
+        lastName: parts.slice(1).join(" "),
+        email: parsed.email ?? "",
+        mobile: parsed.mobile ?? "",
+        submitted: Boolean(parsed.submitted),
+      };
+    }
+    return parsed as StoredRegistration;
   } catch {
     return null;
   }
@@ -52,7 +67,8 @@ export default function CommunityDayRegisterModal({
   children?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
   const [consent, setConsent] = useState(false);
@@ -64,12 +80,13 @@ export default function CommunityDayRegisterModal({
   const openModal = () => {
     const stored = readStored();
     if (stored) {
-      setName(stored.name);
+      setFirstName(stored.firstName);
+      setLastName(stored.lastName);
       setEmail(stored.email);
       setMobile(stored.mobile);
       if (stored.submitted) {
         // Already gave details from this browser — straight to success state.
-        setSuccessName(stored.name);
+        setSuccessName(stored.firstName);
         setIsDuplicate(true);
         setStatus("success");
       } else {
@@ -91,7 +108,7 @@ export default function CommunityDayRegisterModal({
   };
 
   async function submit() {
-    const fieldErrors = validateContact({ name, email, mobile });
+    const fieldErrors = validateContact({ firstName, lastName, email, mobile });
     const next: ContactErrors & { consent?: string } = { ...fieldErrors };
     if (!consent) {
       next.consent = "Please accept so we can send event updates.";
@@ -99,7 +116,7 @@ export default function CommunityDayRegisterModal({
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
-    const contact = normalizedContact({ name, email, mobile });
+    const contact = normalizedContact({ firstName, lastName, email, mobile });
     setStatus("submitting");
 
     try {
@@ -215,26 +232,49 @@ export default function CommunityDayRegisterModal({
               Takes 30 seconds — we use this for headcount, lunch/swag and event
               updates. Then you RSVP on Meetup.
             </p>
-            <div>
-              <label htmlFor="scd-name" className="mb-1.5 block text-sm font-medium text-cream">
-                Full name *
-              </label>
-              <input
-                id="scd-name"
-                name="name"
-                autoComplete="name"
-                placeholder="e.g. Priya Sharma"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                aria-invalid={Boolean(errors.name)}
-                aria-describedby={errors.name ? "scd-name-error" : undefined}
-                className={inputClasses(Boolean(errors.name))}
-              />
-              {errors.name ? (
-                <p id="scd-name-error" role="alert" className="mt-1.5 text-xs text-red-300">
-                  {errors.name}
-                </p>
-              ) : null}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="scd-first-name" className="mb-1.5 block text-sm font-medium text-cream">
+                  First name *
+                </label>
+                <input
+                  id="scd-first-name"
+                  name="firstName"
+                  autoComplete="given-name"
+                  placeholder="e.g. Priya"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  aria-invalid={Boolean(errors.firstName)}
+                  aria-describedby={errors.firstName ? "scd-first-name-error" : undefined}
+                  className={inputClasses(Boolean(errors.firstName))}
+                />
+                {errors.firstName ? (
+                  <p id="scd-first-name-error" role="alert" className="mt-1.5 text-xs text-red-300">
+                    {errors.firstName}
+                  </p>
+                ) : null}
+              </div>
+              <div>
+                <label htmlFor="scd-last-name" className="mb-1.5 block text-sm font-medium text-cream">
+                  Last name *
+                </label>
+                <input
+                  id="scd-last-name"
+                  name="lastName"
+                  autoComplete="family-name"
+                  placeholder="e.g. Sharma"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  aria-invalid={Boolean(errors.lastName)}
+                  aria-describedby={errors.lastName ? "scd-last-name-error" : undefined}
+                  className={inputClasses(Boolean(errors.lastName))}
+                />
+                {errors.lastName ? (
+                  <p id="scd-last-name-error" role="alert" className="mt-1.5 text-xs text-red-300">
+                    {errors.lastName}
+                  </p>
+                ) : null}
+              </div>
             </div>
             <div>
               <label htmlFor="scd-email" className="mb-1.5 block text-sm font-medium text-cream">
