@@ -175,7 +175,7 @@ export default function Navbar() {
                     }}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "relative inline-flex min-h-[36px] items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200",
+                      "relative inline-flex min-h-[44px] items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200",
                       active
                         ? "text-white font-semibold"
                         : "text-fog hover:text-cream"
@@ -213,10 +213,10 @@ export default function Navbar() {
         <div className="hidden items-center gap-3.5 lg:flex">
           <Link
             href="/events/aws-student-community-day-suiit-2026"
-            className="group inline-flex min-h-[38px] items-center gap-2 rounded-full border border-brand/25 bg-brand/5 px-3.5 py-1.5 text-xs font-medium text-cream/90 backdrop-blur-sm transition-all duration-200 hover:border-brand/50 hover:bg-brand/15 hover:shadow-[0_0_16px_rgba(173,92,255,0.25)] hover:text-white"
+            className="group inline-flex min-h-[44px] items-center gap-2 rounded-full border border-brand/25 bg-brand/5 px-3.5 py-1.5 text-xs font-medium text-cream/90 backdrop-blur-sm transition-all duration-200 hover:border-brand/50 hover:bg-brand/15 hover:text-cream hover:shadow-[0_0_16px_rgba(173,92,255,0.25)]"
           >
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75" />
+              <span className="absolute inline-flex h-full w-full animate-pulse-glow rounded-full bg-brand opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-brand shadow-[0_0_8px_rgba(173,92,255,0.9)]" />
             </span>
             <span>Community Day, Oct 3</span>
@@ -228,7 +228,7 @@ export default function Navbar() {
             rel="noopener noreferrer"
             whileHover={reduce ? undefined : { scale: 1.03 }}
             whileTap={reduce ? undefined : { scale: 0.97 }}
-            className="inline-flex min-h-[38px] items-center rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white shadow-[0_0_18px_rgba(173,92,255,0.35)] transition-all duration-200 hover:shadow-[0_0_26px_rgba(173,92,255,0.6)] hover:brightness-110 active:brightness-95"
+            className="inline-flex min-h-[44px] items-center rounded-full bg-brand px-5 py-2 text-sm font-semibold text-black shadow-[0_0_18px_rgba(173,92,255,0.35)] transition-all duration-200 hover:shadow-[0_0_26px_rgba(173,92,255,0.6)] active:brightness-95"
           >
             Join
           </motion.a>
@@ -317,7 +317,7 @@ export default function Navbar() {
                 <Link
                   href="/events/aws-student-community-day-suiit-2026"
                   onClick={close}
-                  className="inline-flex items-center gap-2 text-sm font-medium text-purple-300"
+                  className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-brand"
                 >
                   <span className="h-2 w-2 rounded-full bg-brand shadow-[0_0_6px_rgba(173,92,255,0.9)]" />
                   Community Day, Oct 3 — register
@@ -330,7 +330,7 @@ export default function Navbar() {
                   target="_blank"
                   rel="noopener noreferrer"
                   whileTap={reduce ? undefined : { scale: 0.98 }}
-                  className="flex min-h-[48px] items-center justify-center rounded-full bg-brand px-5 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(173,92,255,0.35)]"
+                  className="flex min-h-[48px] items-center justify-center rounded-full bg-brand px-5 py-3 text-sm font-semibold text-black shadow-[0_0_20px_rgba(173,92,255,0.35)]"
                 >
                   Join
                 </motion.a>

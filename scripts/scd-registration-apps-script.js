@@ -45,6 +45,35 @@ function cleanNamePart(value) {
   return String(value || "").trim().replace(/\s+/g, " ");
 }
 
+/**
+ * Self-healing header row:
+ * - empty tab → writes HEADERS.
+ * - header row present but wrong and NO data below it → overwrites row 1.
+ * - header row wrong WITH data below it → returns false (organizer must fix
+ *   manually — auto-migrating would corrupt existing rows).
+ */
+function ensureHeaders(sheet) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow === 0) {
+    sheet.appendRow(HEADERS);
+    return true;
+  }
+  var row1 = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0];
+  var matches = true;
+  for (var c = 0; c < HEADERS.length; c++) {
+    if (String(row1[c] || "").trim() !== HEADERS[c]) {
+      matches = false;
+      break;
+    }
+  }
+  if (matches) return true;
+  if (lastRow === 1) {
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    return true;
+  }
+  return false;
+}
+
 function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
@@ -82,7 +111,9 @@ function doPost(e) {
     var sheet = ss.getSheetByName(SHEET_NAME);
     if (!sheet) {
       sheet = ss.insertSheet(SHEET_NAME);
-      sheet.appendRow(HEADERS);
+    }
+    if (!ensureHeaders(sheet)) {
+      return json({ status: "error", message: "bad-header" });
     }
 
     // Dedupe on email (col D) or mobile (col E).

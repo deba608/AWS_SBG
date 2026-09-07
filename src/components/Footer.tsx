@@ -18,7 +18,7 @@ const socials = [
 export default function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-line bg-coal">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 pb-4 pt-14 md:grid-cols-[1.4fr_1fr_1fr] md:px-8">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-14 md:grid-cols-[1.4fr_1fr_1fr] md:px-8">
         <div>
           <div className="flex min-h-[44px] items-center gap-3">
             <Logo />

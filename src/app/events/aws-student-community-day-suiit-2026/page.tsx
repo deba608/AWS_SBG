@@ -204,7 +204,7 @@ export default function CommunityDayPage() {
             title="More than a meetup."
             description="Learn from experienced professionals, explore emerging tech, and meet 300+ fellow builders."
           />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {whyAttend.map((c, i) => (
               <Reveal key={c.title} delay={Math.min(i * 0.07, 0.21)}>
                 <article className="group h-full min-w-0 rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
@@ -263,7 +263,7 @@ export default function CommunityDayPage() {
             description="AWS professionals, community leaders and industry experts. Names will be announced — no placeholders, only confirmed speakers."
           />
           <h2 id="speakers-heading" className="sr-only">Speakers</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {COMMUNITY_DAY_SPEAKERS.map((s, i) => (
               <Reveal key={s.role} delay={Math.min(i * 0.07, 0.14)}>
                 <article className="flex h-full flex-col items-center rounded-2xl border border-dashed border-line bg-surface p-8 text-center">
@@ -291,7 +291,7 @@ export default function CommunityDayPage() {
                 eyebrow="Included"
                 title="Lunch, swag + certificate."
               />
-              <ul className="grid gap-4 sm:grid-cols-2">
+              <ul className="grid gap-5 sm:grid-cols-2">
                 {COMMUNITY_DAY_PERKS.map((p, i) => {
                   const Icon = perkIcons[i % perkIcons.length];
                   return (

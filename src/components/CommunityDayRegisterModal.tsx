@@ -162,7 +162,7 @@ export default function CommunityDayRegisterModal({
         onClick={openModal}
         className={
           className ||
-          "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black shadow-[0_8px_30px_rgba(255,153,0,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-brandhover"
+          "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black shadow-[0_2px_16px_rgba(173,92,255,0.32)] transition-colors duration-150 hover:bg-brandhover"
         }
       >
         {children || (
@@ -190,7 +190,7 @@ export default function CommunityDayRegisterModal({
               href={SITE.links.eventCommunityDay}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black transition-all hover:-translate-y-0.5 hover:bg-brandhover"
+              className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-brandhover"
             >
               Continue to Meetup
               <ArrowRight className="h-4 w-4" aria-hidden />
@@ -354,7 +354,7 @@ export default function CommunityDayRegisterModal({
               <button
                 type="submit"
                 disabled={status === "submitting"}
-                className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black transition-all hover:-translate-y-0.5 hover:bg-brandhover disabled:translate-y-0 disabled:opacity-70"
+                className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-brandhover disabled:opacity-70"
               >
                 {status === "submitting" ? (
                   <>

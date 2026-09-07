@@ -35,7 +35,7 @@ function Counter({ value, suffix, label }: { value: number; suffix: string; labe
 
 export default function StatsSection() {
   return (
-    <section aria-label="Community statistics" className="py-10 md:py-14">
+    <section aria-label="Community statistics" className="py-12 md:py-16">
       <Container>
         <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
           {STATS.map((s) => (
