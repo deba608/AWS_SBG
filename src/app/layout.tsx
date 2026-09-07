@@ -20,6 +20,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
   title: {
     default: `${SITE.name} — ${SITE.collegeName}`,
     template: `%s · ${SITE.shortName}`,

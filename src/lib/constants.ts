@@ -6,6 +6,7 @@ export const SITE = {
   description:
     "A student-led community where builders come together to explore cloud computing, AWS, AI, DevOps and modern technologies through hands-on learning and real-world projects.",
   email: "awssbg@suiit.ac.in",
+  url: "https://awssbgsuiit.vercel.app",
   links: {
     join: "https://whatsapp.com/channel/0029VbBQOWtJUM2SSgFtil0O",
     linkedin: "https://www.linkedin.com/company/aws-sbg-suiit",
