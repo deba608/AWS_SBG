@@ -21,6 +21,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -29,8 +30,46 @@ body {
   font-family: var(--font-sans);
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
   text-rendering: optimizeLegibility;
 }
+
+main {
+  /* Fixed navbar (h-14) + anchor offset for #about / #agenda */
+  scroll-margin-top: 4rem;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
+}
+
+/* Zoom-free inputs on iOS: 16px minimum prevents auto-zoom on focus. */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+@media (min-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 0.875rem;
+  }
+}
+
+/*
+ * Spacing contract (mobile-first):
+ * - container px: px-5 sm:px-6 md:px-8 via <Container />
+ * - section py: py-12 sm:py-16 lg:py-24
+ * - page-top hero: pb-12 pt-24 md:pb-24 md:pt-32 (clears fixed h-14 nav + banner)
+ * - heading mb: mb-10 md:mb-12 (nested: mb-6 md:mb-8)
+ * - card p: p-6 default (p-5 dense only, p-8 modal/empty only)
+ * - card grids: grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3/4
+ * - CTA rows: flex flex-col gap-3 sm:flex-row, buttons full-width on mobile
+ */
 
 /*
  * Infrastructure-engineered voice.

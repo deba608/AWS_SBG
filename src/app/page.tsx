@@ -30,11 +30,6 @@ const about = [
   },
 ];
 
-const proof = [
-  ["Beginner friendly", "Guided labs, no experience needed"],
-  ["Free for students", "Mentorship, certificates and swag"],
-] as const;
-
 function QuietHeading({
   label,
   title,
@@ -49,7 +44,7 @@ function QuietHeading({
   return (
     <div className="mb-10 max-w-2xl md:mb-12">
       <p className="text-sm font-medium text-faint">{label}</p>
-      <h2 id={id} className="mt-2 text-3xl font-bold tracking-tight text-cream md:text-4xl">
+      <h2 id={id} className="mt-2 text-3xl font-semibold tracking-tight text-cream md:text-4xl">
         {title}
       </h2>
       {description ? (
@@ -64,9 +59,9 @@ export default function HomePage() {
     <>
       {/* HERO */}
       <section aria-labelledby="hero-heading">
-        <Container className="pb-16 pt-10 md:pb-24 md:pt-14">
-          <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
-            <div>
+        <Container className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
+          <div className="grid items-center gap-10 sm:gap-12 lg:grid-cols-[1.05fr_0.95fr] [&>*]:min-w-0">
+            <div className="min-w-0">
               <p className="text-sm text-faint">
                 {SITE.name}, <span className="md:hidden">{SITE.collegeShortName}</span><span className="hidden md:inline">{SITE.collegeName}</span>
               </p>
@@ -87,19 +82,6 @@ export default function HomePage() {
                   Explore events
                 </Button>
               </div>
-              <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
-                {proof.map(([term, detail]) => (
-                  <div key={term} className="flex items-center gap-2.5">
-                    <span className="font-mono text-sm font-bold text-emerald-300" aria-hidden>
-                      ✓
-                    </span>
-                    <div>
-                      <dt className="text-sm font-semibold text-cream">{term}</dt>
-                      <dd className="text-xs text-faint">{detail}</dd>
-                    </div>
-                  </div>
-                ))}
-              </dl>
             </div>
             <HeroVisual />
           </div>
@@ -107,7 +89,7 @@ export default function HomePage() {
       </section>
 
       {/* ABOUT */}
-      <section aria-labelledby="about-heading" id="about" className="scroll-mt-20 py-16 md:py-24">
+      <section aria-labelledby="about-heading" id="about" className="scroll-mt-24 py-16 md:py-24">
         <Container>
           <QuietHeading
             id="about-heading"

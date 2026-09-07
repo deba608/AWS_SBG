@@ -12,23 +12,17 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<"home" | "about">("home");
   const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const isNavigatingRef = useRef(false);
   const pathname = usePathname();
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll();
 
-  // Smooth constant spring physics for fluid tab sliding
   const activeSpring = reduce
     ? { duration: 0 }
-    : {
-        type: "spring" as const,
-        stiffness: 320,
-        damping: 28,
-        mass: 0.7,
-      };
+    : { type: "spring" as const, stiffness: 320, damping: 28, mass: 0.7 };
 
-
-  // Section observer & scrollspy on home page: cleanly toggles Home vs About
+  // Section observer & scrollspy on home page
   useEffect(() => {
     if (pathname !== "/") return;
 
@@ -40,7 +34,6 @@ export default function Navbar() {
         return;
       }
       const rect = aboutElem.getBoundingClientRect();
-      // When the about section approaches viewport or is active
       if (rect.top <= 280) {
         setActiveSection("about");
       } else {
@@ -48,8 +41,6 @@ export default function Navbar() {
       }
     };
 
-    // Deferred initial read: runs in an async callback, never synchronously
-    // in the effect body (react-hooks/set-state-in-effect).
     const raf = requestAnimationFrame(() => {
       if (window.location.hash === "#about") {
         setActiveSection("about");
@@ -68,7 +59,6 @@ export default function Navbar() {
     };
   }, [pathname]);
 
-  // Smooth scroll handler for anchor clicks
   const scrollToSection = (section: "home" | "about") => {
     isNavigatingRef.current = true;
     setActiveSection(section);
@@ -105,7 +95,6 @@ export default function Navbar() {
 
   const close = () => setOpen(false);
 
-  // Exactly one nav link is active at any time
   const isLinkActive = useCallback(
     (href: string): boolean => {
       if (pathname === "/") {
@@ -119,227 +108,270 @@ export default function Navbar() {
     [pathname, activeSection]
   );
 
+  const showBanner = !bannerDismissed;
+
   return (
-    <header
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-        "border-b border-line/80 bg-ink/90 shadow-[0_8px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl h-14"
-      )}
-    >
-      <nav
-        aria-label="Primary"
+    <>
+      {/* ─── Announcement Banner ─── */}
+      <AnimatePresence>
+        {showBanner && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-x-0 top-0 z-[60] overflow-hidden"
+          >
+            <div className="relative flex items-center justify-center gap-2 bg-gradient-to-r from-brand/90 via-purple-500/90 to-brand/90 px-5 py-2 text-center text-xs font-medium text-white backdrop-blur-sm sm:text-sm">
+              <span className="relative mr-1 flex h-2 w-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+              </span>
+              <span>
+                <span className="font-semibold">AWS Student Community Day</span>
+                {" "}— Oct 3, 2026
+              </span>
+              <Link
+                href="/events/aws-student-community-day-suiit-2026"
+                className="ml-1 inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-0.5 text-xs font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/30"
+              >
+                Register →
+              </Link>
+              <button
+                onClick={() => setBannerDismissed(true)}
+                className="absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+                aria-label="Dismiss banner"
+              >
+                ✕
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── Main Navbar ─── */}
+      <header
         className={cn(
-          "mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 transition-all duration-300 md:px-8 h-14"
+          "fixed inset-x-0 z-50 transition-all duration-300",
+          "border-b border-white/[0.06] bg-ink/80 backdrop-blur-2xl",
+          showBanner ? "top-[36px]" : "top-0"
         )}
       >
-        <Link
-          href="/"
-          onClick={() => scrollToSection("home")}
-          className="group flex min-h-[44px] items-center gap-3"
-          aria-label="AWS Student Builder Group — home"
+        <nav
+          aria-label="Primary"
+          className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-4 px-5 md:px-8"
         >
-          <motion.span whileHover={reduce ? undefined : { rotate: 5, scale: 1.05 }} className="transition-all duration-300 drop-shadow-[0_0_10px_rgba(173,92,255,0.35)]" aria-hidden>
-            <Logo priority />
-          </motion.span>
-          <span className="leading-snug">
-            <span className="block text-sm font-semibold tracking-tight text-cream">
-              AWS Student Builder Group
-            </span>
-            <span className="block text-xs font-normal text-faint transition-colors group-hover:text-fog">
-              <span className="md:hidden">{SITE.collegeShortName}</span>
-              <span className="hidden md:inline">{SITE.collegeName}</span>
-            </span>
-          </span>
-        </Link>
-
-        {/* Center Nav Links with smooth, continuous transition across sections */}
-        <LayoutGroup id="desktop-nav">
-          <ul
-            onMouseLeave={() => setHoveredLabel(null)}
-            className="hidden items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.02] p-1.5 backdrop-blur-md lg:flex"
-          >
-            {NAV_LINKS.map((link) => {
-              const active = isLinkActive(link.href);
-              const isHovered = hoveredLabel === link.label;
-
-              return (
-                <li key={link.label} className="relative">
-                  <Link
-                    href={link.href}
-                    onMouseEnter={() => setHoveredLabel(link.label)}
-                    onClick={() => {
-                      if (link.href === "/") {
-                        scrollToSection("home");
-                      } else if (link.href === "/#about") {
-                        scrollToSection("about");
-                      }
-                    }}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "relative inline-flex min-h-[44px] items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200",
-                      active
-                        ? "text-cream font-semibold"
-                        : "text-fog hover:text-cream"
-                    )}
-                  >
-                    {/* Hover preview pill */}
-                    {isHovered && !active && (
-                      <motion.span
-                        layoutId="nav-hover-pill"
-                        className="absolute inset-0 rounded-full bg-white/[0.05]"
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                        aria-hidden
-                      />
-                    )}
-
-                    {/* Smooth sliding active indicator pill with purple glow */}
-                    {active && (
-                      <motion.span
-                        layoutId="nav-active-pill"
-                        className="absolute inset-0 rounded-full border border-brand/45 bg-brand/20 shadow-[0_0_16px_rgba(173,92,255,0.35)]"
-                        transition={activeSpring}
-                        aria-hidden
-                      />
-                    )}
-
-                    <span className="relative z-10">{link.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </LayoutGroup>
-
-        {/* Right actions: Community Day live pill + Join CTA */}
-        <div className="hidden items-center gap-3.5 lg:flex">
+          {/* Logo */}
           <Link
-            href="/events/aws-student-community-day-suiit-2026"
-            className="group inline-flex min-h-[44px] items-center gap-2 rounded-full border border-brand/25 bg-brand/5 px-3.5 py-1.5 text-xs font-medium text-cream/90 backdrop-blur-sm transition-all duration-200 hover:border-brand/50 hover:bg-brand/15 hover:text-cream hover:shadow-[0_0_16px_rgba(173,92,255,0.25)]"
+            href="/"
+            onClick={() => scrollToSection("home")}
+            className="group flex min-h-[44px] min-w-0 items-center gap-2.5"
+            aria-label="AWS Student Builder Group — home"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-pulse-glow rounded-full bg-brand opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-brand shadow-[0_0_8px_rgba(173,92,255,0.9)]" />
+            <motion.span
+              whileHover={reduce ? undefined : { rotate: 5, scale: 1.08 }}
+              className="relative"
+              aria-hidden
+            >
+              <span className="absolute inset-0 rounded-full bg-brand/20 blur-lg transition-opacity group-hover:opacity-100 opacity-0" />
+              <Logo priority />
+            </motion.span>
+            <span className="min-w-0 leading-snug">
+              <span className="block text-sm font-bold tracking-tight text-cream">
+                AWS <span className="bg-gradient-to-r from-brand to-purple-400 bg-clip-text text-transparent">SBG</span>
+              </span>
+              <span className="block truncate text-[11px] font-normal text-faint transition-colors group-hover:text-fog">
+                <span className="md:hidden">{SITE.collegeShortName}</span>
+                <span className="hidden md:inline">{SITE.collegeName}</span>
+              </span>
             </span>
-            <span>Community Day, Oct 3</span>
           </Link>
 
-          <motion.a
-            href={SITE.links.join}
-            target="_blank"
-            rel="noopener noreferrer"
-            whileHover={reduce ? undefined : { scale: 1.03 }}
-            whileTap={reduce ? undefined : { scale: 0.97 }}
-            className="inline-flex min-h-[44px] items-center rounded-full bg-brand px-5 py-2 text-sm font-semibold text-black shadow-[0_0_18px_rgba(173,92,255,0.35)] transition-all duration-200 hover:shadow-[0_0_26px_rgba(173,92,255,0.6)] active:brightness-95"
-          >
-            Join
-          </motion.a>
-        </div>
-
-        {/* Mobile menu button */}
-        <button
-          className="inline-flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-lg border border-line text-cream transition-colors hover:border-brand/40 lg:hidden"
-          aria-expanded={open}
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((v) => !v)}
-        >
-          <motion.span
-            animate={open ? { rotate: 45, y: 4 } : { rotate: 0, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="block h-0.5 w-5 rounded-full bg-current"
-            aria-hidden
-          />
-          <motion.span
-            animate={open ? { rotate: -45, y: -4 } : { rotate: 0, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="block h-0.5 w-5 rounded-full bg-current"
-            aria-hidden
-          />
-        </button>
-      </nav>
-
-      {/* Dynamic purple scroll progress indicator */}
-      <motion.div
-        style={{ scaleX: scrollYProgress, transformOrigin: "0%" }}
-        className="h-0.5 w-full bg-brand shadow-[0_0_8px_rgba(173,92,255,0.6)]"
-        aria-hidden
-      />
-
-      <AnimatePresence>
-        {open ? (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="overflow-hidden border-t border-line bg-ink/95 backdrop-blur-xl lg:hidden"
-          >
-            <ul className="divide-y divide-line/60 px-5 py-3">
-              {NAV_LINKS.map((link, i) => {
+          {/* Desktop Nav Links */}
+          <LayoutGroup id="desktop-nav">
+            <ul
+              onMouseLeave={() => setHoveredLabel(null)}
+              className="hidden items-center gap-1 lg:flex"
+            >
+              {NAV_LINKS.map((link) => {
                 const active = isLinkActive(link.href);
+                const isHovered = hoveredLabel === link.label;
+
                 return (
-                  <motion.li
-                    key={link.label}
-                    initial={reduce ? false : { opacity: 0, x: -12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.2, delay: reduce ? 0 : 0.04 * i }}
-                  >
+                  <li key={link.label} className="relative">
                     <Link
                       href={link.href}
+                      onMouseEnter={() => setHoveredLabel(link.label)}
                       onClick={() => {
                         if (link.href === "/") {
                           scrollToSection("home");
                         } else if (link.href === "/#about") {
                           scrollToSection("about");
                         }
-                        close();
                       }}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex items-center justify-between py-3.5 text-base transition-colors",
+                        "relative inline-flex min-h-[36px] items-center px-4 py-1 text-[13px] font-medium transition-colors duration-200",
                         active
-                          ? "font-semibold text-brand"
-                          : "font-medium text-fog hover:text-cream"
+                          ? "text-cream"
+                          : "text-faint hover:text-cream"
                       )}
                     >
-                      <span>{link.label}</span>
-                      {active && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-brand shadow-[0_0_8px_rgba(173,92,255,0.9)]" />
+                      {/* Hover underline */}
+                      {isHovered && !active && (
+                        <motion.span
+                          layoutId="nav-indicator"
+                          className="absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-white/20"
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                          aria-hidden
+                        />
                       )}
+
+                      {/* Active indicator — glowing purple underline */}
+                      {active && (
+                        <motion.span
+                          layoutId="nav-indicator"
+                          className="absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-brand shadow-[0_0_8px_rgba(173,92,255,0.6)]"
+                          transition={activeSpring}
+                          aria-hidden
+                        />
+                      )}
+
+                      <span className="relative z-10">{link.label}</span>
                     </Link>
-                  </motion.li>
+                  </li>
                 );
               })}
-              <motion.li
-                initial={reduce ? false : { opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.2, delay: reduce ? 0 : 0.04 * NAV_LINKS.length }}
-                className="py-3.5"
-              >
-                <Link
-                  href="/events/aws-student-community-day-suiit-2026"
-                  onClick={close}
-                  className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-brand"
-                >
-                  <span className="h-2 w-2 rounded-full bg-brand shadow-[0_0_6px_rgba(173,92,255,0.9)]" />
-                  Community Day, Oct 3 — register
-                </Link>
-              </motion.li>
-              <li className="py-4">
-                <motion.a
-                  href={SITE.links.join}
-                  onClick={close}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileTap={reduce ? undefined : { scale: 0.98 }}
-                  className="flex min-h-[48px] items-center justify-center rounded-full bg-brand px-5 py-3 text-sm font-semibold text-black shadow-[0_0_20px_rgba(173,92,255,0.35)]"
-                >
-                  Join
-                </motion.a>
-              </li>
             </ul>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-    </header>
+          </LayoutGroup>
+
+          {/* Desktop Right Actions */}
+          <div className="hidden items-center gap-3 lg:flex">
+            <motion.a
+              href={SITE.links.join}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={reduce ? undefined : { scale: 1.03 }}
+              whileTap={reduce ? undefined : { scale: 0.97 }}
+              className="inline-flex min-h-[36px] items-center rounded-full bg-gradient-to-r from-brand to-purple-500 px-5 py-1.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(173,92,255,0.3)] transition-shadow duration-200 hover:shadow-[0_0_28px_rgba(173,92,255,0.5)]"
+            >
+              Join us
+            </motion.a>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-[5px] rounded-xl border border-white/[0.08] bg-white/[0.03] text-cream transition-colors hover:border-brand/30 hover:bg-brand/5 lg:hidden"
+            aria-expanded={open}
+            aria-label={open ? "Close menu" : "Open menu"}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <motion.span
+              animate={open ? { rotate: 45, y: 3.5 } : { rotate: 0, y: 0 }}
+              transition={{ duration: 0.2 }}
+              className="block h-[1.5px] w-[18px] rounded-full bg-current"
+              aria-hidden
+            />
+            <motion.span
+              animate={open ? { rotate: -45, y: -3.5 } : { rotate: 0, y: 0 }}
+              transition={{ duration: 0.2 }}
+              className="block h-[1.5px] w-[18px] rounded-full bg-current"
+              aria-hidden
+            />
+          </button>
+        </nav>
+
+        {/* Scroll Progress */}
+        <motion.div
+          style={{ scaleX: scrollYProgress, transformOrigin: "0%" }}
+          className="h-[2px] w-full bg-gradient-to-r from-brand via-purple-400 to-brand shadow-[0_0_12px_rgba(173,92,255,0.6)]"
+          aria-hidden
+        />
+
+        {/* ─── Mobile Drawer ─── */}
+        <AnimatePresence>
+          {open ? (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="overflow-hidden border-t border-white/[0.06] bg-ink/95 backdrop-blur-2xl lg:hidden"
+            >
+              <div className="px-5 py-4">
+                <ul className="space-y-1">
+                  {NAV_LINKS.map((link, i) => {
+                    const active = isLinkActive(link.href);
+                    return (
+                      <motion.li
+                        key={link.label}
+                        initial={reduce ? false : { opacity: 0, x: -16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.2, delay: reduce ? 0 : 0.04 * i }}
+                      >
+                        <Link
+                          href={link.href}
+                          onClick={() => {
+                            if (link.href === "/") {
+                              scrollToSection("home");
+                            } else if (link.href === "/#about") {
+                              scrollToSection("about");
+                            }
+                            close();
+                          }}
+                          aria-current={active ? "page" : undefined}
+                          className={cn(
+                            "flex items-center gap-3 rounded-xl px-4 py-3 text-[15px] transition-all",
+                            active
+                              ? "bg-gradient-to-r from-brand/15 to-purple-500/10 font-semibold text-cream shadow-[inset_0_0_0_1px_rgba(173,92,255,0.2)]"
+                              : "font-medium text-fog hover:bg-white/[0.04] hover:text-cream"
+                          )}
+                        >
+                          {active && (
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand shadow-[0_0_8px_rgba(173,92,255,0.9)]" />
+                          )}
+                          <span>{link.label}</span>
+                        </Link>
+                      </motion.li>
+                    );
+                  })}
+                </ul>
+
+                {/* Mobile CTA section */}
+                <motion.div
+                  initial={reduce ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: reduce ? 0 : 0.2 }}
+                  className="mt-4 space-y-3 border-t border-white/[0.06] pt-4"
+                >
+                  <Link
+                    href="/events/aws-student-community-day-suiit-2026"
+                    onClick={close}
+                    className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-brand/10 to-purple-500/5 px-4 py-3 text-sm font-medium text-cream shadow-[inset_0_0_0_1px_rgba(173,92,255,0.15)] transition-all hover:from-brand/15 hover:to-purple-500/10"
+                  >
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+                    </span>
+                    Community Day — Oct 3
+                  </Link>
+
+                  <motion.a
+                    href={SITE.links.join}
+                    onClick={close}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileTap={reduce ? undefined : { scale: 0.98 }}
+                    className="flex min-h-[48px] items-center justify-center rounded-xl bg-gradient-to-r from-brand to-purple-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_0_24px_rgba(173,92,255,0.3)]"
+                  >
+                    Join the community
+                  </motion.a>
+                </motion.div>
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </header>
+    </>
   );
 }

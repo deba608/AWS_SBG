@@ -25,22 +25,21 @@ export default function EventsExplorer() {
         {filter !== "All" ? ` in ${filter}` : ""}
       </p>
       {events.length > 0 ? (
-        <motion.div layout={!reduce} className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          <AnimatePresence mode="popLayout">
+        <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <AnimatePresence mode="wait">
             {events.map((event) => (
               <motion.div
                 key={event.id}
-                layout={!reduce}
-                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
+                initial={reduce ? false : { opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.97 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+                exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
               >
                 <EventCard event={event} />
               </motion.div>
             ))}
           </AnimatePresence>
-        </motion.div>
+        </div>
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-line bg-surface/50 p-10 text-center">
           <span className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-coal text-faint">

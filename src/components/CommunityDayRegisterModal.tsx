@@ -132,10 +132,15 @@ export default function CommunityDayRegisterModal({
 
     const contact = normalizedContact({ firstName, lastName, email, mobile });
     // Open a blank tab synchronously inside the click gesture so popup
-    // blockers permit it — it navigates to Meetup only after a save.
+    // blockers permit it — it navigates to Meetup after the save attempt.
     const placeholderTab = window.open("about:blank", "_blank", "noopener");
+    if (!placeholderTab && process.env.NODE_ENV === "development") {
+      console.warn("[SCD] placeholder tab blocked — showing manual Continue button");
+    }
     setStatus("submitting");
 
+    let saveOk = false;
+    let duplicate = false;
     try {
       if (SHEET_URL) {
         const ctrl = new AbortController();
@@ -161,33 +166,54 @@ export default function CommunityDayRegisterModal({
         if (!res.ok || (data?.status !== "ok" && data?.status !== "duplicate")) {
           throw new Error("submit-failed");
         }
-        setIsDuplicate(data?.status === "duplicate");
+        duplicate = data?.status === "duplicate";
+      } else if (process.env.NODE_ENV === "development") {
+        console.warn("[SCD] NEXT_PUBLIC_SCD_SHEET_URL is empty — skipping Sheet save");
       }
-      const stored: StoredRegistration = {
-        ...contact,
-        submitted: true,
-        meetupDone: false,
-      };
-      let opened = false;
-      if (placeholderTab && !placeholderTab.closed) {
+      saveOk = true;
+    } catch (err) {
+      // Save failed (ad-blocker, network, Apps Script hiccup). Details stay
+      // in the form + localStorage for Retry — registration still proceeds.
+      console.error(
+        "[SCD] sheet save failed:",
+        err instanceof Error ? err.message : err
+      );
+      saveOk = false;
+    }
+
+    // Mandatory step wins: Meetup opens whether or not the save worked.
+    let opened = false;
+    if (placeholderTab && !placeholderTab.closed) {
+      try {
         placeholderTab.location.href = SITE.links.eventCommunityDay;
         opened = true;
-        stored.meetupDone = true;
+      } catch {
+        try {
+          placeholderTab.close();
+        } catch {
+          // Tab already gone — manual Continue button covers it.
+        }
+        opened = false;
       }
-      persist(stored);
-      setAutoOpened(opened);
+    }
+
+    const stored: StoredRegistration = {
+      ...contact,
+      // Failed saves stay submitted:false so a reopen shows the prefilled
+      // form (not a false "done") — Retry then appends exactly one row.
+      submitted: saveOk,
+      meetupDone: opened,
+    };
+    persist(stored);
+    setIsDuplicate(duplicate);
+    setAutoOpened(opened);
+    setSuccessName(contact.firstName);
+    if (saveOk) {
       // Meetup RSVP is mandatory — success always lands on the reminder
       // state until the step is confirmed (auto-open or Continue click).
       setAwaitingMeetup(true);
-      setSuccessName(contact.firstName);
       setStatus("success");
-    } catch {
-      try {
-        placeholderTab?.close();
-      } catch {
-        // Tab already gone — nothing to clean up.
-      }
-      persist({ ...contact, submitted: false, meetupDone: false });
+    } else {
       setStatus("error");
     }
   }
@@ -278,8 +304,10 @@ export default function CommunityDayRegisterModal({
           <div className="text-center" role="alert">
             <p className="text-lg font-semibold text-cream">Couldn&apos;t save your details</p>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-fog">
-              Network hiccup — your info is still in the form. Hit Retry to
-              send it again.
+              Network hiccup — your info is still in the form.{" "}
+              {autoOpened
+                ? "We've still opened Meetup in a new tab so you don't lose your spot — come back here and hit Retry."
+                : "Hit Retry to send it again."}
             </p>
             <div className="mt-6 flex flex-col gap-3">
               <button
