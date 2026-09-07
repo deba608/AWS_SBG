@@ -92,7 +92,7 @@ export default function Footer() {
           <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-faint">
             Community
           </h2>
-          <ul className="mt-4 space-y-1 text-sm">
+          <ul className="mt-3 space-y-0 text-sm">
             {communityLinks.map((link) =>
               link.external ? (
                 <li key={link.label}>
@@ -100,7 +100,7 @@ export default function Footer() {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-[44px] items-center gap-1 text-fog transition-colors hover:text-brand"
+                    className="inline-flex min-h-[40px] items-center gap-1 text-fog transition-colors hover:text-brand md:min-h-[44px]"
                   >
                     {link.label}
                     <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
@@ -110,7 +110,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className={`inline-flex min-h-[44px] items-center gap-1.5 transition-colors hover:text-brand ${
+                    className={`inline-flex min-h-[40px] items-center gap-1.5 transition-colors hover:text-brand md:min-h-[44px] ${
                       link.highlight ? "font-semibold text-brand" : "text-fog"
                     }`}
                   >
@@ -125,7 +125,7 @@ export default function Footer() {
             <li>
               <a
                 href={SITE.links.email}
-                className="inline-flex min-h-[44px] items-center text-fog transition-colors [overflow-wrap:anywhere] hover:text-brand"
+                className="inline-flex min-h-[40px] items-center text-fog transition-colors [overflow-wrap:anywhere] hover:text-brand md:min-h-[44px]"
               >
                 {SITE.email}
               </a>
