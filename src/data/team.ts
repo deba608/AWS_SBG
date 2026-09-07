@@ -14,7 +14,7 @@ export const teamLeads: TeamMember[] = [
     id: "pratik-samal",
     name: "Pratik Samal",
     role: "Captain",
-    bio: "Leads the AWS Cloud Club, steering club direction and fostering a culture of cloud-first building.",
+    bio: "Leads the AWS Student Builder Group, steering community direction and fostering a culture of cloud-first building.",
     lead: true,
   },
   {

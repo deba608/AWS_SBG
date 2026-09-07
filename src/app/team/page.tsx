@@ -57,7 +57,7 @@ export default function TeamPage() {
     <div className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
       <Container>
         <SectionHeading
-          eyebrow="AWS Cloud Club Team 2025–26"
+          eyebrow="AWS Student Builder Group Team 2025–26"
           title="Meet the builders behind the community."
           description="36 students across 12 domains — organizing workshops, mentoring newcomers and keeping the projects shipping."
         />
