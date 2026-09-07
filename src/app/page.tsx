@@ -4,7 +4,6 @@ import Container from "@/components/Container";
 import EventCard from "@/components/EventCard";
 import HeroVisual from "@/components/HeroVisual";
 import JoinCTA from "@/components/JoinCTA";
-import StatsSection from "@/components/StatsSection";
 import { upcomingEvents } from "@/data/events";
 import { SITE } from "@/lib/constants";
 
@@ -106,8 +105,6 @@ export default function HomePage() {
           </div>
         </Container>
       </section>
-
-      <StatsSection />
 
       {/* ABOUT */}
       <section aria-labelledby="about-heading" id="about" className="scroll-mt-20 py-16 md:py-24">

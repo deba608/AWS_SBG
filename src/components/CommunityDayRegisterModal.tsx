@@ -128,7 +128,13 @@ export default function CommunityDayRegisterModal({
         const res = await fetch(SHEET_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ ...contact, source: "sbg-site" }),
+          body: JSON.stringify({
+            firstName: contact.firstName,
+            lastName: contact.lastName,
+            email: contact.email,
+            mobile: contact.mobile,
+            source: "sbg-site",
+          }),
           signal: ctrl.signal,
         });
         window.clearTimeout(timer);
@@ -141,7 +147,7 @@ export default function CommunityDayRegisterModal({
         setIsDuplicate(data?.status === "duplicate");
       }
       persist({ ...contact, submitted: true });
-      setSuccessName(contact.name);
+      setSuccessName(contact.firstName);
       setStatus("success");
     } catch {
       persist({ ...contact, submitted: false });
@@ -177,7 +183,7 @@ export default function CommunityDayRegisterModal({
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-fog">
               {isDuplicate
                 ? "We already have your details — no need to fill the form again."
-                : `Thanks${successName ? `, ${successName.split(" ")[0]}` : ""}! Your details are with the organizers.`}{" "}
+                : `Thanks${successName ? `, ${successName}` : ""}! Your details are with the organizers.`}{" "}
               One last step: RSVP on Meetup and show it at entry.
             </p>
             <a

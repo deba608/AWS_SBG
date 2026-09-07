@@ -67,7 +67,7 @@ Clicking **Register** opens an on-site modal (collecting Name, Email, Mobile Num
 
 | Route | Description |
 |---|---|
-| `/` | Landing page featuring hero, community metrics, mission statement, what we do, and quick join actions |
+| `/` | Landing page featuring hero, mission statement, what we do, and quick join actions |
 | `/events` | Community Day spotlight, upcoming events, and past workshop recaps |
 | `/events/aws-student-community-day-suiit-2026` | Dedicated flagship event landing page with live countdown, speaker lineup, schedule, and registration modal |
 | `/team` | Community leadership and core team member profiles |

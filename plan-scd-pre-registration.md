@@ -45,7 +45,7 @@ for reminders + lunch/swag headcount.
 ## 3. UX flow (all Register CTAs → same modal)
 
 1. Click **Register** (hero, sticky card, spotlight, final CTA, navbar) → modal opens.
-2. Form: **Full name** (single field — merge first/middle/last, fewer fields = higher conversion), **Email**, **Mobile (10-digit)**, **consent checkbox** (required, see §5).
+2. Form: **First name**, **Last name**, **Email**, **Mobile (10-digit)**, **consent checkbox** (required, see §5).
 3. Client validation inline → `Submit & Continue` → POST to Sheet endpoint.
 4. Success state inside modal: green check + "You're on our list!" + big
    **Continue to Meetup →** button (explicit click, not auto-`window.open` —
@@ -86,7 +86,7 @@ you are (30 sec) → RSVP on Meetup".
 
 - **Phase 0 — Unbreak (15 min):** add missing `SITE` import to detail page;
   `npx tsc --noEmit`, `npm run lint`, `npm run build` green.
-- **Phase 1 — Form hardening (1 hr):** single full-name field, validation +
+- **Phase 1 — Form hardening (1 hr):** first-name + last-name fields, validation +
   inline errors (`aria-describedby`, `aria-invalid`), consent checkbox,
   skip-link, prefill/"already registered" via `localStorage`, explicit
   Continue-to-Meetup success state (remove auto `window.open`).
