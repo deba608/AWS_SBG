@@ -42,17 +42,37 @@ appends `timestamp, name, email, mobile, source` to a Sheet owned by the lead.
 Meetup stays the source of truth for attendance; the Sheet is the contact list
 for reminders + lunch/swag headcount.
 
-## 3. UX flow (all Register CTAs → same modal)
+## 3. UX flow — Meetup is a mandatory, unskippable step (all Register CTAs → same modal)
+
+> Design decision: no auto-opened tabs (popup-blocker wars, fragile). Instead a
+> 2-step modal with a confirmation gate. Server-side RSVP verification is
+> impossible without Meetup API access, so this is the strongest enforceable UX:
+> the success screen is unreachable until the user passes the Meetup step in
+> this browser. `localStorage` (`scdRegistration`: details + `submitted` +
+> `rsvpConfirmed`) makes the gate survive refresh/close/reopen.
 
 1. Click **Register** (hero, sticky card, spotlight, final CTA, navbar) → modal opens.
-2. Form: **First name**, **Last name**, **Email**, **Mobile (10-digit)**. No consent checkbox, no skip link (removed per organizer request — see §5 note).
-3. Client validation inline → `Submit & Continue` → POST to Sheet endpoint.
-4. Success state inside modal: green check + "You're on our list!" + big
-   **Continue to Meetup →** button (explicit click, not auto-`window.open` —
-   auto-open after `await` gets popup-blocked; explicit click never is).
-5. Cancel button closes the modal (user can re-open from any Register CTA).
-6. Prefill from `localStorage` on return visits; "already registered" state if
-   email/mobile was submitted from this browser.
+   Resume logic: `submitted && rsvpConfirmed` → success screen; `submitted &&
+   !rsvpConfirmed` → Step 2 (Meetup); otherwise Step 1 (form). Old records
+   without the flag migrate to `rsvpConfirmed: false` — everyone confirms.
+2. **Step 1 of 2 — Your details.** Form: **First name**, **Last name**, **Email**,
+   **Mobile (10-digit)**. Inline validation → `Submit & Continue` → POST to Sheet
+   → persist `submitted: true` → advance to Step 2 (NOT to success).
+3. **Step 2 of 2 — RSVP on Meetup (required).** States plainly: entry needs a
+   Meetup RSVP; the form alone reserves nothing. Contents:
+   - **Open Meetup RSVP** button — explicit click → `window.open` in the user
+     gesture (never blocked) + sets `meetupOpened`. Confirm stays disabled until
+     this is clicked at least once per modal open.
+   - Copyable Meetup URL fallback text (manual fallback, no dependency on tabs).
+   - Required checkbox **"I've completed my RSVP on Meetup"** + **Confirm RSVP**
+     button (disabled until checkbox AND Meetup opened) → persist
+     `rsvpConfirmed: true` → Step 3.
+   - **Back to details** link (edits return to Step 1; must re-submit — never a skip).
+4. **Step 3 — Registered.** Reachable ONLY via Confirm. Checklist: details saved ✓,
+   Meetup RSVP confirmed ✓, plus "show RSVP + college ID at entry".
+5. Cancel/close any time (never trapped); reopening resumes at the furthest
+   incomplete step. Prefill from `localStorage`; duplicates skip re-submit but
+   must still pass the Meetup confirm gate.
 
 New step 0 wording on the detail page (`COMMUNITY_DAY_STEPS[0]`): "Tell us who
 you are (30 sec) → RSVP on Meetup".
@@ -102,10 +122,16 @@ you are (30 sec) → RSVP on Meetup".
 ## 7. Acceptance checklist
 
 - [ ] `tsc`, `lint` (0 errors), `build` green; new route still prerenders
-- [ ] Submit with valid data → row appears in Sheet (< 10 s) → success state → Continue opens Meetup in new tab
+- [ ] Submit with valid data → row appears in Sheet (< 10 s) → lands on Step 2 (Meetup), NOT success
+- [ ] Step 2: Confirm disabled until Meetup opened + checkbox checked; no skip path exists
+- [ ] Close modal on Step 2 without confirming → reopen lands on Step 2, never success
+- [ ] Confirm → success screen with details-saved + RSVP-confirmed checklist
+- [ ] Reopen after full completion → success screen directly
+- [ ] Old stored records (no flag) → forced through Step 2 confirm on next open
 - [ ] Duplicate email/mobile → "already on the list" + Meetup button, no double row
 - [ ] Offline/submit-fail → error + retry (Cancel closes modal; user never stuck)
-- [ ] Popup-blocker on → flow still works (explicit Continue click, no auto-open)
+- [ ] Flow works with popup-blockers on (only explicit user-gesture opens, no auto-open)
+- [ ] Mobile 360px: steps, checkbox, copy fallback all usable; keyboard + screen-reader pass
 - [ ] Invalid mobile (`123`, `+91` + 9 digits) blocked inline with message
 - [ ] No PII in code/logs/localStorage beyond prefill; Sheet shared with leads only
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import Modal from "@/components/Modal";
 import { SITE } from "@/lib/constants";
 import {
@@ -21,6 +21,8 @@ interface StoredRegistration {
   email: string;
   mobile: string;
   submitted: boolean;
+  /** True once Meetup was opened/clicked from this browser. */
+  meetupDone: boolean;
 }
 
 function readStored(): StoredRegistration | null {
@@ -38,9 +40,10 @@ function readStored(): StoredRegistration | null {
         email: parsed.email ?? "",
         mobile: parsed.mobile ?? "",
         submitted: Boolean(parsed.submitted),
+        meetupDone: false,
       };
     }
-    return parsed as StoredRegistration;
+    return { ...parsed, meetupDone: Boolean(parsed.meetupDone) };
   } catch {
     return null;
   }
@@ -75,6 +78,10 @@ export default function CommunityDayRegisterModal({
   const [status, setStatus] = useState<Status>("form");
   const [isDuplicate, setIsDuplicate] = useState(false);
   const [successName, setSuccessName] = useState("");
+  /** Success shown but Meetup step not yet confirmed from this browser. */
+  const [awaitingMeetup, setAwaitingMeetup] = useState(false);
+  /** Meetup tab was auto-opened right after this session's save. */
+  const [autoOpened, setAutoOpened] = useState(false);
 
   const openModal = () => {
     const stored = readStored();
@@ -84,9 +91,12 @@ export default function CommunityDayRegisterModal({
       setEmail(stored.email);
       setMobile(stored.mobile);
       if (stored.submitted) {
-        // Already gave details from this browser — straight to success state.
+        // Details already given from this browser — resume at the mandatory
+        // Meetup step unless it was completed here before.
         setSuccessName(stored.firstName);
-        setIsDuplicate(true);
+        setIsDuplicate(false);
+        setAwaitingMeetup(!stored.meetupDone);
+        setAutoOpened(false);
         setStatus("success");
       } else {
         setStatus("form");
@@ -103,7 +113,16 @@ export default function CommunityDayRegisterModal({
     // Reset transient states so a fresh open starts clean (fields reprefill).
     setStatus("form");
     setIsDuplicate(false);
+    setAwaitingMeetup(false);
+    setAutoOpened(false);
     setErrors({});
+  };
+
+  /** User confirmed the Meetup step — persist so reminders stop. */
+  const markMeetupDone = () => {
+    const stored = readStored();
+    if (stored) persist({ ...stored, meetupDone: true });
+    setAwaitingMeetup(false);
   };
 
   async function submit() {
@@ -112,6 +131,9 @@ export default function CommunityDayRegisterModal({
     if (Object.keys(fieldErrors).length > 0) return;
 
     const contact = normalizedContact({ firstName, lastName, email, mobile });
+    // Open a blank tab synchronously inside the click gesture so popup
+    // blockers permit it — it navigates to Meetup only after a save.
+    const placeholderTab = window.open("about:blank", "_blank", "noopener");
     setStatus("submitting");
 
     try {
@@ -141,14 +163,36 @@ export default function CommunityDayRegisterModal({
         }
         setIsDuplicate(data?.status === "duplicate");
       }
-      persist({ ...contact, submitted: true });
+      const stored: StoredRegistration = {
+        ...contact,
+        submitted: true,
+        meetupDone: false,
+      };
+      let opened = false;
+      if (placeholderTab && !placeholderTab.closed) {
+        placeholderTab.location.href = SITE.links.eventCommunityDay;
+        opened = true;
+        stored.meetupDone = true;
+      }
+      persist(stored);
+      setAutoOpened(opened);
+      // Meetup RSVP is mandatory — success always lands on the reminder
+      // state until the step is confirmed (auto-open or Continue click).
+      setAwaitingMeetup(true);
       setSuccessName(contact.firstName);
       setStatus("success");
     } catch {
-      persist({ ...contact, submitted: false });
+      try {
+        placeholderTab?.close();
+      } catch {
+        // Tab already gone — nothing to clean up.
+      }
+      persist({ ...contact, submitted: false, meetupDone: false });
       setStatus("error");
     }
   }
+
+  const greeting = successName ? `, ${successName}` : "";
 
   return (
     <>
@@ -171,23 +215,59 @@ export default function CommunityDayRegisterModal({
       <Modal open={open} onClose={close} title="Register for Community Day">
         {status === "success" ? (
           <div className="text-center">
-            <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-400" aria-hidden />
+            {awaitingMeetup ? (
+              <AlertTriangle className="mx-auto h-12 w-12 text-brand" aria-hidden />
+            ) : (
+              <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-400" aria-hidden />
+            )}
             <p className="mt-4 text-lg font-semibold text-cream">
-              {isDuplicate ? "You're already on the list!" : "You're on the list!"}
+              {awaitingMeetup ? "One step left — mandatory!" : "You're fully registered!"}
             </p>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-fog">
-              {isDuplicate
-                ? "We already have your details — no need to fill the form again."
-                : `Thanks${successName ? `, ${successName}` : ""}! Your details are with the organizers.`}{" "}
-              One last step: RSVP on Meetup and show it at entry.
+              {awaitingMeetup ? (
+                autoOpened ? (
+                  <>
+                    Thanks{greeting}! Details saved.{" "}
+                    <strong className="text-cream">
+                      We&apos;ve opened Meetup in a new tab — hit Attend there
+                      now.
+                    </strong>{" "}
+                    The form alone does NOT reserve your seat.
+                  </>
+                ) : (
+                  <>
+                    Thanks{greeting}! Details saved.{" "}
+                    <strong className="text-cream">
+                      RSVP on Meetup is mandatory — without it you don&apos;t
+                      have a seat.
+                    </strong>{" "}
+                    Your browser blocked the auto-open, so tap below.
+                  </>
+                )
+              ) : isDuplicate ? (
+                <>
+                  We already had your details{greeting} — and Meetup was opened
+                  from this browser before. Just make sure you hit{" "}
+                  <strong className="text-cream">Attend</strong> on Meetup. See
+                  you Oct 3!
+                </>
+              ) : (
+                <>
+                  Thanks{greeting}! Details saved and Meetup opened. Just make
+                  sure you hit <strong className="text-cream">Attend</strong>{" "}
+                  there. See you Oct 3!
+                </>
+              )}
             </p>
             <a
               href={SITE.links.eventCommunityDay}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={markMeetupDone}
+              autoFocus={awaitingMeetup}
               className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-brandhover"
             >
-              Continue to Meetup
+              {awaitingMeetup ? "RSVP on Meetup now — required" : "Open Meetup again"}
               <ArrowRight className="h-4 w-4" aria-hidden />
             </a>
             <p className="mt-3 text-xs text-faint">
@@ -222,7 +302,8 @@ export default function CommunityDayRegisterModal({
           >
             <p className="text-sm leading-relaxed text-fog">
               Takes 30 seconds — we use this for headcount, lunch/swag and event
-              updates. Then you RSVP on Meetup.
+              updates. Then RSVP on Meetup is <strong className="text-cream">mandatory</strong> —
+              the form alone doesn&apos;t reserve your seat.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
