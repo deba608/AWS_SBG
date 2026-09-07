@@ -4,7 +4,7 @@ import Container from "@/components/Container";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import TeamCard from "@/components/TeamCard";
-import { coreTeam, teamLeads } from "@/data/team";
+import { teamLeads, domainLeads, opsTeam, coordinators } from "@/data/team";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -12,54 +12,83 @@ export const metadata: Metadata = {
   description: `Meet the student builders running the ${SITE.name} at ${SITE.collegeName}.`,
 };
 
+function TeamSection({
+  id,
+  title,
+  members,
+  cols = 2,
+  large = false,
+}: {
+  id: string;
+  title: string;
+  members: typeof teamLeads;
+  cols?: 1 | 2;
+  large?: boolean;
+}) {
+  return (
+    <section aria-labelledby={id}>
+      <h2
+        id={id}
+        className="text-xl font-bold text-cream md:text-2xl"
+      >
+        {title}
+      </h2>
+      <ul
+        className={
+          cols === 2
+            ? "mt-4 grid gap-x-10 border-t border-line sm:grid-cols-2"
+            : "mt-4 border-t border-line"
+        }
+      >
+        {members.map((member, i) => (
+          <li key={member.id} className="min-w-0 border-b border-line">
+            <Reveal delay={Math.min(i * 0.05, 0.25)}>
+              <TeamCard member={member} large={large} />
+            </Reveal>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export default function TeamPage() {
   return (
     <div className="pb-16 pt-10 md:pb-24 md:pt-14">
       <Container>
         <SectionHeading
-          eyebrow="The people running the community"
+          eyebrow="AWS Cloud Club Team 2025–26"
           title="Meet the builders behind the community."
-          description="Students who organize workshops, mentor newcomers and keep the projects shipping."
+          description="36 students across 12 domains — organizing workshops, mentoring newcomers and keeping the projects shipping."
         />
 
-        <section aria-labelledby="leadership">
-          <h2
+        <div className="space-y-14 md:space-y-20">
+          <TeamSection
             id="leadership"
-            className="text-xl font-bold text-cream md:text-2xl"
-          >
-            Community leadership
-          </h2>
-          <ul className="mt-4 border-t border-line">
-            {teamLeads.map((member, i) => (
-              <li key={member.id} className="min-w-0 border-b border-line">
-                <Reveal delay={Math.min(i * 0.07, 0.21)}>
-                  <TeamCard member={member} large />
-                </Reveal>
-              </li>
-            ))}
-          </ul>
-        </section>
+            title="Leadership"
+            members={teamLeads}
+            cols={1}
+            large
+          />
 
-        <section aria-labelledby="core-team" className="mt-14 md:mt-20">
-          <h2
-            id="core-team"
-            className="text-xl font-bold text-cream md:text-2xl"
-          >
-            Core team
-          </h2>
-          <ul className="mt-4 grid gap-x-10 border-t border-line sm:grid-cols-2">
-            {coreTeam.map((member, i) => (
-              <li
-                key={member.id}
-                className="min-w-0 border-b border-line"
-              >
-                <Reveal delay={Math.min(i * 0.05, 0.25)}>
-                  <TeamCard member={member} />
-                </Reveal>
-              </li>
-            ))}
-          </ul>
-        </section>
+          <TeamSection
+            id="domain-leads"
+            title="Domain leads"
+            members={domainLeads}
+          />
+
+          <TeamSection
+            id="ops-team"
+            title="Events, PR & media"
+            members={opsTeam}
+          />
+
+          <TeamSection
+            id="coordinators"
+            title="Co-ordinators"
+            members={coordinators}
+          />
+        </div>
 
         <Reveal className="mt-14">
           <div className="flex flex-col gap-4 border-y border-line py-8 sm:flex-row sm:items-center sm:justify-between">

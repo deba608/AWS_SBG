@@ -68,7 +68,7 @@ export default function HomePage() {
           <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
             <div>
               <p className="text-sm text-faint">
-                {SITE.name}, {SITE.collegeName}
+                {SITE.name}, <span className="md:hidden">{SITE.collegeShortName}</span><span className="hidden md:inline">{SITE.collegeName}</span>
               </p>
               <h1
                 id="hero-heading"

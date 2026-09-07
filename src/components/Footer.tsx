@@ -27,7 +27,8 @@ export default function Footer() {
                 AWS Student Builder Group
               </span>
               <span className="block text-xs font-normal text-faint">
-                {SITE.collegeName}
+                <span className="md:hidden">{SITE.collegeShortName}</span>
+                <span className="hidden md:inline">{SITE.collegeName}</span>
               </span>
             </span>
           </div>
@@ -94,7 +95,7 @@ export default function Footer() {
       </div>
       <div className="relative border-t border-line">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-5 py-5 text-xs text-faint sm:flex-row sm:items-center sm:justify-between md:px-8">
-          <p>© 2026 AWS Student Builder Group, {SITE.collegeName}</p>
+          <p>© 2026 AWS Student Builder Group, <span className="md:hidden">{SITE.collegeShortName}</span><span className="hidden md:inline">{SITE.collegeName}</span></p>
           <p>Learn, build, deploy, and connect.</p>
         </div>
       </div>

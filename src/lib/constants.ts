@@ -2,6 +2,7 @@ export const SITE = {
   name: "AWS Student Builder Group",
   shortName: "AWS SBG",
   collegeName: "Sambalpur University Institute of Information Technology",
+  collegeShortName: "SUIIT",
   tagline: "Learn → Build → Deploy → Connect",
   description:
     "A student-led community where builders come together to explore cloud computing, AWS, AI, DevOps and modern technologies through hands-on learning and real-world projects.",
@@ -18,8 +19,8 @@ export const SITE = {
     eventCommunityDay:
       "https://meetu.ps/e/Qgc6f/1fcHtj/i?utm_source=sbg-site&utm_medium=event-page&utm_campaign=scd-2026",
   },
-  communityLead: "[COMMUNITY LEAD]",
-  technicalLead: "[TECHNICAL LEAD]",
+  communityLead: "Pratik Samal",
+  technicalLead: "Manas Ranjan Diskhit",
 } as const;
 
 export const NAV_LINKS = [

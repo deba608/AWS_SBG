@@ -146,7 +146,8 @@ export default function Navbar() {
               AWS Student Builder Group
             </span>
             <span className="block text-xs font-normal text-faint transition-colors group-hover:text-fog">
-              {SITE.collegeName}
+              <span className="md:hidden">{SITE.collegeShortName}</span>
+              <span className="hidden md:inline">{SITE.collegeName}</span>
             </span>
           </span>
         </Link>
