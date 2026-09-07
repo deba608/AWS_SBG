@@ -37,8 +37,8 @@ export default function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-line bg-coal">
       <div className="glow-brand pointer-events-none absolute -top-32 left-1/2 h-64 w-[42rem] -translate-x-1/2" aria-hidden />
-      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-5 py-12 sm:grid-cols-2 sm:gap-10 md:grid-cols-[1.4fr_1fr_1fr] md:px-8 md:py-16">
-        <div className="min-w-0 sm:col-span-2 md:col-span-1">
+      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-2 gap-x-6 gap-y-8 px-5 py-8 sm:gap-10 md:grid-cols-[1.4fr_1fr_1fr] md:px-8 md:py-16">
+        <div className="col-span-2 min-w-0 md:col-span-1">
           <div className="flex min-h-[44px] items-center gap-3">
             <Logo />
             <span className="leading-snug">
@@ -51,10 +51,10 @@ export default function Footer() {
               </span>
             </span>
           </div>
-          <p className="mt-4 max-w-[60ch] text-sm leading-relaxed text-fog">
+          <p className="mt-3 max-w-[60ch] text-sm leading-relaxed text-fog">
             {SITE.description}
           </p>
-          <div className="mt-5 flex flex-wrap items-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             {socials.map(({ label, href, Icon }) => (
               <a
                 key={label}
@@ -74,12 +74,12 @@ export default function Footer() {
           <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-faint">
             Explore
           </h2>
-          <ul className="mt-4 space-y-1">
+          <ul className="mt-3 space-y-0">
             {NAV_LINKS.map((link) => (
               <li key={link.label}>
                 <Link
                   href={link.href}
-                  className="inline-flex min-h-[44px] items-center text-sm text-fog transition-colors hover:text-brand"
+                  className="inline-flex min-h-[40px] items-center text-sm text-fog transition-colors hover:text-brand md:min-h-[44px]"
                 >
                   {link.label}
                 </Link>

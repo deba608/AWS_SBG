@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SITE } from "@/lib/constants";
 import type { EventItem } from "@/data/events";
 import { cn } from "@/lib/utils";
+import CommunityDayRegisterModal from "./CommunityDayRegisterModal";
 
 const MONTHS = [
   "January",
@@ -97,16 +98,23 @@ export default function EventCard({
             />
             {status.label}
           </p>
-          <a
-            href={event.registerUrl ?? SITE.links.eventDefault}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Register for ${event.title}`}
-            className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-cream underline decoration-brand/60 underline-offset-4 transition-colors hover:decoration-cream"
-          >
-            Register
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </a>
+          {event.id === "aws-student-community-day-suiit-2026" ? (
+            <CommunityDayRegisterModal className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-cream underline decoration-brand/60 underline-offset-4 transition-colors hover:decoration-cream">
+              Register
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </CommunityDayRegisterModal>
+          ) : (
+            <a
+              href={event.registerUrl ?? SITE.links.eventDefault}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Register for ${event.title}`}
+              className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-cream underline decoration-brand/60 underline-offset-4 transition-colors hover:decoration-cream"
+            >
+              Register
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </a>
+          )}
           {event.detailsUrl ? (
             <Link
               href={event.detailsUrl}
