@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, LayoutGroup, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion, useScroll } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { Logo } from "./icons";
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<"home" | "about">("home");
   const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
@@ -17,7 +16,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll();
-const bg = useTransform(scrollYProgress, [0, 0.5, 1], ["rgba(0,0,0,0)", "rgba(173,92,255,0.2)", "rgba(173,92,255,0.5)"]);
 
   // Smooth constant spring physics for fluid tab sliding
   const activeSpring = reduce
@@ -29,16 +27,6 @@ const bg = useTransform(scrollYProgress, [0, 0.5, 1], ["rgba(0,0,0,0)", "rgba(17
         mass: 0.7,
       };
 
-  // Header background blur on scroll
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    const raf = requestAnimationFrame(onScroll);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
 
   // Section observer & scrollspy on home page: cleanly toggles Home vs About
   useEffect(() => {
@@ -134,21 +122,14 @@ const bg = useTransform(scrollYProgress, [0, 0.5, 1], ["rgba(0,0,0,0)", "rgba(17
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 relative transition-all duration-300",
-        scrolled
-          ? "border-b border-line/80 bg-ink/90 shadow-[0_8px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl"
-          : "border-b border-white/[0.04] bg-ink/60 backdrop-blur-md"
+        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
+        "border-b border-line/80 bg-ink/90 shadow-[0_8px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl h-14"
       )}
     >
-      <motion.div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: bg }}
-      />
       <nav
         aria-label="Primary"
         className={cn(
-          "mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 transition-all duration-300 md:px-8",
-          scrolled ? "h-14" : "h-16"
+          "mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 transition-all duration-300 md:px-8 h-14"
         )}
       >
         <Link
@@ -157,7 +138,7 @@ const bg = useTransform(scrollYProgress, [0, 0.5, 1], ["rgba(0,0,0,0)", "rgba(17
           className="group flex min-h-[44px] items-center gap-3"
           aria-label="AWS Student Builder Group — home"
         >
-          <motion.span whileHover={{ rotate: 5, scale: 1.05 }} className="transition-all duration-300 group-hover:scale-105 group-hover:-rotate-3 drop-shadow-[0_0_10px_rgba(173,92,255,0.35)] group-hover:drop-shadow-[0_0_18px_rgba(173,92,255,0.7)]">
+          <motion.span whileHover={reduce ? undefined : { rotate: 5, scale: 1.05 }} className="transition-all duration-300 drop-shadow-[0_0_10px_rgba(173,92,255,0.35)]" aria-hidden>
             <Logo priority />
           </motion.span>
           <span className="leading-snug">
@@ -247,7 +228,7 @@ const bg = useTransform(scrollYProgress, [0, 0.5, 1], ["rgba(0,0,0,0)", "rgba(17
             rel="noopener noreferrer"
             whileHover={reduce ? undefined : { scale: 1.03 }}
             whileTap={reduce ? undefined : { scale: 0.97 }}
-            className="inline-flex min-h-[38px] items-center rounded-full bg-gradient-to-r from-brand to-[#9333ea] px-5 py-2 text-sm font-semibold text-white shadow-[0_0_18px_rgba(173,92,255,0.35)] transition-all duration-200 hover:shadow-[0_0_26px_rgba(173,92,255,0.6)] hover:brightness-110 active:brightness-95"
+            className="inline-flex min-h-[38px] items-center rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white shadow-[0_0_18px_rgba(173,92,255,0.35)] transition-all duration-200 hover:shadow-[0_0_26px_rgba(173,92,255,0.6)] hover:brightness-110 active:brightness-95"
           >
             Join
           </motion.a>
@@ -278,7 +259,7 @@ const bg = useTransform(scrollYProgress, [0, 0.5, 1], ["rgba(0,0,0,0)", "rgba(17
       {/* Dynamic purple scroll progress indicator */}
       <motion.div
         style={{ scaleX: scrollYProgress, transformOrigin: "0%" }}
-        className="h-0.5 w-full bg-gradient-to-r from-[#ad5cff] via-[#c084fc] to-[#e879f9] shadow-[0_0_8px_rgba(173,92,255,0.6)]"
+        className="h-0.5 w-full bg-brand shadow-[0_0_8px_rgba(173,92,255,0.6)]"
         aria-hidden
       />
 
@@ -349,7 +330,7 @@ const bg = useTransform(scrollYProgress, [0, 0.5, 1], ["rgba(0,0,0,0)", "rgba(17
                   target="_blank"
                   rel="noopener noreferrer"
                   whileTap={reduce ? undefined : { scale: 0.98 }}
-                  className="flex min-h-[48px] items-center justify-center rounded-full bg-gradient-to-r from-brand to-[#9333ea] px-5 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(173,92,255,0.35)]"
+                  className="flex min-h-[48px] items-center justify-center rounded-full bg-brand px-5 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(173,92,255,0.35)]"
                 >
                   Join
                 </motion.a>

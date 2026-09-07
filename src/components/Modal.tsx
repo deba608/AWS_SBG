@@ -45,7 +45,7 @@ export default function Modal({
             aria-label={title}
             onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="rank-panel w-full max-w-lg p-6 md:p-8"
@@ -53,6 +53,7 @@ export default function Modal({
             <div className="mb-4 flex items-start justify-between gap-4">
               <h3 className="text-xl font-bold text-cream">{title}</h3>
               <button
+                type="button"
                 onClick={onClose}
                 aria-label="Close dialog"
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line text-fog transition-colors hover:border-white/20 hover:text-cream"

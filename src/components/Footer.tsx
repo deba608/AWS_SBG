@@ -92,11 +92,6 @@ export default function Footer() {
           </ul>
         </div>
       </div>
-      <div aria-hidden className="pointer-events-none select-none overflow-hidden">
-        <p className="-mb-5 text-center text-[19vw] font-semibold leading-[0.85] tracking-tight text-white/[0.025] md:-mb-8 md:text-[11rem]">
-          Builders
-        </p>
-      </div>
       <div className="relative border-t border-line">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-5 py-5 text-xs text-faint sm:flex-row sm:items-center sm:justify-between md:px-8">
           <p>© 2026 AWS Student Builder Group, {SITE.collegeName}</p>

@@ -72,9 +72,10 @@ primary CTA `0 2px 18px rgba(173,92,255,.35)`.
 
 ## 5. Page specs
 
-- **Home:** Hero (copy left, terminal + floating chips right) → tech marquee →
-  stat strip → About `01` (4 cards) → What We Do `02` on coal (6 cards) →
-  Journey rail `03` → Upcoming `04` on coal → Join CTA.
+- **Home (clean):** Hero → stat strip → About → Upcoming → Join CTA.
+  Formats index, Journey rail, tech marquee, and hero promo line removed as
+  redundant; dead components (Journey, TechMarquee, FeatureCard, StatCard)
+  deleted. Modal is kept — it backs the Community Day register dialog.
 - **Events:** heading → filter tabs (active = purple pill) → cards with date
   blocks → Past Events on muted coal cards with recap links.
 - **Team:** leadership (large cards, gradient-ring avatars) → core grid →

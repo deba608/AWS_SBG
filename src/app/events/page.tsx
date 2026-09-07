@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { ArrowRight } from "lucide-react";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
 import EventsExplorer from "@/components/EventsExplorer";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
-import { pastEvents } from "@/data/events";
 import { COMMUNITY_DAY_META } from "@/data/community-day";
+import CommunityDayRegisterModal from "@/components/CommunityDayRegisterModal";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -62,10 +61,7 @@ export default function EventsPage() {
               </div>
             </dl>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Button href={SITE.links.eventCommunityDay} external>
-                Register on Meetup
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </Button>
+              <CommunityDayRegisterModal />
               <Button
                 href="/events/aws-student-community-day-suiit-2026"
                 variant="secondary"
@@ -77,42 +73,6 @@ export default function EventsPage() {
         </Reveal>
         <EventsExplorer />
 
-        <section aria-labelledby="past-events" className="mt-20 md:mt-28">
-          <h2
-            id="past-events"
-            className="text-2xl font-bold tracking-tight text-cream md:text-3xl"
-          >
-            Past events
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-fog md:text-base">
-            An archive of recent sessions and what each one shipped.
-          </p>
-          <ul className="mt-8 border-t border-line">
-            {pastEvents.map((event) => (
-              <li
-                key={event.id}
-                className="min-w-0 border-b border-line py-5"
-              >
-                <p className="text-sm text-faint">{event.date}</p>
-                <h3 className="mt-1 text-base font-semibold text-cream [overflow-wrap:anywhere]">
-                  {event.title}
-                </h3>
-                <p className="mt-1 max-w-prose text-sm leading-relaxed text-fog [overflow-wrap:anywhere]">
-                  {event.summary}
-                </p>
-                <a
-                  href={SITE.links.eventDefault}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`View recap for ${event.title}`}
-                  className="mt-1 inline-flex min-h-[44px] items-center text-sm text-fog underline decoration-line underline-offset-4 transition-colors hover:text-cream hover:decoration-cream"
-                >
-                  View recap
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
       </Container>
     </div>
   );

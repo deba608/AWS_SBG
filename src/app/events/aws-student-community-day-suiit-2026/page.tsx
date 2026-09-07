@@ -32,6 +32,7 @@ import {
 } from "@/data/community-day";
 import { upcomingEvents } from "@/data/events";
 import { SITE } from "@/lib/constants";
+import CommunityDayRegisterModal from "@/components/CommunityDayRegisterModal";
 
 export const metadata: Metadata = {
   title: "AWS Student Community Day SUIIT 2026 — Oct 3",
@@ -148,10 +149,7 @@ export default function CommunityDayPage() {
                 </div>
               </dl>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button href={SITE.links.eventCommunityDay} external>
-                  Register on Meetup — Free
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </Button>
+                <CommunityDayRegisterModal />
                 <Button href="#agenda" variant="secondary">
                   View agenda
                 </Button>
@@ -184,18 +182,12 @@ export default function CommunityDayPage() {
                     </li>
                   ))}
                 </ol>
-                <a
-                  href={SITE.links.eventCommunityDay}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Register for AWS Student Community Day on Meetup"
-                  className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black transition-all hover:-translate-y-0.5 hover:bg-brandhover"
-                >
-                  RSVP on Meetup
+                <CommunityDayRegisterModal className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black transition-all hover:-translate-y-0.5 hover:bg-brandhover">
+                  RSVP — share details first
                   <ArrowRight className="h-4 w-4" aria-hidden />
-                </a>
+                </CommunityDayRegisterModal>
                 <p className="mt-3 text-center text-xs text-faint">
-                  Opens Meetup in a new tab, show RSVP at entry
+                  30-sec form, then Meetup · show RSVP at entry
                 </p>
               </div>
             </Reveal>
@@ -216,7 +208,7 @@ export default function CommunityDayPage() {
             {whyAttend.map((c, i) => (
               <Reveal key={c.title} delay={Math.min(i * 0.07, 0.21)}>
                 <article className="group h-full min-w-0 rounded-2xl border border-line bg-surface p-6 transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand/30 to-brand/5 text-brand ring-1 ring-brand/30 transition-transform duration-200 group-hover:scale-105">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand ring-1 ring-brand/30 transition-transform duration-200 group-hover:scale-105">
                     <c.icon className="h-5 w-5" aria-hidden />
                   </span>
                   <h3 className="mt-4 text-base font-semibold text-cream">
@@ -361,9 +353,10 @@ export default function CommunityDayPage() {
                 Get directions
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
-              <Button href={SITE.links.eventCommunityDay} variant="secondary" external>
+              <CommunityDayRegisterModal className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-line bg-surface px-6 py-3 text-sm font-semibold text-cream transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/60 hover:bg-raised">
                 Register on Meetup
-              </Button>
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </CommunityDayRegisterModal>
             </div>
           </div>
         </Container>
@@ -413,10 +406,7 @@ export default function CommunityDayPage() {
                   certificate for registered participants.
                 </p>
                 <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                  <Button href={SITE.links.eventCommunityDay} external>
-                    Register on Meetup — Free
-                    <ArrowRight className="h-4 w-4" aria-hidden />
-                  </Button>
+                  <CommunityDayRegisterModal />
                   <Button href={SITE.links.instagram} variant="secondary" external>
                     Follow on Instagram
                   </Button>

@@ -138,8 +138,8 @@ export const COMMUNITY_DAY_FAQS = [
 
 export const COMMUNITY_DAY_STEPS = [
   {
-    title: "Register on Meetup",
-    description: "Tap Register — sign in and hit Attend on the Meetup event.",
+    title: "Share your details",
+    description: "Tap Register — a 30-sec form (name, email, mobile), then continue to Meetup.",
   },
   {
     title: "Join the group",

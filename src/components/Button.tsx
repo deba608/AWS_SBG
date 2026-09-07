@@ -6,7 +6,7 @@ type Variant = "primary" | "secondary" | "ghost";
 const styles: Record<Variant, string> = {
   // Primary carries the vibrant purple palette from the logo
   primary:
-    "bg-gradient-to-r from-brand to-[#9333ea] text-white shadow-[0_2px_18px_rgba(173,92,255,0.35)] hover:shadow-[0_4px_24px_rgba(173,92,255,0.55)] hover:brightness-110 active:brightness-95",
+    "bg-brand text-white shadow-[0_2px_18px_rgba(173,92,255,0.35)] hover:bg-brandhover hover:shadow-[0_4px_24px_rgba(173,92,255,0.55)] hover:brightness-110 active:brightness-95",
   secondary:
     "border border-line bg-transparent text-cream hover:border-brand/50 hover:bg-brand/5 hover:text-white",
   ghost: "text-fog hover:bg-brand/10 hover:text-white",

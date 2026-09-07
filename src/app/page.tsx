@@ -4,10 +4,8 @@ import Container from "@/components/Container";
 import EventCard from "@/components/EventCard";
 import HeroVisual from "@/components/HeroVisual";
 import JoinCTA from "@/components/JoinCTA";
-import Journey from "@/components/Journey";
 import StatsSection from "@/components/StatsSection";
-import TechMarquee from "@/components/TechMarquee";
-import { communityDay, upcomingEvents } from "@/data/events";
+import { upcomingEvents } from "@/data/events";
 import { SITE } from "@/lib/constants";
 
 const about = [
@@ -30,33 +28,6 @@ const about = [
     title: "Grow",
     description:
       "Develop technical and professional skills together, then mentor the next batch.",
-  },
-];
-
-const formats = [
-  {
-    name: "Workshops",
-    description: "Learn an AWS service by using it, with guided labs and mentors in the room.",
-  },
-  {
-    name: "Build sessions",
-    description: "Bring a laptop and leave with something deployed.",
-  },
-  {
-    name: "Tech talks",
-    description: "Engineers and alumni share how they cleared certs and shipped projects.",
-  },
-  {
-    name: "Hackathons",
-    description: "Small teams, real problems, working demos at the end.",
-  },
-  {
-    name: "Open source",
-    description: "Contribute to shared repos and learn review-driven development.",
-  },
-  {
-    name: "Community",
-    description: "Meet fellow builders at SUIIT and stay in touch on WhatsApp.",
   },
 ];
 
@@ -130,24 +101,12 @@ export default function HomePage() {
                   </div>
                 ))}
               </dl>
-              {communityDay.detailsUrl ? (
-                <p className="mt-8 text-sm text-fog">
-                  Next up:{" "}
-                  <Link
-                    href={communityDay.detailsUrl}
-                    className="inline-flex min-h-[44px] items-center font-medium text-cream underline decoration-line underline-offset-4 transition-colors hover:text-brand hover:decoration-brand"
-                  >
-                    {communityDay.title}, {communityDay.date}
-                  </Link>
-                </p>
-              ) : null}
             </div>
             <HeroVisual />
           </div>
         </Container>
       </section>
 
-      <TechMarquee />
       <StatsSection />
 
       {/* ABOUT */}
@@ -188,38 +147,6 @@ export default function HomePage() {
           </dl>
         </Container>
       </section>
-
-      {/* WHAT WE DO */}
-      <section aria-labelledby="formats-heading" className="border-t border-line py-16 md:py-24">
-        <Container>
-          <QuietHeading
-            id="formats-heading"
-            label="What we do"
-            title="Hands-on, every single week"
-            description="Six formats, one goal: take you from curious to capable."
-          />
-          <ul>
-            {formats.map((format, i) => (
-              <li
-                key={format.name}
-                className={
-                  "grid gap-1 py-5 sm:grid-cols-[180px_1fr] sm:gap-6 " +
-                  (i === formats.length - 1 ? "border-y border-line" : "border-t border-line")
-                }
-              >
-                <p className="font-semibold text-cream">{format.name}</p>
-                <p className="max-w-2xl text-sm leading-relaxed text-fog">
-                  {format.description}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </Container>
-      </section>
-
-      <div className="border-t border-line">
-        <Journey />
-      </div>
 
       {/* UPCOMING */}
       <section aria-labelledby="upcoming-heading" className="border-t border-line py-16 md:py-24">

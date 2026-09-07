@@ -61,61 +61,6 @@ export const communityDay: EventItem = {
 
 export const upcomingEvents: EventItem[] = [
   communityDay,
-  {
-    id: "aws-cloud-fundamentals",
-    title: "AWS Cloud Fundamentals",
-    category: "Workshop",
-    date: "12 September 2026",
-    time: "10:00 AM",
-    location: "Seminar Hall, SUIIT",
-    description:
-      "Learn AWS fundamentals, cloud concepts and core AWS services with guided hands-on labs.",
-    status: "open",
-  },
-  {
-    id: "s3-lambda-serverless",
-    title: "Serverless with S3 + Lambda",
-    category: "Build Session",
-    date: "26 September 2026",
-    time: "2:00 PM",
-    location: "CS Lab 3 + Discord",
-    description:
-      "Build and deploy an image-resizing pipeline triggered by S3 events. Bring your laptop.",
-    status: "open",
-  },
-  {
-    id: "alumni-sa-talk",
-    title: "How I Cleared the SAA-C03 — Alumni Talk",
-    category: "Tech Talk",
-    date: "10 October 2026",
-    time: "5:00 PM",
-    location: "Seminar Hall, SUIIT",
-    description:
-      "Exam strategy, preparation resources and Q&A with a recently certified cloud engineer.",
-    status: "filling-fast",
-  },
-  {
-    id: "serverless-showdown",
-    title: "Serverless Showdown (24-hr Hackathon)",
-    category: "Hackathon",
-    date: "8 – 9 November 2026",
-    time: "9:00 AM onwards",
-    location: "Hacker Lab, SUIIT",
-    description:
-      "Teams of four solve a real-world problem using serverless AWS services. Demos on day two.",
-    status: "filling-fast",
-  },
-  {
-    id: "dynamodb-modeling",
-    title: "DynamoDB Data Modeling Jam",
-    category: "Workshop",
-    date: "21 November 2026",
-    time: "3:00 PM",
-    location: "Online via Discord",
-    description:
-      "Single-table design patterns and access-pattern modeling with a hands-on lab.",
-    status: "open",
-  },
 ];
 
 export interface PastEvent {

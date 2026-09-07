@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Google Apps Script runs outside Next.js — plain JS with
+    // Apps Script globals (SpreadsheetApp, ContentService).
+    "scripts/**",
   ]),
 ]);
 
