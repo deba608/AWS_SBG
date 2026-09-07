@@ -9,10 +9,10 @@ export const SITE = {
   email: "awssbg@suiit.ac.in",
   url: "https://awssbgsuiit.vercel.app",
   links: {
-    join: "https://whatsapp.com/channel/0029VbBQOWtJUM2SSgFtil0O",
+    join: "https://chat.whatsapp.com/E8TfpRLRko5DBvhgtAYJpm",
     linkedin: "https://www.linkedin.com/company/aws-sbg-suiit",
     discord: "https://discord.gg",
-    whatsapp: "https://whatsapp.com/channel/0029VbBQOWtJUM2SSgFtil0O",
+    whatsapp: "https://chat.whatsapp.com/E8TfpRLRko5DBvhgtAYJpm",
     instagram: "https://www.instagram.com/awssbg_suiit",
     email: "mailto:awssbg@suiit.ac.in",
     eventDefault: "https://meetup.com",

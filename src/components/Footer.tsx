@@ -24,7 +24,7 @@ const communityLinks = [
     highlight: true,
   },
   {
-    label: "Join WhatsApp channel",
+    label: "Join WhatsApp community",
     href: SITE.links.join,
     external: true,
     highlight: false,

@@ -132,7 +132,7 @@ npm start       # Start production server locally
 ## 📬 Community & Contact
 
 - **Website**: [awssbgsuiit.vercel.app](https://awssbgsuiit.vercel.app/)
-- **WhatsApp Community**: [Join Channel](https://whatsapp.com/channel/0029VbBQOWtJUM2SSgFtil0O)
+- **WhatsApp Community**: [Join Community](https://chat.whatsapp.com/E8TfpRLRko5DBvhgtAYJpm)
 - **LinkedIn**: [AWS SBG SUIIT](https://www.linkedin.com/company/aws-sbg-suiit)
 - **Instagram**: [@awssbg_suiit](https://www.instagram.com/awssbg_suiit)
 - **Email**: [awssbg@suiit.ac.in](mailto:awssbg@suiit.ac.in)
