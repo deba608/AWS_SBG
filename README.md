@@ -33,7 +33,7 @@ The production deployment is live on Vercel:
 
 ## 📝 Pre-Registration Backend (Community Day)
 
-Clicking **Register** opens an on-site modal (collecting Name, Email, Mobile Number, and Consent) that asynchronous POSTs to a Google Sheet via a Google Apps Script web app, then seamlessly redirects the attendee to complete RSVP on Meetup.
+Clicking **Register** opens an on-site modal (collecting First Name, Last Name, Email, and Mobile Number) that asynchronous POSTs to a Google Sheet via a Google Apps Script web app, then seamlessly redirects the attendee to complete RSVP on Meetup.
 
 ### Organizer Setup (One-Time)
 

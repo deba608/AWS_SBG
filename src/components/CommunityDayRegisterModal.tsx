@@ -71,8 +71,7 @@ export default function CommunityDayRegisterModal({
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
-  const [consent, setConsent] = useState(false);
-  const [errors, setErrors] = useState<ContactErrors & { consent?: string }>({});
+  const [errors, setErrors] = useState<ContactErrors>({});
   const [status, setStatus] = useState<Status>("form");
   const [isDuplicate, setIsDuplicate] = useState(false);
   const [successName, setSuccessName] = useState("");
@@ -109,12 +108,8 @@ export default function CommunityDayRegisterModal({
 
   async function submit() {
     const fieldErrors = validateContact({ firstName, lastName, email, mobile });
-    const next: ContactErrors & { consent?: string } = { ...fieldErrors };
-    if (!consent) {
-      next.consent = "Please accept so we can send event updates.";
-    }
-    setErrors(next);
-    if (Object.keys(next).length > 0) return;
+    setErrors(fieldErrors);
+    if (Object.keys(fieldErrors).length > 0) return;
 
     const contact = normalizedContact({ firstName, lastName, email, mobile });
     setStatus("submitting");
@@ -203,8 +198,8 @@ export default function CommunityDayRegisterModal({
           <div className="text-center" role="alert">
             <p className="text-lg font-semibold text-cream">Couldn&apos;t save your details</p>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-fog">
-              Network hiccup — your info is still in the form. Retry, or skip
-              ahead to Meetup so you don&apos;t lose your spot.
+              Network hiccup — your info is still in the form. Hit Retry to
+              send it again.
             </p>
             <div className="mt-6 flex flex-col gap-3">
               <button
@@ -214,15 +209,6 @@ export default function CommunityDayRegisterModal({
               >
                 Retry
               </button>
-              <a
-                href={SITE.links.eventCommunityDay}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-line bg-surface px-6 py-3 text-sm font-semibold text-cream transition-colors hover:border-brand/60"
-              >
-                Skip — go straight to Meetup
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </a>
             </div>
           </div>
         ) : (
@@ -329,27 +315,6 @@ export default function CommunityDayRegisterModal({
                 </p>
               ) : null}
             </div>
-            <div>
-              <label htmlFor="scd-consent" className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-fog">
-                <input
-                  id="scd-consent"
-                  type="checkbox"
-                  checked={consent}
-                  onChange={(e) => setConsent(e.target.checked)}
-                  aria-describedby={errors.consent ? "scd-consent-error" : undefined}
-                  className="mt-1 h-4 w-4 shrink-0 accent-brand"
-                />
-                <span>
-                  I agree to be contacted by AWS SBG SUIIT about Community Day
-                  (reminders, venue updates) on email/SMS/WhatsApp. *
-                </span>
-              </label>
-              {errors.consent ? (
-                <p id="scd-consent-error" role="alert" className="mt-1.5 text-xs text-red-300">
-                  {errors.consent}
-                </p>
-              ) : null}
-            </div>
             <div className="flex flex-col gap-3 pt-1">
               <button
                 type="submit"
@@ -368,7 +333,7 @@ export default function CommunityDayRegisterModal({
                   </>
                 )}
               </button>
-              <div className="flex items-center justify-between">
+              <div>
                 <button
                   type="button"
                   onClick={close}
@@ -376,14 +341,6 @@ export default function CommunityDayRegisterModal({
                 >
                   Cancel
                 </button>
-                <a
-                  href={SITE.links.eventCommunityDay}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-[44px] items-center text-sm font-medium text-fog transition-colors hover:text-brand"
-                >
-                  Skip — go straight to Meetup
-                </a>
               </div>
             </div>
           </form>

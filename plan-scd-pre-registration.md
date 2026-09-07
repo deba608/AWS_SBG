@@ -45,13 +45,12 @@ for reminders + lunch/swag headcount.
 ## 3. UX flow (all Register CTAs → same modal)
 
 1. Click **Register** (hero, sticky card, spotlight, final CTA, navbar) → modal opens.
-2. Form: **First name**, **Last name**, **Email**, **Mobile (10-digit)**, **consent checkbox** (required, see §5).
+2. Form: **First name**, **Last name**, **Email**, **Mobile (10-digit)**. No consent checkbox, no skip link (removed per organizer request — see §5 note).
 3. Client validation inline → `Submit & Continue` → POST to Sheet endpoint.
 4. Success state inside modal: green check + "You're on our list!" + big
    **Continue to Meetup →** button (explicit click, not auto-`window.open` —
    auto-open after `await` gets popup-blocked; explicit click never is).
-5. Secondary link under submit: **"Skip — go straight to Meetup"** so the form
-   never costs us a registration.
+5. Cancel button closes the modal (user can re-open from any Register CTA).
 6. Prefill from `localStorage` on return visits; "already registered" state if
    email/mobile was submitted from this browser.
 
@@ -60,26 +59,24 @@ you are (30 sec) → RSVP on Meetup".
 
 ## 4. Validation rules
 
-- **Name:** trim, ≥ 2 chars, letters/spaces only (allow `.` `'` `-`).
+- **Name:** first + last parts, letters only (allow `.` `'` `-`).
 - **Email:** trim + lowercase, HTML5 `type=email` + regex check, reject obvious
   typos? (v1: just normalize; block `+`-alias duplicates at dedupe step).
 - **Mobile:** strip spaces/`+91`/leading `0`, must match `^[6-9]\d{9}$`
   (Indian 10-digit). `inputMode="numeric"`, `maxLength={13}` for paste tolerance.
-- **Consent:** unchecked = submit disabled.
 - Server (Apps Script): re-validate, dedupe by email OR mobile (return
   `{ status: "duplicate" }` → show "already on the list" + Meetup button).
-- Network failure: show error, keep data in fields, offer **retry** + **skip to
-  Meetup** (never trap the user).
+- Network failure: show error, keep data in fields, offer **retry** (Cancel
+  closes the modal; user is never trapped).
 
-## 5. Privacy (required — phone numbers are PII)
+## 5. Privacy note — phone numbers are PII
 
-- Consent checkbox text (get lead sign-off): *"I agree to be contacted by AWS
-  SBG SUIIT about Community Day (reminders, venue updates) on email/SMS/WhatsApp."*
-- One-line purpose note under the form: what we collect, why (event updates +
-  headcount), who sees it (organizing team only), deletion ("data deleted after
-  the event on request — contact [EMAIL]").
-- India's DPDP Act applies: collect minimum (name/email/mobile only — drop
-  college/branch/year to v2), Sheet shared with leads only, no public links.
+> Organizer decision: consent checkbox + skip link removed from the form to
+> minimize friction. The form still collects PII (name/email/mobile), so:
+> keep the Sheet shared with leads only, no public links, collect minimum
+> (no college/branch/year), and honor deletion requests (contact [EMAIL]).
+
+- India's DPDP Act applies: Sheet shared with leads only, no public links.
 - Add `SITE.email` contact if missing in `constants.ts`.
 
 ## 6. Implementation phases
@@ -87,8 +84,8 @@ you are (30 sec) → RSVP on Meetup".
 - **Phase 0 — Unbreak (15 min):** add missing `SITE` import to detail page;
   `npx tsc --noEmit`, `npm run lint`, `npm run build` green.
 - **Phase 1 — Form hardening (1 hr):** first-name + last-name fields, validation +
-  inline errors (`aria-describedby`, `aria-invalid`), consent checkbox,
-  skip-link, prefill/"already registered" via `localStorage`, explicit
+  inline errors (`aria-describedby`, `aria-invalid`),
+  prefill/"already registered" via `localStorage`, explicit
   Continue-to-Meetup success state (remove auto `window.open`).
   Extract to `src/lib/validate-contact.ts` for reuse + unit-testability.
 - **Phase 2 — Sheet backend (1–2 hrs):** Apps Script Web App (validate →
@@ -107,17 +104,14 @@ you are (30 sec) → RSVP on Meetup".
 - [ ] `tsc`, `lint` (0 errors), `build` green; new route still prerenders
 - [ ] Submit with valid data → row appears in Sheet (< 10 s) → success state → Continue opens Meetup in new tab
 - [ ] Duplicate email/mobile → "already on the list" + Meetup button, no double row
-- [ ] Offline/submit-fail → error + retry + skip-to-Meetup (user never stuck)
+- [ ] Offline/submit-fail → error + retry (Cancel closes modal; user never stuck)
 - [ ] Popup-blocker on → flow still works (explicit Continue click, no auto-open)
 - [ ] Invalid mobile (`123`, `+91` + 9 digits) blocked inline with message
-- [ ] Consent unchecked → submit disabled; consent text approved by lead
-- [ ] Skip link present on the form; conversion path without form intact
 - [ ] No PII in code/logs/localStorage beyond prefill; Sheet shared with leads only
 
 ## 8. Open questions for organizers
 
 1. Sheet backend approved — who owns the Google Sheet + Apps Script (account)?
-2. Consent text + contact email for deletion requests — sign-off?
-3. Extra fields wanted (college, year, branch)? Recommendation: no — keep 3 fields for conversion.
-4. WhatsApp reminders — which number sends them, and opt-in wording ok?
-5. Fallback if Apps Script is blocked on event Wi-Fi — Formspree backup account?
+2. Extra fields wanted (college, year, branch)? Recommendation: no — keep 4 fields for conversion.
+3. WhatsApp reminders — which number sends them?
+4. Fallback if Apps Script is blocked on event Wi-Fi — Formspree backup account?
