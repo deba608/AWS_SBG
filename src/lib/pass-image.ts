@@ -32,23 +32,28 @@ export async function drawPassImage(input: {
   if (logo.naturalWidth > 0) ctx.drawImage(logo, 50, 42, 110, 110);
 
   // header
-  ctx.fillStyle = "#6b7480";
-  ctx.font = "28px ui-monospace, monospace";
-  ctx.fillText("AWS SBG · COMMUNITY DAY", 180, 80);
   ctx.fillStyle = "#f5f3ee";
   ctx.font = "bold 52px system-ui, sans-serif";
-  ctx.fillText("Event Entry Pass", 180, 145);
+  ctx.fillText("Event Entry Pass", 180, 118);
   ctx.font = "28px system-ui, sans-serif";
   ctx.fillStyle = "#a8b0bb";
-  ctx.fillText("AWS Student Community Day · Oct 6–8 · SUIIT", 180, 195);
+  ctx.fillText("AWS Student Community Day · Oct 6–8 · SUIIT", 180, 166);
 
-  // serial, right side of header
+  // serial as white solid badge, right side of header
   if (input.serial) {
-    ctx.fillStyle = "#f5f3ee";
+    const label = `Serial No. ${input.serial}`;
     ctx.font = "bold 32px ui-monospace, monospace";
-    ctx.textAlign = "right";
-    ctx.fillText(`Serial No. ${input.serial}`, W - 50, 130);
+    const tw = ctx.measureText(label).width;
+    const bw = tw + 48;
+    const bx = W - 50 - bw;
+    const by = 78;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, 56, 28);
+    ctx.fill();
+    ctx.fillStyle = "#141a20";
     ctx.textAlign = "left";
+    ctx.fillText(label, bx + 24, by + 38);
   }
 
   // name block
