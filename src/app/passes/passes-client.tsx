@@ -62,15 +62,20 @@ export default function PassesClient() {
   }, []);
 
   async function resendEmail() {
-    if (!user || resending) return;
+    if (!user || resending || passes.length === 0) return;
     setResending(true);
     try {
-      const res = await fetch("/api/passes/resend", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email }),
+      const p = passes[0];
+      const ok = await emailExactPass({
+        serial: user.serial ?? "",
+        name: user.name,
+        email: user.email,
+        rollNo: user.rollNo,
+        food: user.food,
+        qrDataUrl: p.qrImage,
+        token: p.token,
       });
-      if (res.ok) setEmailSent(true);
+      if (ok) setEmailSent(true);
     } finally {
       setResending(false);
     }

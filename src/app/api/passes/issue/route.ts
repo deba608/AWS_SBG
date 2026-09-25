@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import QRCode from "qrcode";
-import { mailConfigured, sendPassEmail } from "@/lib/mailer";
-import { drawPassImageServer } from "@/lib/pass-image-server";
+import { mailConfigured } from "@/lib/mailer";
 import { getPassesByContact, issuePasses, registrationCount, ConflictError, RegistrationsFullError } from "@/lib/pass-store";
 import { warnDefaultSecrets } from "@/lib/pass-token";
 import { clientIp, rateOk } from "@/lib/rate-limit";
@@ -46,27 +45,8 @@ export async function POST(req: Request) {
         status: p.status,
       })),
     );
-    // Share the full pass image by email — best effort, pass shown regardless.
-    let emailSent = false;
-    if (!duplicate && mailConfigured()) {
-      const png = await drawPassImageServer({
-        serial: user.serial,
-        name: user.name,
-        email: user.email,
-        rollNo: user.rollNo,
-        food: user.food,
-        qrDataUrl: withQr[0].qrImage,
-        token: passes[0].token,
-      });
-      const mail = await sendPassEmail({
-        to: user.email,
-        name: user.name,
-        rollNo: user.rollNo,
-        passPng: png,
-        token: passes[0].token,
-      });
-      emailSent = mail.sent;
-    }
+    // Email goes out via /api/passes/email-pass with the exact client PNG
+    // (web/email parity) — client triggers it right after showing the pass.
     return NextResponse.json(
       {
         user: {
@@ -80,7 +60,7 @@ export async function POST(req: Request) {
         },
         passes: withQr,
         duplicate,
-        email: { sent: emailSent, configured: mailConfigured() },
+        email: { sent: false, configured: mailConfigured() },
       },
       { status: duplicate ? 200 : 201 },
     );
