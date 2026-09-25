@@ -24,6 +24,8 @@ type VerifyState =
       rollNo?: string;
       food?: string;
       usedAt?: string | null;
+      /** Fresh burn this session (vs already-used). Shows DONE state. */
+      justBurned?: boolean;
     };
 
 interface Stats {
@@ -63,6 +65,7 @@ export default function ScanClient() {
   const [scanning, setScanning] = useState(false);
   const [camErr, setCamErr] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const controlsRef = useRef<{ stop: () => void } | null>(null);
   const lastScanRef = useRef<string>("");
 
@@ -199,6 +202,7 @@ export default function ScanClient() {
           rollNo: d.user?.rollNo,
           food: d.user?.food,
           usedAt: d.usedAt ?? null,
+          justBurned: true,
         });
       } else {
         setState({ kind: "result", status: "INVALID" });
@@ -305,6 +309,14 @@ export default function ScanClient() {
   }
 
   const result = state.kind === "result" ? state : null;
+  const justBurned = result?.justBurned === true;
+
+  function scanNext() {
+    setToken("");
+    lastScanRef.current = "";
+    setState({ kind: "idle" });
+    inputRef.current?.focus();
+  }
 
   return (
     <div className="space-y-5">
@@ -361,6 +373,7 @@ export default function ScanClient() {
           className="flex flex-col gap-2 sm:flex-row"
         >
           <input
+            ref={inputRef}
             value={token}
             onChange={(e) => setToken(e.target.value)}
             placeholder="Paste token or full QR URL…"
@@ -399,33 +412,36 @@ export default function ScanClient() {
       {result ? (
         <div
           role="status"
+          key={`${token}-${result.status}-${result.usedAt ?? "active"}-${justBurned ? "burned" : "seen"}`}
           className={cn(
-            "rank-card overflow-hidden",
-            result.status === "ACTIVE" && "border-green-500/50",
+            "rank-card animate-pop-in overflow-hidden",
+            (result.status === "ACTIVE" || justBurned) && "border-green-500/50",
             result.status === "EXPIRED" && "border-amber-500/50",
-            (result.status === "USED" || result.status === "INVALID") && "border-red-500/50",
+            (!justBurned && (result.status === "USED" || result.status === "INVALID")) && "border-red-500/50",
           )}
         >
           <div
             className={cn(
               "flex items-center gap-3 px-5 py-4 text-lg font-bold text-white",
-              result.status === "ACTIVE" && "bg-green-600",
+              (result.status === "ACTIVE" || justBurned) && "bg-green-600",
               result.status === "EXPIRED" && "bg-amber-600",
-              (result.status === "USED" || result.status === "INVALID") && "bg-red-600",
+              (!justBurned && (result.status === "USED" || result.status === "INVALID")) && "bg-red-600",
             )}
           >
-            {result.status === "ACTIVE" ? (
-              <CheckCircle2 className="h-6 w-6" aria-hidden />
+            {result.status === "ACTIVE" || justBurned ? (
+              <CheckCircle2 className={cn("h-6 w-6", justBurned && "animate-check-pop")} aria-hidden />
             ) : (
               <XCircle className="h-6 w-6" aria-hidden />
             )}
-            {result.status === "ACTIVE"
-              ? "VALID — allow"
-              : result.status === "USED"
-                ? "ALREADY USED — block"
-                : result.status === "EXPIRED"
-                  ? "EXPIRED — block"
-                  : "INVALID — block"}
+            {justBurned
+              ? `DONE — ${result.type ?? "pass"} recorded`
+              : result.status === "ACTIVE"
+                ? "VALID — allow"
+                : result.status === "USED"
+                  ? "ALREADY USED — block"
+                  : result.status === "EXPIRED"
+                    ? "EXPIRED — block"
+                    : "INVALID — block"}
           </div>
           {result.status !== "INVALID" && result.status !== "EXPIRED" ? (
             <div className="space-y-1 p-5">
@@ -442,6 +458,15 @@ export default function ScanClient() {
               )}
               {result.usedAt ? (
                 <p className="text-xs text-fog">Burned at {result.usedAt}</p>
+              ) : null}
+              {justBurned ? (
+                <button
+                  type="button"
+                  onClick={scanNext}
+                  className="mt-4 inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-brand px-6 py-3 text-base font-bold text-black hover:bg-brandhover"
+                >
+                  Scan next
+                </button>
               ) : null}
               {result.status === "ACTIVE" ? (
                 <button

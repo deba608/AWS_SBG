@@ -167,15 +167,17 @@ export default function CommunityDayRegisterModal({
               once at gate.
               {emailSent ? " A copy was also emailed to you." : " Email copy not sent yet — keep the screenshot."}
             </div>
-            <PassCard
-              name={passUser.name}
-              email={email}
-              rollNo={passUser.rollNo}
-              food={passUser.food}
-              type={pass.type}
-              qrImage={pass.qrImage}
-              token={pass.token}
-            />
+            <div id="pass-print-area">
+              <PassCard
+                name={passUser.name}
+                email={email}
+                rollNo={passUser.rollNo}
+                food={passUser.food}
+                type={pass.type}
+                qrImage={pass.qrImage}
+                token={pass.token}
+              />
+            </div>
             <button
               type="button"
               onClick={close}

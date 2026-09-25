@@ -101,7 +101,7 @@ export default function PassesClient() {
             : "Entry pass ready. Download image or take a screenshot — QR scans once."}
           {emailSent ? " A copy was also emailed to you." : " Email copy not sent yet — download the image + screenshot as backup."}
         </div>
-        <div className="print:space-y-6">
+        <div id="pass-print-area" className="print:space-y-6">
           {passes.map((p) => (
             <PassCard
               key={p.type}
