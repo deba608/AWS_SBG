@@ -365,6 +365,23 @@ export type VerifyResult =
   | { ok: false; reason: "INVALID" | "EXPIRED" }
   | { ok: true; user: StoredUser; pass: StoredPass; alreadyUsed: boolean };
 
+/**
+ * Serial No. (A01…) → live pass token. Lets gate verify/burn by serial
+ * when QR won't scan. Returns input unchanged when not a serial.
+ */
+export async function expandSerialToToken(input: string): Promise<string> {
+  const t = input.trim();
+  if (!/^A\d+$/i.test(t)) return t;
+  const serial = t.toUpperCase();
+  const store = await readStore();
+  const user = store.users.find((u) => (u.serial ?? "").toUpperCase() === serial);
+  if (!user) return t;
+  const pass =
+    store.passes.find((p) => p.userId === user.id && p.type === "ENTRY") ??
+    store.passes.find((p) => p.userId === user.id);
+  return pass?.token ?? t;
+}
+
 /** Check signature first, then store lookup, then expiry. */
 export async function verifyPass(token: string): Promise<VerifyResult> {
   const parsed = verifyPassToken(token.trim());

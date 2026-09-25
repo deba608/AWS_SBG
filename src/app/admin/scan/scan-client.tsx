@@ -100,22 +100,20 @@ export default function ScanClient() {
   }, [refreshMe]);
 
   useEffect(() => {
-    if (authed) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      void refreshStats();
-      // prefill when generic camera app opens QR URL directly
-      const q = new URLSearchParams(window.location.search).get("t");
-      if (q) {
-        setToken(q);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        void verify(q);
-      } else {
-        // gate flow: camera on immediately, zero taps to first scan
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        void startCamera();
-      }
+    if (!authed) return;
+    // init: stats + (camera now OR ?t= token verify)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void refreshStats();
+    const q = new URLSearchParams(window.location.search).get("t");
+    if (q) {
+      setToken(q);
+      void verify(q);
+    } else {
+      void startCamera();
     }
-  }, [authed, refreshStats]);
+    // verify/startCamera intentionally run once per login
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -137,6 +135,7 @@ export default function ScanClient() {
 
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
+    if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
     stopCamera();
     setAuthed(false);
     setState({ kind: "idle" });
@@ -303,11 +302,7 @@ export default function ScanClient() {
             const text = result.getText();
             if (text && text !== lastScanRef.current) {
               lastScanRef.current = text;
-              void verify(text);
-              // pause 2s to avoid double-fire on same QR
-              window.setTimeout(() => {
-                lastScanRef.current = "";
-              }, 2000);
+              void verify(text, true);
             }
           }
           if (err && !(err instanceof Error)) setCamErr("Camera read error.");
@@ -368,86 +363,106 @@ export default function ScanClient() {
   const result = state.kind === "result" ? state : null;
   const justBurned = result?.justBurned === true;
 
-  function scanNext() {
-    setToken("");
-    lastScanRef.current = "";
-    setState({ kind: "idle" });
-    inputRef.current?.focus();
-    if (resumeCamRef.current) {
-      resumeCamRef.current = false;
-      void startCamera();
-    }
-  }
-
   return (
-    <div className="space-y-5">
-      {stats ? (
-        <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
-          {[
-            { label: "Users", v: stats.users },
-            { label: "Entry in", v: stats.entryUsed },
-            { label: "Veg", v: stats.veg },
-            { label: "Non-veg", v: stats.nonveg },
-          ].map((s) => (
-            <div key={s.label} className="rank-card p-3">
-              <p className="text-2xl font-bold text-cream">{s.v}</p>
-              <p className="text-xs text-fog">{s.label}</p>
-            </div>
-          ))}
+    <div className="space-y-4">
+      <div className="rank-card flex items-center gap-3 px-5 py-3">
+        <p className="text-3xl font-bold tabular-nums text-green-400">
+          {stats?.entryUsed ?? "–"}
+        </p>
+        <div className="min-w-0 text-xs leading-tight text-fog">
+          <p>in gate{stats ? ` · ${stats.users} reg` : ""}</p>
+          {stats ? <p>Veg {stats.veg} · Non-veg {stats.nonveg}</p> : null}
         </div>
-      ) : null}
+        <span className="flex-1" aria-hidden />
+        {scanning ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/15 px-3 py-1 text-xs font-bold text-green-300">
+            <span aria-hidden className="h-2 w-2 animate-blink rounded-full bg-green-400" />
+            LIVE
+          </span>
+        ) : null}
+        <button
+          type="button"
+          onClick={logout}
+          title="Lock admin"
+          aria-label="Lock admin"
+          className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-line text-fog hover:text-cream"
+        >
+          <LogOut className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
 
-      <div className="rank-card space-y-3 p-5">
+      <div className="rank-card space-y-3 p-4 sm:p-5">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-bold text-cream">Scan</h2>
           <button
             type="button"
-            onClick={logout}
+            onClick={() => void startCamera()}
             className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line px-4 text-sm text-fog hover:text-cream"
           >
-            <LogOut className="h-4 w-4" aria-hidden /> Lock
+            {scanning ? <CameraOff className="h-4 w-4" aria-hidden /> : <Camera className="h-4 w-4" aria-hidden />}
+            {scanning ? "Stop" : "Start"}
           </button>
         </div>
-        <video
-          ref={videoRef}
-          muted
-          playsInline
-          className={cn(
-            "aspect-video w-full rounded-xl border border-line bg-black object-cover",
-            !scanning && "hidden",
-          )}
-        />
-        {camErr ? <p role="alert" className="text-xs text-red-300">{camErr}</p> : null}
-        <button
-          type="button"
-          onClick={startCamera}
-          className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-line px-6 py-3 text-sm font-semibold text-cream hover:border-white/25"
-        >
-          {scanning ? <CameraOff className="h-4 w-4" aria-hidden /> : <Camera className="h-4 w-4" aria-hidden />}
-          {scanning ? "Stop camera" : "Start camera scan"}
-        </button>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void verify(token);
-          }}
-          className="flex flex-col gap-2 sm:flex-row"
-        >
-          <input
-            ref={inputRef}
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="Paste token or full QR URL…"
-            spellCheck={false}
-            className="w-full min-h-[44px] flex-1 rounded-xl border border-line bg-surface px-3 py-3 font-mono text-xs text-cream placeholder:text-faint focus:ring-2 focus:ring-brand"
+        <div className="relative">
+          <video
+            ref={videoRef}
+            muted
+            playsInline
+            onClick={() => {
+              if (!scanning && (state.kind === "idle" || state.kind === "error")) void startCamera(true);
+            }}
+            className={cn(
+              "aspect-[4/3] w-full rounded-xl border border-line bg-black object-cover",
+              !scanning && "hidden",
+            )}
           />
-          <button
-            type="submit"
-            className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black hover:bg-brandhover"
+          {scanning ? (
+            <div aria-hidden className="pointer-events-none absolute inset-3">
+              <span className="absolute top-0 left-0 h-8 w-8 rounded-tl-xl border-t-4 border-l-4 border-brand" />
+              <span className="absolute top-0 right-0 h-8 w-8 rounded-tr-xl border-t-4 border-r-4 border-brand" />
+              <span className="absolute bottom-0 left-0 h-8 w-8 rounded-bl-xl border-b-4 border-l-4 border-brand" />
+              <span className="absolute right-0 bottom-0 h-8 w-8 rounded-br-xl border-r-4 border-b-4 border-brand" />
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void startCamera(true)}
+              className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-black text-fog hover:text-cream"
+            >
+              <Camera className="h-8 w-8" aria-hidden />
+              <span className="text-sm font-semibold">Tap to start camera</span>
+              <span className="text-xs">point at QR — instant verify</span>
+            </button>
+          )}
+        </div>
+        {camErr ? <p role="alert" className="text-xs text-red-300">{camErr}</p> : null}
+        <details className="rounded-xl border border-line px-4 py-2">
+          <summary className="min-h-[44px] cursor-pointer py-2 text-sm text-fog hover:text-cream">
+            Manual token entry
+          </summary>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void verify(token);
+            }}
+            className="flex flex-col gap-2 pb-2 sm:flex-row"
           >
-            Verify
-          </button>
-        </form>
+            <input
+              ref={inputRef}
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="Paste token or full QR URL…"
+              spellCheck={false}
+              className="w-full min-h-[44px] flex-1 rounded-xl border border-line bg-surface px-3 py-3 font-mono text-xs text-cream placeholder:text-faint focus:ring-2 focus:ring-brand"
+            />
+            <button
+              type="submit"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black hover:bg-brandhover"
+            >
+              Verify
+            </button>
+          </form>
+        </details>
       </div>
 
       {state.kind === "busy" ? (
@@ -530,10 +545,11 @@ export default function ScanClient() {
               {result.status === "USED" ? (
                 <button
                   type="button"
-                  onClick={scanNext}
-                  className="mt-4 inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-brand px-6 py-3 text-base font-bold text-black hover:bg-brandhover"
+                  onClick={resumeNow}
+                  className="mt-4 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full border border-line px-6 py-3 text-sm font-semibold text-fog hover:text-cream"
                 >
-                  Scan next
+                  <Camera className="h-4 w-4" aria-hidden />
+                  Next person — tap to scan now
                 </button>
               ) : null}
               {result.status === "ACTIVE" ? (
