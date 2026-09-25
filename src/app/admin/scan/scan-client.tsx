@@ -20,6 +20,7 @@ type VerifyState =
       status: "ACTIVE" | "USED" | "INVALID" | "EXPIRED";
       type?: "ENTRY" | "FOOD";
       name?: string;
+      serial?: string;
       email?: string;
       rollNo?: string;
       food?: string;
@@ -154,6 +155,7 @@ export default function ScanClient() {
           status: d.status,
           type: d.type,
           name: d.user?.name,
+          serial: d.user?.serial,
           email: d.user?.email,
           rollNo: d.user?.rollNo,
           food: d.user?.food,
@@ -190,6 +192,7 @@ export default function ScanClient() {
           status: "USED",
           type: d.type,
           name: d.user?.name,
+          serial: d.user?.serial,
           email: d.user?.email,
           rollNo: d.user?.rollNo,
           food: d.user?.food,
@@ -203,6 +206,7 @@ export default function ScanClient() {
           status: "USED",
           type: d.type,
           name: d.user?.name,
+          serial: d.user?.serial,
           email: d.user?.email,
           rollNo: d.user?.rollNo,
           food: d.user?.food,
@@ -454,10 +458,16 @@ export default function ScanClient() {
           </div>
           {result.status !== "INVALID" && result.status !== "EXPIRED" ? (
             <div className="space-y-1 p-5">
-              <p className="text-xl font-bold text-cream">{result.name}</p>
+              <p className="text-xl font-bold text-cream">
+                {result.name}
+                {result.serial ? <span className="ml-2 font-mono text-sm text-brand">No. {result.serial}</span> : null}
+              </p>
               <p className="text-sm text-fog">{result.email} · Roll {result.rollNo}</p>
               {result.food ? (
-                <p className="mt-2 inline-block rounded-full bg-white/10 px-3 py-1 font-mono text-xs text-cream">
+                <p className={cn(
+                  "mt-2 inline-block rounded-full border px-3 py-1 font-mono text-xs font-bold text-white",
+                  result.food === "Veg" ? "border-green-600 bg-green-600" : "border-red-600 bg-red-600",
+                )}>
                   {result.type} · {result.food === "Veg" ? "VEG" : "NON-VEG"}
                 </p>
               ) : (

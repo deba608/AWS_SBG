@@ -48,7 +48,7 @@ export default function CommunityDayRegisterModal({
   const [status, setStatus] = useState<Status>("form");
   const [apiError, setApiError] = useState("");
   const [pass, setPass] = useState<IssuedPass | null>(null);
-  const [passUser, setPassUser] = useState({ name: "", rollNo: "", food: "" });
+  const [passUser, setPassUser] = useState({ name: "", serial: "", rollNo: "", food: "" });
   const [emailSent, setEmailSent] = useState(false);
 
   const openModal = () => {
@@ -130,6 +130,7 @@ export default function CommunityDayRegisterModal({
       setPass(issued);
       setPassUser({
         name: (data.user as { name: string }).name,
+        serial: (data.user as { serial?: string }).serial ?? "",
         rollNo: (data.user as { rollNo: string }).rollNo,
         food: (data.user as { food: string }).food,
       });
@@ -170,6 +171,7 @@ export default function CommunityDayRegisterModal({
             <div id="pass-print-area">
               <PassCard
                 name={passUser.name}
+                serial={passUser.serial}
                 email={email}
                 rollNo={passUser.rollNo}
                 food={passUser.food}

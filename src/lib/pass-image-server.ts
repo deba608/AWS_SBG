@@ -53,7 +53,7 @@ export async function drawPassImageServer(input: {
     const badgeW = ctx.measureText(badgeLabel).width + 40;
     const badgeY = 382;
     ctx.fillStyle = vegMeal ? "#16a34a" : "#dc2626";
-    const rc = ctx as CanvasRenderingContext2D & { roundRect?: (...a: number[]) => void };
+    const rc = ctx as unknown as { roundRect?: (...a: number[]) => void };
     if (typeof rc.roundRect === "function") {
       ctx.beginPath();
       rc.roundRect(50, badgeY, badgeW, 46, 12);

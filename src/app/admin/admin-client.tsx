@@ -34,6 +34,7 @@ interface Row {
   usedAt: string | null;
   scannedBy: string | null;
   name: string;
+  serial: string;
   email: string;
   rollNo: string;
   gender: string;
@@ -288,6 +289,7 @@ export default function AdminClient() {
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
               <tr className="text-xs text-faint uppercase">
+                <th className="px-4 py-2">Sr</th>
                 <th className="px-4 py-2">Name</th>
                 <th className="px-4 py-2">Contact</th>
                 <th className="px-4 py-2">Food</th>
@@ -302,6 +304,7 @@ export default function AdminClient() {
                 return (
                 <Fragment key={r.token}>
                 <tr className="border-t border-line">
+                  <td className="px-4 py-2 font-mono text-xs font-bold text-brand">{r.serial}</td>
                   <td className="px-4 py-2 font-medium text-cream">
                     <button
                       type="button"
@@ -321,8 +324,8 @@ export default function AdminClient() {
                   <td className="px-4 py-2">
                     <span
                       className={cn(
-                        "rounded-full px-2 py-0.5 text-xs font-semibold",
-                        r.food === "Veg" ? "bg-green-500/15 text-green-300" : "bg-amber-500/15 text-amber-300",
+                        "rounded-full border px-2 py-0.5 text-xs font-bold text-white",
+                        r.food === "Veg" ? "border-green-600 bg-green-600" : "border-red-600 bg-red-600",
                       )}
                     >
                       {r.food === "Veg" ? "VEG" : "NON-VEG"}
@@ -352,8 +355,9 @@ export default function AdminClient() {
                 </tr>
                 {open ? (
                 <tr key={`${r.token}-detail`} className="border-t border-dashed border-line bg-black/20">
-                  <td colSpan={6} className="px-4 py-3 text-xs">
+                  <td colSpan={7} className="px-4 py-3 text-xs">
                     <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 sm:grid-cols-2">
+                      <div className="flex gap-2"><dt className="shrink-0 text-faint">Serial</dt><dd className="font-mono text-cream">{r.serial}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Gender</dt><dd className="text-cream">{r.gender}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Issued</dt><dd className="text-cream">{new Date(r.createdAt).toLocaleString("en-IN")}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Gate</dt><dd className="text-cream">{r.scannedBy ?? "—"}</dd></div>
@@ -368,7 +372,7 @@ export default function AdminClient() {
               })}
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-fog">
+                  <td colSpan={7} className="px-4 py-8 text-center text-fog">
                     No passes yet. Share <code className="font-mono">/passes</code> link.
                   </td>
                 </tr>
