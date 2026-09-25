@@ -5,7 +5,6 @@ import { Loader2, Printer, RotateCcw } from "lucide-react";
 import Container from "@/components/Container";
 import PassCard from "@/components/PassCard";
 import {
-  GENDERS,
   validateContact,
   type ContactErrors,
 } from "@/lib/validate-contact";

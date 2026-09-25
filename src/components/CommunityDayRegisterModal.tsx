@@ -11,6 +11,7 @@ import {
 } from "@/lib/validate-contact";
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
+import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "scdRegistration";
 const SHEET_URL = process.env.NEXT_PUBLIC_SCD_SHEET_URL ?? "";
