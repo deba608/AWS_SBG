@@ -14,6 +14,7 @@ export async function sendPassEmail(input: {
   to: string;
   name: string;
   rollNo: string;
+  serial: string;
   passPng: Buffer;
   token: string;
 }): Promise<EmailResult> {
@@ -34,13 +35,21 @@ export async function sendPassEmail(input: {
       text: [
         `Hi ${input.name},`,
         ``,
-        `Your entry pass for AWS Student Community Day (Oct 6–8, SUIIT) is attached as an image.`,
-        `One-time entry pass: show the QR at the gate — invalid after first scan.`,
+        `We're excited to welcome you to AWS Student Community Day!`,
         ``,
-        `Backup: take a screenshot of the attached pass.`,
-        `Token: ${input.token}`,
+        `Your official entry pass is attached to this email. Please keep it accessible and present it at the venue for verification.`,
         ``,
-        `See you there — AWS Student Builder Group`,
+        `Serial No: ${input.serial}`,
+        `Entry Token: ${input.token}`,
+        ``,
+        `We look forward to seeing you at the event and having you be a part of a day filled with technology, innovation, learning, and collaboration.`,
+        ``,
+        `See you there!`,
+        ``,
+        `Best regards,`,
+        `AWS Student Builder Group, SUIIT`,
+        `Sambalpur University Institute of Information Technology`,
+        `Sambalpur, Odisha - 768019`,
       ].join("\n"),
       attachments: [{ filename: `SCD_${input.rollNo}.png`, content: input.passPng, contentType: "image/png" }],
     });

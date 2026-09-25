@@ -39,6 +39,7 @@ export async function POST(req: Request) {
       to: v.user.email,
       name: v.user.name,
       rollNo: v.user.rollNo,
+      serial: v.user.serial,
       passPng: png,
       token: v.pass.token,
     });

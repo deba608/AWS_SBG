@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useCallback, useEffect, useState } from "react";
-import { ChevronDown, Download, Loader2, LogOut, RotateCw, Search } from "lucide-react";
+import { Fragment, useCallback, useEffect, useState, type ReactNode } from "react";
+import { ChevronDown, Download, Loader2, LogOut, Printer, RotateCw, Search } from "lucide-react";
 import AdminLogin from "@/components/AdminLogin";
 import { cn } from "@/lib/utils";
 
@@ -54,8 +54,7 @@ interface RegSettings {
 const selectCls =
   "min-h-[44px] rounded-xl border border-line bg-surface px-3 py-2 text-sm text-cream focus:ring-2 focus:ring-brand";
 
-function Bar({ label, v, total, tone }: { label: string; v: number; total: number; tone: string }) {
-  const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+function Bar({ label, v, total, tone }: { label: string; v: number; total: number; tone: string }) {  const pct = total > 0 ? Math.round((v / total) * 100) : 0;
   return (
     <div>
       <div className="flex items-center justify-between text-xs">
@@ -69,8 +68,18 @@ function Bar({ label, v, total, tone }: { label: string; v: number; total: numbe
   );
 }
 
-export default function AdminClient() {
-  const [authed, setAuthed] = useState<boolean | null>(null);
+function Section({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <section aria-label={label} className="space-y-3">
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.25em] text-faint">
+        {"//"} {label}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+export default function AdminClient() {  const [authed, setAuthed] = useState<boolean | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [rows, setRows] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
@@ -271,49 +280,39 @@ export default function AdminClient() {
         >
           Open scanner
         </Link>
-        {(["ALL", "ENTRY", "FOOD", "USERS"] as const).map((scope) => (
-          <a
-            key={scope}
-            href={`/api/admin/export?scope=${scope}`}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line px-4 py-2 text-sm text-fog hover:text-cream"
+        {settings ? (
+          <span
+            className={cn(
+              "inline-flex min-h-[44px] items-center rounded-full border px-4 py-2 text-xs font-bold",
+              settings.open ? "border-green-500/40 text-green-300" : "border-red-500/40 text-red-300",
+            )}
           >
-            <Download className="h-4 w-4" aria-hidden />
-            CSV {scope === "ALL" ? "all" : scope.toLowerCase()}
-          </a>
-        ))}
-        <a
-          href="/api/admin/export?scope=USERS&format=xlsx"
-          title="Excel workbook: registrations + lunch summary sheets"
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500"
-        >
-          <Download className="h-4 w-4" aria-hidden />
-          Excel sheet
-        </a>
+            <span aria-hidden className={cn("mr-2 h-2 w-2 rounded-full", settings.open ? "bg-green-400" : "bg-red-400")} />
+            {settings.open ? `OPEN · ${settings.registered}/${settings.limit}` : "CLOSED"}
+          </span>
+        ) : null}
+        <span className="flex-1" aria-hidden />
         <button
           type="button"
           onClick={() => void load()}
           title="Refresh now (auto-refreshes every 15s)"
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line px-4 py-2 text-sm text-fog hover:text-cream"
+          aria-label="Refresh dashboard"
+          className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-line text-fog hover:text-cream"
         >
-          <RotateCw className={cn("h-4 w-4", loading && "animate-spin")} aria-hidden /> Refresh
+          <RotateCw className={cn("h-4 w-4", loading && "animate-spin")} aria-hidden />
         </button>
         <button
           type="button"
           onClick={logout}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line px-4 py-2 text-sm text-fog hover:text-cream"
+          title="Lock admin"
+          aria-label="Lock admin"
+          className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-line text-fog hover:text-cream"
         >
-          <LogOut className="h-4 w-4" aria-hidden /> Lock
-        </button>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          title="Offline fallback: print full list before event, check names manually if network dies"
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line px-4 py-2 text-sm text-fog hover:text-cream"
-        >
-          Print gate list
+          <LogOut className="h-4 w-4" aria-hidden />
         </button>
       </div>
 
+      <Section label="Overview">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {cards.map((c) => (
           <div key={c.label} className="rank-card p-4 text-center">
@@ -328,19 +327,12 @@ export default function AdminClient() {
           </div>
         ))}
       </div>
+      </Section>
 
       {settings ? (
         <div className="rank-card p-4 sm:p-5 print:hidden">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-bold text-cream">Registration control</h2>
-            <span
-              className={cn(
-                "rounded-full px-3 py-1 text-xs font-bold",
-                settings.open ? "bg-green-500/15 text-green-300" : "bg-red-500/15 text-red-300",
-              )}
-            >
-              {settings.open ? `OPEN · ${settings.registered}/${settings.limit}` : "CLOSED"}
-            </span>
           </div>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
             <label className="flex flex-1 items-center gap-2 text-sm text-fog">
@@ -381,6 +373,7 @@ export default function AdminClient() {
       ) : null}
 
       {stats ? (
+      <Section label="Gate live">
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <div className="rank-card space-y-3 p-4 sm:p-5">
             <h2 className="text-sm font-bold text-cream">Demographics</h2>
@@ -417,8 +410,10 @@ export default function AdminClient() {
             )}
           </div>
         </div>
+      </Section>
       ) : null}
 
+      <Section label="Pass list">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -631,6 +626,44 @@ export default function AdminClient() {
           </table>
         </div>
       </div>
+      </Section>
+
+      <Section label="Exports & offline">
+        <div className="rank-card p-4 sm:p-5 print:hidden">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {(["ALL", "ENTRY", "FOOD", "USERS"] as const).map((scope) => (
+              <a
+                key={scope}
+                href={`/api/admin/export?scope=${scope}`}
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-line px-4 py-2 text-sm text-fog hover:text-cream"
+              >
+                <Download className="h-4 w-4" aria-hidden />
+                CSV {scope === "ALL" ? "all" : scope.toLowerCase()}
+              </a>
+            ))}
+            <a
+              href="/api/admin/export?scope=USERS&format=xlsx"
+              title="Excel workbook: registrations + lunch summary sheets"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500"
+            >
+              <Download className="h-4 w-4" aria-hidden />
+              Excel sheet
+            </a>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              title="Print full list before event — manual check if network dies"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-line px-4 py-2 text-sm text-fog hover:text-cream"
+            >
+              <Printer className="h-4 w-4" aria-hidden />
+              Print gate list
+            </button>
+          </div>
+          <p className="mt-3 text-xs text-faint">
+            CSV opens in Excel/Sheets. Print the gate list before the event as the offline fallback.
+          </p>
+        </div>
+      </Section>
     </div>
   );
 }
