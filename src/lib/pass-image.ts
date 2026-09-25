@@ -37,7 +37,7 @@ export async function drawPassImage(input: {
   ctx.fillText("Event Entry Pass", 180, 102);
   ctx.font = "28px system-ui, sans-serif";
   ctx.fillStyle = "#a8b0bb";
-  ctx.fillText("AWS Student Community Day · Oct 6–8 · SUIIT", 180, 150);
+  ctx.fillText("AWS Student Community Day · Oct 6–8", 180, 150);
 
   // serial value only, white solid badge beside the title
   if (input.serial) {

@@ -73,7 +73,7 @@ export default function PassCard({
               />
               <div className="min-w-0">
                 <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-faint">
-                  AWS SBG · Community Day
+                  AWS SBG · Student Community Day
                 </p>
                 <h3 className="mt-1 text-lg font-bold tracking-tight text-cream">
                   {meta.label}
