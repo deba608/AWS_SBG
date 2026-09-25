@@ -14,9 +14,10 @@ import { cn } from "@/lib/utils";
 type VerifyState =
   | { kind: "idle" }
   | { kind: "busy" }
+  | { kind: "error"; message: string }
   | {
       kind: "result";
-      status: "ACTIVE" | "USED" | "INVALID";
+      status: "ACTIVE" | "USED" | "INVALID" | "EXPIRED";
       type?: "ENTRY" | "FOOD";
       name?: string;
       email?: string;
@@ -142,7 +143,7 @@ export default function ScanClient() {
         setState({ kind: "idle" });
         return;
       }
-      if (d.status === "ACTIVE" || d.status === "USED") {
+      if (d.status === "ACTIVE" || d.status === "USED" || d.status === "EXPIRED") {
         setState({
           kind: "result",
           status: d.status,
@@ -152,11 +153,13 @@ export default function ScanClient() {
           mobile: d.user?.mobile,
           usedAt: d.usedAt ?? null,
         });
+      } else if (d.error === "Too fast. Slow down.") {
+        setState({ kind: "error", message: "Too fast — wait a moment, then retry." });
       } else {
         setState({ kind: "result", status: "INVALID" });
       }
     } catch {
-      setState({ kind: "result", status: "INVALID" });
+      setState({ kind: "error", message: "Network failed. Check connection, then retry — nothing burned." });
     }
   }
 
