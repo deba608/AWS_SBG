@@ -23,7 +23,7 @@ export default function FoodSelect({
       <div
         role="radiogroup"
         aria-labelledby={labelId}
-        className="flex rounded-2xl border border-line bg-coal p-1.5"
+        className="grid grid-cols-2 gap-2"
       >
         {FOODS.map((f) => {
           const veg = f === "Veg";
@@ -36,12 +36,12 @@ export default function FoodSelect({
               aria-checked={active}
               onClick={() => onChange(f)}
               className={cn(
-                "flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border-2 text-sm font-bold transition-all duration-200",
+                "flex min-h-[44px] items-center justify-center gap-2 rounded-xl border px-3 text-sm font-semibold transition-all duration-200",
                 active
                   ? veg
-                    ? "border-emerald-400 bg-emerald-400/15 text-cream shadow-[0_0_24px_rgba(52,211,153,0.3)]"
-                    : "border-red-400 bg-red-400/15 text-cream shadow-[0_0_24px_rgba(248,113,113,0.3)]"
-                  : "border-transparent text-fog hover:text-cream",
+                    ? "border-emerald-400/60 bg-emerald-400/10 text-cream shadow-[0_0_20px_rgba(52,211,153,0.18)]"
+                    : "border-red-400/60 bg-red-400/10 text-cream shadow-[0_0_20px_rgba(248,113,113,0.18)]"
+                  : "border-line bg-surface text-fog hover:border-faint hover:text-cream",
               )}
             >
               {veg ? (
