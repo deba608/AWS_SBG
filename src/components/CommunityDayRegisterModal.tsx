@@ -56,7 +56,7 @@ export default function CommunityDayRegisterModal({
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const s = JSON.parse(raw) as Partial<Record<string, string>>;
-        if (s.fullName) setFullName(String(s.fullName));
+        if (s.fullName ?? s.name) setFullName(String(s.fullName ?? s.name));
         if (s.rollNo) setRollNo(String(s.rollNo));
         if (s.email) setEmail(String(s.email));
         if (s.gender) setGender(String(s.gender));
@@ -89,7 +89,10 @@ export default function CommunityDayRegisterModal({
     setApiError("");
 
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(contact));
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ fullName, rollNo, email, gender, food }),
+      );
     } catch {
       // private mode etc.
     }
@@ -116,7 +119,7 @@ export default function CommunityDayRegisterModal({
       const res = await fetch("/api/passes/issue", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(contact),
+        body: JSON.stringify({ fullName, rollNo, email, gender, food }),
       });
       const data = await res.json();
       if (!res.ok) {

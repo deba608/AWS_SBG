@@ -113,10 +113,10 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
       },
       {
         time: "11:00 AM – 01:00 PM",
-        title: "Make-A-Bot",
-        description: "Interactive build workshop: develop and deploy AI bots using Amazon Bedrock and AWS Lambda.",
+        title: "Make-A-Bot Competition",
+        description: "Bot-building competition: design, develop and deploy AI bots using Amazon Bedrock and AWS Lambda. Compete for prizes.",
         venue: "Seminar Hall",
-        tag: "Workshop",
+        tag: "Competition",
       },
     ],
   },

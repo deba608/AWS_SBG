@@ -93,15 +93,15 @@ export const techparlament: EventItem = {
 };
 
 export const makeABot: EventItem = {
-  id: "make-a-bot-workshop",
+  id: "make-a-bot-competition",
   parentId: "aws-student-community-day-suiit-2026",
-  title: "Make-A-Bot Workshop (Day 2)",
+  title: "Make-A-Bot Competition (Day 2)",
   category: "Build Session",
   date: "7 October 2026",
   time: "11:00 AM – 1:00 PM IST",
   location: "Seminar Hall, SUIIT",
   description:
-    "Interactive build session: develop and deploy conversational AI bots and autonomous agents using Amazon Bedrock and AWS Lambda.",
+    "Bot-building competition: design, develop and deploy conversational AI bots and autonomous agents using Amazon Bedrock and AWS Lambda. Compete for prizes.",
   status: "open",
   registerUrl: "/passes",
   detailsUrl: "/events/aws-student-community-day-suiit-2026",
