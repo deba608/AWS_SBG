@@ -1,6 +1,7 @@
+import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { listPasses } from "@/lib/pass-store";
+import { listPasses, passStats } from "@/lib/pass-store";
 
 function csvCell(v: string | null | undefined): string {
   const s = String(v ?? "");
@@ -11,6 +12,7 @@ export async function GET(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   const { searchParams } = new URL(req.url);
   const scope = searchParams.get("scope") ?? "ALL"; // ALL | ENTRY | FOOD | USERS
+  const format = searchParams.get("format") ?? "csv"; // csv | xlsx
   const { rows } = await listPasses({ limit: 1000 });
 
   let header: string[];
@@ -45,6 +47,38 @@ export async function GET(req: Request) {
       pass.scannedBy ?? "",
       pass.token,
     ]);
+  }
+
+  if (format === "xlsx") {
+    const stats = await passStats();
+    const wb = new ExcelJS.Workbook();
+    wb.creator = "AWS SBG";
+    wb.created = new Date();
+    const main = wb.addWorksheet(scope === "USERS" ? "Registrations" : "Passes");
+    main.columns = header.map((h) => ({ header: h, key: h, width: 22 }));
+    main.getRow(1).font = { bold: true };
+    for (const line of lines) main.addRow(line);
+    const lunch = wb.addWorksheet("Lunch summary");
+    lunch.columns = [
+      { header: "metric", key: "metric", width: 22 },
+      { header: "count", key: "count", width: 12 },
+    ];
+    lunch.getRow(1).font = { bold: true };
+    for (const [metric, count] of [
+      ["registered", stats.users],
+      ["passes_issued", stats.issued],
+      ["veg", stats.veg],
+      ["non_veg", stats.nonveg],
+      ["entry_scanned", stats.entryUsed],
+      ["entry_pending", stats.entryActive],
+    ] as const) lunch.addRow([metric, count]);
+    const buf = Buffer.from(await wb.xlsx.writeBuffer());
+    return new NextResponse(buf, {
+      headers: {
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": `attachment; filename="passes-${scope.toLowerCase()}.xlsx"`,
+      },
+    });
   }
 
   const csv = [header, ...lines].map((r) => r.map(csvCell).join(",")).join("\n");

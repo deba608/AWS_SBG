@@ -133,6 +133,14 @@ export default function AdminClient() {
             CSV {scope === "ALL" ? "all" : scope.toLowerCase()}
           </a>
         ))}
+        <a
+          href="/api/admin/export?scope=USERS&format=xlsx"
+          title="Excel workbook: registrations + lunch summary sheets"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500"
+        >
+          <Download className="h-4 w-4" aria-hidden />
+          Excel sheet
+        </a>
         <button
           type="button"
           onClick={logout}
