@@ -25,6 +25,7 @@ export default function PassCard({
   name,
   serial,
   email,
+  mobile,
   rollNo,
   food,
   type,
@@ -34,6 +35,7 @@ export default function PassCard({
   name: string;
   serial: string;
   email: string;
+  mobile: string;
   rollNo: string;
   food: string;
   type: PassCardType;
@@ -105,6 +107,7 @@ export default function PassCard({
                 {name}
               </p>
               <p className="mt-1 truncate text-sm text-fog">{email}</p>
+              <p className="mt-0.5 truncate text-sm text-fog">{mobile}</p>
               <p className="mt-0.5 font-mono text-xs tracking-wide text-faint">
                 {rollNo}
               </p>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PassesClient from "./passes-client";
+import RetrievePass from "@/components/RetrievePass";
 
 export const metadata: Metadata = {
   title: "Get Event Entry Pass",
@@ -23,6 +24,7 @@ export default function PassesPage() {
       </p>
       <div className="mt-8">
         <PassesClient />
+        <RetrievePass />
       </div>
     </div>
   );

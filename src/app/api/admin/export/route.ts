@@ -18,28 +18,30 @@ export async function GET(req: Request) {
   let header: string[];
   let lines: string[][];
   if (scope === "USERS") {
-    const seen = new Map<string, { serial: string; name: string; email: string; rollNo: string; gender: string; food: string; createdAt: string }>();
+    const seen = new Map<string, { serial: string; name: string; email: string; mobile: string; rollNo: string; gender: string; food: string; createdAt: string }>();
     for (const { user } of rows) {
       if (!user || seen.has(user.id)) continue;
       seen.set(user.id, {
         serial: user.serial ?? "",
         name: user.name,
         email: user.email,
+        mobile: user.mobile ?? "",
         rollNo: user.rollNo,
         gender: user.gender,
         food: user.food,
         createdAt: user.createdAt,
       });
     }
-    header = ["serial", "name", "email", "roll_no", "gender", "food", "registered_at"];
-    lines = [...seen.values()].map((u) => [u.serial, u.name, u.email, u.rollNo, u.gender, u.food, u.createdAt]);
+    header = ["serial", "name", "email", "mobile", "roll_no", "gender", "food", "registered_at"];
+    lines = [...seen.values()].map((u) => [u.serial, u.name, u.email, u.mobile, u.rollNo, u.gender, u.food, u.createdAt]);
   } else {
     const filtered = scope === "ALL" ? rows : rows.filter((r) => r.pass.type === scope);
-    header = ["serial", "name", "email", "roll_no", "gender", "food", "type", "status", "used_at", "scanned_by", "token"];
+    header = ["serial", "name", "email", "mobile", "roll_no", "gender", "food", "type", "status", "used_at", "scanned_by", "token"];
     lines = filtered.map(({ pass, user }) => [
       user?.serial ?? "",
       user?.name ?? "",
       user?.email ?? "",
+      user?.mobile ?? "",
       user?.rollNo ?? "",
       user?.gender ?? "",
       user?.food ?? "",

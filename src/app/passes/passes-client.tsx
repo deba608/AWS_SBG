@@ -24,6 +24,7 @@ interface IssuedUser {
   name: string;
   serial: string;
   email: string;
+  mobile: string;
   rollNo: string;
   gender: string;
   food: string;
@@ -38,6 +39,7 @@ export default function PassesClient() {
   const [fullName, setFullName] = useState("");
   const [rollNo, setRollNo] = useState("");
   const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
   const [gender, setGender] = useState("");
   const [food, setFood] = useState("");
   const [errors, setErrors] = useState<ContactErrors>({});
@@ -50,7 +52,7 @@ export default function PassesClient() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const fe = validateContact({ fullName, rollNo, email, gender, food });
+    const fe = validateContact({ fullName, rollNo, email, mobile, gender, food });
     setErrors(fe);
     if (Object.keys(fe).length > 0) return;
     setStatus("busy");
@@ -59,7 +61,7 @@ export default function PassesClient() {
       const res = await fetch("/api/passes/issue", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, rollNo, email, gender, food }),
+        body: JSON.stringify({ fullName, rollNo, email, mobile, gender, food }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -109,6 +111,7 @@ export default function PassesClient() {
               name={user.name}
               serial={user.serial ?? ""}
               email={user.email}
+              mobile={user.mobile ?? ""}
               rollNo={user.rollNo}
               food={user.food}
               type={p.type}
@@ -200,6 +203,26 @@ export default function PassesClient() {
           />
           {errors.email ? (
             <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.email}</p>
+          ) : null}
+        </div>
+        <div>
+          <label htmlFor="pass-mobile" className="mb-1.5 block text-sm font-medium text-cream">
+            Mobile number *
+          </label>
+          <input
+            id="pass-mobile"
+            type="tel"
+            autoComplete="tel-national"
+            inputMode="numeric"
+            maxLength={13}
+            placeholder="98765 43210"
+            value={mobile}
+            onChange={(e) => setMobile(e.target.value)}
+            aria-invalid={Boolean(errors.mobile)}
+            className={inputCls(Boolean(errors.mobile))}
+          />
+          {errors.mobile ? (
+            <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.mobile}</p>
           ) : null}
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

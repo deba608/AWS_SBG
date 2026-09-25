@@ -18,6 +18,7 @@ export interface StoredUser {
   name: string;
   rollNo: string;
   email: string;
+  mobile: string;
   gender: Gender;
   food: FoodPref;
   createdAt: string;
@@ -153,10 +154,14 @@ export function findUser(
   store: StoreShape,
   email: string,
   rollNo: string,
+  mobile?: string,
 ): StoredUser | undefined {
   const e = email.trim().toLowerCase();
   const r = rollNo.trim().toUpperCase();
-  return store.users.find((u) => u.email === e || u.rollNo === r);
+  const m = (mobile ?? "").replace(/\D/g, "").slice(-10);
+  return store.users.find(
+    (u) => u.email === e || u.rollNo === r || (m !== "" && (u.mobile ?? "").replace(/\D/g, "").slice(-10) === m),
+  );
 }
 
 /** Thrown when email or roll number is already registered. Maps to 409. */
@@ -167,22 +172,24 @@ export class ConflictError extends Error {
   }
 }
 
-/** One email / roll number = one pass. Re-registration is rejected (409). */
+/** One email / roll / mobile = one pass. Re-registration is rejected (409). */
 export async function issuePasses(input: {
   name: string;
   rollNo: string;
   email: string;
+  mobile: string;
   gender: Gender;
   food: FoodPref;
 }): Promise<{ user: StoredUser; passes: StoredPass[]; duplicate: boolean }> {
   return withWriteLock(async () => {
   const email = input.email.trim().toLowerCase();
   const rollNo = input.rollNo.trim().toUpperCase();
+  const mobile = input.mobile.replace(/\D/g, "").slice(-10);
   const store = await readStore();
-  const existing = findUser(store, email, rollNo);
+  const existing = findUser(store, email, rollNo, mobile);
   if (existing) {
     throw new ConflictError(
-      "This email or roll number is already registered. Each student gets one pass — use Retrieve below if you lost your QR.",
+      "This email, roll number or mobile is already registered. Each student gets one pass — use Retrieve below if you lost your QR.",
     );
   }
 
@@ -195,6 +202,7 @@ export async function issuePasses(input: {
     name: input.name,
     rollNo,
     email,
+    mobile,
     gender: input.gender,
     food: input.food,
     createdAt: now,
@@ -223,9 +231,10 @@ export async function issuePasses(input: {
 export async function getPassesByContact(
   email: string,
   rollNo: string,
+  mobile?: string,
 ): Promise<{ user: StoredUser; passes: StoredPass[] } | null> {
   const store = await readStore();
-  const user = findUser(store, email, rollNo);
+  const user = findUser(store, email, rollNo, mobile);
   if (!user) return null;
   return { user, passes: store.passes.filter((p) => p.userId === user.id) };
 }
@@ -315,7 +324,7 @@ export async function listPasses(filter: {
     if (filter.status && filter.status !== "ALL" && pass.status !== filter.status) continue;
     const user = store.users.find((u) => u.id === pass.userId) ?? null;
     if (q) {
-      const hay = `${user?.name ?? ""} ${user?.rollNo ?? ""} ${user?.email ?? ""} ${user?.food ?? ""}`.toLowerCase();
+      const hay = `${user?.name ?? ""} ${user?.serial ?? ""} ${user?.rollNo ?? ""} ${user?.email ?? ""} ${user?.mobile ?? ""} ${user?.food ?? ""}`.toLowerCase();
       if (!hay.includes(q)) continue;
     }
     rows.push({ pass, user });

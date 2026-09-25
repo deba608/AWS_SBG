@@ -26,6 +26,7 @@ export async function POST(req: Request) {
     fullName: String(b.fullName ?? ""),
     rollNo: String(b.rollNo ?? ""),
     email: String(b.email ?? ""),
+    mobile: String(b.mobile ?? ""),
     gender: String(b.gender ?? ""),
     food: String(b.food ?? ""),
   };
@@ -72,6 +73,7 @@ export async function POST(req: Request) {
           serial: user.serial,
           rollNo: user.rollNo,
           email: user.email,
+          mobile: user.mobile,
           gender: user.gender,
           food: user.food,
         },
@@ -108,15 +110,16 @@ export async function POST(req: Request) {
   }
 }
 
-/** Retrieve: GET /api/passes/issue?email=&rollNo= */
+/** Retrieve: GET /api/passes/issue?email=&rollNo=&mobile= */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const email = (searchParams.get("email") ?? "").trim().toLowerCase();
-  const rollNo = (searchParams.get("rollNo") ?? searchParams.get("mobile") ?? "").trim();
-  if (!email && !rollNo) {
-    return NextResponse.json({ error: "email or roll number required." }, { status: 400 });
+  const rollNo = (searchParams.get("rollNo") ?? "").trim();
+  const mobile = (searchParams.get("mobile") ?? "").trim();
+  if (!email && !rollNo && !mobile) {
+    return NextResponse.json({ error: "email, roll number or mobile required." }, { status: 400 });
   }
-  const found = await getPassesByContact(email, rollNo);
+  const found = await getPassesByContact(email, rollNo, mobile);
   if (!found) return NextResponse.json({ error: "No pass found." }, { status: 404 });
   const withQr = await Promise.all(
     found.passes.map(async (p) => ({
@@ -133,6 +136,7 @@ export async function GET(req: Request) {
       serial: found.user.serial ?? "",
       rollNo: found.user.rollNo,
       email: found.user.email,
+      mobile: found.user.mobile ?? "",
       gender: found.user.gender,
       food: found.user.food,
     },

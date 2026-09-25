@@ -23,6 +23,7 @@ export async function GET(req: Request) {
       name: user?.name ?? "—",
       serial: user?.serial ?? "—",
       email: user?.email ?? "—",
+      mobile: user?.mobile ?? "—",
       rollNo: user?.rollNo ?? "—",
       gender: user?.gender ?? "—",
       food: user?.food ?? "—",
