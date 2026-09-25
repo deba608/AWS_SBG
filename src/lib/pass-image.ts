@@ -17,28 +17,43 @@ export async function drawPassImage(input: {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas unavailable.");
 
-  // bg
-  ctx.fillStyle = "#ffffff";
+  // bg (site surface)
+  ctx.fillStyle = "#141a20";
   ctx.fillRect(0, 0, W, H);
 
-  // header band
-  ctx.fillStyle = "#7c3aed";
-  ctx.fillRect(0, 0, W, 210);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 44px system-ui, sans-serif";
-  ctx.fillText("Event Entry Pass", 50, 90);
+  // brand accent bar
+  ctx.fillStyle = "#ad5cff";
+  ctx.fillRect(0, 0, W, 10);
+
+  // header
+  ctx.fillStyle = "#6b7480";
+  ctx.font = "28px ui-monospace, monospace";
+  ctx.fillText("AWS SBG · COMMUNITY DAY", 50, 80);
+  ctx.fillStyle = "#f5f3ee";
+  ctx.font = "bold 52px system-ui, sans-serif";
+  ctx.fillText("Event Entry Pass", 50, 145);
   ctx.font = "28px system-ui, sans-serif";
-  ctx.fillStyle = "#e9d5ff";
-  ctx.fillText("AWS Student Community Day · Oct 6–8 · SUIIT", 50, 145);
+  ctx.fillStyle = "#a8b0bb";
+  ctx.fillText("AWS Student Community Day · Oct 6–8 · SUIIT", 50, 195);
 
   // name block
-  ctx.fillStyle = "#111111";
+  ctx.fillStyle = "#f5f3ee";
   ctx.font = "bold 52px system-ui, sans-serif";
-  ctx.fillText(input.name.slice(0, 28), 50, 290);
-  ctx.fillStyle = "#555555";
+  ctx.fillText(input.name.slice(0, 28), 50, 300);
+  ctx.fillStyle = "#a8b0bb";
   ctx.font = "30px system-ui, sans-serif";
-  ctx.fillText(input.email.slice(0, 40), 50, 340);
-  ctx.fillText(`Roll: ${input.rollNo} · Food: ${input.food}`, 50, 385);
+  ctx.fillText(input.email.slice(0, 40), 50, 350);
+  ctx.fillStyle = "#6b7480";
+  ctx.fillText(`Roll: ${input.rollNo} · Food: ${input.food}`, 50, 395);
+
+  // QR on white well (keeps contrast for scanners)
+  const QR = 560;
+  const qx = (W - QR) / 2;
+  const qy = 445;
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.roundRect(qx - 24, qy - 24, QR + 48, QR + 48, 28);
+  ctx.fill();
 
   // QR
   const img = new Image();
@@ -47,18 +62,17 @@ export async function drawPassImage(input: {
     img.onerror = () => reject(new Error("QR load failed."));
     img.src = input.qrDataUrl;
   });
-  const QR = 560;
-  ctx.drawImage(img, (W - QR) / 2, 440, QR, QR);
+  ctx.drawImage(img, qx, qy, QR, QR);
 
   // token + hint
-  ctx.fillStyle = "#333333";
+  ctx.fillStyle = "#6b7480";
   ctx.font = "22px ui-monospace, monospace";
   const tok = input.token.length > 48 ? `${input.token.slice(0, 48)}…` : input.token;
   ctx.fillText(tok, 50, 1060);
-  ctx.fillStyle = "#7c3aed";
+  ctx.fillStyle = "#ad5cff";
   ctx.font = "bold 28px system-ui, sans-serif";
   ctx.fillText("Show QR at gate · scans once", 50, 1115);
-  ctx.fillStyle = "#777777";
+  ctx.fillStyle = "#6b7480";
   ctx.font = "26px system-ui, sans-serif";
   ctx.fillText("Backup: take a screenshot of this pass.", 50, 1158);
 
