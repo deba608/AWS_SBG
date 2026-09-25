@@ -2,6 +2,7 @@ import Link from "next/link";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
 import EventCard from "@/components/EventCard";
+import EventGroup from "@/components/EventGroup";
 import HeroVisual from "@/components/HeroVisual";
 import JoinCTA from "@/components/JoinCTA";
 import { upcomingEvents } from "@/data/events";
@@ -137,9 +138,16 @@ export default function HomePage() {
             description="Hands-on sessions, hackathons, and discussions on the calendar. Join one and ship something."
           />
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {upcomingEvents.map((event) => (
-              <EventCard key={event.id} event={event} compact />
-            ))}
+            {upcomingEvents
+              .filter((event) => !event.parentId)
+              .map((event) => {
+                const sessions = upcomingEvents.filter((e) => e.parentId === event.id);
+                return sessions.length > 0 ? (
+                  <EventGroup key={event.id} parent={event} sessions={sessions} compact />
+                ) : (
+                  <EventCard key={event.id} event={event} compact />
+                );
+              })}
           </div>
           <p className="mt-8">
             <Link
