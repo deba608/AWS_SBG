@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import { mailConfigured, sendPassEmail } from "@/lib/mailer";
+import { drawPassImageServer } from "@/lib/pass-image-server";
 import { getPassesByContact, issuePasses, ConflictError } from "@/lib/pass-store";
 import { warnDefaultSecrets } from "@/lib/pass-token";
 import { clientIp, rateOk } from "@/lib/rate-limit";
@@ -44,14 +45,21 @@ export async function POST(req: Request) {
         status: p.status,
       })),
     );
-    // Share by email too — best effort, pass shown regardless.
+    // Share the full pass image by email — best effort, pass shown regardless.
     let emailSent = false;
     if (!duplicate && mailConfigured()) {
-      const png = Buffer.from(withQr[0].qrImage.split(",")[1], "base64");
+      const png = await drawPassImageServer({
+        name: user.name,
+        email: user.email,
+        rollNo: user.rollNo,
+        food: user.food,
+        qrDataUrl: withQr[0].qrImage,
+        token: passes[0].token,
+      });
       const mail = await sendPassEmail({
         to: user.email,
         name: user.name,
-        qrPng: png,
+        passPng: png,
         token: passes[0].token,
       });
       emailSent = mail.sent;

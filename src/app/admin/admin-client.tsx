@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import { Download, Loader2, LogOut, Search } from "lucide-react";
+import { Fragment, useCallback, useEffect, useState } from "react";
+import { ChevronDown, Download, Loader2, LogOut, Search } from "lucide-react";
 import AdminLogin from "@/components/AdminLogin";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,17 @@ interface Stats {
   entryUsed: number;
   veg: number;
   nonveg: number;
+  male: number;
+  female: number;
+}
+
+interface Scan {
+  type: string;
+  name: string;
+  rollNo: string;
+  food: string;
+  usedAt: string | null;
+  scannedBy: string;
 }
 
 interface Row {
@@ -32,6 +43,21 @@ interface Row {
 const selectCls =
   "min-h-[44px] rounded-xl border border-line bg-surface px-3 py-2 text-sm text-cream focus:ring-2 focus:ring-brand";
 
+function Bar({ label, v, total, tone }: { label: string; v: number; total: number; tone: string }) {
+  const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+  return (
+    <div>
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-fog">{label}</span>
+        <span className="font-mono text-cream">{v} · {pct}%</span>
+      </div>
+      <div className="mt-1 h-2 overflow-hidden rounded-full bg-black/40" role="img" aria-label={`${label}: ${v} of ${total}`}>
+        <div className={cn("h-full rounded-full", tone)} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
+
 export default function AdminClient() {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -41,6 +67,8 @@ export default function AdminClient() {
   const [type, setType] = useState("ALL");
   const [status, setStatus] = useState("ALL");
   const [loading, setLoading] = useState(false);
+  const [scans, setScans] = useState<Scan[]>([]);
+  const [openToken, setOpenToken] = useState<string | null>(null);
 
   const check = useCallback(async () => {
     try {
@@ -54,12 +82,13 @@ export default function AdminClient() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [s, l] = await Promise.all([
+      const [s, l, r] = await Promise.all([
         fetch("/api/admin/stats", { cache: "no-store" }),
         fetch(
           `/api/admin/passes?q=${encodeURIComponent(q)}&type=${type}&status=${status}&limit=200`,
           { cache: "no-store" },
         ),
+        fetch("/api/admin/recent?limit=10", { cache: "no-store" }),
       ]);
       if (l.status === 401) {
         setAuthed(false);
@@ -71,6 +100,7 @@ export default function AdminClient() {
         setRows(d.rows as Row[]);
         setTotal(d.total as number);
       }
+      if (r.ok) setScans(((await r.json()).rows as Scan[]) ?? []);
     } finally {
       setLoading(false);
     }
@@ -94,6 +124,8 @@ export default function AdminClient() {
     setAuthed(false);
     setRows([]);
     setStats(null);
+    setScans([]);
+    setOpenToken(null);
   }
 
   if (authed === null) {
@@ -113,6 +145,7 @@ export default function AdminClient() {
         { label: "Non-veg lunch", v: stats.nonveg },
       ]
     : [];
+  const entryPct = stats && stats.issued > 0 ? Math.round((stats.entryUsed / stats.issued) * 100) : 0;
 
   return (
     <div className="space-y-5">
@@ -164,9 +197,53 @@ export default function AdminClient() {
             <p className="text-3xl font-bold text-cream">{c.v}</p>
             <p className="mt-1 text-xs text-fog">{c.label}</p>
             {c.sub ? <p className="text-[11px] text-faint">{c.sub}</p> : null}
+            {c.label === "Entry in" && stats ? (
+              <div className="mx-auto mt-2 h-2 max-w-[120px] overflow-hidden rounded-full bg-black/40" role="img" aria-label={`Gate progress: ${entryPct}% entered`}>
+                <div className="h-full rounded-full bg-green-500" style={{ width: `${entryPct}%` }} />
+              </div>
+            ) : null}
           </div>
         ))}
       </div>
+
+      {stats ? (
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <div className="rank-card space-y-3 p-4 sm:p-5">
+            <h2 className="text-sm font-bold text-cream">Demographics</h2>
+            <Bar label="Male" v={stats.male} total={stats.users} tone="bg-sky-500" />
+            <Bar label="Female" v={stats.female} total={stats.users} tone="bg-pink-500" />
+            <Bar label="Veg" v={stats.veg} total={stats.users} tone="bg-green-500" />
+            <Bar label="Non-veg" v={stats.nonveg} total={stats.users} tone="bg-amber-500" />
+          </div>
+          <div className="rank-card p-4 sm:p-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-cream">Recent gate scans</h2>
+              <Link href="/admin/scan" className="text-xs text-fog underline decoration-line underline-offset-4 hover:text-cream">
+                Open scanner
+              </Link>
+            </div>
+            {scans.length === 0 ? (
+              <p className="mt-3 text-sm text-fog">No scans yet — burns appear here live.</p>
+            ) : (
+              <ul className="mt-3 space-y-2">
+                {scans.map((s) => (
+                  <li key={`${s.rollNo}-${s.usedAt}`} className="flex items-center justify-between gap-3 rounded-xl border border-line px-3 py-2 text-sm">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-cream">{s.name}</p>
+                      <p className="truncate text-xs text-faint">
+                        Roll {s.rollNo} · {s.food === "Veg" ? "VEG" : "NON-VEG"} · {s.scannedBy}
+                      </p>
+                    </div>
+                    <span className="shrink-0 font-mono text-[11px] text-fog">
+                      {s.usedAt ? new Date(s.usedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "—"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      ) : null}
 
       <form
         onSubmit={(e) => {
@@ -220,9 +297,22 @@ export default function AdminClient() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.token} className="border-t border-line">
-                  <td className="px-4 py-2 font-medium text-cream">{r.name}</td>
+              {rows.map((r) => {
+                const open = openToken === r.token;
+                return (
+                <Fragment key={r.token}>
+                <tr className="border-t border-line">
+                  <td className="px-4 py-2 font-medium text-cream">
+                    <button
+                      type="button"
+                      onClick={() => setOpenToken(open ? null : r.token)}
+                      aria-expanded={open}
+                      className="inline-flex min-h-[44px] items-center gap-1.5 text-left hover:text-brand"
+                    >
+                      {r.name}
+                      <ChevronDown className={cn("h-4 w-4 text-faint transition-transform", open && "rotate-180")} aria-hidden />
+                    </button>
+                  </td>
                   <td className="px-4 py-2 text-xs text-fog">
                     {r.email}
                     <br />
@@ -260,7 +350,22 @@ export default function AdminClient() {
                   </td>
                   <td className="px-4 py-2 text-xs text-fog">{r.usedAt ?? "—"}</td>
                 </tr>
-              ))}
+                {open ? (
+                <tr key={`${r.token}-detail`} className="border-t border-dashed border-line bg-black/20">
+                  <td colSpan={6} className="px-4 py-3 text-xs">
+                    <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 sm:grid-cols-2">
+                      <div className="flex gap-2"><dt className="shrink-0 text-faint">Gender</dt><dd className="text-cream">{r.gender}</dd></div>
+                      <div className="flex gap-2"><dt className="shrink-0 text-faint">Issued</dt><dd className="text-cream">{new Date(r.createdAt).toLocaleString("en-IN")}</dd></div>
+                      <div className="flex gap-2"><dt className="shrink-0 text-faint">Gate</dt><dd className="text-cream">{r.scannedBy ?? "—"}</dd></div>
+                      <div className="flex gap-2"><dt className="shrink-0 text-faint">Burned</dt><dd className="text-cream">{r.usedAt ? new Date(r.usedAt).toLocaleString("en-IN") : "—"}</dd></div>
+                    </dl>
+                    <p className="mt-2 break-all font-mono text-[11px] text-faint">{r.token}</p>
+                  </td>
+                </tr>
+                ) : null}
+                </Fragment>
+                );
+              })}
               {rows.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-fog">

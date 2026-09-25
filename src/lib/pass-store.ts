@@ -250,6 +250,8 @@ export async function passStats(): Promise<{
   entryUsed: number;
   veg: number;
   nonveg: number;
+  male: number;
+  female: number;
 }> {
   const store = await readStore();
   return {
@@ -259,6 +261,8 @@ export async function passStats(): Promise<{
     entryUsed: store.passes.filter((p) => p.type === "ENTRY" && p.status === "USED").length,
     veg: store.users.filter((u) => u.food === "Veg").length,
     nonveg: store.users.filter((u) => u.food === "Non-veg").length,
+    male: store.users.filter((u) => u.gender === "Male").length,
+    female: store.users.filter((u) => u.gender === "Female").length,
   };
 }
 

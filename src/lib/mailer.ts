@@ -13,7 +13,7 @@ export function mailConfigured(): boolean {
 export async function sendPassEmail(input: {
   to: string;
   name: string;
-  qrPng: Buffer;
+  passPng: Buffer;
   token: string;
 }): Promise<EmailResult> {
   if (!mailConfigured()) return { sent: false, reason: "email-not-configured" };
@@ -41,7 +41,7 @@ export async function sendPassEmail(input: {
         ``,
         `See you there — AWS Student Builder Group`,
       ].join("\n"),
-      attachments: [{ filename: "entry-pass.png", content: input.qrPng, contentType: "image/png" }],
+      attachments: [{ filename: "entry-pass.png", content: input.passPng, contentType: "image/png" }],
     });
     return { sent: true };
   } catch (err) {

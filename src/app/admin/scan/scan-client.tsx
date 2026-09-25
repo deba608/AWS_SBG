@@ -68,6 +68,7 @@ export default function ScanClient() {
   const inputRef = useRef<HTMLInputElement>(null);
   const controlsRef = useRef<{ stop: () => void } | null>(null);
   const lastScanRef = useRef<string>("");
+  const resumeCamRef = useRef(false);
 
   const refreshMe = useCallback(async () => {
     try {
@@ -182,6 +183,8 @@ export default function ScanClient() {
       if (r.status === 410 || d.status === "EXPIRED") {
         setState({ kind: "result", status: "EXPIRED", type: d.type });
       } else if (r.status === 409 || d.status === "USED") {
+        resumeCamRef.current = true;
+        stopCamera();
         setState({
           kind: "result",
           status: "USED",
@@ -193,6 +196,8 @@ export default function ScanClient() {
           usedAt: d.usedAt ?? null,
         });
       } else if (d.ok) {
+        resumeCamRef.current = true;
+        stopCamera();
         setState({
           kind: "result",
           status: "USED",
@@ -316,6 +321,10 @@ export default function ScanClient() {
     lastScanRef.current = "";
     setState({ kind: "idle" });
     inputRef.current?.focus();
+    if (resumeCamRef.current) {
+      resumeCamRef.current = false;
+      void startCamera();
+    }
   }
 
   return (
@@ -459,7 +468,7 @@ export default function ScanClient() {
               {result.usedAt ? (
                 <p className="text-xs text-fog">Burned at {result.usedAt}</p>
               ) : null}
-              {justBurned ? (
+              {result.status === "USED" ? (
                 <button
                   type="button"
                   onClick={scanNext}
