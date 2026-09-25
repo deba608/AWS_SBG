@@ -10,6 +10,7 @@ import {
 } from "@/lib/validate-contact";
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
+import { emailExactPass } from "@/lib/pass-image";
 import { cn } from "@/lib/utils";
 
 interface IssuedPass {
@@ -102,8 +103,24 @@ export default function PassesClient() {
       setUser(data.user as IssuedUser);
       setPasses(data.passes as IssuedPass[]);
       setWasDuplicate(Boolean(data.duplicate));
-      setEmailSent(Boolean(data.email?.sent));
+      setEmailSent(false);
       setStatus("done");
+      // Email the exact on-screen pass (fire-and-forget; row flips on success).
+      void (async () => {
+        const u = data.user as IssuedUser;
+        const ps = data.passes as IssuedPass[];
+        if (!ps[0]) return;
+        const ok = await emailExactPass({
+          serial: u.serial ?? "",
+          name: u.name,
+          email: u.email,
+          rollNo: u.rollNo,
+          food: u.food,
+          qrDataUrl: ps[0].qrImage,
+          token: ps[0].token,
+        });
+        if (ok) setEmailSent(true);
+      })();
       try {
         localStorage.setItem(
           "awsPasses",

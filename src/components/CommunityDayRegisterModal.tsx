@@ -128,7 +128,7 @@ export default function CommunityDayRegisterModal({
       const res = await fetch("/api/passes/issue", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, rollNo, email, gender, food }),
+        body: JSON.stringify({ fullName, rollNo, email, mobile, gender, food }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -136,15 +136,28 @@ export default function CommunityDayRegisterModal({
         throw new Error(data.error ?? "Pass issue failed.");
       }
       const issued = (data.passes as IssuedPass[])[0];
+      const u = data.user as { name: string; serial?: string; rollNo: string; food: string };
       setPass(issued);
       setPassUser({
-        name: (data.user as { name: string }).name,
-        serial: (data.user as { serial?: string }).serial ?? "",
-        rollNo: (data.user as { rollNo: string }).rollNo,
-        food: (data.user as { food: string }).food,
+        name: u.name,
+        serial: u.serial ?? "",
+        rollNo: u.rollNo,
+        food: u.food,
       });
-      setEmailSent(Boolean(data.email?.sent));
+      setEmailSent(false);
       setStatus("done");
+      // Email the exact on-screen pass (fire-and-forget).
+      void emailExactPass({
+        serial: u.serial ?? "",
+        name: u.name,
+        email,
+        rollNo: u.rollNo,
+        food: u.food,
+        qrDataUrl: issued.qrImage,
+        token: issued.token,
+      }).then((ok) => {
+        if (ok) setEmailSent(true);
+      });
     } catch (err) {
       setApiError(err instanceof Error ? err.message : "Pass issue failed.");
       setStatus("form");
