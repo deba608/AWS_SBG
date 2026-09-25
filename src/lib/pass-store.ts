@@ -134,7 +134,15 @@ export function findUser(
   return store.users.find((u) => u.email === e || u.rollNo === r);
 }
 
-/** Idempotent issue: existing email/roll returns existing ENTRY pass. */
+/** Thrown when email or roll number is already registered. Maps to 409. */
+export class ConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ConflictError";
+  }
+}
+
+/** One email / roll number = one pass. Re-registration is rejected (409). */
 export async function issuePasses(input: {
   name: string;
   rollNo: string;
@@ -148,23 +156,22 @@ export async function issuePasses(input: {
   const store = await readStore();
   const existing = findUser(store, email, rollNo);
   if (existing) {
-    const entry = store.passes.find((p) => p.userId === existing.id && p.type === "ENTRY");
-    if (entry) return { user: existing, passes: [entry], duplicate: true };
+    throw new ConflictError(
+      "This email or roll number is already registered. Each student gets one pass — use Retrieve below if you lost your QR.",
+    );
   }
 
   const now = new Date().toISOString();
-  const user: StoredUser =
-    existing ??
-    ({
-      id: `u_${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`,
-      name: input.name,
-      rollNo,
-      email,
-      gender: input.gender,
-      food: input.food,
-      createdAt: now,
-    } satisfies StoredUser);
-  if (!existing) store.users.push(user);
+  const user: StoredUser = {
+    id: `u_${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`,
+    name: input.name,
+    rollNo,
+    email,
+    gender: input.gender,
+    food: input.food,
+    createdAt: now,
+  };
+  store.users.push(user);
 
   const pid = newPassId();
   const token = signPass("ENTRY", pid);
@@ -181,7 +188,7 @@ export async function issuePasses(input: {
   };
   store.passes.push(pass);
   await writeStore(store);
-  return { user, passes: [pass], duplicate: Boolean(existing) };
+  return { user, passes: [pass], duplicate: false };
   });
 }
 

@@ -151,6 +151,7 @@ export default function PassesClient() {
           <input
             id="pass-name"
             autoComplete="name"
+            maxLength={60}
             placeholder="e.g. Debashish Pradhan"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
@@ -168,6 +169,7 @@ export default function PassesClient() {
           <input
             id="pass-roll"
             autoComplete="off"
+            maxLength={20}
             placeholder="e.g. 24BTCSE26"
             value={rollNo}
             onChange={(e) => setRollNo(e.target.value)}
@@ -186,6 +188,7 @@ export default function PassesClient() {
             id="pass-email"
             type="email"
             autoComplete="email"
+            maxLength={100}
             inputMode="email"
             placeholder="24btcse26@suiit.ac.in"
             value={email}

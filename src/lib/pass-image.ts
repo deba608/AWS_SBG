@@ -47,27 +47,35 @@ export async function drawPassImage(input: {
   const vegMeal = input.food === "Veg";
   ctx.lineWidth = 4;
   ctx.strokeStyle = vegMeal ? "#34d399" : "#f87171";
-  ctx.strokeRect(50, 406, 34, 34);
+  ctx.strokeRect(50, 392, 34, 34);
   ctx.fillStyle = vegMeal ? "#34d399" : "#f87171";
   if (vegMeal) {
     ctx.beginPath();
-    ctx.arc(67, 423, 9, 0, Math.PI * 2);
+    ctx.arc(67, 409, 9, 0, Math.PI * 2);
     ctx.fill();
   } else {
     ctx.beginPath();
-    ctx.moveTo(67, 412);
-    ctx.lineTo(77, 430);
-    ctx.lineTo(57, 430);
+    ctx.moveTo(67, 398);
+    ctx.lineTo(77, 416);
+    ctx.lineTo(57, 416);
     ctx.closePath();
     ctx.fill();
   }
   ctx.fillStyle = "#6b7480";
-  ctx.fillText(`Roll: ${input.rollNo} · Food: ${input.food}`, 100, 433);
+  ctx.fillText(`Roll: ${input.rollNo} · Food: ${input.food}`, 100, 419);
+
+  // divider
+  ctx.strokeStyle = "#232c36";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(50, 468);
+  ctx.lineTo(W - 50, 468);
+  ctx.stroke();
 
   // QR on white well (keeps contrast for scanners)
-  const QR = 560;
+  const QR = 500;
   const qx = (W - QR) / 2;
-  const qy = 445;
+  const qy = 508;
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
   ctx.roundRect(qx - 24, qy - 24, QR + 48, QR + 48, 28);
@@ -86,13 +94,13 @@ export async function drawPassImage(input: {
   ctx.fillStyle = "#6b7480";
   ctx.font = "22px ui-monospace, monospace";
   const tok = input.token.length > 48 ? `${input.token.slice(0, 48)}…` : input.token;
-  ctx.fillText(tok, 50, 1060);
+  ctx.fillText(tok, 50, 1085);
   ctx.fillStyle = "#ad5cff";
   ctx.font = "bold 28px system-ui, sans-serif";
-  ctx.fillText("Show QR at gate · scans once", 50, 1115);
+  ctx.fillText("Show QR at gate · scans once", 50, 1132);
   ctx.fillStyle = "#6b7480";
   ctx.font = "26px system-ui, sans-serif";
-  ctx.fillText("Backup: take a screenshot of this pass.", 50, 1158);
+  ctx.fillText("Backup: take a screenshot of this pass.", 50, 1176);
 
   return canvas.toDataURL("image/png");
 }

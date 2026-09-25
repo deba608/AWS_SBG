@@ -63,13 +63,8 @@ export default function FoodSelect({
               )}
             >
               <VegMark veg={veg} />
-              <span>
-                <span className={cn("block text-sm font-bold", active ? "text-cream" : "text-fog")}>
-                  {veg ? "Veg" : "Non-veg"}
-                </span>
-                <span className="block text-[11px] text-faint">
-                  {veg ? "Pure vegetarian" : "Includes egg / meat"}
-                </span>
+              <span className={cn("block text-sm font-bold", active ? "text-cream" : "text-fog")}>
+                {veg ? "Veg" : "Non-veg"}
               </span>
               {active ? (
                 <span

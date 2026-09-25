@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import { mailConfigured, sendPassEmail } from "@/lib/mailer";
-import { getPassesByContact, issuePasses } from "@/lib/pass-store";
+import { getPassesByContact, issuePasses, ConflictError } from "@/lib/pass-store";
 import { warnDefaultSecrets } from "@/lib/pass-token";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 import {
@@ -72,6 +72,9 @@ export async function POST(req: Request) {
       { status: duplicate ? 200 : 201 },
     );
   } catch (err) {
+    if (err instanceof ConflictError) {
+      return NextResponse.json({ error: err.message }, { status: 409 });
+    }
     console.error("[passes/issue]", err);
     const storageDead =
       err instanceof Error && ("code" in err

@@ -46,15 +46,20 @@ export function validateRegistration(input: RegistrationInput): RegistrationErro
   const name = collapseSpaces(input.fullName);
   if (!name) errors.fullName = "Full name is required.";
   else if (name.length < 2) errors.fullName = "Please enter your full name.";
+  else if (name.length > 60) errors.fullName = "Name too long (max 60 characters).";
   else if (!NAME_RE.test(name)) errors.fullName = "Letters, spaces ( . ' - ) only.";
 
   const roll = input.rollNo.trim().toUpperCase();
   if (!roll) errors.rollNo = "Roll number is required.";
+  else if (roll.length > 20) errors.rollNo = "Roll number too long.";
   else if (!ROLL_RE.test(roll)) errors.rollNo = "Enter a valid roll number.";
 
   const email = normalizeEmail(input.email);
   if (!email) errors.email = "College mail is required.";
+  else if (email.length > 100) errors.email = "Email too long.";
   else if (!EMAIL_RE.test(email)) errors.email = "Enter a valid email address.";
+  else if (!email.endsWith("@suiit.ac.in"))
+    errors.email = "Not a valid college mail — use your SUIIT mail (@suiit.ac.in).";
 
   if (!GENDERS.includes(input.gender as Gender)) errors.gender = "Select gender.";
   if (!FOODS.includes(input.food as FoodPref)) errors.food = "Select food preference.";

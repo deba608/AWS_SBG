@@ -109,7 +109,7 @@ export default function PassCard({
                 )}
               >
                 <VegMark veg={food === "Veg"} />
-                {food === "Veg" ? "PURE VEG" : "NON-VEG"}
+                {food === "Veg" ? "Veg" : "Non-veg"}
               </p>
               <div className="mt-3 space-y-1.5 text-xs text-fog">
                 <p className="flex items-center justify-center gap-1.5 sm:justify-start">
