@@ -4,7 +4,6 @@ import {
   Award,
   Backpack,
   CalendarDays,
-  Check,
   Clock,
   Gift,
   IdCard,
@@ -69,9 +68,7 @@ const whyAttend = [
 ];
 
 const bringList = [
-  { icon: IdCard, text: "College ID (required at entry)" },
-  { icon: Check, text: "Meetup RSVP confirmation on your phone" },
-  { icon: Laptop, text: "Laptop (optional, for hands-on)" },
+  { icon: IdCard, text: "Your entry pass (required at entry)" },
   { icon: Backpack, text: "Curiosity — no prior AWS experience needed" },
 ];
 

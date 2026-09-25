@@ -120,7 +120,7 @@ export const COMMUNITY_DAY_FAQS = [
   },
   {
     q: "What should I bring?",
-    a: "College ID, Meetup RSVP confirmation, and optionally a laptop for hands-on activities. Curiosity required.",
+    a: "Your entry pass (required at entry). Curiosity required — no prior AWS experience needed.",
   },
   {
     q: "Is lunch + certificate included?",
@@ -143,6 +143,6 @@ export const COMMUNITY_DAY_STEPS = [
   },
   {
     title: "Show up Oct 3",
-    description: "Bring college ID + RSVP confirmation to APJ Abdul Kalam Auditorium by 9 AM.",
+    description: "Bring your entry pass to APJ Abdul Kalam Auditorium by 9 AM.",
   },
 ] as const;
