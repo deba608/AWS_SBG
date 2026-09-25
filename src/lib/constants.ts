@@ -28,6 +28,7 @@ export const NAV_LINKS = [
   { label: "About", href: "/#about" },
   { label: "Events", href: "/events" },
   { label: "Team", href: "/team" },
+  { label: "Passes", href: "/passes" },
 ] as const;
 
 export const STATS = [
