@@ -43,8 +43,26 @@ export async function drawPassImage(input: {
   ctx.fillStyle = "#a8b0bb";
   ctx.font = "30px system-ui, sans-serif";
   ctx.fillText(input.email.slice(0, 40), 50, 350);
+  // veg / non-veg mark + roll line
+  const vegMeal = input.food === "Veg";
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = vegMeal ? "#34d399" : "#f87171";
+  ctx.strokeRect(50, 406, 34, 34);
+  ctx.fillStyle = vegMeal ? "#34d399" : "#f87171";
+  if (vegMeal) {
+    ctx.beginPath();
+    ctx.arc(67, 423, 9, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(67, 412);
+    ctx.lineTo(77, 430);
+    ctx.lineTo(57, 430);
+    ctx.closePath();
+    ctx.fill();
+  }
   ctx.fillStyle = "#6b7480";
-  ctx.fillText(`Roll: ${input.rollNo} · Food: ${input.food}`, 50, 395);
+  ctx.fillText(`Roll: ${input.rollNo} · Food: ${input.food}`, 100, 433);
 
   // QR on white well (keeps contrast for scanners)
   const QR = 560;

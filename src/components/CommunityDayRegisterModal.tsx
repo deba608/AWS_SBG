@@ -5,12 +5,12 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import Modal from "@/components/Modal";
 import PassCard from "@/components/PassCard";
 import {
-  FOODS,
   GENDERS,
   normalizedContact,
   validateContact,
   type ContactErrors,
 } from "@/lib/validate-contact";
+import FoodSelect from "@/components/FoodSelect";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "scdRegistration";
@@ -275,33 +275,12 @@ export default function CommunityDayRegisterModal({
                 ) : null}
               </div>
               <div>
-                <span className="mb-1.5 block text-sm font-medium text-cream" id="scd-food-label">
-                  Food *
-                </span>
-                <div role="radiogroup" aria-labelledby="scd-food-label" className="flex gap-2">
-                  {FOODS.map((f) => (
-                    <button
-                      key={f}
-                      type="button"
-                      role="radio"
-                      aria-checked={food === f}
-                      onClick={() => setFood(f)}
-                      className={cn(
-                        "min-h-[44px] flex-1 rounded-xl border px-3 text-sm font-semibold transition-colors",
-                        food === f
-                          ? f === "Veg"
-                            ? "border-green-500 bg-green-500/15 text-green-200"
-                            : "border-amber-500 bg-amber-500/15 text-amber-200"
-                          : "border-line text-fog hover:text-cream",
-                      )}
-                    >
-                      {f === "Veg" ? "Veg" : "Non-veg"}
-                    </button>
-                  ))}
-                </div>
-                {errors.food ? (
-                  <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.food}</p>
-                ) : null}
+                <FoodSelect
+                  value={food}
+                  onChange={setFood}
+                  labelId="scd-food-label"
+                  error={errors.food}
+                />
               </div>
             </div>
             {apiError ? (

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CalendarDays, Download, Loader2, MapPin } from "lucide-react";
 import { downloadDataUrl, drawPassImage } from "@/lib/pass-image";
+import { VegMark } from "@/components/FoodSelect";
 import { COMMUNITY_DAY_META } from "@/data/community-day";
 import { cn } from "@/lib/utils";
 
@@ -101,13 +102,14 @@ export default function PassCard({
               </p>
               <p
                 className={cn(
-                  "mt-2.5 inline-block rounded-full border px-3 py-1 text-xs font-bold",
+                  "mt-2.5 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold",
                   food === "Veg"
                     ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                    : "border-amber-400/30 bg-amber-400/10 text-amber-300",
+                    : "border-red-400/30 bg-red-400/10 text-red-300",
                 )}
               >
-                {food === "Veg" ? "VEG" : "NON-VEG"}
+                <VegMark veg={food === "Veg"} />
+                {food === "Veg" ? "PURE VEG" : "NON-VEG"}
               </p>
               <div className="mt-3 space-y-1.5 text-xs text-fog">
                 <p className="flex items-center justify-center gap-1.5 sm:justify-start">

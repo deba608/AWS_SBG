@@ -1,4 +1,4 @@
-export type Gender = "Male" | "Female" | "Other";
+export type Gender = "Male" | "Female";
 export type FoodPref = "Veg" | "Non-veg";
 
 export interface RegistrationInput {
@@ -29,7 +29,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const NAME_RE = /^[A-Za-z][A-Za-z.'\- ]*$/;
 const ROLL_RE = /^[A-Za-z0-9][A-Za-z0-9/.\- ]{2,19}$/;
 
-export const GENDERS: Gender[] = ["Male", "Female", "Other"];
+export const GENDERS: Gender[] = ["Male", "Female"];
 export const FOODS: FoodPref[] = ["Veg", "Non-veg"];
 
 export function normalizeEmail(value: string): string {
