@@ -174,7 +174,9 @@ export default function ScanClient() {
         body: JSON.stringify({ token: t, scannedBy: "admin-scan" }),
       });
       const d = await r.json();
-      if (r.status === 409 || d.status === "USED") {
+      if (r.status === 410 || d.status === "EXPIRED") {
+        setState({ kind: "result", status: "EXPIRED", type: d.type });
+      } else if (r.status === 409 || d.status === "USED") {
         setState({
           kind: "result",
           status: "USED",
@@ -198,6 +200,8 @@ export default function ScanClient() {
         setState({ kind: "result", status: "INVALID" });
       }
       void refreshStats();
+    } catch {
+      setState({ kind: "error", message: "Network failed during burn. Verify status before retry — pass may already be burned." });
     } finally {
       setBurning(false);
     }
@@ -374,21 +378,36 @@ export default function ScanClient() {
         </div>
       ) : null}
 
+      {state.kind === "error" ? (
+        <div role="alert" className="rank-card border-amber-500/50 p-5">
+          <p className="font-bold text-amber-300">Connection problem</p>
+          <p className="mt-1 text-sm text-fog">{state.message}</p>
+          <button
+            type="button"
+            onClick={() => void verify(token)}
+            className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-full bg-brand px-6 py-2 text-sm font-semibold text-black hover:bg-brandhover"
+          >
+            Retry verify
+          </button>
+        </div>
+      ) : null}
+
       {result ? (
         <div
           role="status"
           className={cn(
             "rank-card overflow-hidden",
             result.status === "ACTIVE" && "border-green-500/50",
-            result.status === "USED" && "border-red-500/50",
-            result.status === "INVALID" && "border-red-500/50",
+            result.status === "EXPIRED" && "border-amber-500/50",
+            (result.status === "USED" || result.status === "INVALID") && "border-red-500/50",
           )}
         >
           <div
             className={cn(
               "flex items-center gap-3 px-5 py-4 text-lg font-bold text-white",
               result.status === "ACTIVE" && "bg-green-600",
-              result.status !== "ACTIVE" && "bg-red-600",
+              result.status === "EXPIRED" && "bg-amber-600",
+              (result.status === "USED" || result.status === "INVALID") && "bg-red-600",
             )}
           >
             {result.status === "ACTIVE" ? (
@@ -396,9 +415,15 @@ export default function ScanClient() {
             ) : (
               <XCircle className="h-6 w-6" aria-hidden />
             )}
-            {result.status === "ACTIVE" ? "VALID — allow" : result.status === "USED" ? "ALREADY USED — block" : "INVALID — block"}
+            {result.status === "ACTIVE"
+              ? "VALID — allow"
+              : result.status === "USED"
+                ? "ALREADY USED — block"
+                : result.status === "EXPIRED"
+                  ? "EXPIRED — block"
+                  : "INVALID — block"}
           </div>
-          {result.status !== "INVALID" ? (
+          {result.status !== "INVALID" && result.status !== "EXPIRED" ? (
             <div className="space-y-1 p-5">
               <p className="text-xl font-bold text-cream">{result.name}</p>
               <p className="text-sm text-fog">{result.email} · {result.mobile}</p>
