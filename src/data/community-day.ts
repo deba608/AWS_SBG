@@ -69,8 +69,8 @@ export const COMMUNITY_DAY_AGENDA: AgendaItem[] = [
   },
   {
     time: "04:00 PM",
-    title: "Swag, Certificates + Close",
-    description: "Goodies, participation certificates and group photo.",
+    title: "Certificates + Closing",
+    description: "Participation certificates, networking and group photo.",
     tag: "Closing",
   },
 ];
@@ -104,11 +104,11 @@ export const COMMUNITY_DAY_PERKS = [
 export const COMMUNITY_DAY_FAQS = [
   {
     q: "Is entry really free?",
-    a: "Yes. Entry is FREE. Just RSVP on Meetup so we can plan lunch, swag and seating for 300+ attendees.",
+    a: "Yes. Entry is FREE. Just register on this page to get your QR entry pass — it helps us plan lunch, swag and seating for 300+ attendees.",
   },
   {
     q: "How do I register?",
-    a: "Click Register — it opens Meetup. Sign in, join the AWS SBG group, hit Attend/RSVP, then show your RSVP confirmation at the venue with your college ID.",
+    a: "Click Get event pass — fill name, roll number, college mail, gender and food preference. Your QR pass shows instantly and emails to you. Show it at the venue gate with your college ID.",
   },
   {
     q: "Do I need prior AWS experience?",
@@ -116,7 +116,7 @@ export const COMMUNITY_DAY_FAQS = [
   },
   {
     q: "Who can attend?",
-    a: "Students interested in AWS/Cloud, devs, AI/ML + GenAI enthusiasts, DevOps learners and open-source contributors. Non-SUIIT students: RSVP on Meetup and watch the event page for entry notes.",
+    a: "Students interested in AWS/Cloud, devs, AI/ML + GenAI enthusiasts, DevOps learners and open-source contributors. Non-SUIIT students: register here for a pass and watch the event page for entry notes.",
   },
   {
     q: "What should I bring?",
@@ -124,7 +124,7 @@ export const COMMUNITY_DAY_FAQS = [
   },
   {
     q: "Is lunch + certificate included?",
-    a: "Yes — lunch for registered participants and a participation certificate, per the official Meetup listing.",
+    a: "Yes — lunch for pass holders and a participation certificate.",
   },
   {
     q: "Where is the venue?",
@@ -134,8 +134,8 @@ export const COMMUNITY_DAY_FAQS = [
 
 export const COMMUNITY_DAY_STEPS = [
   {
-    title: "Share your details",
-    description: "Tap Register — a 30-sec form, then Meetup RSVP (mandatory — the form alone doesn't reserve a seat).",
+    title: "Get your pass",
+    description: "Tap Get event pass — a 30-sec form, QR generates instantly + emails to you.",
   },
   {
     title: "Join the group",

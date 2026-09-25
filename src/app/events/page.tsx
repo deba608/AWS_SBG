@@ -38,7 +38,7 @@ export default function EventsPage() {
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-fog md:text-base">
               Cloud, AI/GenAI and DevOps with AWS pros, hands-on labs,
-              networking, lunch, swag and certificate.
+              networking, lunch and certificate.
             </p>
             <dl className="mt-4 flex max-w-2xl flex-wrap gap-x-6 gap-y-1 text-sm">
               <div className="flex min-w-0 gap-2">

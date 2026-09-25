@@ -35,11 +35,11 @@ import CommunityDayRegisterModal from "@/components/CommunityDayRegisterModal";
 export const metadata: Metadata = {
   title: "AWS Student Community Day SUIIT 2026 — Oct 3",
   description:
-    "Free flagship meetup Oct 3 at SUIIT: Cloud, AI/GenAI + DevOps, hands-on labs, lunch, swag + certificate. Register on Meetup.",
+    "Free flagship meetup Oct 3 at SUIIT: Cloud, AI/GenAI + DevOps, hands-on labs, lunch + certificate. Free entry with QR pass.",
   openGraph: {
     title: "AWS Student Community Day SUIIT 2026 — Oct 3",
     description:
-      "Cloud, AI/GenAI + DevOps with AWS pros. Free for students — lunch, swag + certificate. APJ Abdul Kalam Auditorium, SUIIT.",
+      "Cloud, AI/GenAI + DevOps with AWS pros. Free for students — lunch + certificate. APJ Abdul Kalam Auditorium, SUIIT.",
     type: "website",
   },
 };
@@ -63,7 +63,7 @@ const whyAttend = [
   {
     icon: Award,
     title: "Grow",
-    description: "Leave with swag, a participation certificate and new opportunities.",
+    description: "Leave with practical knowledge, a participation certificate and new opportunities.",
   },
 ];
 
@@ -110,7 +110,7 @@ export default function CommunityDayPage() {
           <Reveal>
             <div className="flex flex-wrap items-center gap-2">
               <Badge>Flagship session on October 3, free entry</Badge>
-              <Badge tone="success">Registration open on Meetup</Badge>
+              <Badge tone="success">Registration open — free pass</Badge>
             </div>
           </Reveal>
           <div className="mt-5 grid items-start gap-8 sm:gap-10 lg:grid-cols-[1.15fr_0.85fr] [&>*]:min-w-0">
@@ -148,7 +148,7 @@ export default function CommunityDayPage() {
                 <CommunityDayRegisterModal />
               </div>
               <p className="mt-4 text-xs text-faint">
-                300 expected, lunch, swag and certificate, {COMMUNITY_DAY_META.host}
+                300 expected, lunch and certificate, {COMMUNITY_DAY_META.host}
               </p>
             </div>
             <Reveal delay={0.12}>
@@ -176,11 +176,11 @@ export default function CommunityDayPage() {
                   ))}
                 </ol>
                 <CommunityDayRegisterModal className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black transition-all hover:-translate-y-0.5 hover:bg-brandhover">
-                  RSVP — share details first
+                  Get event pass — Free
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </CommunityDayRegisterModal>
                 <p className="mt-3 text-center text-xs text-faint">
-                  30-sec form, then Meetup · show RSVP at entry
+                  30-sec form, instant QR pass · show at entry
                 </p>
               </div>
             </Reveal>
@@ -252,7 +252,7 @@ export default function CommunityDayPage() {
                 align="left"
                 size="sm"
                 eyebrow="Included"
-                title="Lunch, swag + certificate."
+                title="Lunch + certificate."
               />
               <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 {COMMUNITY_DAY_PERKS.map((p, i) => {
@@ -318,7 +318,7 @@ export default function CommunityDayPage() {
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
               <CommunityDayRegisterModal className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-line bg-surface px-6 py-3 text-sm font-semibold text-cream transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/60 hover:bg-raised">
-                Register on Meetup
+                Get event pass
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </CommunityDayRegisterModal>
             </div>
@@ -366,8 +366,8 @@ export default function CommunityDayPage() {
                   See you at Community Day?
                 </h2>
                 <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-fog">
-                  RSVP on Meetup now — 300+ builders already in. Lunch, swag and
-                  certificate for registered participants.
+                  Register now — 300+ builders already in. Lunch and
+                  certificate for pass holders.
                 </p>
                 <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:[&>*]:w-auto [&>*]:w-full [&>*]:max-w-sm">
                   <CommunityDayRegisterModal />
