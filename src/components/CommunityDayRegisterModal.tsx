@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, Mail } from "lucide-react";
 import Modal from "@/components/Modal";
 import PassCard from "@/components/PassCard";
 import {
@@ -168,7 +168,14 @@ export default function CommunityDayRegisterModal({
             <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-200">
               Entry pass ready. One-time use only — invalid after gate scan.
               Download image or take a screenshot.
-              {emailSent ? " A copy was also emailed to you." : " Email copy not sent yet — keep the screenshot."}
+            </div>
+            <div className={`flex items-center gap-2.5 rounded-xl border p-3 text-sm ${emailSent ? "border-sky-400/30 bg-sky-400/10 text-sky-200" : "border-amber-400/30 bg-amber-400/10 text-amber-200"}`}>
+              <Mail className="h-5 w-5 shrink-0" aria-hidden />
+              {emailSent ? (
+                <p>Pass emailed to <span className="font-semibold">{email}</span> — check inbox + spam.</p>
+              ) : (
+                <p>Mail not sent to <span className="font-semibold">{email}</span> yet — keep the screenshot.</p>
+              )}
             </div>
             <div id="pass-print-area">
               <PassCard

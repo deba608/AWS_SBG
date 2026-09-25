@@ -13,6 +13,7 @@ export function mailConfigured(): boolean {
 export async function sendPassEmail(input: {
   to: string;
   name: string;
+  rollNo: string;
   passPng: Buffer;
   token: string;
 }): Promise<EmailResult> {
@@ -41,7 +42,7 @@ export async function sendPassEmail(input: {
         ``,
         `See you there — AWS Student Builder Group`,
       ].join("\n"),
-      attachments: [{ filename: "entry-pass.png", content: input.passPng, contentType: "image/png" }],
+      attachments: [{ filename: `SCD_${input.rollNo}.png`, content: input.passPng, contentType: "image/png" }],
     });
     return { sent: true };
   } catch (err) {

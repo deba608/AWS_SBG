@@ -61,6 +61,7 @@ export async function POST(req: Request) {
       const mail = await sendPassEmail({
         to: user.email,
         name: user.name,
+        rollNo: user.rollNo,
         passPng: png,
         token: passes[0].token,
       });

@@ -50,7 +50,7 @@ export default function PassCard({
     setBusy(true);
     try {
       const png = await drawPassImage({ serial, name, email, rollNo, food, qrDataUrl: qrImage, token });
-      downloadDataUrl(png, `entry-pass-${rollNo}.png`);
+      downloadDataUrl(png, `SCD_${rollNo}.png`);
     } finally {
       setBusy(false);
     }

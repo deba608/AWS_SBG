@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Printer, RotateCcw } from "lucide-react";
+import { Loader2, Mail, Printer, RotateCcw } from "lucide-react";
 import Container from "@/components/Container";
 import PassCard from "@/components/PassCard";
 import {
@@ -102,7 +102,14 @@ export default function PassesClient() {
           {wasDuplicate
             ? "Pass already existed — showing your QR. Same QR works at gate."
             : "Entry pass ready. One-time use only — invalid after gate scan. Download image or take a screenshot."}
-          {emailSent ? " A copy was also emailed to you." : " Email copy not sent yet — download the image + screenshot as backup."}
+        </div>
+        <div className={`rank-card flex items-center gap-3 p-4 text-sm print:hidden ${emailSent ? "border-sky-400/30 bg-sky-400/10 text-sky-200" : "border-amber-400/30 bg-amber-400/10 text-amber-200"}`}>
+          <Mail className="h-5 w-5 shrink-0" aria-hidden />
+          {emailSent ? (
+            <p>Pass emailed to <span className="font-semibold">{user.email}</span> — check inbox + spam.</p>
+          ) : (
+            <p>Mail not sent to <span className="font-semibold">{user.email}</span> yet — keep the downloaded image + screenshot.</p>
+          )}
         </div>
         <div id="pass-print-area" className="print:space-y-6">
           {passes.map((p) => (
