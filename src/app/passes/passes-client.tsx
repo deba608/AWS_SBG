@@ -10,6 +10,7 @@ import {
   type ContactErrors,
 } from "@/lib/validate-contact";
 import FoodSelect from "@/components/FoodSelect";
+import GenderSelect from "@/components/GenderSelect";
 import { cn } from "@/lib/utils";
 
 interface IssuedPass {

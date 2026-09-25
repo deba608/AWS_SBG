@@ -5,13 +5,12 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import Modal from "@/components/Modal";
 import PassCard from "@/components/PassCard";
 import {
-  GENDERS,
   normalizedContact,
   validateContact,
   type ContactErrors,
 } from "@/lib/validate-contact";
 import FoodSelect from "@/components/FoodSelect";
-import { cn } from "@/lib/utils";
+import GenderSelect from "@/components/GenderSelect";
 
 const STORAGE_KEY = "scdRegistration";
 const SHEET_URL = process.env.NEXT_PUBLIC_SCD_SHEET_URL ?? "";
@@ -283,24 +282,11 @@ export default function CommunityDayRegisterModal({
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label htmlFor="scd-gender" className="mb-1.5 block text-sm font-medium text-cream">
-                  Gender *
-                </label>
-                <select
-                  id="scd-gender"
+                <GenderSelect
                   value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  aria-invalid={Boolean(errors.gender)}
-                  className={inputClasses(Boolean(errors.gender))}
-                >
-                  <option value="">Select…</option>
-                  {GENDERS.map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
-                {errors.gender ? (
-                  <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.gender}</p>
-                ) : null}
+                  onChange={setGender}
+                  error={errors.gender}
+                />
               </div>
               <div>
                 <FoodSelect
