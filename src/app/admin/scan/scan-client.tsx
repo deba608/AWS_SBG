@@ -464,7 +464,7 @@ export default function ScanClient() {
             <div className="space-y-1 p-5">
               <p className="text-xl font-bold text-cream">
                 {result.name}
-                {result.serial ? <span className="ml-2 font-mono text-sm text-brand">No. {result.serial}</span> : null}
+                {result.serial ? <span className="ml-2 font-mono text-sm text-brand">Serial No. {result.serial}</span> : null}
               </p>
               <p className="text-sm text-fog">{result.email}{result.mobile ? ` · ${result.mobile}` : ""} · Roll {result.rollNo}</p>
               {result.food ? (

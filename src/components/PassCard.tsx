@@ -58,21 +58,27 @@ export default function PassCard({
 
   return (
     <div className="rank-card overflow-hidden">
-      <div
-        className="h-1 bg-gradient-to-r from-brandpressed via-brand to-brandhover"
-        aria-hidden
-      />
       <div className="relative">
         <div className="bg-grid bg-grid-fade absolute inset-0" aria-hidden />
         <div className="relative px-5 pt-5 sm:px-6">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-faint">
-                AWS SBG · Community Day
-              </p>
-              <h3 className="mt-1 text-lg font-bold tracking-tight text-cream">
-                {meta.label}
-              </h3>
+            <div className="flex min-w-0 items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.png"
+                alt="AWS SBG logo"
+                width={44}
+                height={44}
+                className="h-11 w-11 shrink-0 rounded-xl object-contain"
+              />
+              <div className="min-w-0">
+                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-faint">
+                  AWS SBG · Community Day
+                </p>
+                <h3 className="mt-1 text-lg font-bold tracking-tight text-cream">
+                  {meta.label}
+                </h3>
+              </div>
             </div>
             <div className="flex shrink-0 flex-col items-end gap-2">
               <span
@@ -85,7 +91,7 @@ export default function PassCard({
               </span>
               {serial ? (
                 <span className="rounded-full bg-white px-3 py-1 font-mono text-xs font-bold text-black">
-                  No. {serial}
+                  Serial No. {serial}
                 </span>
               ) : null}
             </div>
@@ -108,26 +114,28 @@ export default function PassCard({
               </p>
               <p className="mt-1 truncate text-sm text-fog">{email}</p>
               <p className="mt-0.5 truncate text-sm text-fog">{mobile}</p>
-              <p className="mt-0.5 font-mono text-xs tracking-wide text-faint">
-                {rollNo}
-              </p>
-              <p
-                className={cn(
-                  "mt-2.5 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold tracking-wide",
-                  food === "Veg"
-                    ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300"
-                    : "border-red-400/40 bg-red-400/10 text-red-300",
-                )}
-              >
-                <span
-                  aria-hidden
+              <div className="mt-1.5 flex items-center justify-between gap-3">
+                <p className="font-mono text-xs tracking-wide text-faint">
+                  Roll: {rollNo}
+                </p>
+                <p
                   className={cn(
-                    "h-2 w-2 rounded-full",
-                    food === "Veg" ? "bg-emerald-400" : "bg-red-400",
+                    "inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold tracking-wide",
+                    food === "Veg"
+                      ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300"
+                      : "border-red-400/40 bg-red-400/10 text-red-300",
                   )}
-                />
-                {food === "Veg" ? "VEG" : "NON-VEG"}
-              </p>
+                >
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "h-2 w-2 rounded-full",
+                      food === "Veg" ? "bg-emerald-400" : "bg-red-400",
+                    )}
+                  />
+                  {food === "Veg" ? "VEG" : "NON-VEG"}
+                </p>
+              </div>
               <div className="mt-3 space-y-1.5 text-xs text-fog">
                 <p className="flex items-center justify-center gap-1.5 sm:justify-start">
                   <CalendarDays className="h-3.5 w-3.5 shrink-0 text-brand" aria-hidden />

@@ -1,28 +1,26 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { GENDERS } from "@/lib/validate-contact";
+import { GENDERS, type Gender } from "@/lib/validate-contact";
 import { cn } from "@/lib/utils";
 
 export default function GenderSelect({
   value,
   onChange,
+  labelId,
   error,
 }: {
   value: string;
-  onChange: (g: string) => void;
+  onChange: (g: Gender) => void;
+  labelId: string;
   error?: string;
 }) {
   return (
     <div>
-      <span className="mb-1.5 block text-sm font-medium text-cream" id="gender-label">
+      <span className="mb-1.5 block text-sm font-medium text-cream" id={labelId}>
         Gender *
       </span>
-      <div
-        role="radiogroup"
-        aria-labelledby="gender-label"
-        className="flex rounded-2xl border border-line bg-coal p-1.5"
-      >
+      <div role="radiogroup" aria-labelledby={labelId} className="grid grid-cols-2 gap-2">
         {GENDERS.map((g) => {
           const active = value === g;
           return (
@@ -33,16 +31,18 @@ export default function GenderSelect({
               aria-checked={active}
               onClick={() => onChange(g)}
               className={cn(
-                "flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all duration-200",
+                "relative flex min-h-[44px] items-center justify-center rounded-xl border px-3 text-sm font-semibold transition-all",
                 active
-                  ? "bg-gradient-to-b from-brand to-brandpressed text-black shadow-[0_4px_20px_rgba(173,92,255,0.4)]"
-                  : "text-fog hover:text-cream",
+                  ? "border-brand/60 bg-brand/10 text-cream shadow-[0_0_20px_rgba(173,92,255,0.18)]"
+                  : "border-line bg-surface text-fog hover:border-faint hover:text-cream",
               )}
             >
-              {active ? (
-                <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
-              ) : null}
               {g}
+              {active ? (
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand">
+                  <Check className="h-3 w-3 text-black" strokeWidth={3.5} aria-hidden />
+                </span>
+              ) : null}
             </button>
           );
         })}

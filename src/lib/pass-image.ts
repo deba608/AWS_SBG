@@ -22,27 +22,32 @@ export async function drawPassImage(input: {
   ctx.fillStyle = "#141a20";
   ctx.fillRect(0, 0, W, H);
 
-  // brand accent bar
-  ctx.fillStyle = "#ad5cff";
-  ctx.fillRect(0, 0, W, 10);
+  // logo
+  const logo = new Image();
+  await new Promise<void>((resolve) => {
+    logo.onload = () => resolve();
+    logo.onerror = () => resolve(); // proceed without logo
+    logo.src = "/logo.png";
+  });
+  if (logo.naturalWidth > 0) ctx.drawImage(logo, 50, 42, 110, 110);
 
   // header
   ctx.fillStyle = "#6b7480";
   ctx.font = "28px ui-monospace, monospace";
-  ctx.fillText("AWS SBG · COMMUNITY DAY", 50, 80);
+  ctx.fillText("AWS SBG · COMMUNITY DAY", 180, 80);
   ctx.fillStyle = "#f5f3ee";
   ctx.font = "bold 52px system-ui, sans-serif";
-  ctx.fillText("Event Entry Pass", 50, 145);
+  ctx.fillText("Event Entry Pass", 180, 145);
   ctx.font = "28px system-ui, sans-serif";
   ctx.fillStyle = "#a8b0bb";
-  ctx.fillText("AWS Student Community Day · Oct 6–8 · SUIIT", 50, 195);
+  ctx.fillText("AWS Student Community Day · Oct 6–8 · SUIIT", 180, 195);
 
   // serial, right side of header
   if (input.serial) {
     ctx.fillStyle = "#f5f3ee";
     ctx.font = "bold 32px ui-monospace, monospace";
     ctx.textAlign = "right";
-    ctx.fillText(`No. ${input.serial}`, W - 50, 130);
+    ctx.fillText(`Serial No. ${input.serial}`, W - 50, 130);
     ctx.textAlign = "left";
   }
 
@@ -53,28 +58,30 @@ export async function drawPassImage(input: {
   ctx.fillStyle = "#a8b0bb";
   ctx.font = "30px system-ui, sans-serif";
   ctx.fillText(input.email.slice(0, 40), 50, 350);
-  // food badge: tinted pill + dot + roll line
+  // roll left, food badge right
   const vegMeal = input.food === "Veg";
   const badgeLabel = vegMeal ? "VEG" : "NON-VEG";
   ctx.font = "bold 26px system-ui, sans-serif";
   const badgeW = ctx.measureText(badgeLabel).width + 72;
+  const badgeX = W - 50 - badgeW;
   const badgeY = 382;
+  ctx.fillStyle = "#6b7480";
+  ctx.font = "30px system-ui, sans-serif";
+  ctx.fillText(`Roll: ${input.rollNo}`, 50, badgeY + 32);
   ctx.fillStyle = vegMeal ? "#16a34a33" : "#dc262633";
   ctx.beginPath();
-  ctx.roundRect(50, badgeY, badgeW, 46, 23);
+  ctx.roundRect(badgeX, badgeY, badgeW, 46, 23);
   ctx.fill();
   ctx.lineWidth = 2;
   ctx.strokeStyle = vegMeal ? "#34d399" : "#f87171";
   ctx.stroke();
   ctx.fillStyle = vegMeal ? "#34d399" : "#f87171";
   ctx.beginPath();
-  ctx.arc(50 + 24, badgeY + 23, 8, 0, Math.PI * 2);
+  ctx.arc(badgeX + 24, badgeY + 23, 8, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = vegMeal ? "#a7f3d0" : "#fecaca";
-  ctx.fillText(badgeLabel, 50 + 42, badgeY + 32);
-  ctx.fillStyle = "#6b7480";
-  ctx.font = "30px system-ui, sans-serif";
-  ctx.fillText(`Roll: ${input.rollNo}`, 50 + badgeW + 18, badgeY + 32);
+  ctx.font = "bold 26px system-ui, sans-serif";
+  ctx.fillText(badgeLabel, badgeX + 42, badgeY + 32);
 
   // divider
   ctx.strokeStyle = "#232c36";
