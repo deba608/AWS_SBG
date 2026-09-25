@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import { mailConfigured, sendPassEmail } from "@/lib/mailer";
 import { drawPassImageServer } from "@/lib/pass-image-server";
-import { getPassesByContact, issuePasses, ConflictError } from "@/lib/pass-store";
+import { getPassesByContact, issuePasses, registrationCount, ConflictError, RegistrationsFullError } from "@/lib/pass-store";
 import { warnDefaultSecrets } from "@/lib/pass-token";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 import {
@@ -88,6 +88,9 @@ export async function POST(req: Request) {
     if (err instanceof ConflictError) {
       return NextResponse.json({ error: err.message }, { status: 409 });
     }
+    if (err instanceof RegistrationsFullError) {
+      return NextResponse.json({ error: err.message }, { status: 403 });
+    }
     console.error("[passes/issue]", err);
     const storageDead =
       err instanceof Error && ("code" in err
@@ -111,9 +114,12 @@ export async function POST(req: Request) {
   }
 }
 
-/** Retrieve: GET /api/passes/issue?email=&rollNo=&mobile= */
+/** Slots: GET /api/passes/issue?count=1 — Retrieve: ?email=&rollNo=&mobile= */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
+  if (searchParams.get("count") === "1") {
+    return NextResponse.json(await registrationCount());
+  }
   const email = (searchParams.get("email") ?? "").trim().toLowerCase();
   const rollNo = (searchParams.get("rollNo") ?? "").trim();
   const mobile = (searchParams.get("mobile") ?? "").trim();

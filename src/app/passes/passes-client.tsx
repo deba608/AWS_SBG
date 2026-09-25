@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Mail, Printer, RotateCcw } from "lucide-react";
 import Container from "@/components/Container";
 import PassCard from "@/components/PassCard";
@@ -50,6 +50,16 @@ export default function PassesClient() {
   const [wasDuplicate, setWasDuplicate] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [resending, setResending] = useState(false);
+  const [slots, setSlots] = useState<{ registered: number; limit: number; open: boolean } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/passes/issue?count=1", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (typeof d.registered === "number") setSlots(d);
+      })
+      .catch(() => {});
+  }, []);
 
   async function resendEmail() {
     if (!user || resending) return;
@@ -183,6 +193,15 @@ export default function PassesClient() {
 
   return (
     <Container className="rank-card p-5 sm:p-6">
+      {slots && !slots.open ? (
+        <p role="alert" className="mb-4 rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
+          Registrations full — all {slots.limit} passes claimed. Retrieve your pass below if already registered.
+        </p>
+      ) : slots ? (
+        <p className="mb-4 text-xs text-fog">
+          {slots.limit - slots.registered} of {slots.limit} passes left.
+        </p>
+      ) : null}
       <form noValidate onSubmit={submit} className="space-y-4">
         <div>
           <label htmlFor="pass-name" className="mb-1.5 block text-sm font-medium text-cream">
@@ -284,7 +303,7 @@ export default function PassesClient() {
         ) : null}
         <button
           type="submit"
-          disabled={status === "busy"}
+          disabled={status === "busy" || (slots !== null && !slots.open)}
           className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black hover:bg-brandhover disabled:opacity-70"
         >
           {status === "busy" ? (

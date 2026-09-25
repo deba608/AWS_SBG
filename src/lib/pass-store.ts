@@ -172,6 +172,26 @@ export class ConflictError extends Error {
   }
 }
 
+/** Thrown when registration cap reached. Maps to 403. */
+export class RegistrationsFullError extends Error {
+  constructor() {
+    super("Registrations are full — all 200 passes claimed.");
+    this.name = "RegistrationsFullError";
+  }
+}
+
+/** Hard cap (overridable for tests via PASS_MAX). */
+export function maxRegistrations(): number {
+  const n = Number(process.env.PASS_MAX ?? 200);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 200;
+}
+
+export async function registrationCount(): Promise<{ registered: number; limit: number; open: boolean }> {
+  const store = await readStore();
+  const limit = maxRegistrations();
+  return { registered: store.users.length, limit, open: store.users.length < limit };
+}
+
 /** One email / roll / mobile = one pass. Re-registration is rejected (409). */
 export async function issuePasses(input: {
   name: string;
@@ -191,6 +211,9 @@ export async function issuePasses(input: {
     throw new ConflictError(
       "This email, roll number or mobile is already registered. Each student gets one pass — use Retrieve below if you lost your QR.",
     );
+  }
+  if (store.users.length >= maxRegistrations()) {
+    throw new RegistrationsFullError();
   }
 
   const now = new Date().toISOString();
