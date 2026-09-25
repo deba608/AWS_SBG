@@ -31,6 +31,7 @@ import {
 import { upcomingEvents } from "@/data/events";
 import { SITE } from "@/lib/constants";
 import CommunityDayRegisterModal from "@/components/CommunityDayRegisterModal";
+import CommunityDayAgenda from "@/components/CommunityDayAgenda";
 
 export const metadata: Metadata = {
   title: "AWS Student Community Day SUIIT 2026 — Oct 6–8",
@@ -212,6 +213,21 @@ export default function CommunityDayPage() {
                 </article>
               </Reveal>
             ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* AGENDA / SCHEDULE */}
+      <section id="agenda" className="py-12 sm:py-16 lg:py-24">
+        <Container>
+          <SectionHeading
+            align="left"
+            eyebrow="Schedule"
+            title="3 Days. High impact tracks."
+            description="Explore the complete day-by-day agenda for AWS Student Community Day SUIIT 2026."
+          />
+          <div className="mt-8 sm:mt-10">
+            <CommunityDayAgenda />
           </div>
         </Container>
       </section>

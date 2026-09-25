@@ -40,9 +40,9 @@ export function qrContentForToken(token: string): string {
 
 /** Passes die after event. Override via PASS_EXPIRY_ISO env. */
 export function passExpiry(): Date {
-  const raw = process.env.PASS_EXPIRY_ISO ?? "2026-10-04T00:00:00+05:30";
+  const raw = process.env.PASS_EXPIRY_ISO ?? "2026-10-09T00:00:00+05:30";
   const d = new Date(raw);
-  return Number.isNaN(d.getTime()) ? new Date("2026-10-04T00:00:00+05:30") : d;
+  return Number.isNaN(d.getTime()) ? new Date("2026-10-09T00:00:00+05:30") : d;
 }
 
 export function isExpired(now = new Date()): boolean {
