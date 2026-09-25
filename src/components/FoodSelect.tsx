@@ -35,22 +35,14 @@ export default function FoodSelect({
               aria-checked={active}
               onClick={() => onChange(f)}
               className={cn(
-                "flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all duration-200",
+                "flex min-h-[48px] flex-1 items-center justify-center rounded-xl border-2 text-sm font-bold transition-all duration-200",
                 active
                   ? veg
-                    ? "bg-gradient-to-b from-emerald-400 to-emerald-600 text-black shadow-[0_4px_20px_rgba(52,211,153,0.4)]"
-                    : "bg-gradient-to-b from-red-400 to-red-600 text-white shadow-[0_4px_20px_rgba(248,113,113,0.4)]"
-                  : "text-fog hover:text-cream",
+                    ? "border-green-500 bg-green-500/10 text-cream shadow-[0_0_20px_rgba(34,197,94,0.25)]"
+                    : "border-red-500 bg-red-500/10 text-cream shadow-[0_0_20px_rgba(239,68,68,0.25)]"
+                  : "border-line bg-coal text-fog hover:text-cream",
               )}
             >
-              <span
-                aria-hidden
-                className={cn(
-                  "h-2 w-2 rounded-full",
-                  veg ? "bg-emerald-500" : "bg-red-500",
-                  active ? "bg-black/30" : "",
-                )}
-              />
               {veg ? "Veg" : "Non-veg"}
             </button>
           );
