@@ -113,12 +113,19 @@ export default function PassCard({
               </p>
               <p
                 className={cn(
-                  "mt-2.5 inline-flex items-center rounded-full border px-4 py-1.5 text-xs font-bold text-white",
+                  "mt-2.5 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold tracking-wide",
                   food === "Veg"
-                    ? "border-green-600 bg-green-600"
-                    : "border-red-600 bg-red-600",
+                    ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300"
+                    : "border-red-400/40 bg-red-400/10 text-red-300",
                 )}
               >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "h-2 w-2 rounded-full",
+                    food === "Veg" ? "bg-emerald-400" : "bg-red-400",
+                  )}
+                />
                 {food === "Veg" ? "VEG" : "NON-VEG"}
               </p>
               <div className="mt-3 space-y-1.5 text-xs text-fog">

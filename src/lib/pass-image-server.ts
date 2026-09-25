@@ -46,23 +46,27 @@ export async function drawPassImageServer(input: {
     ctx.fillStyle = "#a8b0bb";
     ctx.font = "30px sans-serif";
     ctx.fillText(input.email.slice(0, 40), 50, 350);
-    // solid food badge + roll line (no veg logos)
+    // food badge: tinted pill + dot + roll line
     const vegMeal = input.food === "Veg";
     const badgeLabel = vegMeal ? "VEG" : "NON-VEG";
     ctx.font = "bold 26px sans-serif";
-    const badgeW = ctx.measureText(badgeLabel).width + 40;
+    const badgeW = ctx.measureText(badgeLabel).width + 72;
     const badgeY = 382;
-    ctx.fillStyle = vegMeal ? "#16a34a" : "#dc2626";
+    ctx.fillStyle = vegMeal ? "#16a34a33" : "#dc262633";
     const rc = ctx as unknown as { roundRect?: (...a: number[]) => void };
-    if (typeof rc.roundRect === "function") {
-      ctx.beginPath();
-      rc.roundRect(50, badgeY, badgeW, 46, 12);
-      ctx.fill();
-    } else {
-      ctx.fillRect(50, badgeY, badgeW, 46);
-    }
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(badgeLabel, 50 + 20, badgeY + 32);
+    ctx.beginPath();
+    if (typeof rc.roundRect === "function") rc.roundRect(50, badgeY, badgeW, 46, 23);
+    else ctx.rect(50, badgeY, badgeW, 46);
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = vegMeal ? "#34d399" : "#f87171";
+    ctx.stroke();
+    ctx.fillStyle = vegMeal ? "#34d399" : "#f87171";
+    ctx.beginPath();
+    ctx.arc(50 + 24, badgeY + 23, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = vegMeal ? "#a7f3d0" : "#fecaca";
+    ctx.fillText(badgeLabel, 50 + 42, badgeY + 32);
     ctx.fillStyle = "#6b7480";
     ctx.font = "30px sans-serif";
     ctx.fillText(`Roll: ${input.rollNo}`, 50 + badgeW + 18, badgeY + 32);

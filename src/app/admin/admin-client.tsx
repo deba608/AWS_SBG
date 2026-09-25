@@ -326,10 +326,11 @@ export default function AdminClient() {
                   <td className="px-4 py-2">
                     <span
                       className={cn(
-                        "rounded-full border px-2 py-0.5 text-xs font-bold text-white",
-                        r.food === "Veg" ? "border-green-600 bg-green-600" : "border-red-600 bg-red-600",
+                        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-bold",
+                        r.food === "Veg" ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300" : "border-red-400/40 bg-red-400/10 text-red-300",
                       )}
                     >
+                      <span aria-hidden className={cn("h-1.5 w-1.5 rounded-full", r.food === "Veg" ? "bg-emerald-400" : "bg-red-400")} />
                       {r.food === "Veg" ? "VEG" : "NON-VEG"}
                     </span>
                   </td>

@@ -469,9 +469,10 @@ export default function ScanClient() {
               <p className="text-sm text-fog">{result.email}{result.mobile ? ` · ${result.mobile}` : ""} · Roll {result.rollNo}</p>
               {result.food ? (
                 <p className={cn(
-                  "mt-2 inline-block rounded-full border px-3 py-1 font-mono text-xs font-bold text-white",
-                  result.food === "Veg" ? "border-green-600 bg-green-600" : "border-red-600 bg-red-600",
+                  "mt-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-xs font-bold",
+                  result.food === "Veg" ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300" : "border-red-400/40 bg-red-400/10 text-red-300",
                 )}>
+                  <span aria-hidden className={cn("h-2 w-2 rounded-full", result.food === "Veg" ? "bg-emerald-400" : "bg-red-400")} />
                   {result.type} · {result.food === "Veg" ? "VEG" : "NON-VEG"}
                 </p>
               ) : (
