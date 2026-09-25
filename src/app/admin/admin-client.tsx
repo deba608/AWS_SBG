@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useState } from "react";
-import { ChevronDown, Download, Loader2, LogOut, Search } from "lucide-react";
+import { ChevronDown, Download, Loader2, LogOut, RotateCw, Search } from "lucide-react";
 import AdminLogin from "@/components/AdminLogin";
 import { cn } from "@/lib/utils";
 
@@ -121,6 +121,25 @@ export default function AdminClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
 
+  useEffect(() => {
+    // debounced search as admin types / flips filters
+    if (!authed) return;
+    const t = window.setTimeout(() => {
+      void load();
+    }, 400);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed, q, type, status]);
+
+  useEffect(() => {
+    // live gate view: stats + scans refresh every 15s
+    if (!authed) return;
+    const t = window.setInterval(() => {
+      void load();
+    }, 15000);
+    return () => window.clearInterval(t);
+  }, [authed, load]);
+
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
     setAuthed(false);
@@ -176,6 +195,14 @@ export default function AdminClient() {
           <Download className="h-4 w-4" aria-hidden />
           Excel sheet
         </a>
+        <button
+          type="button"
+          onClick={() => void load()}
+          title="Refresh now (auto-refreshes every 15s)"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line px-4 py-2 text-sm text-fog hover:text-cream"
+        >
+          <RotateCw className={cn("h-4 w-4", loading && "animate-spin")} aria-hidden /> Refresh
+        </button>
         <button
           type="button"
           onClick={logout}

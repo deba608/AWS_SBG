@@ -175,7 +175,7 @@ export class ConflictError extends Error {
 /** Thrown when registration cap reached. Maps to 403. */
 export class RegistrationsFullError extends Error {
   constructor() {
-    super("Registrations are full — all 200 passes claimed.");
+    super(`Registrations are full — all ${maxRegistrations()} passes claimed.`);
     this.name = "RegistrationsFullError";
   }
 }

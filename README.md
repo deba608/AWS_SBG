@@ -20,57 +20,57 @@ The production deployment is live on Vercel:
 ## 🚀 Flagship Event
 
 ### **AWS Student Community Day SUIIT 2026**
-- **Date & Time**: Saturday, October 3, 2026 · 9:00 AM – 4:00 PM IST
+- **Date & Time**: 6–8 October 2026 · 9:00 AM – 5:30 PM IST (3 days)
 - **Venue**: APJ Abdul Kalam Auditorium, SUIIT, Burla
 - **Audience**: 300+ expected student builders, developers, and cloud enthusiasts
-- **Perks**: Lunch + official swag + certificates for registered participants
+- **Program**: Day 1 DecodeX Hackathon · Day 2 Tech Parliament + Make-A-Bot Competition · Day 3 Speaker/Podcast + prizes
+- **Perks**: Lunch + certificates for pass holders (no swag)
 - **Event Page**: [`/events/aws-student-community-day-suiit-2026`](https://awssbgsuiit.vercel.app/events/aws-student-community-day-suiit-2026)
-- **Meetup Registration**: [Join on Meetup](https://meetu.ps/e/Qgc6f/1fcHtj/i) (Single source of truth: `SITE.links.eventCommunityDay` in `src/lib/constants.ts`)
+- **Registration**: on-site QR entry pass — no Meetup. One `@suiit.ac.in` mail + roll number = one pass.
 
-> Event details (agenda, speaker lineup, FAQs) are managed in [`src/data/community-day.ts`](src/data/community-day.ts).
+> Event details (schedule, speaker lineup, FAQs) are managed in [`src/data/community-day.ts`](src/data/community-day.ts). Event cards in [`src/data/events.ts`](src/data/events.ts).
 
 ---
 
-## 📝 Pre-Registration Backend (Community Day)
+## 🎟️ Pass System (registration → gate)
 
-Clicking **Register** opens an on-site modal (collecting First Name, Last Name, Email, and Mobile Number) that asynchronous POSTs to a Google Sheet via a Google Apps Script web app, then seamlessly redirects the attendee to complete RSVP on Meetup.
+**Flow**: form (full name, roll no, SUIIT mail, gender M/F, food Veg/Non-veg) → instant QR entry pass shown + PNG download + emailed → gate scan burns (single-use).
 
-### Organizer Setup (One-Time)
+**Rules**: one email/roll = one pass (409 on re-register) · mail must end `@suiit.ac.in` · validation shared client+server in [`src/lib/validate-contact.ts`](src/lib/validate-contact.ts).
 
-1. Create a `.env.local` file from the example:
-   ```bash
-   # Windows PowerShell
-   Copy-Item .env.example .env.local
+### Env Setup
 
-   # macOS / Linux
-   cp .env.example .env.local
-   ```
-2. **Deploy Apps Script**:
-   - Open a Google Sheet → **Extensions > Apps Script**
-   - Copy and paste the code from [`scripts/scd-registration-apps-script.js`](scripts/scd-registration-apps-script.js)
-   - Click **Deploy > New deployment** → Select type: **Web app**
-   - Configure:
-     - **Execute as**: `Me`
-     - **Who has access**: `Anyone`
-   - Copy the deployed Web App URL (`.../exec`).
-3. Set the environment variable in `.env.local`:
-   ```env
-   NEXT_PUBLIC_SCD_SHEET_URL="https://script.google.com/macros/s/.../exec"
-   ```
-4. For production deployments on Vercel, add `NEXT_PUBLIC_SCD_SHEET_URL` under **Project Settings → Environment Variables**.
-
-### Pass store (Upstash Redis, required in production)
-
-Vercel's filesystem is read-only, so passes use Upstash Redis when configured, file store (`.data-passes/`, gitignored) otherwise for local dev.
+`.env.local` (gitignored; mirror in Vercel **Project Settings → Environment Variables**, then redeploy):
 
 ```env
+# Pass store (REQUIRED in production — Vercel disk is read-only)
 UPSTASH_REDIS_REST_URL="https://...upstash.io"
 UPSTASH_REDIS_REST_TOKEN="..."
+# Free DB: console.upstash.com. Without these, registration 500s on Vercel (file fallback is local-dev only).
+
+# Mail pass copy (optional — pass still issues without it)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=awssbg@suiit.ac.in
+SMTP_PASS=<gmail-app-password>
+SMTP_FROM=awssbg@suiit.ac.in
+
+# Organizer sheet backup (optional, fire-and-forget)
+NEXT_PUBLIC_SCD_SHEET_URL="https://script.google.com/macros/s/.../exec"
+# Script source: scripts/scd-registration-apps-script.js (Sheet → Extensions > Apps Script → Deploy as Web app, access Anyone)
+
+# Gate security (set in prod — dev defaults warn in logs)
+PASS_SECRET=<random-32-chars>
+ADMIN_PASS=<gate-password>
 ```
 
-Create a free Redis DB at console.upstash.com, add both vars to `.env.local` and Vercel env, redeploy.
+**Diagnose prod**: open `/api/health` — reports disk, redis, mail, expiry.
 
-> **Note**: If the sheet URL is omitted, the registration form still functions gracefully (prefilling details and forwarding to Meetup) without failing the attendee experience. Contact validation logic is maintained in [`src/lib/validate-contact.ts`](src/lib/validate-contact.ts).
+### Admin
+
+- `/admin` — stats, demographics, live scans (15s refresh), search, CSV/Excel export, printable gate list
+- `/admin/scan` — camera + manual verify/burn (login via `ADMIN_PASS`)
+- Data: Upstash key `sbg:passes:v1` (users + passes). Sheet backup if configured.
 
 ---
 
@@ -81,6 +81,10 @@ Create a free Redis DB at console.upstash.com, add both vars to `.env.local` and
 | `/` | Landing page featuring hero, mission statement, what we do, and quick join actions |
 | `/events` | Community Day spotlight, upcoming events, and past workshop recaps |
 | `/events/aws-student-community-day-suiit-2026` | Dedicated flagship event landing page with live countdown, speaker lineup, schedule, and registration modal |
+| `/passes` | Self-serve QR entry pass form |
+| `/admin` | Organizer dashboard (stats, search, export) — `ADMIN_PASS` |
+| `/admin/scan` | Gate scanner (camera + manual verify/burn) |
+| `/api/health` | Prod diagnostics (disk, redis, mail, expiry) |
 | `/team` | Community leadership and core team member profiles |
 
 ---
