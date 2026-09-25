@@ -63,7 +63,7 @@ export default function RetrievePass() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="24btcse26@suiit.ac.in / 24BTCSE26 / 98765 43210"
+          placeholder="24btcse26@suiit.ac.in / 24BTCSE26 / 9437512345"
           spellCheck={false}
           autoComplete="off"
           aria-label="College mail, roll number, or mobile"

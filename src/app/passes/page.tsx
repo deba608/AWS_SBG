@@ -20,7 +20,7 @@ export default function PassesPage() {
       <p className="measure mt-3 text-sm leading-relaxed text-fog sm:text-base">
         Register once. System generates your QR entry pass instantly, shows it
         here, and emails a copy. Download the image or take a screenshot —
-        show QR at gate, scans once.
+        one-time entry only, pass invalid after gate scan.
       </p>
       <div className="mt-8">
         <PassesClient />

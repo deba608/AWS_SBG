@@ -34,7 +34,7 @@ export async function sendPassEmail(input: {
         `Hi ${input.name},`,
         ``,
         `Your entry pass for AWS Student Community Day (Oct 6–8, SUIIT) is attached as an image.`,
-        `Show the QR at the gate — it scans once.`,
+        `One-time entry pass: show the QR at the gate — invalid after first scan.`,
         ``,
         `Backup: take a screenshot of the attached pass.`,
         `Token: ${input.token}`,

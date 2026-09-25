@@ -11,7 +11,7 @@ export type PassCardType = "ENTRY" | "FOOD";
 const TYPE_META = {
   ENTRY: {
     label: "Event Entry Pass",
-    hint: "Show at gate. Single scan — re-scan blocked.",
+    hint: "One-time entry pass. Show at gate — invalid after first scan.",
     chip: "border-brand/40 bg-brand/10 text-brand",
   },
   FOOD: {

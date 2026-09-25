@@ -101,7 +101,7 @@ export default function PassesClient() {
         <div className="rank-card border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200 print:hidden">
           {wasDuplicate
             ? "Pass already existed — showing your QR. Same QR works at gate."
-            : "Entry pass ready. Download image or take a screenshot — QR scans once."}
+            : "Entry pass ready. One-time use only — invalid after gate scan. Download image or take a screenshot."}
           {emailSent ? " A copy was also emailed to you." : " Email copy not sent yet — download the image + screenshot as backup."}
         </div>
         <div id="pass-print-area" className="print:space-y-6">
@@ -157,7 +157,7 @@ export default function PassesClient() {
             id="pass-name"
             autoComplete="name"
             maxLength={60}
-            placeholder="e.g. Debashish Pradhan"
+              placeholder="Debashish Pradhan"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             aria-invalid={Boolean(errors.fullName)}
@@ -175,7 +175,7 @@ export default function PassesClient() {
             id="pass-roll"
             autoComplete="off"
             maxLength={20}
-            placeholder="e.g. 24BTCSE26"
+              placeholder="24BTCSE26"
             value={rollNo}
             onChange={(e) => setRollNo(e.target.value)}
             aria-invalid={Boolean(errors.rollNo)}
@@ -215,7 +215,7 @@ export default function PassesClient() {
             autoComplete="tel-national"
             inputMode="numeric"
             maxLength={13}
-            placeholder="98765 43210"
+            placeholder="9437512345"
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
             aria-invalid={Boolean(errors.mobile)}

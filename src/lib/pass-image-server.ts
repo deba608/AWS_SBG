@@ -89,7 +89,7 @@ export async function drawPassImageServer(input: {
     ctx.fillText(tok, 50, 1085);
     ctx.fillStyle = "#ad5cff";
     ctx.font = "bold 28px sans-serif";
-    ctx.fillText("Show QR at gate · scans once", 50, 1132);
+    ctx.fillText("One-time entry · invalid after gate scan", 50, 1132);
     ctx.fillStyle = "#6b7480";
     ctx.font = "26px sans-serif";
     ctx.fillText("Backup: take a screenshot of this pass.", 50, 1176);
