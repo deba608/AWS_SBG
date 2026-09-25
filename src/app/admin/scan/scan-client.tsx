@@ -450,6 +450,10 @@ export default function ScanClient() {
                 </button>
               ) : null}
             </div>
+          ) : result.status === "EXPIRED" ? (
+            <p className="p-5 text-sm text-fog">
+              Event window passed. Pass no longer valid — do not allow entry.
+            </p>
           ) : (
             <p className="p-5 text-sm text-fog">
               No match. Check QR, light, or enter token manually.

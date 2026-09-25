@@ -114,7 +114,7 @@ export default function AdminClient() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 print:hidden">
         <Link
           href="/admin/scan"
           className="inline-flex min-h-[44px] items-center rounded-full bg-brand px-5 py-2 text-sm font-semibold text-black hover:bg-brandhover"
@@ -138,6 +138,14 @@ export default function AdminClient() {
         >
           <LogOut className="h-4 w-4" aria-hidden /> Lock
         </button>
+        <button
+          type="button"
+          onClick={() => window.print()}
+          title="Offline fallback: print full list before event, check names manually if network dies"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line px-4 py-2 text-sm text-fog hover:text-cream"
+        >
+          Print gate list
+        </button>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -155,7 +163,7 @@ export default function AdminClient() {
           e.preventDefault();
           void load();
         }}
-        className="rank-card flex flex-col gap-2 p-4 sm:flex-row sm:items-center"
+        className="rank-card flex flex-col gap-2 p-4 sm:flex-row sm:items-center print:hidden"
       >
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-faint" aria-hidden />
