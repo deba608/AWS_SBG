@@ -16,25 +16,29 @@ export async function GET(req: Request) {
   let header: string[];
   let lines: string[][];
   if (scope === "USERS") {
-    const seen = new Map<string, { name: string; email: string; mobile: string; createdAt: string }>();
+    const seen = new Map<string, { name: string; email: string; rollNo: string; gender: string; food: string; createdAt: string }>();
     for (const { user } of rows) {
       if (!user || seen.has(user.id)) continue;
       seen.set(user.id, {
-        name: `${user.firstName} ${user.lastName}`,
+        name: user.name,
         email: user.email,
-        mobile: user.mobile,
+        rollNo: user.rollNo,
+        gender: user.gender,
+        food: user.food,
         createdAt: user.createdAt,
       });
     }
-    header = ["name", "email", "mobile", "registered_at"];
-    lines = [...seen.values()].map((u) => [u.name, u.email, u.mobile, u.createdAt]);
+    header = ["name", "email", "roll_no", "gender", "food", "registered_at"];
+    lines = [...seen.values()].map((u) => [u.name, u.email, u.rollNo, u.gender, u.food, u.createdAt]);
   } else {
     const filtered = scope === "ALL" ? rows : rows.filter((r) => r.pass.type === scope);
-    header = ["name", "email", "mobile", "type", "status", "used_at", "scanned_by", "token"];
+    header = ["name", "email", "roll_no", "gender", "food", "type", "status", "used_at", "scanned_by", "token"];
     lines = filtered.map(({ pass, user }) => [
-      user ? `${user.firstName} ${user.lastName}` : "",
+      user?.name ?? "",
       user?.email ?? "",
-      user?.mobile ?? "",
+      user?.rollNo ?? "",
+      user?.gender ?? "",
+      user?.food ?? "",
       pass.type,
       pass.status,
       pass.usedAt ?? "",

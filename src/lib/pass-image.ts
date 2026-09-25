@@ -4,7 +4,8 @@
 export async function drawPassImage(input: {
   name: string;
   email: string;
-  mobile: string;
+  rollNo: string;
+  food: string;
   qrDataUrl: string;
   token: string;
 }): Promise<string> {
@@ -37,7 +38,7 @@ export async function drawPassImage(input: {
   ctx.fillStyle = "#555555";
   ctx.font = "30px system-ui, sans-serif";
   ctx.fillText(input.email.slice(0, 40), 50, 340);
-  ctx.fillText(input.mobile, 50, 385);
+  ctx.fillText(`Roll: ${input.rollNo} · Food: ${input.food}`, 50, 385);
 
   // QR
   const img = new Image();

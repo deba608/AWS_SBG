@@ -8,13 +8,15 @@ import {
   verifyPassToken,
   type PassType,
 } from "./pass-token";
+import type { FoodPref, Gender } from "./validate-contact";
 
 export interface StoredUser {
   id: string;
-  firstName: string;
-  lastName: string;
+  name: string;
+  rollNo: string;
   email: string;
-  mobile: string;
+  gender: Gender;
+  food: FoodPref;
   createdAt: string;
 }
 
@@ -60,22 +62,25 @@ async function writeStore(store: StoreShape): Promise<void> {
 export function findUser(
   store: StoreShape,
   email: string,
-  mobile: string,
+  rollNo: string,
 ): StoredUser | undefined {
   const e = email.trim().toLowerCase();
-  return store.users.find((u) => u.email === e || u.mobile === mobile);
+  const r = rollNo.trim().toUpperCase();
+  return store.users.find((u) => u.email === e || u.rollNo === r);
 }
 
-/** Idempotent issue: existing email/mobile returns existing ENTRY pass. */
+/** Idempotent issue: existing email/roll returns existing ENTRY pass. */
 export async function issuePasses(input: {
-  firstName: string;
-  lastName: string;
+  name: string;
+  rollNo: string;
   email: string;
-  mobile: string;
+  gender: Gender;
+  food: FoodPref;
 }): Promise<{ user: StoredUser; passes: StoredPass[]; duplicate: boolean }> {
   const email = input.email.trim().toLowerCase();
+  const rollNo = input.rollNo.trim().toUpperCase();
   const store = await readStore();
-  const existing = findUser(store, email, input.mobile);
+  const existing = findUser(store, email, rollNo);
   if (existing) {
     const entry = store.passes.find((p) => p.userId === existing.id && p.type === "ENTRY");
     if (entry) return { user: existing, passes: [entry], duplicate: true };
@@ -86,10 +91,11 @@ export async function issuePasses(input: {
     existing ??
     ({
       id: `u_${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`,
-      firstName: input.firstName,
-      lastName: input.lastName,
+      name: input.name,
+      rollNo,
       email,
-      mobile: input.mobile,
+      gender: input.gender,
+      food: input.food,
       createdAt: now,
     } satisfies StoredUser);
   if (!existing) store.users.push(user);
@@ -114,10 +120,10 @@ export async function issuePasses(input: {
 
 export async function getPassesByContact(
   email: string,
-  mobile: string,
+  rollNo: string,
 ): Promise<{ user: StoredUser; passes: StoredPass[] } | null> {
   const store = await readStore();
-  const user = findUser(store, email, mobile);
+  const user = findUser(store, email, rollNo);
   if (!user) return null;
   return { user, passes: store.passes.filter((p) => p.userId === user.id) };
 }
@@ -201,7 +207,7 @@ export async function listPasses(filter: {
     if (filter.status && filter.status !== "ALL" && pass.status !== filter.status) continue;
     const user = store.users.find((u) => u.id === pass.userId) ?? null;
     if (q) {
-      const hay = `${user?.firstName ?? ""} ${user?.lastName ?? ""} ${user?.email ?? ""} ${user?.mobile ?? ""}`.toLowerCase();
+      const hay = `${user?.name ?? ""} ${user?.rollNo ?? ""} ${user?.email ?? ""} ${user?.food ?? ""}`.toLowerCase();
       if (!hay.includes(q)) continue;
     }
     rows.push({ pass, user });

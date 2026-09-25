@@ -1,97 +1,79 @@
-export interface ContactInput {
-  firstName: string;
-  lastName: string;
+export type Gender = "Male" | "Female" | "Other";
+export type FoodPref = "Veg" | "Non-veg";
+
+export interface RegistrationInput {
+  fullName: string;
+  rollNo: string;
   email: string;
-  mobile: string;
+  gender: string;
+  food: string;
 }
 
-export interface ContactErrors {
-  firstName?: string;
-  lastName?: string;
+export interface RegistrationErrors {
+  fullName?: string;
+  rollNo?: string;
   email?: string;
-  mobile?: string;
+  gender?: string;
+  food?: string;
 }
 
-export interface NormalizedContact {
-  /** Combined for the Sheet ("First Last"). */
+export interface NormalizedRegistration {
   name: string;
-  firstName: string;
-  lastName: string;
+  rollNo: string;
   email: string;
-  mobile: string;
+  gender: Gender;
+  food: FoodPref;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const NAME_PART_RE = /^[A-Za-z][A-Za-z.'\-]*$/;
+const NAME_RE = /^[A-Za-z][A-Za-z.'\- ]*$/;
+const ROLL_RE = /^[A-Za-z0-9][A-Za-z0-9/.\- ]{2,19}$/;
+
+export const GENDERS: Gender[] = ["Male", "Female", "Other"];
+export const FOODS: FoodPref[] = ["Veg", "Non-veg"];
 
 export function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
-/** Strip spaces/separators, tolerate +91 / leading 0, return 10-digit form. */
-export function normalizeMobile(value: string): string {
-  let digits = value.replace(/\D/g, "");
-  if (digits.length === 12 && digits.startsWith("91")) {
-    digits = digits.slice(2);
-  } else if (digits.length === 11 && digits.startsWith("0")) {
-    digits = digits.slice(1);
-  }
-  return digits;
-}
-
-export function collapseName(value: string): string {
+export function collapseSpaces(value: string): string {
   return value.trim().replace(/\s+/g, " ");
 }
 
-function validateNamePart(value: string): string | undefined {
-  const part = collapseName(value);
-  if (!part) return "This field is required.";
-  if (!NAME_PART_RE.test(part)) {
-    return "Letters only ( . ' - allowed).";
-  }
-  return undefined;
-}
+export function validateRegistration(input: RegistrationInput): RegistrationErrors {
+  const errors: RegistrationErrors = {};
 
-export function validateContact(input: ContactInput): ContactErrors {
-  const errors: ContactErrors = {};
+  const name = collapseSpaces(input.fullName);
+  if (!name) errors.fullName = "Full name is required.";
+  else if (name.length < 2) errors.fullName = "Please enter your full name.";
+  else if (!NAME_RE.test(name)) errors.fullName = "Letters, spaces ( . ' - ) only.";
 
-  const firstError = validateNamePart(input.firstName);
-  if (firstError) {
-    errors.firstName = input.firstName.trim() ? firstError : "First name is required.";
-  } else if (collapseName(input.firstName).length < 2) {
-    errors.firstName = "Please enter your first name.";
-  }
-
-  const lastError = validateNamePart(input.lastName);
-  if (lastError) {
-    errors.lastName = input.lastName.trim() ? lastError : "Last name is required.";
-  }
+  const roll = input.rollNo.trim().toUpperCase();
+  if (!roll) errors.rollNo = "Roll number is required.";
+  else if (!ROLL_RE.test(roll)) errors.rollNo = "Enter a valid roll number.";
 
   const email = normalizeEmail(input.email);
-  if (!email) {
-    errors.email = "Email is required.";
-  } else if (!EMAIL_RE.test(email)) {
-    errors.email = "Enter a valid email address.";
-  }
+  if (!email) errors.email = "College mail is required.";
+  else if (!EMAIL_RE.test(email)) errors.email = "Enter a valid email address.";
 
-  const mobile = normalizeMobile(input.mobile);
-  if (!mobile) {
-    errors.mobile = "Mobile number is required.";
-  } else if (!/^[6-9]\d{9}$/.test(mobile)) {
-    errors.mobile = "Enter a valid 10-digit Indian mobile number.";
-  }
+  if (!GENDERS.includes(input.gender as Gender)) errors.gender = "Select gender.";
+  if (!FOODS.includes(input.food as FoodPref)) errors.food = "Select food preference.";
 
   return errors;
 }
 
-export function normalizedContact(input: ContactInput): NormalizedContact {
-  const firstName = collapseName(input.firstName);
-  const lastName = collapseName(input.lastName);
+export function normalizeRegistration(input: RegistrationInput): NormalizedRegistration {
   return {
-    name: `${firstName} ${lastName}`.trim(),
-    firstName,
-    lastName,
+    name: collapseSpaces(input.fullName),
+    rollNo: input.rollNo.trim().toUpperCase(),
     email: normalizeEmail(input.email),
-    mobile: normalizeMobile(input.mobile),
+    gender: input.gender as Gender,
+    food: input.food as FoodPref,
   };
 }
+
+// Back-compat aliases (old contact shape removed; kept names stable for imports)
+export type ContactInput = RegistrationInput;
+export type ContactErrors = RegistrationErrors;
+export const validateContact = validateRegistration;
+export const normalizedContact = normalizeRegistration;

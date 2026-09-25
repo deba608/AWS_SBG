@@ -10,14 +10,16 @@ export type PassCardType = "ENTRY" | "FOOD";
 export default function PassCard({
   name,
   email,
-  mobile,
+  rollNo,
+  food,
   type,
   qrImage,
   token,
 }: {
   name: string;
   email: string;
-  mobile: string;
+  rollNo: string;
+  food: string;
   type: PassCardType;
   qrImage: string;
   token: string;
@@ -29,8 +31,8 @@ export default function PassCard({
     if (busy) return;
     setBusy(true);
     try {
-      const png = await drawPassImage({ name, email, mobile, qrDataUrl: qrImage, token });
-      downloadDataUrl(png, `entry-pass-${mobile}.png`);
+      const png = await drawPassImage({ name, email, rollNo, food, qrDataUrl: qrImage, token });
+      downloadDataUrl(png, `entry-pass-${rollNo}.png`);
     } finally {
       setBusy(false);
     }
@@ -61,7 +63,15 @@ export default function PassCard({
         <div className="w-full min-w-0 text-center sm:text-left">
           <p className="truncate text-xl font-bold">{name}</p>
           <p className="mt-1 truncate text-sm text-black/60">{email}</p>
-          <p className="text-sm text-black/60">{mobile}</p>
+          <p className="text-sm text-black/60">Roll: {rollNo}</p>
+          <p
+            className={cn(
+              "mt-2 inline-block rounded-full px-3 py-1 text-xs font-bold",
+              food === "Veg" ? "bg-green-600 text-white" : "bg-amber-600 text-white",
+            )}
+          >
+            {food === "Veg" ? "VEG" : "NON-VEG"}
+          </p>
           <p className="mt-3 rounded-lg bg-black/5 p-2 font-mono text-[11px] break-all text-black/70">
             {token}
           </p>

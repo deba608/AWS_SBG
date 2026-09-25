@@ -20,9 +20,11 @@ export async function GET(req: Request) {
       createdAt: pass.createdAt,
       usedAt: pass.usedAt,
       scannedBy: pass.scannedBy,
-      name: user ? `${user.firstName} ${user.lastName}` : "—",
+      name: user?.name ?? "—",
       email: user?.email ?? "—",
-      mobile: user?.mobile ?? "—",
+      rollNo: user?.rollNo ?? "—",
+      gender: user?.gender ?? "—",
+      food: user?.food ?? "—",
     })),
   });
 }

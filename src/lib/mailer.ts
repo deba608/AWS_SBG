@@ -25,7 +25,7 @@ export async function sendPassEmail(input: {
       secure: port === 465,
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
     });
-    const from = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "noreply@localhost";
+    const from = process.env.SMTP_FROM ?? "awsscd@suiit.ac.in";
     await transporter.sendMail({
       from: `"AWS SBG" <${from}>`,
       to: input.to,

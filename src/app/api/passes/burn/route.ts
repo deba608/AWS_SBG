@@ -29,7 +29,7 @@ export async function POST(req: Request) {
           status: "USED",
           type: r.pass?.type,
           user: r.user
-            ? { name: `${r.user.firstName} ${r.user.lastName}`, email: r.user.email, mobile: r.user.mobile }
+            ? { name: r.user.name, email: r.user.email, rollNo: r.user.rollNo, food: r.user.food }
             : undefined,
           usedAt: r.pass?.usedAt,
         },
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     ok: true,
     status: "USED",
     type: r.pass.type,
-    user: { name: `${r.user.firstName} ${r.user.lastName}`, email: r.user.email, mobile: r.user.mobile },
+    user: { name: r.user.name, email: r.user.email, rollNo: r.user.rollNo, food: r.user.food },
     usedAt: r.pass.usedAt,
   });
 }
