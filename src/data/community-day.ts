@@ -22,59 +22,140 @@ export interface AgendaItem {
   time: string;
   title: string;
   description: string;
+  venue?: string;
   tag?: string;
 }
 
-export const COMMUNITY_DAY_AGENDA: AgendaItem[] = [
+export interface DaySchedule {
+  dayNumber: number;
+  dayLabel: string;
+  date: string;
+  shortDate: string;
+  theme: string;
+  defaultVenue: string;
+  schedule: AgendaItem[];
+}
+
+export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
   {
-    time: "09:00 AM",
-    title: "Check-in + Networking",
-    description: "Collect your badge, meet fellow builders, grab a seat.",
-    tag: "Doors open",
+    dayNumber: 1,
+    dayLabel: "Day 1",
+    date: "Tuesday, 06 October 2026",
+    shortDate: "Oct 6",
+    theme: "DecodeX Hackathon",
+    defaultVenue: "APJ Abdul Kalam Auditorium",
+    schedule: [
+      {
+        time: "9:00 – 9:30 AM",
+        title: "Participant check-in",
+        description: "Badge collection, team verification, and workstation setup.",
+        venue: "APJ Abdul Kalam Auditorium",
+        tag: "Check-in",
+      },
+      {
+        time: "9:30 – 10:30 AM",
+        title: "Problem Statement Submission",
+        description: "Hackathon challenge briefing, team submissions, and guideline walkthrough.",
+        venue: "APJ Abdul Kalam Auditorium",
+        tag: "Kickoff",
+      },
+      {
+        time: "10:30 AM – 1:00 PM",
+        title: "Hackathon – Phase I",
+        description: "Architecture sprint, rapid prototyping, and mentor guidance rounds.",
+        venue: "APJ Abdul Kalam Auditorium",
+        tag: "Sprint I",
+      },
+      {
+        time: "1:00 – 2:00 PM",
+        title: "Lunch break",
+        description: "Lunch provided for all registered participants. Network and recharge.",
+        venue: "APJ Abdul Kalam Auditorium",
+        tag: "Lunch",
+      },
+      {
+        time: "2:00 – 4:00 PM",
+        title: "Hackathon – Phase II",
+        description: "Implementation, AWS service integrations, testing, and demo polish.",
+        venue: "APJ Abdul Kalam Auditorium",
+        tag: "Sprint II",
+      },
+      {
+        time: "4:00 – 5:00 PM",
+        title: "Evaluation",
+        description: "Jury review, architecture assessment, and project demonstrations.",
+        venue: "APJ Abdul Kalam Auditorium",
+        tag: "Judging",
+      },
+      {
+        time: "5:00 – 5:30 PM",
+        title: "Hackathon Ends",
+        description: "Day 1 wrap-up, jury deliberations, and Day 2 announcements.",
+        venue: "APJ Abdul Kalam Auditorium",
+        tag: "Closing",
+      },
+    ],
   },
   {
-    time: "10:00 AM",
-    title: "Opening + Community Keynote",
-    description: "Welcome, community roadmap, and what to expect from the day.",
-    tag: "Keynote",
+    dayNumber: 2,
+    dayLabel: "Day 2",
+    date: "Wednesday, 07 October 2026",
+    shortDate: "Oct 7",
+    theme: "Tech Parliament & Make-A-Bot",
+    defaultVenue: "Seminar Hall",
+    schedule: [
+      {
+        time: "9:30 – 10:30 AM",
+        title: "Tech Parliament",
+        description: "High-energy debate on architecture choices: Serverless vs Containers, Monoliths vs Microservices, and AI trade-offs.",
+        venue: "Seminar Hall",
+        tag: "Debate",
+      },
+      {
+        time: "11:00 AM – 01:00 PM",
+        title: "Make-A-Bot",
+        description: "Interactive build workshop: develop and deploy AI bots using Amazon Bedrock and AWS Lambda.",
+        venue: "Seminar Hall",
+        tag: "Workshop",
+      },
+    ],
   },
   {
-    time: "11:00 AM",
-    title: "Cloud Computing on AWS",
-    description: "Core concepts + real-world use cases. Speaker TBA.",
-    tag: "Cloud · TBA",
-  },
-  {
-    time: "12:00 PM",
-    title: "AI + Generative AI with AWS",
-    description: "Demos with Bedrock and foundation models. Speaker TBA.",
-    tag: "AI/GenAI · TBA",
-  },
-  {
-    time: "01:00 PM",
-    title: "Lunch Break",
-    description: "Lunch for registered participants. Network over food.",
-    tag: "Included",
-  },
-  {
-    time: "02:00 PM",
-    title: "DevOps in Practice",
-    description: "CI/CD, serverless and shipping fast. Speaker TBA.",
-    tag: "DevOps · TBA",
-  },
-  {
-    time: "03:00 PM",
-    title: "Hands-on + Interactive Activities",
-    description: "Build-along labs, quizzes and community challenges.",
-    tag: "Hands-on",
-  },
-  {
-    time: "04:00 PM",
-    title: "Certificates + Closing",
-    description: "Participation certificates, networking and group photo.",
-    tag: "Closing",
+    dayNumber: 3,
+    dayLabel: "Day 3",
+    date: "Thursday, 08 October 2026",
+    shortDate: "Oct 8",
+    theme: "Speaker Session, Prize Distribution & Lunch",
+    defaultVenue: "APJ Abdul Kalam Auditorium",
+    schedule: [
+      {
+        time: "10:00 AM – 12:00 PM",
+        title: "Speaker / Podcast Session",
+        description: "Fireside chat and live podcast with AWS practitioners on engineering journeys and industry insights.",
+        venue: "APJ Abdul Kalam Auditorium",
+        tag: "Keynote & Podcast",
+      },
+      {
+        time: "12:00 – 01:00 PM",
+        title: "Prize Distribution",
+        description: "Felicitation of DecodeX Hackathon winners, top contributors, and certificate distribution.",
+        venue: "APJ Abdul Kalam Auditorium",
+        tag: "Awards",
+      },
+      {
+        time: "01:00 – 02:00 PM",
+        title: "Lunch",
+        description: "Grand community lunch and open networking session.",
+        venue: "CR 1",
+        tag: "Lunch",
+      },
+    ],
   },
 ];
+
+export const COMMUNITY_DAY_AGENDA: AgendaItem[] = COMMUNITY_DAY_SCHEDULE.flatMap(
+  (day) => day.schedule
+);
 
 export interface SpeakerPlaceholder {
   role: string;
