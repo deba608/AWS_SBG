@@ -86,14 +86,14 @@ export default function CommunityDayRegisterModal({
     setErrors(fieldErrors);
     if (Object.keys(fieldErrors).length > 0) return;
 
-    const contact = normalizedContact({ fullName, rollNo, email, gender, food });
+    const contact = normalizedContact({ fullName, rollNo, email, mobile, gender, food });
     setStatus("submitting");
     setApiError("");
 
     try {
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ fullName, rollNo, email, gender, food }),
+        JSON.stringify({ fullName, rollNo, email, mobile, gender, food }),
       );
     } catch {
       // private mode etc.
