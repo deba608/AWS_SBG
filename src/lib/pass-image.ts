@@ -34,26 +34,25 @@ export async function drawPassImage(input: {
   // header
   ctx.fillStyle = "#f5f3ee";
   ctx.font = "bold 52px system-ui, sans-serif";
-  ctx.fillText("Event Entry Pass", 180, 118);
+  ctx.fillText("Event Entry Pass", 180, 102);
   ctx.font = "28px system-ui, sans-serif";
   ctx.fillStyle = "#a8b0bb";
-  ctx.fillText("AWS Student Community Day · Oct 6–8 · SUIIT", 180, 166);
+  ctx.fillText("AWS Student Community Day · Oct 6–8 · SUIIT", 180, 150);
 
-  // serial as white solid badge, right side of header
+  // serial value only, white solid badge beside the title
   if (input.serial) {
-    const label = `Serial No. ${input.serial}`;
-    ctx.font = "bold 32px ui-monospace, monospace";
-    const tw = ctx.measureText(label).width;
-    const bw = tw + 48;
+    ctx.font = "bold 30px ui-monospace, monospace";
+    const tw = ctx.measureText(input.serial).width;
+    const bw = tw + 44;
     const bx = W - 50 - bw;
-    const by = 78;
+    const by = 62;
     ctx.fillStyle = "#ffffff";
     ctx.beginPath();
-    ctx.roundRect(bx, by, bw, 56, 28);
+    ctx.roundRect(bx, by, bw, 52, 26);
     ctx.fill();
     ctx.fillStyle = "#141a20";
     ctx.textAlign = "left";
-    ctx.fillText(label, bx + 24, by + 38);
+    ctx.fillText(input.serial, bx + 22, by + 36);
   }
 
   // name block
