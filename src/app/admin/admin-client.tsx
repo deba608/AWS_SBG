@@ -81,6 +81,8 @@ export default function AdminClient() {
   }, [check]);
 
   useEffect(() => {
+    // authed change pulls fresh server data
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (authed) void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
