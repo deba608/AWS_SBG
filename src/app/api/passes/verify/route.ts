@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { verifyPass } from "@/lib/pass-store";
+import { expandSerialToToken, verifyPass } from "@/lib/pass-store";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 
 function extractToken(req: Request, bodyToken?: string): string {
@@ -26,8 +26,9 @@ export async function GET(req: Request) {
   if (!rateOk(`scan:${clientIp(req)}`, 120, 60_000)) {
     return NextResponse.json({ error: "Too fast. Slow down." }, { status: 429 });
   }
-  const token = extractToken(req).trim();
-  if (!token) return NextResponse.json({ error: "token required." }, { status: 400 });
+  const raw = extractToken(req).trim();
+  if (!raw) return NextResponse.json({ error: "token required." }, { status: 400 });
+  const token = await expandSerialToToken(raw);
   const r = await verifyPass(token);
   if (!r.ok) return NextResponse.json({ ok: false, status: r.reason });
   return NextResponse.json({
@@ -58,8 +59,9 @@ export async function POST(req: Request) {
   } catch {
     // allow query-only
   }
-  const token = extractToken(req, String((body as Record<string, unknown>).token ?? "")).trim();
-  if (!token) return NextResponse.json({ error: "token required." }, { status: 400 });
+  const raw = extractToken(req, String((body as Record<string, unknown>).token ?? "")).trim();
+  if (!raw) return NextResponse.json({ error: "token required." }, { status: 400 });
+  const token = await expandSerialToToken(raw);
   const r = await verifyPass(token);
   if (!r.ok) return NextResponse.json({ ok: false, status: r.reason });
   return NextResponse.json({

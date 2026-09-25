@@ -313,16 +313,17 @@ input:focus-visible,
   border-radius: 6px;
 }
 
-/* Print: only the pass, never the page chrome. Wrappers use id="pass-print-area". */
+/* Print: only the pass, never the page chrome. Wrappers use id="pass-print-area".
+   :has scopes this to pass pages — admin gate-list print is unaffected. */
 @media print {
-  body * {
+  body:has(#pass-print-area) * {
     visibility: hidden;
   }
-  #pass-print-area,
-  #pass-print-area * {
+  body:has(#pass-print-area) #pass-print-area,
+  body:has(#pass-print-area) #pass-print-area * {
     visibility: visible;
   }
-  #pass-print-area {
+  body:has(#pass-print-area) #pass-print-area {
     position: absolute;
     left: 0;
     right: 0;

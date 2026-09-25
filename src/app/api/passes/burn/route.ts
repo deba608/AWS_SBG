@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { burnPass } from "@/lib/pass-store";
+import { burnPass, expandSerialToToken } from "@/lib/pass-store";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
@@ -14,9 +14,10 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
-  const token = String((body as Record<string, unknown>).token ?? "").trim();
+  const raw = String((body as Record<string, unknown>).token ?? "").trim();
   const scannedBy = String((body as Record<string, unknown>).scannedBy ?? "admin").slice(0, 60);
-  if (!token) return NextResponse.json({ error: "token required." }, { status: 400 });
+  if (!raw) return NextResponse.json({ error: "token required." }, { status: 400 });
+  const token = await expandSerialToToken(raw);
   const r = await burnPass(token, scannedBy);
   if (!r.ok) {
     if (r.reason === "EXPIRED") {
