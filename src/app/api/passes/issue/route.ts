@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import { mailConfigured } from "@/lib/mailer";
-import { getPassesByContact, issuePasses, registrationCount, ConflictError, RegistrationsFullError } from "@/lib/pass-store";
+import { getPassesByContact, issuePasses, registrationCount, ConflictError, RegistrationsClosedError, RegistrationsFullError } from "@/lib/pass-store";
 import { warnDefaultSecrets } from "@/lib/pass-token";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 import {
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
     if (err instanceof ConflictError) {
       return NextResponse.json({ error: err.message }, { status: 409 });
     }
-    if (err instanceof RegistrationsFullError) {
+    if (err instanceof RegistrationsFullError || err instanceof RegistrationsClosedError) {
       return NextResponse.json({ error: err.message }, { status: 403 });
     }
     console.error("[passes/issue]", err);

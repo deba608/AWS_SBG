@@ -36,11 +36,19 @@ export interface StoredPass {
   scannedBy: string | null;
 }
 
+export interface PassSettingsState {
+  /** Null = follow PASS_MAX env. */
+  maxPasses: number | null;
+  /** Null = open. False stops registration. */
+  registrationsOpen: boolean | null;
+}
+
 interface StoreShape {
   users: StoredUser[];
   passes: StoredPass[];
   /** Last issued serial number. */
   seq: number;
+  settings?: PassSettingsState;
 }
 
 const FILE = path.join(process.cwd(), ".data-passes", "passes.json");
@@ -174,9 +182,17 @@ export class ConflictError extends Error {
 
 /** Thrown when registration cap reached. Maps to 403. */
 export class RegistrationsFullError extends Error {
-  constructor() {
-    super(`Registrations are full — all ${maxRegistrations()} passes claimed.`);
+  constructor(limit: number) {
+    super(`Registrations are full — all ${limit} passes claimed.`);
     this.name = "RegistrationsFullError";
+  }
+}
+
+/** Thrown when organizers stopped registration. Maps to 403. */
+export class RegistrationsClosedError extends Error {
+  constructor() {
+    super("Registrations are closed by organizers.");
+    this.name = "RegistrationsClosedError";
   }
 }
 
@@ -186,10 +202,89 @@ export function maxRegistrations(): number {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 200;
 }
 
+export async function getSettings(): Promise<PassSettingsState> {
+  const store = await readStore();
+  return {
+    maxPasses: store.settings?.maxPasses ?? null,
+    registrationsOpen: store.settings?.registrationsOpen ?? null,
+  };
+}
+
+export async function effectiveLimit(): Promise<number> {
+  const s = await getSettings();
+  return s.maxPasses ?? maxRegistrations();
+}
+
+export async function registrationsAccepting(): Promise<boolean> {
+  const s = await getSettings();
+  if (s.registrationsOpen === false) return false;
+  return true;
+}
+
+export async function updateSettings(patch: {
+  maxPasses?: number | null;
+  registrationsOpen?: boolean | null;
+}): Promise<PassSettingsState> {
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const cur = store.settings ?? { maxPasses: null, registrationsOpen: null };
+    if (patch.maxPasses !== undefined) {
+      cur.maxPasses =
+        patch.maxPasses === null || patch.maxPasses === undefined
+          ? null
+          : Math.max(1, Math.floor(patch.maxPasses));
+    }
+    if (patch.registrationsOpen !== undefined) {
+      cur.registrationsOpen = patch.registrationsOpen;
+    }
+    store.settings = cur;
+    await writeStore(store);
+    return { ...cur };
+  });
+}
+
 export async function registrationCount(): Promise<{ registered: number; limit: number; open: boolean }> {
   const store = await readStore();
-  const limit = maxRegistrations();
-  return { registered: store.users.length, limit, open: store.users.length < limit };
+  const s = store.settings;
+  const limit = s?.maxPasses ?? maxRegistrations();
+  const open = s?.registrationsOpen !== false && store.users.length < limit;
+  return { registered: store.users.length, limit, open };
+}
+
+export async function getUserById(userId: string): Promise<StoredUser | null> {
+  const store = await readStore();
+  const user = store.users.find((u) => u.id === userId);
+  return user ? { ...user } : null;
+}
+
+/** Patch editable user fields. Uniqueness re-checked. Returns updated user. */export async function updateUser(
+  userId: string,
+  patch: { name?: string; rollNo?: string; email?: string; mobile?: string; gender?: Gender; food?: FoodPref },
+): Promise<StoredUser> {
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const user = store.users.find((u) => u.id === userId);
+    if (!user) throw new Error("User not found.");
+    const email = patch.email !== undefined ? patch.email.trim().toLowerCase() : user.email;
+    const rollNo = patch.rollNo !== undefined ? patch.rollNo.trim().toUpperCase() : user.rollNo;
+    const mobile = patch.mobile !== undefined ? patch.mobile.replace(/\D/g, "").slice(-10) : user.mobile;
+    const clash = store.users.find(
+      (u) =>
+        u.id !== userId &&
+        (u.email === email || u.rollNo === rollNo || (mobile !== "" && u.mobile === mobile)),
+    );
+    if (clash) {
+      throw new ConflictError("Another registration already uses that email, roll or mobile.");
+    }
+    if (patch.name !== undefined) user.name = patch.name;
+    user.rollNo = rollNo;
+    user.email = email;
+    user.mobile = mobile;
+    if (patch.gender !== undefined) user.gender = patch.gender;
+    if (patch.food !== undefined) user.food = patch.food;
+    await writeStore(store);
+    return { ...user };
+  });
 }
 
 /** One email / roll / mobile = one pass. Re-registration is rejected (409). */
@@ -212,8 +307,12 @@ export async function issuePasses(input: {
       "This email, roll number or mobile is already registered. Each student gets one pass — use Retrieve below if you lost your QR.",
     );
   }
-  if (store.users.length >= maxRegistrations()) {
-    throw new RegistrationsFullError();
+  if (store.settings?.registrationsOpen === false) {
+    throw new RegistrationsClosedError();
+  }
+  const limit = store.settings?.maxPasses ?? maxRegistrations();
+  if (store.users.length >= limit) {
+    throw new RegistrationsFullError(limit);
   }
 
   const now = new Date().toISOString();

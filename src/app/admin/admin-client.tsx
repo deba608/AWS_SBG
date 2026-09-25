@@ -34,12 +34,21 @@ interface Row {
   usedAt: string | null;
   scannedBy: string | null;
   name: string;
+  userId: string | null;
   serial: string;
   email: string;
   mobile: string;
   rollNo: string;
   gender: string;
   food: string;
+}
+
+interface RegSettings {
+  maxPasses: number | null;
+  registrationsOpen: boolean | null;
+  registered: number;
+  limit: number;
+  open: boolean;
 }
 
 const selectCls =
@@ -71,6 +80,14 @@ export default function AdminClient() {
   const [loading, setLoading] = useState(false);
   const [scans, setScans] = useState<Scan[]>([]);
   const [openToken, setOpenToken] = useState<string | null>(null);
+  const [settings, setSettings] = useState<RegSettings | null>(null);
+  const [limitDraft, setLimitDraft] = useState("");
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsMsg, setSettingsMsg] = useState("");
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", email: "", mobile: "", rollNo: "", gender: "", food: "" });
+  const [editErr, setEditErr] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const check = useCallback(async () => {
     try {
@@ -84,13 +101,14 @@ export default function AdminClient() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [s, l, r] = await Promise.all([
+      const [s, l, r, g] = await Promise.all([
         fetch("/api/admin/stats", { cache: "no-store" }),
         fetch(
           `/api/admin/passes?q=${encodeURIComponent(q)}&type=${type}&status=${status}&limit=200`,
           { cache: "no-store" },
         ),
         fetch("/api/admin/recent?limit=10", { cache: "no-store" }),
+        fetch("/api/admin/settings", { cache: "no-store" }),
       ]);
       if (l.status === 401) {
         setAuthed(false);
@@ -103,6 +121,11 @@ export default function AdminClient() {
         setTotal(d.total as number);
       }
       if (r.ok) setScans(((await r.json()).rows as Scan[]) ?? []);
+      if (g.ok) {
+        const d = (await g.json()) as RegSettings;
+        setSettings(d);
+        setLimitDraft((prev) => (prev === "" ? String(d.limit) : prev));
+      }
     } finally {
       setLoading(false);
     }
@@ -147,6 +170,77 @@ export default function AdminClient() {
     setStats(null);
     setScans([]);
     setOpenToken(null);
+    setSettings(null);
+    setEditingUserId(null);
+  }
+
+  async function saveSettings(patch: { maxPasses?: number | null; registrationsOpen?: boolean | null }) {
+    setSavingSettings(true);
+    setSettingsMsg("");
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error ?? "Save failed.");
+      setSettings(d as RegSettings);
+      setLimitDraft(String((d as RegSettings).limit));
+      setSettingsMsg("Saved.");
+    } catch (err) {
+      setSettingsMsg(err instanceof Error ? err.message : "Save failed.");
+    } finally {
+      setSavingSettings(false);
+    }
+  }
+
+  function startEdit(r: Row) {
+    if (!r.userId) return;
+    setEditErr("");
+    setEditForm({
+      name: r.name,
+      email: r.email,
+      mobile: r.mobile === "—" ? "" : r.mobile,
+      rollNo: r.rollNo,
+      gender: r.gender,
+      food: r.food,
+    });
+    setEditingUserId(r.userId);
+  }
+
+  async function saveEdit() {
+    if (!editingUserId) return;
+    setSavingEdit(true);
+    setEditErr("");
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: editingUserId,
+          patch: {
+            name: editForm.name,
+            email: editForm.email,
+            mobile: editForm.mobile,
+            rollNo: editForm.rollNo,
+            gender: editForm.gender,
+            food: editForm.food,
+          },
+        }),
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        const fieldErr = d.errors ? Object.values(d.errors as Record<string, string>).join(" ") : "";
+        throw new Error(fieldErr || d.error || "Update failed.");
+      }
+      setEditingUserId(null);
+      await load();
+    } catch (err) {
+      setEditErr(err instanceof Error ? err.message : "Update failed.");
+    } finally {
+      setSavingEdit(false);
+    }
   }
 
   if (authed === null) {
@@ -234,6 +328,57 @@ export default function AdminClient() {
           </div>
         ))}
       </div>
+
+      {settings ? (
+        <div className="rank-card p-4 sm:p-5 print:hidden">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm font-bold text-cream">Registration control</h2>
+            <span
+              className={cn(
+                "rounded-full px-3 py-1 text-xs font-bold",
+                settings.open ? "bg-green-500/15 text-green-300" : "bg-red-500/15 text-red-300",
+              )}
+            >
+              {settings.open ? `OPEN · ${settings.registered}/${settings.limit}` : "CLOSED"}
+            </span>
+          </div>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+            <label className="flex flex-1 items-center gap-2 text-sm text-fog">
+              Max passes
+              <input
+                type="number"
+                min={1}
+                max={10000}
+                value={limitDraft}
+                onChange={(e) => setLimitDraft(e.target.value)}
+                className="w-full min-h-[44px] max-w-[140px] rounded-xl border border-line bg-surface px-3 py-2 text-sm text-cream focus:ring-2 focus:ring-brand"
+              />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={savingSettings}
+                onClick={() => void saveSettings({ maxPasses: Number(limitDraft) })}
+                className="inline-flex min-h-[44px] items-center rounded-full bg-brand px-4 py-2 text-sm font-semibold text-black hover:bg-brandhover disabled:opacity-60"
+              >
+                Set limit
+              </button>
+              <button
+                type="button"
+                disabled={savingSettings}
+                onClick={() => void saveSettings({ registrationsOpen: !settings.open })}
+                className={cn(
+                  "inline-flex min-h-[44px] items-center rounded-full px-4 py-2 text-sm font-semibold",
+                  settings.open ? "border border-red-400/50 text-red-300 hover:bg-red-500/10" : "bg-green-600 text-white hover:bg-green-500",
+                )}
+              >
+                {settings.open ? "Stop registration" : "Resume registration"}
+              </button>
+            </div>
+          </div>
+          {settingsMsg ? <p className="mt-2 text-xs text-fog">{settingsMsg}</p> : null}
+        </div>
+      ) : null}
 
       {stats ? (
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -394,6 +539,81 @@ export default function AdminClient() {
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Burned</dt><dd className="text-cream">{r.usedAt ? new Date(r.usedAt).toLocaleString("en-IN") : "—"}</dd></div>
                     </dl>
                     <p className="mt-2 break-all font-mono text-[11px] text-faint">{r.token}</p>
+                    {r.userId ? (
+                      <div className="mt-3">
+                        {editingUserId === r.userId ? (
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                              {(
+                                [
+                                  ["name", "Full name"],
+                                  ["email", "College mail"],
+                                  ["mobile", "Mobile"],
+                                  ["rollNo", "Roll no"],
+                                ] as const
+                              ).map(([k, label]) => (
+                                <label key={k} className="block text-xs text-faint">
+                                  {label}
+                                  <input
+                                    value={editForm[k]}
+                                    onChange={(e) => setEditForm((f) => ({ ...f, [k]: e.target.value }))}
+                                    className="mt-1 w-full min-h-[44px] rounded-xl border border-line bg-surface px-3 py-2 text-sm text-cream focus:ring-2 focus:ring-brand"
+                                  />
+                                </label>
+                              ))}
+                              <label className="block text-xs text-faint">
+                                Gender
+                                <select
+                                  value={editForm.gender}
+                                  onChange={(e) => setEditForm((f) => ({ ...f, gender: e.target.value }))}
+                                  className={selectCls + " mt-1 w-full"}
+                                >
+                                  <option value="Male">Male</option>
+                                  <option value="Female">Female</option>
+                                </select>
+                              </label>
+                              <label className="block text-xs text-faint">
+                                Food
+                                <select
+                                  value={editForm.food}
+                                  onChange={(e) => setEditForm((f) => ({ ...f, food: e.target.value }))}
+                                  className={selectCls + " mt-1 w-full"}
+                                >
+                                  <option value="Veg">Veg</option>
+                                  <option value="Non-veg">Non-veg</option>
+                                </select>
+                              </label>
+                            </div>
+                            {editErr ? <p role="alert" className="text-xs text-red-300">{editErr}</p> : null}
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                disabled={savingEdit}
+                                onClick={() => void saveEdit()}
+                                className="inline-flex min-h-[44px] items-center rounded-full bg-brand px-4 py-2 text-sm font-semibold text-black hover:bg-brandhover disabled:opacity-60"
+                              >
+                                {savingEdit ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : "Save"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingUserId(null)}
+                                className="inline-flex min-h-[44px] items-center rounded-full border border-line px-4 py-2 text-sm text-fog hover:text-cream"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => startEdit(r)}
+                            className="inline-flex min-h-[44px] items-center rounded-full border border-line px-4 py-2 text-xs font-semibold text-fog hover:text-cream"
+                          >
+                            Modify details
+                          </button>
+                        )}
+                      </div>
+                    ) : null}
                   </td>
                 </tr>
                 ) : null}
