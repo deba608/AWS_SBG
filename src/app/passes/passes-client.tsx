@@ -22,6 +22,7 @@ interface IssuedPass {
 
 interface IssuedUser {
   name: string;
+  serial: string;
   email: string;
   rollNo: string;
   gender: string;
@@ -106,6 +107,7 @@ export default function PassesClient() {
             <PassCard
               key={p.type}
               name={user.name}
+              serial={user.serial ?? ""}
               email={user.email}
               rollNo={user.rollNo}
               food={user.food}
