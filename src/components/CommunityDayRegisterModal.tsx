@@ -11,6 +11,7 @@ import {
 } from "@/lib/validate-contact";
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
+import { emailExactPass } from "@/lib/pass-image";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "scdRegistration";

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, Mail, Search } from "lucide-react";
 import PassCard from "@/components/PassCard";
+import { emailExactPass } from "@/lib/pass-image";
 
 interface FoundPass {
   type: "ENTRY" | "FOOD";
@@ -56,15 +57,20 @@ export default function RetrievePass() {
   }
 
   async function resendEmail() {
-    if (!user || resend === "busy") return;
+    if (!user || resend === "busy" || passes.length === 0) return;
     setResend("busy");
     try {
-      const res = await fetch("/api/passes/resend", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email }),
+      const p = passes[0];
+      const ok = await emailExactPass({
+        serial: user.serial ?? "",
+        name: user.name,
+        email: user.email,
+        rollNo: user.rollNo,
+        food: user.food,
+        qrDataUrl: p.qrImage,
+        token: p.token,
       });
-      setResend(res.ok ? "sent" : "failed");
+      setResend(ok ? "sent" : "failed");
     } catch {
       setResend("failed");
     }
