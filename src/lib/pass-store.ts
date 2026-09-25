@@ -59,6 +59,19 @@ async function writeStore(store: StoreShape): Promise<void> {
   await fs.rename(tmp, FILE);
 }
 
+/**
+ * Serializes read-modify-write ops in this process.
+ * Multi-admin safe on ONE server instance (2-3 gate phones hitting same
+ * Next server). NOT safe across serverless replicas — file store needs a
+ * single persistent host. For Vercel/multi-instance, migrate to a DB.
+ */
+let writeQueue: Promise<unknown> = Promise.resolve();
+function withWriteLock<T>(fn: () => Promise<T>): Promise<T> {
+  const run = writeQueue.then(fn, fn);
+  writeQueue = run.catch(() => undefined);
+  return run;
+}
+
 export function findUser(
   store: StoreShape,
   email: string,
@@ -77,6 +90,7 @@ export async function issuePasses(input: {
   gender: Gender;
   food: FoodPref;
 }): Promise<{ user: StoredUser; passes: StoredPass[]; duplicate: boolean }> {
+  return withWriteLock(async () => {
   const email = input.email.trim().toLowerCase();
   const rollNo = input.rollNo.trim().toUpperCase();
   const store = await readStore();
@@ -116,6 +130,7 @@ export async function issuePasses(input: {
   store.passes.push(pass);
   await writeStore(store);
   return { user, passes: [pass], duplicate: Boolean(existing) };
+  });
 }
 
 export async function getPassesByContact(
@@ -149,8 +164,9 @@ export type BurnResult =
   | { ok: false; reason: "INVALID" | "EXPIRED" | "ALREADY_USED"; user?: StoredUser; pass?: StoredPass }
   | { ok: true; user: StoredUser; pass: StoredPass };
 
-/** Atomic-ish burn: re-read, check ACTIVE, write USED. */
+/** Serialized burn: concurrent admins can't double-burn or lose updates. */
 export async function burnPass(token: string, scannedBy: string): Promise<BurnResult> {
+  return withWriteLock(async () => {
   const t = token.trim();
   if (!verifyPassToken(t)) return { ok: false, reason: "INVALID" };
   if (isExpired()) return { ok: false, reason: "EXPIRED" };
@@ -165,6 +181,7 @@ export async function burnPass(token: string, scannedBy: string): Promise<BurnRe
   pass.scannedBy = scannedBy || "admin";
   await writeStore(store);
   return { ok: true, user, pass };
+  });
 }
 
 export async function passStats(): Promise<{
