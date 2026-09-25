@@ -36,6 +36,7 @@ interface Row {
   name: string;
   serial: string;
   email: string;
+  mobile: string;
   rollNo: string;
   gender: string;
   food: string;
@@ -319,6 +320,7 @@ export default function AdminClient() {
                   <td className="px-4 py-2 text-xs text-fog">
                     {r.email}
                     <br />
+                    {r.mobile && r.mobile !== "—" ? <>{r.mobile}<br /></> : null}
                     Roll {r.rollNo}
                   </td>
                   <td className="px-4 py-2">

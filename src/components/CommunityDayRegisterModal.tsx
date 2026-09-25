@@ -42,6 +42,7 @@ export default function CommunityDayRegisterModal({
   const [fullName, setFullName] = useState("");
   const [rollNo, setRollNo] = useState("");
   const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
   const [gender, setGender] = useState("");
   const [food, setFood] = useState("");
   const [errors, setErrors] = useState<ContactErrors>({});
@@ -59,6 +60,7 @@ export default function CommunityDayRegisterModal({
         if (s.fullName ?? s.name) setFullName(String(s.fullName ?? s.name));
         if (s.rollNo) setRollNo(String(s.rollNo));
         if (s.email) setEmail(String(s.email));
+        if (s.mobile) setMobile(String(s.mobile));
         if (s.gender) setGender(String(s.gender));
         if (s.food) setFood(String(s.food));
       }
@@ -80,7 +82,7 @@ export default function CommunityDayRegisterModal({
   };
 
   async function submit() {
-    const fieldErrors = validateContact({ fullName, rollNo, email, gender, food });
+    const fieldErrors = validateContact({ fullName, rollNo, email, mobile, gender, food });
     setErrors(fieldErrors);
     if (Object.keys(fieldErrors).length > 0) return;
 
@@ -173,6 +175,7 @@ export default function CommunityDayRegisterModal({
                 name={passUser.name}
                 serial={passUser.serial}
                 email={email}
+                mobile={mobile}
                 rollNo={passUser.rollNo}
                 food={passUser.food}
                 type={pass.type}
@@ -256,6 +259,26 @@ export default function CommunityDayRegisterModal({
               />
               {errors.email ? (
                 <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.email}</p>
+              ) : null}
+            </div>
+            <div>
+              <label htmlFor="scd-mobile" className="mb-1.5 block text-sm font-medium text-cream">
+                Mobile number *
+              </label>
+              <input
+                id="scd-mobile"
+                type="tel"
+                autoComplete="tel-national"
+                inputMode="numeric"
+                maxLength={13}
+                placeholder="98765 43210"
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value)}
+                aria-invalid={Boolean(errors.mobile)}
+                className={inputClasses(Boolean(errors.mobile))}
+              />
+              {errors.mobile ? (
+                <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.mobile}</p>
               ) : null}
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

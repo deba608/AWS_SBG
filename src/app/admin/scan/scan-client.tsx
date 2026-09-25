@@ -22,6 +22,7 @@ type VerifyState =
       name?: string;
       serial?: string;
       email?: string;
+      mobile?: string;
       rollNo?: string;
       food?: string;
       usedAt?: string | null;
@@ -157,6 +158,7 @@ export default function ScanClient() {
           name: d.user?.name,
           serial: d.user?.serial,
           email: d.user?.email,
+          mobile: d.user?.mobile,
           rollNo: d.user?.rollNo,
           food: d.user?.food,
           usedAt: d.usedAt ?? null,
@@ -194,6 +196,7 @@ export default function ScanClient() {
           name: d.user?.name,
           serial: d.user?.serial,
           email: d.user?.email,
+          mobile: d.user?.mobile,
           rollNo: d.user?.rollNo,
           food: d.user?.food,
           usedAt: d.usedAt ?? null,
@@ -208,6 +211,7 @@ export default function ScanClient() {
           name: d.user?.name,
           serial: d.user?.serial,
           email: d.user?.email,
+          mobile: d.user?.mobile,
           rollNo: d.user?.rollNo,
           food: d.user?.food,
           usedAt: d.usedAt ?? null,
@@ -462,7 +466,7 @@ export default function ScanClient() {
                 {result.name}
                 {result.serial ? <span className="ml-2 font-mono text-sm text-brand">No. {result.serial}</span> : null}
               </p>
-              <p className="text-sm text-fog">{result.email} · Roll {result.rollNo}</p>
+              <p className="text-sm text-fog">{result.email}{result.mobile ? ` · ${result.mobile}` : ""} · Roll {result.rollNo}</p>
               {result.food ? (
                 <p className={cn(
                   "mt-2 inline-block rounded-full border px-3 py-1 font-mono text-xs font-bold text-white",
