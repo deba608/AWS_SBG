@@ -521,7 +521,17 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
                       {r.status}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-xs text-fog">{r.usedAt ?? "—"}</td>
+                  <td className="px-4 py-2 text-xs text-fog">
+                    {r.usedAt
+                      ? new Date(r.usedAt).toLocaleString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })
+                      : "—"}
+                  </td>
                 </tr>
                 {open ? (
                 <tr key={`${r.token}-detail`} className="border-t border-dashed border-line bg-black/20">

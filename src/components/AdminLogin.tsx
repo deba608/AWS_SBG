@@ -31,8 +31,7 @@ export default function AdminLogin({ onDone }: { onDone: () => void }) {
     <form onSubmit={submit} className="rank-card space-y-4 p-5 sm:p-6">
       <h2 className="text-lg font-bold text-cream">Admin login</h2>
       <p className="text-sm text-fog">
-        Enter gate password. Set via <code className="font-mono">ADMIN_PASS</code> env
-        in production.
+        Enter gate password to continue.
       </p>
       <input
         type="password"
