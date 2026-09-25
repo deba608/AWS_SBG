@@ -438,7 +438,7 @@ export default function ScanClient() {
         {camErr ? <p role="alert" className="text-xs text-red-300">{camErr}</p> : null}
         <details className="rounded-xl border border-line px-4 py-2">
           <summary className="min-h-[44px] cursor-pointer py-2 text-sm text-fog hover:text-cream">
-            Manual token entry
+            Manual entry — token or Serial No.
           </summary>
           <form
             onSubmit={(e) => {
@@ -451,7 +451,7 @@ export default function ScanClient() {
               ref={inputRef}
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              placeholder="Paste token or full QR URL…"
+              placeholder="Token, QR URL, or Serial No. (A01)…"
               spellCheck={false}
               className="w-full min-h-[44px] flex-1 rounded-xl border border-line bg-surface px-3 py-3 font-mono text-xs text-cream placeholder:text-faint focus:ring-2 focus:ring-brand"
             />
