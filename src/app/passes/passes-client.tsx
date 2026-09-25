@@ -49,6 +49,22 @@ export default function PassesClient() {
   const [passes, setPasses] = useState<IssuedPass[]>([]);
   const [wasDuplicate, setWasDuplicate] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [resending, setResending] = useState(false);
+
+  async function resendEmail() {
+    if (!user || resending) return;
+    setResending(true);
+    try {
+      const res = await fetch("/api/passes/resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email }),
+      });
+      if (res.ok) setEmailSent(true);
+    } finally {
+      setResending(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -105,11 +121,23 @@ export default function PassesClient() {
         </div>
         <div className={`rank-card flex items-center gap-3 p-4 text-sm print:hidden ${emailSent ? "border-sky-400/30 bg-sky-400/10 text-sky-200" : "border-amber-400/30 bg-amber-400/10 text-amber-200"}`}>
           <Mail className="h-5 w-5 shrink-0" aria-hidden />
-          {emailSent ? (
-            <p>Pass emailed to <span className="font-semibold">{user.email}</span> — check inbox + spam.</p>
-          ) : (
-            <p>Mail not sent to <span className="font-semibold">{user.email}</span> yet — keep the downloaded image + screenshot.</p>
-          )}
+          <div className="flex-1">
+            {emailSent ? (
+              <p>Pass emailed to <span className="font-semibold">{user.email}</span> — check inbox + spam.</p>
+            ) : (
+              <p>Mail not sent to <span className="font-semibold">{user.email}</span> yet — keep the downloaded image + screenshot.</p>
+            )}
+          </div>
+          {!emailSent ? (
+            <button
+              type="button"
+              onClick={resendEmail}
+              disabled={resending}
+              className="inline-flex min-h-[44px] shrink-0 items-center rounded-full border border-current px-4 py-2 text-xs font-bold disabled:opacity-60"
+            >
+              {resending ? "Sending…" : "Resend email"}
+            </button>
+          ) : null}
         </div>
         <div id="pass-print-area" className="print:space-y-6">
           {passes.map((p) => (

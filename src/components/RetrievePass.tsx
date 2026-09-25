@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Mail, Search } from "lucide-react";
 import PassCard from "@/components/PassCard";
 
 interface FoundPass {
@@ -29,6 +29,7 @@ export default function RetrievePass() {
   const [error, setError] = useState("");
   const [user, setUser] = useState<FoundUser | null>(null);
   const [passes, setPasses] = useState<FoundPass[]>([]);
+  const [resend, setResend] = useState<"idle" | "busy" | "sent" | "failed">("idle");
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,10 +47,26 @@ export default function RetrievePass() {
       if (!res.ok) throw new Error(data.error ?? "No pass found.");
       setUser(data.user as FoundUser);
       setPasses(data.passes as FoundPass[]);
+      setResend("idle");
       setStatus("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "No pass found.");
       setStatus("idle");
+    }
+  }
+
+  async function resendEmail() {
+    if (!user || resend === "busy") return;
+    setResend("busy");
+    try {
+      const res = await fetch("/api/passes/resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email }),
+      });
+      setResend(res.ok ? "sent" : "failed");
+    } catch {
+      setResend("failed");
     }
   }
 
@@ -89,6 +106,19 @@ export default function RetrievePass() {
       ) : null}
       {status === "done" && user ? (
         <div className="mt-5 space-y-4">
+          <button
+            type="button"
+            onClick={resendEmail}
+            disabled={resend === "busy" || resend === "sent"}
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-line px-5 py-2 text-sm font-semibold text-cream hover:border-brand/60 disabled:opacity-60"
+          >
+            {resend === "busy" ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Mail className="h-4 w-4" aria-hidden />
+            )}
+            {resend === "sent" ? `Pass emailed to ${user.email}` : resend === "failed" ? "Resend failed — try again" : `Resend pass to ${user.email}`}
+          </button>
           {passes.map((p) => (
             <PassCard
               key={p.type}
