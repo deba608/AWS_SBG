@@ -94,7 +94,7 @@ export default function CommunityDayAgenda() {
                         {item.title}
                       </h4>
                       {item.tag ? (
-                        <Badge tone="default">{item.tag}</Badge>
+                        <Badge tone="neutral">{item.tag}</Badge>
                       ) : null}
                     </div>
                     {item.description ? (
