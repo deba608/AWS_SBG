@@ -13,6 +13,8 @@ import { getRedis, withRedisLock } from "./pass-redis";
 
 export interface StoredUser {
   id: string;
+  /** Public serial: A01, A02, … assigned in registration order. */
+  serial: string;
   name: string;
   rollNo: string;
   email: string;
@@ -36,6 +38,8 @@ export interface StoredPass {
 interface StoreShape {
   users: StoredUser[];
   passes: StoredPass[];
+  /** Last issued serial number. */
+  seq: number;
 }
 
 const FILE = path.join(process.cwd(), ".data-passes", "passes.json");
@@ -43,7 +47,28 @@ const REDIS_KEY = "sbg:passes:v1";
 const REDIS_LOCK = "sbg:passes:lock";
 
 function emptyStore(): StoreShape {
-  return { users: [], passes: [] };
+  return { users: [], passes: [], seq: 0 };
+}
+
+export function formatSerial(n: number): string {
+  return `A${String(n).padStart(2, "0")}`;
+}
+
+/** Backfill serials for pre-serial users, oldest first. Returns next seq. */
+function ensureSerials(store: StoreShape): void {
+  if (typeof store.seq !== "number") store.seq = 0;
+  const missing = store.users
+    .filter((u) => !u.serial)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  for (const u of missing) {
+    store.seq += 1;
+    u.serial = formatSerial(store.seq);
+  }
+  // keep seq ahead of any hand-set serials
+  for (const u of store.users) {
+    const m = /^A(\d+)$/.exec(u.serial ?? "");
+    if (m) store.seq = Math.max(store.seq, Number(m[1]));
+  }
 }
 
 function parseStore(raw: unknown): StoreShape {
@@ -162,8 +187,11 @@ export async function issuePasses(input: {
   }
 
   const now = new Date().toISOString();
+  ensureSerials(store);
+  store.seq += 1;
   const user: StoredUser = {
     id: `u_${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`,
+    serial: formatSerial(store.seq),
     name: input.name,
     rollNo,
     email,

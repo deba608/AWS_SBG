@@ -21,6 +21,7 @@ export async function GET(req: Request) {
       usedAt: pass.usedAt,
       scannedBy: pass.scannedBy,
       name: user?.name ?? "—",
+      serial: user?.serial ?? "—",
       email: user?.email ?? "—",
       rollNo: user?.rollNo ?? "—",
       gender: user?.gender ?? "—",

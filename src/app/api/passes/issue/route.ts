@@ -49,6 +49,7 @@ export async function POST(req: Request) {
     let emailSent = false;
     if (!duplicate && mailConfigured()) {
       const png = await drawPassImageServer({
+        serial: user.serial,
         name: user.name,
         email: user.email,
         rollNo: user.rollNo,
@@ -68,6 +69,7 @@ export async function POST(req: Request) {
       {
         user: {
           name: user.name,
+          serial: user.serial,
           rollNo: user.rollNo,
           email: user.email,
           gender: user.gender,
@@ -128,6 +130,7 @@ export async function GET(req: Request) {
   return NextResponse.json({
     user: {
       name: found.user.name,
+      serial: found.user.serial ?? "",
       rollNo: found.user.rollNo,
       email: found.user.email,
       gender: found.user.gender,

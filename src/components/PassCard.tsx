@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { CalendarDays, Download, Loader2, MapPin } from "lucide-react";
 import { downloadDataUrl, drawPassImage } from "@/lib/pass-image";
-import { VegMark } from "@/components/FoodSelect";
 import { COMMUNITY_DAY_META } from "@/data/community-day";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +23,7 @@ const TYPE_META = {
 
 export default function PassCard({
   name,
+  serial,
   email,
   rollNo,
   food,
@@ -32,6 +32,7 @@ export default function PassCard({
   token,
 }: {
   name: string;
+  serial: string;
   email: string;
   rollNo: string;
   food: string;
@@ -46,7 +47,7 @@ export default function PassCard({
     if (busy) return;
     setBusy(true);
     try {
-      const png = await drawPassImage({ name, email, rollNo, food, qrDataUrl: qrImage, token });
+      const png = await drawPassImage({ serial, name, email, rollNo, food, qrDataUrl: qrImage, token });
       downloadDataUrl(png, `entry-pass-${rollNo}.png`);
     } finally {
       setBusy(false);
@@ -71,14 +72,21 @@ export default function PassCard({
                 {meta.label}
               </h3>
             </div>
-            <span
-              className={cn(
-                "shrink-0 rounded-full border px-3 py-1 font-mono text-xs font-semibold",
-                meta.chip,
-              )}
-            >
-              {type}
-            </span>
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <span
+                className={cn(
+                  "rounded-full border px-3 py-1 font-mono text-xs font-semibold",
+                  meta.chip,
+                )}
+              >
+                {type}
+              </span>
+              {serial ? (
+                <span className="rounded-full bg-white px-3 py-1 font-mono text-xs font-bold text-black">
+                  No. {serial}
+                </span>
+              ) : null}
+            </div>
           </div>
 
           <div className="mt-5 flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
@@ -102,14 +110,13 @@ export default function PassCard({
               </p>
               <p
                 className={cn(
-                  "mt-2.5 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold",
+                  "mt-2.5 inline-flex items-center rounded-full border px-4 py-1.5 text-xs font-bold text-white",
                   food === "Veg"
-                    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                    : "border-red-400/30 bg-red-400/10 text-red-300",
+                    ? "border-green-600 bg-green-600"
+                    : "border-red-600 bg-red-600",
                 )}
               >
-                <VegMark veg={food === "Veg"} />
-                {food === "Veg" ? "Veg" : "Non-veg"}
+                {food === "Veg" ? "VEG" : "NON-VEG"}
               </p>
               <div className="mt-3 space-y-1.5 text-xs text-fog">
                 <p className="flex items-center justify-center gap-1.5 sm:justify-start">

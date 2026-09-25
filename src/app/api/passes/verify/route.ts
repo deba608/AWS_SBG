@@ -36,6 +36,7 @@ export async function GET(req: Request) {
     type: r.pass.type,
     user: {
       name: r.user.name,
+      serial: r.user.serial ?? "",
       email: r.user.email,
       rollNo: r.user.rollNo,
       food: r.user.food,
@@ -66,6 +67,7 @@ export async function POST(req: Request) {
     type: r.pass.type,
     user: {
       name: r.user.name,
+      serial: r.user.serial ?? "",
       email: r.user.email,
       rollNo: r.user.rollNo,
       food: r.user.food,
