@@ -11,7 +11,7 @@ import {
 
 export async function POST(req: Request) {
   warnDefaultSecrets();
-  if (!rateOk(`issue:${clientIp(req)}`, 10, 60_000)) {
+  if (!rateOk(`issue:${clientIp(req)}`, 30, 60_000)) {
     return NextResponse.json({ error: "Too many requests. Wait a minute." }, { status: 429 });
   }
   let body: unknown;

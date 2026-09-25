@@ -165,7 +165,7 @@ export default function CommunityDayRegisterModal({
             <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-200">
               Entry pass ready. Download image or take a screenshot — QR scans
               once at gate.
-              {emailSent ? " A copy was also emailed to you." : null}
+              {emailSent ? " A copy was also emailed to you." : " Email copy not sent yet — keep the screenshot."}
             </div>
             <PassCard
               name={passUser.name}

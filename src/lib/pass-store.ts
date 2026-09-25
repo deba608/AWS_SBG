@@ -189,8 +189,8 @@ export async function passStats(): Promise<{
   users: number;
   entryActive: number;
   entryUsed: number;
-  foodActive: number;
-  foodUsed: number;
+  veg: number;
+  nonveg: number;
 }> {
   const store = await readStore();
   return {
@@ -198,8 +198,8 @@ export async function passStats(): Promise<{
     users: store.users.length,
     entryActive: store.passes.filter((p) => p.type === "ENTRY" && p.status === "ACTIVE").length,
     entryUsed: store.passes.filter((p) => p.type === "ENTRY" && p.status === "USED").length,
-    foodActive: store.passes.filter((p) => p.type === "FOOD" && p.status === "ACTIVE").length,
-    foodUsed: store.passes.filter((p) => p.type === "FOOD" && p.status === "USED").length,
+    veg: store.users.filter((u) => u.food === "Veg").length,
+    nonveg: store.users.filter((u) => u.food === "Non-veg").length,
   };
 }
 

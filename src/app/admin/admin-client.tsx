@@ -11,8 +11,8 @@ interface Stats {
   users: number;
   entryActive: number;
   entryUsed: number;
-  foodActive: number;
-  foodUsed: number;
+  veg: number;
+  nonveg: number;
 }
 
 interface Row {
@@ -108,9 +108,9 @@ export default function AdminClient() {
   const cards = stats
     ? [
         { label: "Registered", v: stats.users },
-        { label: "Passes issued", v: stats.issued },
         { label: "Entry in", v: stats.entryUsed, sub: `${stats.entryActive} pending` },
-        { label: "Food out", v: stats.foodUsed, sub: `${stats.foodActive} pending` },
+        { label: "Veg lunch", v: stats.veg },
+        { label: "Non-veg lunch", v: stats.nonveg },
       ]
     : [];
 

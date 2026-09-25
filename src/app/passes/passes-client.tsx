@@ -99,7 +99,7 @@ export default function PassesClient() {
           {wasDuplicate
             ? "Pass already existed — showing your QR. Same QR works at gate."
             : "Entry pass ready. Download image or take a screenshot — QR scans once."}
-          {emailSent ? " A copy was also emailed to you." : null}
+          {emailSent ? " A copy was also emailed to you." : " Email copy not sent yet — download the image + screenshot as backup."}
         </div>
         <div className="print:space-y-6">
           {passes.map((p) => (

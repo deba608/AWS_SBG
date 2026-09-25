@@ -31,8 +31,8 @@ interface Stats {
   users: number;
   entryActive: number;
   entryUsed: number;
-  foodActive: number;
-  foodUsed: number;
+  veg: number;
+  nonveg: number;
 }
 
 function tokenFromQRText(text: string): string {
@@ -313,8 +313,8 @@ export default function ScanClient() {
           {[
             { label: "Users", v: stats.users },
             { label: "Entry in", v: stats.entryUsed },
-            { label: "Food out", v: stats.foodUsed },
-            { label: "Issued", v: stats.issued },
+            { label: "Veg", v: stats.veg },
+            { label: "Non-veg", v: stats.nonveg },
           ].map((s) => (
             <div key={s.label} className="rank-card p-3">
               <p className="text-2xl font-bold text-cream">{s.v}</p>
