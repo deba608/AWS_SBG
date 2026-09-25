@@ -2,6 +2,7 @@
 
 /** Compose a shareable pass PNG on canvas. No deps. 900x1250. */
 export async function drawPassImage(input: {
+  serial: string;
   name: string;
   email: string;
   rollNo: string;
@@ -36,6 +37,15 @@ export async function drawPassImage(input: {
   ctx.fillStyle = "#a8b0bb";
   ctx.fillText("AWS Student Community Day · Oct 6–8 · SUIIT", 50, 195);
 
+  // serial, right side of header
+  if (input.serial) {
+    ctx.fillStyle = "#f5f3ee";
+    ctx.font = "bold 32px ui-monospace, monospace";
+    ctx.textAlign = "right";
+    ctx.fillText(`No. ${input.serial}`, W - 50, 130);
+    ctx.textAlign = "left";
+  }
+
   // name block
   ctx.fillStyle = "#f5f3ee";
   ctx.font = "bold 52px system-ui, sans-serif";
@@ -43,26 +53,21 @@ export async function drawPassImage(input: {
   ctx.fillStyle = "#a8b0bb";
   ctx.font = "30px system-ui, sans-serif";
   ctx.fillText(input.email.slice(0, 40), 50, 350);
-  // veg / non-veg mark + roll line
+  // solid food badge + roll line (no veg logos)
   const vegMeal = input.food === "Veg";
-  ctx.lineWidth = 4;
-  ctx.strokeStyle = vegMeal ? "#34d399" : "#f87171";
-  ctx.strokeRect(50, 392, 34, 34);
-  ctx.fillStyle = vegMeal ? "#34d399" : "#f87171";
-  if (vegMeal) {
-    ctx.beginPath();
-    ctx.arc(67, 409, 9, 0, Math.PI * 2);
-    ctx.fill();
-  } else {
-    ctx.beginPath();
-    ctx.moveTo(67, 398);
-    ctx.lineTo(77, 416);
-    ctx.lineTo(57, 416);
-    ctx.closePath();
-    ctx.fill();
-  }
+  const badgeLabel = vegMeal ? "VEG" : "NON-VEG";
+  ctx.font = "bold 26px system-ui, sans-serif";
+  const badgeW = ctx.measureText(badgeLabel).width + 40;
+  const badgeY = 382;
+  ctx.fillStyle = vegMeal ? "#16a34a" : "#dc2626";
+  ctx.beginPath();
+  ctx.roundRect(50, badgeY, badgeW, 46, 12);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(badgeLabel, 50 + 20, badgeY + 32);
   ctx.fillStyle = "#6b7480";
-  ctx.fillText(`Roll: ${input.rollNo} · Food: ${input.food}`, 100, 419);
+  ctx.font = "30px system-ui, sans-serif";
+  ctx.fillText(`Roll: ${input.rollNo}`, 50 + badgeW + 18, badgeY + 32);
 
   // divider
   ctx.strokeStyle = "#232c36";
