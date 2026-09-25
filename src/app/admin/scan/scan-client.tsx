@@ -71,6 +71,8 @@ export default function ScanClient() {
   const controlsRef = useRef<{ stop: () => void } | null>(null);
   const lastScanRef = useRef<string>("");
   const resumeTimer = useRef<number | null>(null);
+  const scanningRef = useRef(false);
+  scanningRef.current = scanning;
 
   const refreshMe = useCallback(async () => {
     try {
@@ -276,21 +278,22 @@ export default function ScanClient() {
       for (const tr of (v.srcObject as MediaStream).getTracks()) tr.stop();
       v.srcObject = null;
     }
+    scanningRef.current = false;
     setScanning(false);
   }
 
   async function startCamera(force = false) {
     setCamErr("");
-    if (scanning && !force) {
-      stopCamera();
+    if (scanningRef.current) {
+      if (!force) stopCamera();
       return;
     }
-    if (scanning && force) return;
     try {
       const { BrowserQRCodeReader } = await import("@zxing/browser");
       const reader = new BrowserQRCodeReader();
       const video = videoRef.current;
       if (!video) return;
+      scanningRef.current = true;
       setScanning(true);
       const controls = await reader.decodeFromVideoDevice(
         undefined,
@@ -315,11 +318,15 @@ export default function ScanClient() {
       setCamErr(
         err instanceof Error ? err.message : "Camera unavailable. Use manual entry.",
       );
+      scanningRef.current = false;
       setScanning(false);
     }
   }
 
-  useEffect(() => () => stopCamera(), []);
+  useEffect(() => () => {
+    stopCamera();
+    if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+  }, []);
 
   if (authed === null) {
     return (
