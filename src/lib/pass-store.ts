@@ -178,3 +178,46 @@ export async function passStats(): Promise<{
     foodUsed: store.passes.filter((p) => p.type === "FOOD" && p.status === "USED").length,
   };
 }
+
+export interface PassRow {
+  pass: StoredPass;
+  user: StoredUser | null;
+}
+
+/** Filtered list, newest first. Cap limit to protect <500 scale. */
+export async function listPasses(filter: {
+  query?: string;
+  type?: string;
+  status?: string;
+  limit?: number;
+}): Promise<{ rows: PassRow[]; total: number }> {
+  const store = await readStore();
+  const q = (filter.query ?? "").trim().toLowerCase();
+  const limit = Math.min(Math.max(filter.limit ?? 200, 1), 1000);
+  const rows: PassRow[] = [];
+  for (const pass of store.passes) {
+    if (filter.type && filter.type !== "ALL" && pass.type !== filter.type) continue;
+    if (filter.status && filter.status !== "ALL" && pass.status !== filter.status) continue;
+    const user = store.users.find((u) => u.id === pass.userId) ?? null;
+    if (q) {
+      const hay = `${user?.firstName ?? ""} ${user?.lastName ?? ""} ${user?.email ?? ""} ${user?.mobile ?? ""}`.toLowerCase();
+      if (!hay.includes(q)) continue;
+    }
+    rows.push({ pass, user });
+  }
+  rows.sort((a, b) => b.pass.createdAt.localeCompare(a.pass.createdAt));
+  return { rows: rows.slice(0, limit), total: rows.length };
+}
+
+/** Recently burned, newest burn first. */
+export async function recentScans(limit = 20): Promise<PassRow[]> {
+  const store = await readStore();
+  return store.passes
+    .filter((p) => p.status === "USED")
+    .sort((a, b) => (b.usedAt ?? "").localeCompare(a.usedAt ?? ""))
+    .slice(0, Math.min(Math.max(limit, 1), 100))
+    .map((pass) => ({
+      pass,
+      user: store.users.find((u) => u.id === pass.userId) ?? null,
+    }));
+}
