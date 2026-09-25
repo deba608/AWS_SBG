@@ -412,7 +412,7 @@ export default function ScanClient() {
               if (!scanning && (state.kind === "idle" || state.kind === "error")) void startCamera(true);
             }}
             className={cn(
-              "aspect-[4/3] w-full rounded-xl border border-line bg-black object-cover",
+              "aspect-square w-full rounded-xl border border-line bg-black object-cover",
               !scanning && "hidden",
             )}
           />
@@ -427,7 +427,7 @@ export default function ScanClient() {
             <button
               type="button"
               onClick={() => void startCamera(true)}
-              className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-black text-fog hover:text-cream"
+              className="flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-black text-fog hover:text-cream"
             >
               <Camera className="h-8 w-8" aria-hidden />
               <span className="text-sm font-semibold">Tap to start camera</span>
