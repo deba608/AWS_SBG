@@ -59,6 +59,19 @@ async function writeStore(store: StoreShape): Promise<void> {
   await fs.rename(tmp, FILE);
 }
 
+/** Probe: false on read-only hosts (serverless without disk). */
+export async function storeWritable(): Promise<boolean> {
+  try {
+    await fs.mkdir(path.dirname(FILE), { recursive: true });
+    const probe = path.join(path.dirname(FILE), `.probe-${process.pid}`);
+    await fs.writeFile(probe, "ok", "utf8");
+    await fs.unlink(probe);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Serializes read-modify-write ops in this process.
  * Multi-admin safe on ONE server instance (2-3 gate phones hitting same

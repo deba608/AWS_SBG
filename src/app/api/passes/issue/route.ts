@@ -73,7 +73,25 @@ export async function POST(req: Request) {
     );
   } catch (err) {
     console.error("[passes/issue]", err);
-    return NextResponse.json({ error: "Issue failed. Retry." }, { status: 500 });
+    const storageDead =
+      err instanceof Error && ("code" in err
+        ? ["EROFS", "EACCES", "EPERM", "ENOSPC"].includes(String((err as NodeJS.ErrnoException).code))
+        : /read-only|permission|denied/i.test(err.message));
+    if (storageDead) {
+      return NextResponse.json(
+        { error: "Server storage is read-only. Host passes on a persistent server, not serverless." },
+        { status: 500 },
+      );
+    }
+    return NextResponse.json(
+      {
+        error: "Issue failed. Retry.",
+        ...(process.env.NODE_ENV !== "production" && err instanceof Error
+          ? { detail: err.message }
+          : {}),
+      },
+      { status: 500 },
+    );
   }
 }
 

@@ -190,7 +190,7 @@ export const COMMUNITY_DAY_FAQS = [
   },
   {
     q: "How do I register?",
-    a: "Click Get event pass — fill name, roll number, college mail, gender and food preference. Your QR pass shows instantly and emails to you. Show it at the venue gate with your college ID.",
+    a: "Click Get event pass — fill name, roll number, college mail, gender and food preference. Your QR pass shows instantly and emails to you. Show it at the venue gate.",
   },
   {
     q: "Do I need prior AWS experience?",

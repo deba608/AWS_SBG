@@ -54,7 +54,7 @@ const whyAttend = [
   {
     icon: Laptop,
     title: "Build",
-    description: "Hands-on labs and interactive activities. Bring a laptop if you can.",
+    description: "Hands-on labs and interactive activities with peers who ship.",
   },
   {
     icon: Users,
