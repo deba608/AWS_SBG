@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import { getPassesByContact, issuePasses } from "@/lib/pass-store";
+import { warnDefaultSecrets } from "@/lib/pass-token";
+import { clientIp, rateOk } from "@/lib/rate-limit";
 import {
   normalizedContact,
   validateContact,
 } from "@/lib/validate-contact";
 
 export async function POST(req: Request) {
+  warnDefaultSecrets();
+  if (!rateOk(`issue:${clientIp(req)}`, 10, 60_000)) {
+    return NextResponse.json({ error: "Too many requests. Wait a minute." }, { status: 429 });
+  }
   let body: unknown;
   try {
     body = await req.json();

@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
 import { burnPass } from "@/lib/pass-store";
+import { clientIp, rateOk } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  if (!rateOk(`scan:${clientIp(req)}`, 120, 60_000)) {
+    return NextResponse.json({ error: "Too fast. Slow down." }, { status: 429 });
+  }
   let body: unknown;
   try {
     body = await req.json();
@@ -15,6 +19,9 @@ export async function POST(req: Request) {
   if (!token) return NextResponse.json({ error: "token required." }, { status: 400 });
   const r = await burnPass(token, scannedBy);
   if (!r.ok) {
+    if (r.reason === "EXPIRED") {
+      return NextResponse.json({ ok: false, status: "EXPIRED" }, { status: 410 });
+    }
     if (r.reason === "ALREADY_USED") {
       return NextResponse.json(
         {

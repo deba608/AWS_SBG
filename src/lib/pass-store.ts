@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import {
+  isExpired,
   newPassId,
   qrContentForToken,
   signPass,
@@ -124,10 +125,10 @@ export async function getPassesByContact(
 }
 
 export type VerifyResult =
-  | { ok: false; reason: "INVALID" }
+  | { ok: false; reason: "INVALID" | "EXPIRED" }
   | { ok: true; user: StoredUser; pass: StoredPass; alreadyUsed: boolean };
 
-/** Check signature first, then store lookup. */
+/** Check signature first, then store lookup, then expiry. */
 export async function verifyPass(token: string): Promise<VerifyResult> {
   const parsed = verifyPassToken(token.trim());
   if (!parsed) return { ok: false, reason: "INVALID" };
@@ -136,17 +137,19 @@ export async function verifyPass(token: string): Promise<VerifyResult> {
   if (!pass) return { ok: false, reason: "INVALID" };
   const user = store.users.find((u) => u.id === pass.userId);
   if (!user) return { ok: false, reason: "INVALID" };
+  if (isExpired()) return { ok: false, reason: "EXPIRED" };
   return { ok: true, user, pass, alreadyUsed: pass.status === "USED" };
 }
 
 export type BurnResult =
-  | { ok: false; reason: "INVALID" | "ALREADY_USED"; user?: StoredUser; pass?: StoredPass }
+  | { ok: false; reason: "INVALID" | "EXPIRED" | "ALREADY_USED"; user?: StoredUser; pass?: StoredPass }
   | { ok: true; user: StoredUser; pass: StoredPass };
 
 /** Atomic-ish burn: re-read, check ACTIVE, write USED. */
 export async function burnPass(token: string, scannedBy: string): Promise<BurnResult> {
   const t = token.trim();
   if (!verifyPassToken(t)) return { ok: false, reason: "INVALID" };
+  if (isExpired()) return { ok: false, reason: "EXPIRED" };
   const store = await readStore();
   const pass = store.passes.find((p) => p.token === t);
   if (!pass) return { ok: false, reason: "INVALID" };

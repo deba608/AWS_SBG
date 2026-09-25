@@ -37,3 +37,28 @@ export function qrContentForToken(token: string): string {
     "https://awssbgsuiit.vercel.app";
   return `${base.replace(/\/$/, "")}/admin/scan?t=${encodeURIComponent(token)}`;
 }
+
+/** Passes die after event. Override via PASS_EXPIRY_ISO env. */
+export function passExpiry(): Date {
+  const raw = process.env.PASS_EXPIRY_ISO ?? "2026-10-04T00:00:00+05:30";
+  const d = new Date(raw);
+  return Number.isNaN(d.getTime()) ? new Date("2026-10-04T00:00:00+05:30") : d;
+}
+
+export function isExpired(now = new Date()): boolean {
+  return now.getTime() > passExpiry().getTime();
+}
+
+const warned = new Set<string>();
+/** Loud in prod when dev defaults still set. Call at API entry. */
+export function warnDefaultSecrets(): void {
+  if (process.env.NODE_ENV !== "production") return;
+  if ((process.env.PASS_SECRET ?? "").length === 0 && !warned.has("PASS_SECRET")) {
+    warned.add("PASS_SECRET");
+    console.warn("[passes] PASS_SECRET unset — using dev default. Set env now.");
+  }
+  if ((process.env.ADMIN_PASS ?? "") === "" && !warned.has("ADMIN_PASS")) {
+    warned.add("ADMIN_PASS");
+    console.warn("[passes] ADMIN_PASS unset — default password active. Set env now.");
+  }
+}

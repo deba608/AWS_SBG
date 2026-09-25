@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { ADMIN_COOKIE, adminPassword, makeAdminCookie } from "@/lib/admin-auth";
+import { warnDefaultSecrets } from "@/lib/pass-token";
+import { clientIp, rateOk } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
+  warnDefaultSecrets();
+  if (!rateOk(`login:${clientIp(req)}`, 8, 60_000)) {
+    return NextResponse.json({ error: "Too many attempts. Wait a minute." }, { status: 429 });
+  }
   let body: unknown;
   try {
     body = await req.json();
