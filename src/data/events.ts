@@ -19,6 +19,8 @@ export interface EventItem {
   status: EventStatus;
   registerUrl?: string;
   detailsUrl?: string;
+  /** Groups session under a flagship parent (e.g. Community Day). */
+  parentId?: string;
 }
 
 export const EVENT_FILTERS = [
@@ -62,6 +64,7 @@ export const communityDay: EventItem = {
 
 export const decodeXHackathon: EventItem = {
   id: "decodex-hackathon-2026",
+  parentId: "aws-student-community-day-suiit-2026",
   title: "DecodeX Hackathon (Day 1)",
   category: "Hackathon",
   date: "6 October 2026",
@@ -76,6 +79,7 @@ export const decodeXHackathon: EventItem = {
 
 export const techparlament: EventItem = {
   id: "techparlament-2026",
+  parentId: "aws-student-community-day-suiit-2026",
   title: "Tech Parliament (Day 2)",
   category: "Tech Talk",
   date: "7 October 2026",
@@ -90,6 +94,7 @@ export const techparlament: EventItem = {
 
 export const makeABot: EventItem = {
   id: "make-a-bot-workshop",
+  parentId: "aws-student-community-day-suiit-2026",
   title: "Make-A-Bot Workshop (Day 2)",
   category: "Build Session",
   date: "7 October 2026",
@@ -104,6 +109,7 @@ export const makeABot: EventItem = {
 
 export const speakerPodcast: EventItem = {
   id: "speaker-podcast-session",
+  parentId: "aws-student-community-day-suiit-2026",
   title: "Speaker & Podcast Session (Day 3)",
   category: "Podcast",
   date: "8 October 2026",

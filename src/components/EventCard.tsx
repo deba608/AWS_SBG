@@ -35,7 +35,7 @@ function dateParts(date: string): { day: string; month: string } {
   };
 }
 
-const statusMeta = {
+export const statusMeta = {
   open: { label: "Registration open", dot: "bg-emerald-400" },
   "filling-fast": { label: "Filling fast", dot: "bg-brand" },
   closed: { label: "Registrations closed", dot: "bg-faint" },
@@ -102,6 +102,15 @@ export default function EventCard({
               Register
               <ArrowRight className="h-4 w-4" aria-hidden />
             </CommunityDayRegisterModal>
+          ) : event.registerUrl?.startsWith("/") ? (
+            <Link
+              href={event.registerUrl}
+              aria-label={`Register for ${event.title}`}
+              className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-cream underline decoration-brand/60 underline-offset-4 transition-colors hover:decoration-cream"
+            >
+              Register
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
           ) : (
             <a
               href={event.registerUrl ?? "/passes"}

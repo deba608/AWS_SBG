@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CalendarX2 } from "lucide-react";
 import EventCard from "./EventCard";
+import EventGroup from "./EventGroup";
 import Tabs from "./Tabs";
 import { EVENT_FILTERS, filterEvents, upcomingEvents, type EventFilter } from "@/data/events";
 import { useState } from "react";
@@ -10,7 +11,16 @@ import { useState } from "react";
 export default function EventsExplorer() {
   const [filter, setFilter] = useState<EventFilter>("All");
   const reduce = useReducedMotion();
-  const events = filterEvents(upcomingEvents, filter);
+
+  // "All" → flagship groups with sessions nested inside.
+  // Filtered → flat matching list (existing behavior).
+  const grouped = filter === "All";
+  const parents = upcomingEvents.filter((e) => !e.parentId);
+  const childrenOf = (id: string) => upcomingEvents.filter((e) => e.parentId === id);
+  const flat = filterEvents(upcomingEvents, filter);
+  const count = grouped
+    ? parents.length + parents.reduce((n, p) => n + childrenOf(p.id).length, 0)
+    : flat.length;
 
   return (
     <div>
@@ -21,13 +31,30 @@ export default function EventsExplorer() {
         label="Filter events by type"
       />
       <p className="mt-4 text-sm text-faint" role="status">
-        Showing {events.length} {events.length === 1 ? "event" : "events"}
+        Showing {count} {count === 1 ? "event" : "events"}
         {filter !== "All" ? ` in ${filter}` : ""}
       </p>
-      {events.length > 0 ? (
+      {grouped ? (
+        <div className="mt-6 space-y-6">
+          <AnimatePresence mode="wait">
+            {parents.map((parent) => (
+              <motion.div
+                key={parent.id}
+                className="min-w-0"
+                initial={reduce ? false : { opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+              >
+                <EventGroup parent={parent} sessions={childrenOf(parent.id)} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      ) : flat.length > 0 ? (
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <AnimatePresence mode="wait">
-            {events.map((event) => (
+            {flat.map((event) => (
               <motion.div
                 key={event.id}
                 className="min-w-0"
