@@ -21,7 +21,8 @@ type VerifyState =
       type?: "ENTRY" | "FOOD";
       name?: string;
       email?: string;
-      mobile?: string;
+      rollNo?: string;
+      food?: string;
       usedAt?: string | null;
     };
 
@@ -150,7 +151,8 @@ export default function ScanClient() {
           type: d.type,
           name: d.user?.name,
           email: d.user?.email,
-          mobile: d.user?.mobile,
+          rollNo: d.user?.rollNo,
+          food: d.user?.food,
           usedAt: d.usedAt ?? null,
         });
       } else if (d.error === "Too fast. Slow down.") {
@@ -183,7 +185,8 @@ export default function ScanClient() {
           type: d.type,
           name: d.user?.name,
           email: d.user?.email,
-          mobile: d.user?.mobile,
+          rollNo: d.user?.rollNo,
+          food: d.user?.food,
           usedAt: d.usedAt ?? null,
         });
       } else if (d.ok) {
@@ -193,7 +196,8 @@ export default function ScanClient() {
           type: d.type,
           name: d.user?.name,
           email: d.user?.email,
-          mobile: d.user?.mobile,
+          rollNo: d.user?.rollNo,
+          food: d.user?.food,
           usedAt: d.usedAt ?? null,
         });
       } else {
@@ -426,10 +430,16 @@ export default function ScanClient() {
           {result.status !== "INVALID" && result.status !== "EXPIRED" ? (
             <div className="space-y-1 p-5">
               <p className="text-xl font-bold text-cream">{result.name}</p>
-              <p className="text-sm text-fog">{result.email} · {result.mobile}</p>
-              <p className="mt-2 inline-block rounded-full bg-white/10 px-3 py-1 font-mono text-xs text-cream">
-                {result.type}
-              </p>
+              <p className="text-sm text-fog">{result.email} · Roll {result.rollNo}</p>
+              {result.food ? (
+                <p className="mt-2 inline-block rounded-full bg-white/10 px-3 py-1 font-mono text-xs text-cream">
+                  {result.type} · {result.food === "Veg" ? "VEG" : "NON-VEG"}
+                </p>
+              ) : (
+                <p className="mt-2 inline-block rounded-full bg-white/10 px-3 py-1 font-mono text-xs text-cream">
+                  {result.type}
+                </p>
+              )}
               {result.usedAt ? (
                 <p className="text-xs text-fog">Burned at {result.usedAt}</p>
               ) : null}

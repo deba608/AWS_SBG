@@ -5,10 +5,13 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import Modal from "@/components/Modal";
 import PassCard from "@/components/PassCard";
 import {
+  FOODS,
+  GENDERS,
   normalizedContact,
   validateContact,
   type ContactErrors,
 } from "@/lib/validate-contact";
+import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "scdRegistration";
 const SHEET_URL = process.env.NEXT_PUBLIC_SCD_SHEET_URL ?? "";
@@ -36,15 +39,16 @@ export default function CommunityDayRegisterModal({
   children?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [rollNo, setRollNo] = useState("");
   const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
+  const [gender, setGender] = useState("");
+  const [food, setFood] = useState("");
   const [errors, setErrors] = useState<ContactErrors>({});
   const [status, setStatus] = useState<Status>("form");
   const [apiError, setApiError] = useState("");
   const [pass, setPass] = useState<IssuedPass | null>(null);
-  const [passName, setPassName] = useState("");
+  const [passUser, setPassUser] = useState({ name: "", rollNo: "", food: "" });
   const [emailSent, setEmailSent] = useState(false);
 
   const openModal = () => {
@@ -52,10 +56,11 @@ export default function CommunityDayRegisterModal({
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const s = JSON.parse(raw) as Partial<Record<string, string>>;
-        if (s.firstName) setFirstName(String(s.firstName));
-        if (s.lastName) setLastName(String(s.lastName));
+        if (s.fullName) setFullName(String(s.fullName));
+        if (s.rollNo) setRollNo(String(s.rollNo));
         if (s.email) setEmail(String(s.email));
-        if (s.mobile) setMobile(String(s.mobile));
+        if (s.gender) setGender(String(s.gender));
+        if (s.food) setFood(String(s.food));
       }
     } catch {
       // ignore
@@ -75,11 +80,11 @@ export default function CommunityDayRegisterModal({
   };
 
   async function submit() {
-    const fieldErrors = validateContact({ firstName, lastName, email, mobile });
+    const fieldErrors = validateContact({ fullName, rollNo, email, gender, food });
     setErrors(fieldErrors);
     if (Object.keys(fieldErrors).length > 0) return;
 
-    const contact = normalizedContact({ firstName, lastName, email, mobile });
+    const contact = normalizedContact({ fullName, rollNo, email, gender, food });
     setStatus("submitting");
     setApiError("");
 
@@ -89,7 +94,7 @@ export default function CommunityDayRegisterModal({
       // private mode etc.
     }
 
-    // Organizer backup: contact list sheet, 2.5s max, never blocks pass.
+    // Organizer backup: contact sheet, 2.5s max, never blocks pass.
     if (SHEET_URL) {
       try {
         const ctrl = new AbortController();
@@ -120,7 +125,11 @@ export default function CommunityDayRegisterModal({
       }
       const issued = (data.passes as IssuedPass[])[0];
       setPass(issued);
-      setPassName((data.user as { name: string }).name);
+      setPassUser({
+        name: (data.user as { name: string }).name,
+        rollNo: (data.user as { rollNo: string }).rollNo,
+        food: (data.user as { food: string }).food,
+      });
       setEmailSent(Boolean(data.email?.sent));
       setStatus("done");
     } catch (err) {
@@ -156,9 +165,10 @@ export default function CommunityDayRegisterModal({
               {emailSent ? " A copy was also emailed to you." : null}
             </div>
             <PassCard
-              name={passName}
+              name={passUser.name}
               email={email}
-              mobile={mobile}
+              rollNo={passUser.rollNo}
+              food={passUser.food}
               type={pass.type}
               qrImage={pass.qrImage}
               token={pass.token}
@@ -185,78 +195,46 @@ export default function CommunityDayRegisterModal({
               here, and emails to you.
             </p>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="scd-first-name"
-                  className="mb-1.5 block text-sm font-medium text-cream"
-                >
-                  First name *
-                </label>
-                <input
-                  id="scd-first-name"
-                  name="firstName"
-                  autoComplete="given-name"
-                  placeholder="e.g. Debashish"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  aria-invalid={Boolean(errors.firstName)}
-                  aria-describedby={
-                    errors.firstName ? "scd-first-name-error" : undefined
-                  }
-                  className={inputClasses(Boolean(errors.firstName))}
-                />
-                {errors.firstName ? (
-                  <p
-                    id="scd-first-name-error"
-                    role="alert"
-                    className="mt-1.5 text-xs text-red-300"
-                  >
-                    {errors.firstName}
-                  </p>
-                ) : null}
-              </div>
-              <div>
-                <label
-                  htmlFor="scd-last-name"
-                  className="mb-1.5 block text-sm font-medium text-cream"
-                >
-                  Last name *
-                </label>
-                <input
-                  id="scd-last-name"
-                  name="lastName"
-                  autoComplete="family-name"
-                  placeholder="e.g. Pradhan"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  aria-invalid={Boolean(errors.lastName)}
-                  aria-describedby={
-                    errors.lastName ? "scd-last-name-error" : undefined
-                  }
-                  className={inputClasses(Boolean(errors.lastName))}
-                />
-                {errors.lastName ? (
-                  <p
-                    id="scd-last-name-error"
-                    role="alert"
-                    className="mt-1.5 text-xs text-red-300"
-                  >
-                    {errors.lastName}
-                  </p>
-                ) : null}
-              </div>
+            <div>
+              <label htmlFor="scd-name" className="mb-1.5 block text-sm font-medium text-cream">
+                Full name *
+              </label>
+              <input
+                id="scd-name"
+                autoComplete="name"
+                placeholder="e.g. Debashish Pradhan"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                aria-invalid={Boolean(errors.fullName)}
+                className={inputClasses(Boolean(errors.fullName))}
+              />
+              {errors.fullName ? (
+                <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.fullName}</p>
+              ) : null}
             </div>
             <div>
-              <label
-                htmlFor="scd-email"
-                className="mb-1.5 block text-sm font-medium text-cream"
-              >
-                Email *
+              <label htmlFor="scd-roll" className="mb-1.5 block text-sm font-medium text-cream">
+                Roll number *
+              </label>
+              <input
+                id="scd-roll"
+                autoComplete="off"
+                placeholder="e.g. 24BTCSE26"
+                value={rollNo}
+                onChange={(e) => setRollNo(e.target.value)}
+                aria-invalid={Boolean(errors.rollNo)}
+                className={cn(inputClasses(Boolean(errors.rollNo)), "uppercase")}
+              />
+              {errors.rollNo ? (
+                <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.rollNo}</p>
+              ) : null}
+            </div>
+            <div>
+              <label htmlFor="scd-email" className="mb-1.5 block text-sm font-medium text-cream">
+                College mail *
               </label>
               <input
                 id="scd-email"
-                name="email"
                 type="email"
                 autoComplete="email"
                 inputMode="email"
@@ -264,55 +242,65 @@ export default function CommunityDayRegisterModal({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 aria-invalid={Boolean(errors.email)}
-                aria-describedby={errors.email ? "scd-email-error" : undefined}
                 className={inputClasses(Boolean(errors.email))}
               />
               {errors.email ? (
-                <p
-                  id="scd-email-error"
-                  role="alert"
-                  className="mt-1.5 text-xs text-red-300"
-                >
-                  {errors.email}
-                </p>
+                <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.email}</p>
               ) : null}
             </div>
-            <div>
-              <label
-                htmlFor="scd-mobile"
-                className="mb-1.5 block text-sm font-medium text-cream"
-              >
-                Mobile number *
-              </label>
-              <input
-                id="scd-mobile"
-                name="mobile"
-                type="tel"
-                autoComplete="tel-national"
-                inputMode="numeric"
-                maxLength={13}
-                placeholder="98765 43210"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                aria-invalid={Boolean(errors.mobile)}
-                aria-describedby={errors.mobile ? "scd-mobile-error" : undefined}
-                className={inputClasses(Boolean(errors.mobile))}
-              />
-              {errors.mobile ? (
-                <p
-                  id="scd-mobile-error"
-                  role="alert"
-                  className="mt-1.5 text-xs text-red-300"
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="scd-gender" className="mb-1.5 block text-sm font-medium text-cream">
+                  Gender *
+                </label>
+                <select
+                  id="scd-gender"
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  aria-invalid={Boolean(errors.gender)}
+                  className={inputClasses(Boolean(errors.gender))}
                 >
-                  {errors.mobile}
-                </p>
-              ) : null}
+                  <option value="">Select…</option>
+                  {GENDERS.map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+                {errors.gender ? (
+                  <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.gender}</p>
+                ) : null}
+              </div>
+              <div>
+                <span className="mb-1.5 block text-sm font-medium text-cream" id="scd-food-label">
+                  Food *
+                </span>
+                <div role="radiogroup" aria-labelledby="scd-food-label" className="flex gap-2">
+                  {FOODS.map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      role="radio"
+                      aria-checked={food === f}
+                      onClick={() => setFood(f)}
+                      className={cn(
+                        "min-h-[44px] flex-1 rounded-xl border px-3 text-sm font-semibold transition-colors",
+                        food === f
+                          ? f === "Veg"
+                            ? "border-green-500 bg-green-500/15 text-green-200"
+                            : "border-amber-500 bg-amber-500/15 text-amber-200"
+                          : "border-line text-fog hover:text-cream",
+                      )}
+                    >
+                      {f === "Veg" ? "Veg" : "Non-veg"}
+                    </button>
+                  ))}
+                </div>
+                {errors.food ? (
+                  <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.food}</p>
+                ) : null}
+              </div>
             </div>
             {apiError ? (
-              <p
-                role="alert"
-                className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200"
-              >
+              <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
                 {apiError}
               </p>
             ) : null}

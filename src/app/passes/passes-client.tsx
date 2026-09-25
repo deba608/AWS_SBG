@@ -5,9 +5,12 @@ import { Loader2, Printer, RotateCcw } from "lucide-react";
 import Container from "@/components/Container";
 import PassCard from "@/components/PassCard";
 import {
+  FOODS,
+  GENDERS,
   validateContact,
   type ContactErrors,
 } from "@/lib/validate-contact";
+import { cn } from "@/lib/utils";
 
 interface IssuedPass {
   type: "ENTRY" | "FOOD";
@@ -20,7 +23,9 @@ interface IssuedPass {
 interface IssuedUser {
   name: string;
   email: string;
-  mobile: string;
+  rollNo: string;
+  gender: string;
+  food: string;
 }
 
 const inputCls = (bad: boolean) =>
@@ -29,10 +34,11 @@ const inputCls = (bad: boolean) =>
   }`;
 
 export default function PassesClient() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [rollNo, setRollNo] = useState("");
   const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
+  const [gender, setGender] = useState("");
+  const [food, setFood] = useState("");
   const [errors, setErrors] = useState<ContactErrors>({});
   const [status, setStatus] = useState<"form" | "busy" | "done">("form");
   const [apiError, setApiError] = useState("");
@@ -43,7 +49,7 @@ export default function PassesClient() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const fe = validateContact({ firstName, lastName, email, mobile });
+    const fe = validateContact({ fullName, rollNo, email, gender, food });
     setErrors(fe);
     if (Object.keys(fe).length > 0) return;
     setStatus("busy");
@@ -52,7 +58,7 @@ export default function PassesClient() {
       const res = await fetch("/api/passes/issue", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, email, mobile }),
+        body: JSON.stringify({ fullName, rollNo, email, gender, food }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -101,7 +107,8 @@ export default function PassesClient() {
               key={p.type}
               name={user.name}
               email={user.email}
-              mobile={user.mobile}
+              rollNo={user.rollNo}
+              food={user.food}
               type={p.type}
               qrImage={p.qrImage}
               token={p.token}
@@ -137,45 +144,43 @@ export default function PassesClient() {
   return (
     <Container className="rank-card p-5 sm:p-6">
       <form noValidate onSubmit={submit} className="space-y-4">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div>
-            <label htmlFor="pass-first" className="mb-1.5 block text-sm font-medium text-cream">
-              First name *
-            </label>
-            <input
-              id="pass-first"
-              autoComplete="given-name"
-              placeholder="e.g. Debashish"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              aria-invalid={Boolean(errors.firstName)}
-              className={inputCls(Boolean(errors.firstName))}
-            />
-            {errors.firstName ? (
-              <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.firstName}</p>
-            ) : null}
-          </div>
-          <div>
-            <label htmlFor="pass-last" className="mb-1.5 block text-sm font-medium text-cream">
-              Last name *
-            </label>
-            <input
-              id="pass-last"
-              autoComplete="family-name"
-              placeholder="e.g. Pradhan"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              aria-invalid={Boolean(errors.lastName)}
-              className={inputCls(Boolean(errors.lastName))}
-            />
-            {errors.lastName ? (
-              <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.lastName}</p>
-            ) : null}
-          </div>
+        <div>
+          <label htmlFor="pass-name" className="mb-1.5 block text-sm font-medium text-cream">
+            Full name *
+          </label>
+          <input
+            id="pass-name"
+            autoComplete="name"
+            placeholder="e.g. Debashish Pradhan"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            aria-invalid={Boolean(errors.fullName)}
+            className={inputCls(Boolean(errors.fullName))}
+          />
+          {errors.fullName ? (
+            <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.fullName}</p>
+          ) : null}
+        </div>
+        <div>
+          <label htmlFor="pass-roll" className="mb-1.5 block text-sm font-medium text-cream">
+            Roll number *
+          </label>
+          <input
+            id="pass-roll"
+            autoComplete="off"
+            placeholder="e.g. 24BTCSE26"
+            value={rollNo}
+            onChange={(e) => setRollNo(e.target.value)}
+            aria-invalid={Boolean(errors.rollNo)}
+            className={cn(inputCls(Boolean(errors.rollNo)), "uppercase")}
+          />
+          {errors.rollNo ? (
+            <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.rollNo}</p>
+          ) : null}
         </div>
         <div>
           <label htmlFor="pass-email" className="mb-1.5 block text-sm font-medium text-cream">
-            Email *
+            College mail *
           </label>
           <input
             id="pass-email"
@@ -192,25 +197,56 @@ export default function PassesClient() {
             <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.email}</p>
           ) : null}
         </div>
-        <div>
-          <label htmlFor="pass-mobile" className="mb-1.5 block text-sm font-medium text-cream">
-            Mobile *
-          </label>
-          <input
-            id="pass-mobile"
-            type="tel"
-            autoComplete="tel-national"
-            inputMode="numeric"
-            maxLength={13}
-            placeholder="98765 43210"
-            value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
-            aria-invalid={Boolean(errors.mobile)}
-            className={inputCls(Boolean(errors.mobile))}
-          />
-          {errors.mobile ? (
-            <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.mobile}</p>
-          ) : null}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label htmlFor="pass-gender" className="mb-1.5 block text-sm font-medium text-cream">
+              Gender *
+            </label>
+            <select
+              id="pass-gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              aria-invalid={Boolean(errors.gender)}
+              className={inputCls(Boolean(errors.gender))}
+            >
+              <option value="">Select…</option>
+              {GENDERS.map((g) => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+            {errors.gender ? (
+              <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.gender}</p>
+            ) : null}
+          </div>
+          <div>
+            <span className="mb-1.5 block text-sm font-medium text-cream" id="pass-food-label">
+              Food preference *
+            </span>
+            <div role="radiogroup" aria-labelledby="pass-food-label" className="flex gap-2">
+              {FOODS.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  role="radio"
+                  aria-checked={food === f}
+                  onClick={() => setFood(f)}
+                  className={cn(
+                    "min-h-[44px] flex-1 rounded-xl border px-3 text-sm font-semibold transition-colors",
+                    food === f
+                      ? f === "Veg"
+                        ? "border-green-500 bg-green-500/15 text-green-200"
+                        : "border-amber-500 bg-amber-500/15 text-amber-200"
+                      : "border-line text-fog hover:text-cream",
+                  )}
+                >
+                  {f === "Veg" ? "Veg" : "Non-veg"}
+                </button>
+              ))}
+            </div>
+            {errors.food ? (
+              <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.food}</p>
+            ) : null}
+          </div>
         </div>
         {apiError ? (
           <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
@@ -225,10 +261,10 @@ export default function PassesClient() {
           {status === "busy" ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              Generating QRs…
+              Generating pass…
             </>
           ) : (
-            "Generate my passes"
+            "Register + get my pass"
           )}
         </button>
       </form>

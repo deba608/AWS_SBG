@@ -24,7 +24,9 @@ interface Row {
   scannedBy: string | null;
   name: string;
   email: string;
-  mobile: string;
+  rollNo: string;
+  gender: string;
+  food: string;
 }
 
 const selectCls =
@@ -170,7 +172,7 @@ export default function AdminClient() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search name / email / mobile…"
+            placeholder="Search name / email / roll no…"
             className="w-full min-h-[44px] rounded-xl border border-line bg-surface py-2 pr-3 pl-9 text-sm text-cream placeholder:text-faint focus:ring-2 focus:ring-brand"
           />
         </div>
@@ -203,6 +205,7 @@ export default function AdminClient() {
               <tr className="text-xs text-faint uppercase">
                 <th className="px-4 py-2">Name</th>
                 <th className="px-4 py-2">Contact</th>
+                <th className="px-4 py-2">Food</th>
                 <th className="px-4 py-2">Type</th>
                 <th className="px-4 py-2">Status</th>
                 <th className="px-4 py-2">Used at</th>
@@ -215,7 +218,17 @@ export default function AdminClient() {
                   <td className="px-4 py-2 text-xs text-fog">
                     {r.email}
                     <br />
-                    {r.mobile}
+                    Roll {r.rollNo}
+                  </td>
+                  <td className="px-4 py-2">
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-xs font-semibold",
+                        r.food === "Veg" ? "bg-green-500/15 text-green-300" : "bg-amber-500/15 text-amber-300",
+                      )}
+                    >
+                      {r.food === "Veg" ? "VEG" : "NON-VEG"}
+                    </span>
                   </td>
                   <td className="px-4 py-2">
                     <span
@@ -242,7 +255,7 @@ export default function AdminClient() {
               ))}
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-fog">
+                  <td colSpan={6} className="px-4 py-8 text-center text-fog">
                     No passes yet. Share <code className="font-mono">/passes</code> link.
                   </td>
                 </tr>
