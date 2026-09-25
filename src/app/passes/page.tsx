@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import PassesClient from "./passes-client";
 
 export const metadata: Metadata = {
-  title: "Get Event + Food Pass",
+  title: "Get Event Entry Pass",
   description:
-    "Submit details, get QR entry + food pass instantly. Single-use, scan at gate.",
+    "Register, get QR entry pass instantly + emailed copy. Single-use, scan at gate.",
 };
 
 export default function PassesPage() {
@@ -14,12 +14,12 @@ export default function PassesPage() {
         {"// passes"}
       </p>
       <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
-        Get your Entry + Food pass
+        Get your event entry pass
       </h1>
       <p className="measure mt-3 text-sm leading-relaxed text-fog sm:text-base">
-        Fill details once. System issues 2 QRs — one for gate entry, one for
-        food. Each scans once. Screenshot works, but download PDF/print
-        recommended.
+        Register once. System generates your QR entry pass instantly, shows it
+        here, and emails a copy. Download the image or take a screenshot —
+        show QR at gate, scans once.
       </p>
       <div className="mt-8">
         <PassesClient />

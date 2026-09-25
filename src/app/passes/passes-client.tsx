@@ -39,6 +39,7 @@ export default function PassesClient() {
   const [user, setUser] = useState<IssuedUser | null>(null);
   const [passes, setPasses] = useState<IssuedPass[]>([]);
   const [wasDuplicate, setWasDuplicate] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,6 +62,7 @@ export default function PassesClient() {
       setUser(data.user as IssuedUser);
       setPasses(data.passes as IssuedPass[]);
       setWasDuplicate(Boolean(data.duplicate));
+      setEmailSent(Boolean(data.email?.sent));
       setStatus("done");
       try {
         localStorage.setItem(
@@ -81,6 +83,7 @@ export default function PassesClient() {
     setUser(null);
     setPasses([]);
     setApiError("");
+    setEmailSent(false);
   }
 
   if (status === "done" && user) {
@@ -88,8 +91,9 @@ export default function PassesClient() {
       <div className="space-y-5">
         <div className="rank-card border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200 print:hidden">
           {wasDuplicate
-            ? "Pass already existed — showing existing QRs. Same QRs work at gate."
-            : "Passes issued. Download/print now — each QR scans once."}
+            ? "Pass already existed — showing your QR. Same QR works at gate."
+            : "Entry pass ready. Download image or take a screenshot — QR scans once."}
+          {emailSent ? " A copy was also emailed to you." : null}
         </div>
         <div className="print:space-y-6">
           {passes.map((p) => (
@@ -123,8 +127,8 @@ export default function PassesClient() {
           </button>
         </div>
         <p className="text-xs text-faint print:hidden">
-          Tip: phone Print → Save as PDF works. Keep QRs private — anyone with
-          image can scan first and burn your pass.
+          Tip: download the image + take a screenshot as backup. Keep QR
+          private — anyone with image can scan first and burn your pass.
         </p>
       </div>
     );

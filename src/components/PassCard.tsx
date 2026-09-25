@@ -1,3 +1,8 @@
+"use client";
+
+import { useState } from "react";
+import { Download, Loader2 } from "lucide-react";
+import { downloadDataUrl, drawPassImage } from "@/lib/pass-image";
 import { cn } from "@/lib/utils";
 
 export type PassCardType = "ENTRY" | "FOOD";
@@ -18,6 +23,19 @@ export default function PassCard({
   token: string;
 }) {
   const isEntry = type === "ENTRY";
+  const [busy, setBusy] = useState(false);
+
+  async function downloadPng() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const png = await drawPassImage({ name, email, mobile, qrDataUrl: qrImage, token });
+      downloadDataUrl(png, `entry-pass-${mobile}.png`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="rank-card overflow-hidden bg-white text-black print:border-black print:shadow-none">
       <div
@@ -52,6 +70,22 @@ export default function PassCard({
               ? "Show at gate. Single scan — re-scan blocked."
               : "Show at food counter. Single meal — re-scan blocked."}
           </p>
+          <p className="mt-1 text-xs text-black/50">
+            Backup: take a screenshot of this pass.
+          </p>
+          <button
+            type="button"
+            onClick={downloadPng}
+            disabled={busy}
+            className="mt-3 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-black px-5 py-2 text-sm font-semibold text-white hover:bg-black/80 disabled:opacity-60 print:hidden"
+          >
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Download className="h-4 w-4" aria-hidden />
+            )}
+            Download pass image
+          </button>
         </div>
       </div>
     </div>

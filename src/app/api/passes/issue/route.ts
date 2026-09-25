@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import QRCode from "qrcode";
+import { mailConfigured, sendPassEmail } from "@/lib/mailer";
 import { getPassesByContact, issuePasses } from "@/lib/pass-store";
 import { warnDefaultSecrets } from "@/lib/pass-token";
 import { clientIp, rateOk } from "@/lib/rate-limit";
@@ -42,6 +43,18 @@ export async function POST(req: Request) {
         status: p.status,
       })),
     );
+    // Share by email too — best effort, pass shown regardless.
+    let emailSent = false;
+    if (!duplicate && mailConfigured()) {
+      const png = Buffer.from(withQr[0].qrImage.split(",")[1], "base64");
+      const mail = await sendPassEmail({
+        to: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+        qrPng: png,
+        token: passes[0].token,
+      });
+      emailSent = mail.sent;
+    }
     return NextResponse.json(
       {
         user: {
@@ -51,6 +64,7 @@ export async function POST(req: Request) {
         },
         passes: withQr,
         duplicate,
+        email: { sent: emailSent, configured: mailConfigured() },
       },
       { status: duplicate ? 200 : 201 },
     );

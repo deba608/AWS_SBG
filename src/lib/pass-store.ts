@@ -66,7 +66,7 @@ export function findUser(
   return store.users.find((u) => u.email === e || u.mobile === mobile);
 }
 
-/** Idempotent issue: existing email/mobile returns existing passes. */
+/** Idempotent issue: existing email/mobile returns existing ENTRY pass. */
 export async function issuePasses(input: {
   firstName: string;
   lastName: string;
@@ -77,8 +77,8 @@ export async function issuePasses(input: {
   const store = await readStore();
   const existing = findUser(store, email, input.mobile);
   if (existing) {
-    const passes = store.passes.filter((p) => p.userId === existing.id);
-    if (passes.length === 2) return { user: existing, passes, duplicate: true };
+    const entry = store.passes.find((p) => p.userId === existing.id && p.type === "ENTRY");
+    if (entry) return { user: existing, passes: [entry], duplicate: true };
   }
 
   const now = new Date().toISOString();
@@ -94,24 +94,22 @@ export async function issuePasses(input: {
     } satisfies StoredUser);
   if (!existing) store.users.push(user);
 
-  const passes: StoredPass[] = (["ENTRY", "FOOD"] as PassType[]).map((type) => {
-    const pid = newPassId();
-    const token = signPass(type, pid);
-    return {
-      id: pid,
-      userId: user.id,
-      type,
-      token,
-      qrContent: qrContentForToken(token),
-      status: "ACTIVE",
-      createdAt: now,
-      usedAt: null,
-      scannedBy: null,
-    } satisfies StoredPass;
-  });
-  store.passes.push(...passes);
+  const pid = newPassId();
+  const token = signPass("ENTRY", pid);
+  const pass: StoredPass = {
+    id: pid,
+    userId: user.id,
+    type: "ENTRY",
+    token,
+    qrContent: qrContentForToken(token),
+    status: "ACTIVE",
+    createdAt: now,
+    usedAt: null,
+    scannedBy: null,
+  };
+  store.passes.push(pass);
   await writeStore(store);
-  return { user, passes, duplicate: Boolean(existing) };
+  return { user, passes: [pass], duplicate: Boolean(existing) };
 }
 
 export async function getPassesByContact(
