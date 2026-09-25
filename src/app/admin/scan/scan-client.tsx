@@ -84,11 +84,14 @@ export default function ScanClient() {
   }, []);
 
   useEffect(() => {
+    // init once: auth check hits external API
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshMe();
   }, [refreshMe]);
 
   useEffect(() => {
     if (authed) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       void refreshStats();
       // prefill when generic camera app opens QR URL directly
       const q = new URLSearchParams(window.location.search).get("t");
