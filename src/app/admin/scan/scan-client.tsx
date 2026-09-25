@@ -70,7 +70,7 @@ export default function ScanClient() {
   const inputRef = useRef<HTMLInputElement>(null);
   const controlsRef = useRef<{ stop: () => void } | null>(null);
   const lastScanRef = useRef<string>("");
-  const resumeCamRef = useRef(false);
+  const resumeTimer = useRef<number | null>(null);
 
   const refreshMe = useCallback(async () => {
     try {
@@ -103,7 +103,15 @@ export default function ScanClient() {
       void refreshStats();
       // prefill when generic camera app opens QR URL directly
       const q = new URLSearchParams(window.location.search).get("t");
-      if (q) setToken(q);
+      if (q) {
+        setToken(q);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        void verify(q);
+      } else {
+        // gate flow: camera on immediately, zero taps to first scan
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        void startCamera();
+      }
     }
   }, [authed, refreshStats]);
 
@@ -133,7 +141,30 @@ export default function ScanClient() {
     setToken("");
   }
 
-  async function verify(raw: string) {
+  /** Reset to idle + camera back on (continuous gate mode). */
+  function resumeNow() {
+    if (resumeTimer.current) {
+      window.clearTimeout(resumeTimer.current);
+      resumeTimer.current = null;
+    }
+    setToken("");
+    lastScanRef.current = "";
+    setState({ kind: "idle" });
+    void startCamera(true);
+  }
+
+  function scheduleResume(ms: number) {
+    if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+    resumeTimer.current = window.setTimeout(() => {
+      resumeTimer.current = null;
+      setToken("");
+      lastScanRef.current = "";
+      setState({ kind: "idle" });
+      void startCamera(true);
+    }, ms);
+  }
+
+  async function verify(raw: string, auto = false) {
     const t = tokenFromQRText(raw);
     if (!t) return;
     setToken(t);
@@ -151,6 +182,11 @@ export default function ScanClient() {
         return;
       }
       if (d.status === "ACTIVE" || d.status === "USED" || d.status === "EXPIRED") {
+        if (auto) {
+          // freeze frame: decision made, stop decode spam
+          stopCamera();
+          if (d.status !== "ACTIVE") scheduleResume(2400);
+        }
         setState({
           kind: "result",
           status: d.status,
@@ -187,8 +223,8 @@ export default function ScanClient() {
       if (r.status === 410 || d.status === "EXPIRED") {
         setState({ kind: "result", status: "EXPIRED", type: d.type });
       } else if (r.status === 409 || d.status === "USED") {
-        resumeCamRef.current = true;
         stopCamera();
+        scheduleResume(2400);
         setState({
           kind: "result",
           status: "USED",
@@ -202,8 +238,8 @@ export default function ScanClient() {
           usedAt: d.usedAt ?? null,
         });
       } else if (d.ok) {
-        resumeCamRef.current = true;
         stopCamera();
+        scheduleResume(1500);
         setState({
           kind: "result",
           status: "USED",
@@ -243,12 +279,13 @@ export default function ScanClient() {
     setScanning(false);
   }
 
-  async function startCamera() {
+  async function startCamera(force = false) {
     setCamErr("");
-    if (scanning) {
+    if (scanning && !force) {
       stopCamera();
       return;
     }
+    if (scanning && force) return;
     try {
       const { BrowserQRCodeReader } = await import("@zxing/browser");
       const reader = new BrowserQRCodeReader();
