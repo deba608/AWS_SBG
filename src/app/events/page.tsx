@@ -28,7 +28,7 @@ export default function EventsPage() {
             className="mb-10 border-y border-line py-6 sm:mb-12 sm:py-8 md:py-10"
           >
             <p className="text-sm text-fog">
-              Flagship session on October 3, free for students, 300 expected.
+              Flagship session on October 6–8, free for students, 300 expected.
             </p>
             <h2
               id="community-day-spotlight"

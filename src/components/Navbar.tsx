@@ -310,7 +310,7 @@ export default function Navbar() {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
                     </span>
-                    Community Day — Oct 3
+                    Community Day — Oct 6–8
                   </Link>
 
                   <motion.a

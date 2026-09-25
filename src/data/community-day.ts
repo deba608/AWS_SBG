@@ -2,16 +2,17 @@ export const COMMUNITY_DAY_SLUG = "aws-student-community-day-suiit-2026";
 
 export const COMMUNITY_DAY_META = {
   title: "AWS Student Community Day SUIIT 2026",
-  date: "3 October 2026",
-  shortDate: "Oct 3",
+  date: "6–8 October 2026",
+  shortDate: "Oct 6–8",
   time: "9:00 AM – 4:00 PM IST",
   venue: "APJ Abdul Kalam Auditorium, SUIIT, Burla",
   venueShort: "APJ Abdul Kalam Auditorium, SUIIT",
   address: "SUIIT, Jyoti Vihar, Burla, Sambalpur, Odisha",
   mapsUrl:
     "https://www.google.com/maps/search/?api=1&query=APJ+Abdul+Kalam+Auditorium+SUIIT+Burla+Sambalpur",
-  // 9 AM IST Oct 3 2026
-  startIso: "2026-10-03T09:00:00+05:30",
+  // 9 AM IST Oct 6 2026
+  startIso: "2026-10-06T09:00:00+05:30",
+  endIso: "2026-10-08T16:00:00+05:30",
   capacity: 300,
   entry: "FREE",
   host: "AWS SBG at SUIIT · Hosted by Pratik Samal",
@@ -104,7 +105,7 @@ export const COMMUNITY_DAY_PERKS = [
 export const COMMUNITY_DAY_FAQS = [
   {
     q: "Is entry really free?",
-    a: "Yes. Entry is FREE. Just register on this page to get your QR entry pass — it helps us plan lunch, swag and seating for 300+ attendees.",
+    a: "Yes. Entry is FREE. Just register on this page to get your QR entry pass — it helps us plan lunch, seating and logistics for 300+ attendees.",
   },
   {
     q: "How do I register?",
@@ -142,7 +143,7 @@ export const COMMUNITY_DAY_STEPS = [
     description: "Join the AWS SBG at SUIIT group so you get updates + headcount questions.",
   },
   {
-    title: "Show up Oct 3",
+    title: "Show up Oct 6–8",
     description: "Bring your entry pass to APJ Abdul Kalam Auditorium by 9 AM.",
   },
 ] as const;

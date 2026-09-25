@@ -15,7 +15,7 @@ export default function AdminPage() {
       </p>
       <h1 className="mt-2 text-3xl font-bold sm:text-4xl">Dashboard</h1>
       <p className="measure mt-3 text-sm leading-relaxed text-fog sm:text-base">
-        Headcount at a glance. Search passes, export CSV for lunch/swag planning.
+        Headcount at a glance. Search passes, export CSV for lunch and event planning.
       </p>
       <div className="mt-8">
         <AdminClient />

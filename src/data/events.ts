@@ -52,7 +52,7 @@ export const communityDay: EventItem = {
   id: "aws-student-community-day-suiit-2026",
   title: "AWS Student Community Day SUIIT 2026",
   category: "Community Day",
-  date: "3 October 2026",
+  date: "6–8 October 2026",
   time: "9:00 AM – 4:00 PM IST",
   location: "APJ Abdul Kalam Auditorium, SUIIT, Burla",
   description:

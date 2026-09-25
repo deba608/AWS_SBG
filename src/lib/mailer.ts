@@ -33,7 +33,7 @@ export async function sendPassEmail(input: {
       text: [
         `Hi ${input.name},`,
         ``,
-        `Your entry pass for AWS Student Community Day (Oct 3, SUIIT) is attached as an image.`,
+        `Your entry pass for AWS Student Community Day (Oct 6–8, SUIIT) is attached as an image.`,
         `Show the QR at the gate — it scans once.`,
         ``,
         `Backup: take a screenshot of the attached pass.`,

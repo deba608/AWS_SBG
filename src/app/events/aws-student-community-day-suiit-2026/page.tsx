@@ -33,11 +33,11 @@ import { SITE } from "@/lib/constants";
 import CommunityDayRegisterModal from "@/components/CommunityDayRegisterModal";
 
 export const metadata: Metadata = {
-  title: "AWS Student Community Day SUIIT 2026 — Oct 3",
+  title: "AWS Student Community Day SUIIT 2026 — Oct 6–8",
   description:
-    "Free flagship meetup Oct 3 at SUIIT: Cloud, AI/GenAI + DevOps, hands-on labs, lunch + certificate. Free entry with QR pass.",
+    "Free flagship meetup Oct 6–8 at SUIIT: Cloud, AI/GenAI + DevOps, hands-on labs, lunch + certificate. Free entry with QR pass.",
   openGraph: {
-    title: "AWS Student Community Day SUIIT 2026 — Oct 3",
+    title: "AWS Student Community Day SUIIT 2026 — Oct 6–8",
     description:
       "Cloud, AI/GenAI + DevOps with AWS pros. Free for students — lunch + certificate. APJ Abdul Kalam Auditorium, SUIIT.",
     type: "website",
@@ -82,6 +82,7 @@ export default function CommunityDayPage() {
     "@type": "Event",
     name: COMMUNITY_DAY_META.title,
     startDate: COMMUNITY_DAY_META.startIso,
+    endDate: COMMUNITY_DAY_META.endIso,
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
     location: {
@@ -109,7 +110,7 @@ export default function CommunityDayPage() {
         <Container className="relative pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
           <Reveal>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge>Flagship session on October 3, free entry</Badge>
+              <Badge>Flagship session on October 6–8, free entry</Badge>
               <Badge tone="success">Registration open — free pass</Badge>
             </div>
           </Reveal>
@@ -154,7 +155,7 @@ export default function CommunityDayPage() {
             <Reveal delay={0.12}>
               <div className="rounded-2xl border border-line bg-surface/80 p-5 backdrop-blur sm:p-6">
                 <p className="text-sm font-semibold text-cream">
-                  Countdown to October 3
+                  Countdown to October 6
                 </p>
                 <div className="mt-4">
                   <Countdown />
@@ -360,7 +361,7 @@ export default function CommunityDayPage() {
               <div className="glow-brand absolute left-1/2 top-0 h-72 w-[28rem] max-w-none -translate-x-1/2 -translate-y-1/2 sm:w-[36rem]" aria-hidden />
               <div className="relative">
                 <p className="text-sm font-semibold text-cream">
-                  October 3 at SUIIT, free for students
+                  October 6–8 at SUIIT, free for students
                 </p>
                 <h2 id="register-heading" className="mx-auto mt-3 max-w-xl break-words text-3xl font-bold tracking-tight text-cream sm:text-4xl md:text-5xl">
                   See you at Community Day?

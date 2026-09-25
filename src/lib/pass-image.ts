@@ -29,7 +29,7 @@ export async function drawPassImage(input: {
   ctx.fillText("Event Entry Pass", 50, 90);
   ctx.font = "28px system-ui, sans-serif";
   ctx.fillStyle = "#e9d5ff";
-  ctx.fillText("AWS Student Community Day · Oct 3 · SUIIT", 50, 145);
+  ctx.fillText("AWS Student Community Day · Oct 6–8 · SUIIT", 50, 145);
 
   // name block
   ctx.fillStyle = "#111111";

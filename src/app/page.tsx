@@ -134,10 +134,10 @@ export default function HomePage() {
             id="upcoming-heading"
             label="Upcoming"
             title="Upcoming events"
-            description="Three sessions on the calendar. Join one and ship something."
+            description="Hands-on sessions, hackathons, and discussions on the calendar. Join one and ship something."
           />
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {upcomingEvents.slice(0, 3).map((event) => (
+            {upcomingEvents.map((event) => (
               <EventCard key={event.id} event={event} compact />
             ))}
           </div>
