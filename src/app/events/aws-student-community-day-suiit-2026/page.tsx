@@ -23,7 +23,6 @@ import EventCard from "@/components/EventCard";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import {
-  COMMUNITY_DAY_AGENDA,
   COMMUNITY_DAY_FAQS,
   COMMUNITY_DAY_META,
   COMMUNITY_DAY_PERKS,
@@ -150,9 +149,6 @@ export default function CommunityDayPage() {
               </dl>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
                 <CommunityDayRegisterModal />
-                <Button href="#agenda" variant="secondary">
-                  View agenda
-                </Button>
               </div>
               <p className="mt-4 text-xs text-faint">
                 300 expected, lunch, swag and certificate, {COMMUNITY_DAY_META.host}
@@ -219,37 +215,6 @@ export default function CommunityDayPage() {
               </Reveal>
             ))}
           </div>
-        </Container>
-      </section>
-
-      {/* AGENDA */}
-      <section id="agenda" className="scroll-mt-20 py-12 sm:py-16 lg:py-24">
-        <Container>
-          <SectionHeading
-            align="left"
-            eyebrow="Agenda (to be announced)"
-            title="A full day of cloud."
-            description="Timings follow the official Meetup (9 AM – 4 PM). Session titles marked TBA will be confirmed by organizers."
-          />
-          <h2 id="agenda-heading" className="sr-only">Agenda</h2>
-          <ol className="relative space-y-4 border-l border-line pl-6 md:pl-8">
-            {COMMUNITY_DAY_AGENDA.map((a, i) => (
-              <Reveal key={a.time + a.title} delay={Math.min(i * 0.04, 0.2)}>
-                <li className="relative rounded-2xl border border-line bg-surface p-6 transition-colors duration-200 hover:border-brand/40">
-                  <span
-                    className="absolute -left-[31px] top-6 h-3 w-3 rounded-full bg-brand md:-left-[39px]"
-                    aria-hidden
-                  />
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold tabular-nums text-cream">{a.time}</span>
-                    {a.tag ? <Badge tone="neutral">{a.tag}</Badge> : null}
-                  </div>
-                  <h3 className="mt-2 text-base font-semibold text-cream">{a.title}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-fog">{a.description}</p>
-                </li>
-              </Reveal>
-            ))}
-          </ol>
         </Container>
       </section>
 
