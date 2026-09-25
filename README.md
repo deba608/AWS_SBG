@@ -59,6 +59,17 @@ Clicking **Register** opens an on-site modal (collecting First Name, Last Name, 
    ```
 4. For production deployments on Vercel, add `NEXT_PUBLIC_SCD_SHEET_URL` under **Project Settings → Environment Variables**.
 
+### Pass store (Upstash Redis, required in production)
+
+Vercel's filesystem is read-only, so passes use Upstash Redis when configured, file store (`.data-passes/`, gitignored) otherwise for local dev.
+
+```env
+UPSTASH_REDIS_REST_URL="https://...upstash.io"
+UPSTASH_REDIS_REST_TOKEN="..."
+```
+
+Create a free Redis DB at console.upstash.com, add both vars to `.env.local` and Vercel env, redeploy.
+
 > **Note**: If the sheet URL is omitted, the registration form still functions gracefully (prefilling details and forwarding to Meetup) without failing the attendee experience. Contact validation logic is maintained in [`src/lib/validate-contact.ts`](src/lib/validate-contact.ts).
 
 ---

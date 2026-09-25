@@ -9,6 +9,7 @@ import {
   type PassType,
 } from "./pass-token";
 import type { FoodPref, Gender } from "./validate-contact";
+import { getRedis, withRedisLock } from "./pass-redis";
 
 export interface StoredUser {
   id: string;
@@ -38,21 +39,56 @@ interface StoreShape {
 }
 
 const FILE = path.join(process.cwd(), ".data-passes", "passes.json");
+const REDIS_KEY = "sbg:passes:v1";
+const REDIS_LOCK = "sbg:passes:lock";
+
+function emptyStore(): StoreShape {
+  return { users: [], passes: [] };
+}
+
+function parseStore(raw: unknown): StoreShape {
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw) as StoreShape;
+      if (Array.isArray(parsed.users) && Array.isArray(parsed.passes)) return parsed;
+    } catch {
+      // fall through
+    }
+    return emptyStore();
+  }
+  if (
+    typeof raw === "object" &&
+    raw !== null &&
+    Array.isArray((raw as StoreShape).users) &&
+    Array.isArray((raw as StoreShape).passes)
+  ) {
+    return raw as StoreShape;
+  }
+  return emptyStore();
+}
 
 async function readStore(): Promise<StoreShape> {
-  try {
-    const raw = await fs.readFile(FILE, "utf8");
-    const parsed = JSON.parse(raw) as StoreShape;
-    if (!Array.isArray(parsed.users) || !Array.isArray(parsed.passes)) {
-      return { users: [], passes: [] };
+  const redis = getRedis();
+  if (redis) {
+    try {
+      return parseStore(await redis.get(REDIS_KEY));
+    } catch {
+      return emptyStore();
     }
-    return parsed;
+  }
+  try {
+    return parseStore(await fs.readFile(FILE, "utf8"));
   } catch {
-    return { users: [], passes: [] };
+    return emptyStore();
   }
 }
 
 async function writeStore(store: StoreShape): Promise<void> {
+  const redis = getRedis();
+  if (redis) {
+    await redis.set(REDIS_KEY, JSON.stringify(store));
+    return;
+  }
   await fs.mkdir(path.dirname(FILE), { recursive: true });
   const tmp = `${FILE}.${process.pid}.tmp`;
   await fs.writeFile(tmp, JSON.stringify(store, null, 2), "utf8");
@@ -73,14 +109,17 @@ export async function storeWritable(): Promise<boolean> {
 }
 
 /**
- * Serializes read-modify-write ops in this process.
- * Multi-admin safe on ONE server instance (2-3 gate phones hitting same
- * Next server). NOT safe across serverless replicas — file store needs a
- * single persistent host. For Vercel/multi-instance, migrate to a DB.
+ * Serializes read-modify-write ops. In-process queue covers a single server;
+ * the Redis lock (SET NX EX) covers multi-instance serverless (Vercel).
+ * Without Redis env configured, file store is local-dev only — Vercel's
+ * filesystem is read-only, so passes REQUIRE Upstash in production.
  */
 let writeQueue: Promise<unknown> = Promise.resolve();
 function withWriteLock<T>(fn: () => Promise<T>): Promise<T> {
-  const run = writeQueue.then(fn, fn);
+  const run = writeQueue.then(
+    () => withRedisLock(REDIS_LOCK, fn),
+    () => withRedisLock(REDIS_LOCK, fn),
+  );
   writeQueue = run.catch(() => undefined);
   return run;
 }
