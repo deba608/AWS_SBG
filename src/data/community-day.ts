@@ -92,10 +92,6 @@ export const COMMUNITY_DAY_PERKS = [
     description: "Lunch for all registered participants.",
   },
   {
-    title: "Swag + Goodies",
-    description: "Exciting event swag for attendees.",
-  },
-  {
     title: "Certificate",
     description: "Participation certificate for attendees.",
   },

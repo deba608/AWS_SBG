@@ -1,6 +1,12 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { newPassId, qrContentForToken, signPass, type PassType } from "./pass-token";
+import {
+  newPassId,
+  qrContentForToken,
+  signPass,
+  verifyPassToken,
+  type PassType,
+} from "./pass-token";
 
 export interface StoredUser {
   id: string;
@@ -115,4 +121,60 @@ export async function getPassesByContact(
   const user = findUser(store, email, mobile);
   if (!user) return null;
   return { user, passes: store.passes.filter((p) => p.userId === user.id) };
+}
+
+export type VerifyResult =
+  | { ok: false; reason: "INVALID" }
+  | { ok: true; user: StoredUser; pass: StoredPass; alreadyUsed: boolean };
+
+/** Check signature first, then store lookup. */
+export async function verifyPass(token: string): Promise<VerifyResult> {
+  const parsed = verifyPassToken(token.trim());
+  if (!parsed) return { ok: false, reason: "INVALID" };
+  const store = await readStore();
+  const pass = store.passes.find((p) => p.token === token.trim());
+  if (!pass) return { ok: false, reason: "INVALID" };
+  const user = store.users.find((u) => u.id === pass.userId);
+  if (!user) return { ok: false, reason: "INVALID" };
+  return { ok: true, user, pass, alreadyUsed: pass.status === "USED" };
+}
+
+export type BurnResult =
+  | { ok: false; reason: "INVALID" | "ALREADY_USED"; user?: StoredUser; pass?: StoredPass }
+  | { ok: true; user: StoredUser; pass: StoredPass };
+
+/** Atomic-ish burn: re-read, check ACTIVE, write USED. */
+export async function burnPass(token: string, scannedBy: string): Promise<BurnResult> {
+  const t = token.trim();
+  if (!verifyPassToken(t)) return { ok: false, reason: "INVALID" };
+  const store = await readStore();
+  const pass = store.passes.find((p) => p.token === t);
+  if (!pass) return { ok: false, reason: "INVALID" };
+  const user = store.users.find((u) => u.id === pass.userId);
+  if (!user) return { ok: false, reason: "INVALID" };
+  if (pass.status === "USED") return { ok: false, reason: "ALREADY_USED", user, pass };
+  pass.status = "USED";
+  pass.usedAt = new Date().toISOString();
+  pass.scannedBy = scannedBy || "admin";
+  await writeStore(store);
+  return { ok: true, user, pass };
+}
+
+export async function passStats(): Promise<{
+  issued: number;
+  users: number;
+  entryActive: number;
+  entryUsed: number;
+  foodActive: number;
+  foodUsed: number;
+}> {
+  const store = await readStore();
+  return {
+    issued: store.passes.length,
+    users: store.users.length,
+    entryActive: store.passes.filter((p) => p.type === "ENTRY" && p.status === "ACTIVE").length,
+    entryUsed: store.passes.filter((p) => p.type === "ENTRY" && p.status === "USED").length,
+    foodActive: store.passes.filter((p) => p.type === "FOOD" && p.status === "ACTIVE").length,
+    foodUsed: store.passes.filter((p) => p.type === "FOOD" && p.status === "USED").length,
+  };
 }
