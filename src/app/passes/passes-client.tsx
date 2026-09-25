@@ -195,11 +195,7 @@ export default function PassesClient() {
     <Container className="rank-card p-5 sm:p-6">
       {slots && !slots.open ? (
         <p role="alert" className="mb-4 rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
-          Registrations full — all {slots.limit} passes claimed. Retrieve your pass below if already registered.
-        </p>
-      ) : slots ? (
-        <p className="mb-4 text-xs text-fog">
-          {slots.limit - slots.registered} of {slots.limit} passes left.
+          Registrations full — retrieve your pass below if already registered.
         </p>
       ) : null}
       <form noValidate onSubmit={submit} className="space-y-4">

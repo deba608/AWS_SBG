@@ -220,10 +220,8 @@ export default function CommunityDayRegisterModal({
             </p>
             {slots && !slots.open ? (
               <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
-                Registrations full — all {slots.limit} passes claimed.
+                Registrations full.
               </p>
-            ) : slots ? (
-              <p className="text-xs text-fog">{slots.limit - slots.registered} of {slots.limit} passes left.</p>
             ) : null}
 
             <div>

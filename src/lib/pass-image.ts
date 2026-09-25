@@ -125,3 +125,26 @@ export function downloadDataUrl(dataUrl: string, filename: string): void {
   a.click();
   a.remove();
 }
+
+/** Email the exact PNG shown on web — server sends it as-is, zero drift. */
+export async function emailExactPass(input: {
+  serial: string;
+  name: string;
+  email: string;
+  rollNo: string;
+  food: string;
+  qrDataUrl: string;
+  token: string;
+}): Promise<boolean> {
+  try {
+    const pngDataUrl = await drawPassImage(input);
+    const res = await fetch("/api/passes/email-pass", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: input.token, pngDataUrl }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
