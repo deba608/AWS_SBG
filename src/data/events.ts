@@ -1,5 +1,3 @@
-import { SITE } from "@/lib/constants";
-
 export type EventCategory =
   | "Workshop"
   | "Tech Talk"
@@ -58,7 +56,7 @@ export const communityDay: EventItem = {
   description:
     "Flagship 3-day gathering: DecodeX Hackathon, Tech Parliament, Make-A-Bot, Speaker & Podcast session, networking, lunch and certificates. Free for students.",
   status: "filling-fast",
-  registerUrl: SITE.links.eventCommunityDay,
+  registerUrl: "/passes",
   detailsUrl: "/events/aws-student-community-day-suiit-2026",
 };
 
@@ -72,7 +70,7 @@ export const decodeXHackathon: EventItem = {
   description:
     "Community Day flagship hackathon: Problem statement submission, Phase I & II sprints, mentor guidance, and jury evaluation on AWS.",
   status: "open",
-  registerUrl: SITE.links.eventDefault,
+  registerUrl: "/passes",
   detailsUrl: "/events/aws-student-community-day-suiit-2026",
 };
 
@@ -86,7 +84,7 @@ export const techparlament: EventItem = {
   description:
     "Parliamentary-style tech debate on architecture trade-offs: Serverless vs Containers, Monoliths vs Microservices, and AI in software engineering.",
   status: "open",
-  registerUrl: SITE.links.eventDefault,
+  registerUrl: "/passes",
   detailsUrl: "/events/aws-student-community-day-suiit-2026",
 };
 
@@ -100,7 +98,7 @@ export const makeABot: EventItem = {
   description:
     "Interactive build session: develop and deploy conversational AI bots and autonomous agents using Amazon Bedrock and AWS Lambda.",
   status: "open",
-  registerUrl: SITE.links.eventDefault,
+  registerUrl: "/passes",
   detailsUrl: "/events/aws-student-community-day-suiit-2026",
 };
 
@@ -114,7 +112,7 @@ export const speakerPodcast: EventItem = {
   description:
     "Keynote fireside chat and live podcast session with AWS professionals and industry leaders, followed by prize distribution and community lunch.",
   status: "open",
-  registerUrl: SITE.links.eventDefault,
+  registerUrl: "/passes",
   detailsUrl: "/events/aws-student-community-day-suiit-2026",
 };
 

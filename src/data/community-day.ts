@@ -4,7 +4,7 @@ export const COMMUNITY_DAY_META = {
   title: "AWS Student Community Day SUIIT 2026",
   date: "6–8 October 2026",
   shortDate: "Oct 6–8",
-  time: "9:00 AM – 4:00 PM IST",
+  time: "9:00 AM – 5:30 PM IST",
   venue: "APJ Abdul Kalam Auditorium, SUIIT, Burla",
   venueShort: "APJ Abdul Kalam Auditorium, SUIIT",
   address: "SUIIT, Jyoti Vihar, Burla, Sambalpur, Odisha",
@@ -12,7 +12,7 @@ export const COMMUNITY_DAY_META = {
     "https://www.google.com/maps/search/?api=1&query=APJ+Abdul+Kalam+Auditorium+SUIIT+Burla+Sambalpur",
   // 9 AM IST Oct 6 2026
   startIso: "2026-10-06T09:00:00+05:30",
-  endIso: "2026-10-08T16:00:00+05:30",
+  endIso: "2026-10-08T14:00:00+05:30",
   capacity: 300,
   entry: "FREE",
   host: "AWS SBG at SUIIT · Hosted by Pratik Samal",

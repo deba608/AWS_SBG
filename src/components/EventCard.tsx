@@ -1,6 +1,5 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { SITE } from "@/lib/constants";
 import type { EventItem } from "@/data/events";
 import { cn } from "@/lib/utils";
 import CommunityDayRegisterModal from "./CommunityDayRegisterModal";
@@ -105,8 +104,8 @@ export default function EventCard({
             </CommunityDayRegisterModal>
           ) : (
             <a
-              href={event.registerUrl ?? SITE.links.eventDefault}
-              target="_blank"
+              href={event.registerUrl ?? "/passes"}
+              target={event.registerUrl?.startsWith("http") ? "_blank" : undefined}
               rel="noopener noreferrer"
               aria-label={`Register for ${event.title}`}
               className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-cream underline decoration-brand/60 underline-offset-4 transition-colors hover:decoration-cream"
