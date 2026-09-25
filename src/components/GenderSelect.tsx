@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { Check } from "lucide-react";
 import { GENDERS, type Gender } from "@/lib/validate-contact";
 import { cn } from "@/lib/utils";
@@ -12,15 +13,17 @@ export default function GenderSelect({
 }: {
   value: string;
   onChange: (g: Gender) => void;
-  labelId: string;
+  labelId?: string;
   error?: string;
 }) {
+  const autoId = useId();
+  const id = labelId ?? `gender-${autoId}`;
   return (
     <div>
-      <span className="mb-1.5 block text-sm font-medium text-cream" id={labelId}>
+      <span className="mb-1.5 block text-sm font-medium text-cream" id={id}>
         Gender *
       </span>
-      <div role="radiogroup" aria-labelledby={labelId} className="grid grid-cols-2 gap-2">
+      <div role="radiogroup" aria-labelledby={id} className="grid grid-cols-2 gap-2">
         {GENDERS.map((g) => {
           const active = value === g;
           return (
