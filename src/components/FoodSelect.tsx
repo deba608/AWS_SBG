@@ -1,6 +1,5 @@
 "use client";
 
-import { Check } from "lucide-react";
 import { FOODS, type FoodPref } from "@/lib/validate-contact";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +19,11 @@ export default function FoodSelect({
       <span className="mb-1.5 block text-sm font-medium text-cream" id={labelId}>
         Food preference *
       </span>
-      <div role="radiogroup" aria-labelledby={labelId} className="grid grid-cols-2 gap-2">
+      <div
+        role="radiogroup"
+        aria-labelledby={labelId}
+        className="flex rounded-2xl border border-line bg-coal p-1.5"
+      >
         {FOODS.map((f) => {
           const veg = f === "Veg";
           const active = value === f;
@@ -32,26 +35,23 @@ export default function FoodSelect({
               aria-checked={active}
               onClick={() => onChange(f)}
               className={cn(
-                "relative flex min-h-[56px] items-center justify-center gap-2 rounded-xl border px-3.5 py-2.5 text-sm font-bold transition-all",
+                "flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all duration-200",
                 active
-                  ? "border-brand/60 bg-brand/10 text-cream shadow-[0_0_24px_rgba(173,92,255,0.25)]"
-                  : "border-line bg-surface text-fog hover:border-brand/30 hover:text-cream",
+                  ? veg
+                    ? "bg-gradient-to-b from-emerald-400 to-emerald-600 text-black shadow-[0_4px_20px_rgba(52,211,153,0.4)]"
+                    : "bg-gradient-to-b from-red-400 to-red-600 text-white shadow-[0_4px_20px_rgba(248,113,113,0.4)]"
+                  : "text-fog hover:text-cream",
               )}
             >
               <span
                 aria-hidden
                 className={cn(
                   "h-2 w-2 rounded-full",
-                  veg ? "bg-emerald-400" : "bg-red-400",
-                  !active && "opacity-50",
+                  veg ? "bg-emerald-500" : "bg-red-500",
+                  active ? "bg-black/30" : "",
                 )}
               />
               {veg ? "Veg" : "Non-veg"}
-              {active ? (
-                <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand">
-                  <Check className="h-3 w-3 text-black" strokeWidth={3.5} aria-hidden />
-                </span>
-              ) : null}
             </button>
           );
         })}
