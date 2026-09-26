@@ -86,7 +86,7 @@ export const techparlament: EventItem = {
   time: "9:30 AM – 10:30 AM IST",
   location: "Seminar Hall, SUIIT",
   description:
-    "Parliamentary-style tech debate on architecture trade-offs: Serverless vs Containers, Monoliths vs Microservices, and AI in software engineering.",
+    "",
   status: "open",
   registerUrl: "/passes",
   detailsUrl: "/events/aws-student-community-day-suiit-2026",
@@ -101,7 +101,7 @@ export const makeABot: EventItem = {
   time: "11:00 AM – 1:00 PM IST",
   location: "Seminar Hall, SUIIT",
   description:
-    "Bot-building competition: design, develop and deploy conversational AI bots and autonomous agents using Amazon Bedrock and AWS Lambda. Compete for prizes.",
+    "",
   status: "open",
   registerUrl: "/passes",
   detailsUrl: "/events/aws-student-community-day-suiit-2026",

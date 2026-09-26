@@ -107,14 +107,14 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
       {
         time: "9:30 – 10:30 AM",
         title: "Tech Parliament",
-        description: "High-energy debate on architecture choices: Serverless vs Containers, Monoliths vs Microservices, and AI trade-offs.",
+        description: "",
         venue: "Seminar Hall",
         tag: "Debate",
       },
       {
         time: "11:00 AM – 01:00 PM",
         title: "Make-A-Bot Competition",
-        description: "Bot-building competition: design, develop and deploy AI bots using Amazon Bedrock and AWS Lambda. Compete for prizes.",
+        description: "",
         venue: "Seminar Hall",
         tag: "Competition",
       },

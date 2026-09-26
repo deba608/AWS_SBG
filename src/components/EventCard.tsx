@@ -74,7 +74,7 @@ export default function EventCard({
             event.title
           )}
         </h3>
-        {!compact ? (
+        {!compact && event.description ? (
           <p className="mt-2 max-w-prose text-sm leading-relaxed text-fog [overflow-wrap:anywhere]">
             {event.description}
           </p>
