@@ -15,6 +15,8 @@ interface Stats {
   nonveg: number;
   male: number;
   female: number;
+  foodUsed: number;
+  foodActive: number;
 }
 
 interface Scan {
@@ -265,6 +267,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
     ? [
         { label: "Registered", v: stats.users },
         { label: "Entry in", v: stats.entryUsed, sub: `${stats.entryActive} pending` },
+        { label: "Food served", v: stats.foodUsed, sub: `${stats.foodActive} pending` },
         { label: "Veg lunch", v: stats.veg },
         { label: "Non-veg lunch", v: stats.nonveg },
       ]
@@ -313,7 +316,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
       </div>
 
       <Section label="Overview">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {cards.map((c) => (
           <div key={c.label} className="rank-card p-4 text-center">
             <p className="text-3xl font-bold text-cream">{c.v}</p>

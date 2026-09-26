@@ -34,6 +34,16 @@ export interface StoredPass {
   createdAt: string;
   usedAt: string | null;
   scannedBy: string | null;
+  /** Lunch single-use. Missing (old passes) = ACTIVE. */
+  food?: "ACTIVE" | "USED";
+  foodUsedAt?: string | null;
+  foodScannedBy?: string | null;
+}
+
+export type BurnKind = "entry" | "food";
+
+export function foodStatusOf(pass: StoredPass): "ACTIVE" | "USED" {
+  return pass.food ?? "ACTIVE";
 }
 
 export interface PassSettingsState {
@@ -363,7 +373,7 @@ export async function getPassesByContact(
 
 export type VerifyResult =
   | { ok: false; reason: "INVALID" | "EXPIRED" }
-  | { ok: true; user: StoredUser; pass: StoredPass; alreadyUsed: boolean };
+  | { ok: true; user: StoredUser; pass: StoredPass; alreadyUsed: boolean; foodUsed: boolean };
 
 /**
  * Serial No. (A01…) → live pass token. Lets gate verify/burn by serial
@@ -392,30 +402,38 @@ export async function verifyPass(token: string): Promise<VerifyResult> {
   const user = store.users.find((u) => u.id === pass.userId);
   if (!user) return { ok: false, reason: "INVALID" };
   if (isExpired()) return { ok: false, reason: "EXPIRED" };
-  return { ok: true, user, pass, alreadyUsed: pass.status === "USED" };
+  return { ok: true, user, pass, alreadyUsed: pass.status === "USED", foodUsed: foodStatusOf(pass) === "USED" };
 }
 
 export type BurnResult =
-  | { ok: false; reason: "INVALID" | "EXPIRED" | "ALREADY_USED"; user?: StoredUser; pass?: StoredPass }
-  | { ok: true; user: StoredUser; pass: StoredPass };
+  | { ok: false; reason: "INVALID" | "EXPIRED" | "ALREADY_USED"; kind: BurnKind; user?: StoredUser; pass?: StoredPass }
+  | { ok: true; kind: BurnKind; user: StoredUser; pass: StoredPass };
 
 /** Serialized burn: concurrent admins can't double-burn or lose updates. */
-export async function burnPass(token: string, scannedBy: string): Promise<BurnResult> {
+export async function burnPass(token: string, scannedBy: string, kind: BurnKind = "entry"): Promise<BurnResult> {
   return withWriteLock(async () => {
   const t = token.trim();
-  if (!verifyPassToken(t)) return { ok: false, reason: "INVALID" };
-  if (isExpired()) return { ok: false, reason: "EXPIRED" };
+  if (!verifyPassToken(t)) return { ok: false, reason: "INVALID", kind };
+  if (isExpired()) return { ok: false, reason: "EXPIRED", kind };
   const store = await readStore();
   const pass = store.passes.find((p) => p.token === t);
-  if (!pass) return { ok: false, reason: "INVALID" };
+  if (!pass) return { ok: false, reason: "INVALID", kind };
   const user = store.users.find((u) => u.id === pass.userId);
-  if (!user) return { ok: false, reason: "INVALID" };
-  if (pass.status === "USED") return { ok: false, reason: "ALREADY_USED", user, pass };
+  if (!user) return { ok: false, reason: "INVALID", kind };
+  if (kind === "food") {
+    if (foodStatusOf(pass) === "USED") return { ok: false, reason: "ALREADY_USED", kind, user, pass };
+    pass.food = "USED";
+    pass.foodUsedAt = new Date().toISOString();
+    pass.foodScannedBy = scannedBy || "admin";
+    await writeStore(store);
+    return { ok: true, kind, user, pass };
+  }
+  if (pass.status === "USED") return { ok: false, reason: "ALREADY_USED", kind, user, pass };
   pass.status = "USED";
   pass.usedAt = new Date().toISOString();
   pass.scannedBy = scannedBy || "admin";
   await writeStore(store);
-  return { ok: true, user, pass };
+  return { ok: true, kind, user, pass };
   });
 }
 
@@ -428,6 +446,8 @@ export async function passStats(): Promise<{
   nonveg: number;
   male: number;
   female: number;
+  foodUsed: number;
+  foodActive: number;
 }> {
   const store = await readStore();
   return {
@@ -439,6 +459,8 @@ export async function passStats(): Promise<{
     nonveg: store.users.filter((u) => u.food === "Non-veg").length,
     male: store.users.filter((u) => u.gender === "Male").length,
     female: store.users.filter((u) => u.gender === "Female").length,
+    foodUsed: store.passes.filter((p) => foodStatusOf(p) === "USED").length,
+    foodActive: store.passes.filter((p) => foodStatusOf(p) === "ACTIVE").length,
   };
 }
 

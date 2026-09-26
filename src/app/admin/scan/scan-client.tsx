@@ -18,6 +18,7 @@ type VerifyState =
   | {
       kind: "result";
       status: "ACTIVE" | "USED" | "INVALID" | "EXPIRED";
+      foodStatus?: "FOOD_ACTIVE" | "FOOD_USED";
       type?: "ENTRY" | "FOOD";
       name?: string;
       serial?: string;
@@ -28,7 +29,10 @@ type VerifyState =
       usedAt?: string | null;
       /** Fresh burn this session (vs already-used). Shows DONE state. */
       justBurned?: boolean;
+      justBurnedKind?: "entry" | "food";
     };
+
+type ScanMode = "entry" | "food";
 
 interface Stats {
   issued: number;
@@ -37,6 +41,8 @@ interface Stats {
   entryUsed: number;
   veg: number;
   nonveg: number;
+  foodUsed: number;
+  foodActive: number;
 }
 
 function tokenFromQRText(text: string): string {
@@ -66,6 +72,13 @@ export default function ScanClient() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [scanning, setScanning] = useState(false);
   const [camErr, setCamErr] = useState("");
+  const [mode, setMode] = useState<ScanMode>(() => {
+    try {
+      return window.localStorage.getItem("awsScanMode") === "food" ? "food" : "entry";
+    } catch {
+      return "entry";
+    }
+  });
   const videoRef = useRef<HTMLVideoElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const controlsRef = useRef<{ stop: () => void } | null>(null);
@@ -142,6 +155,17 @@ export default function ScanClient() {
     setToken("");
   }
 
+  function switchMode(m: ScanMode) {
+    setMode(m);
+    try {
+      window.localStorage.setItem("awsScanMode", m);
+    } catch {
+      // ignore
+    }
+    // fresh context for the other counter
+    resumeNow();
+  }
+
   /** Reset to idle + camera back on (continuous gate mode). */
   function resumeNow() {
     if (resumeTimer.current) {
@@ -186,11 +210,12 @@ export default function ScanClient() {
         if (auto) {
           // freeze frame: decision made, stop decode spam
           stopCamera();
-          if (d.status !== "ACTIVE") scheduleResume(2400);
+          if (d.status !== "ACTIVE" || d.foodStatus === "FOOD_USED") scheduleResume(2400);
         }
         setState({
           kind: "result",
           status: d.status,
+          foodStatus: d.foodStatus,
           type: d.type,
           name: d.user?.name,
           serial: d.user?.serial,
@@ -213,22 +238,24 @@ export default function ScanClient() {
   async function burn() {
     const t = tokenFromQRText(token);
     if (!t || burning) return;
+    const kind: ScanMode = mode;
     setBurning(true);
     try {
       const r = await fetch("/api/passes/burn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: t, scannedBy: "admin-scan" }),
+        body: JSON.stringify({ token: t, scannedBy: `admin-scan-${kind}`, kind }),
       });
       const d = await r.json();
       if (r.status === 410 || d.status === "EXPIRED") {
         setState({ kind: "result", status: "EXPIRED", type: d.type });
-      } else if (r.status === 409 || d.status === "USED") {
+      } else if (r.status === 409 || d.status === "USED" || d.status === "FOOD_USED") {
         stopCamera();
         scheduleResume(2400);
         setState({
           kind: "result",
           status: "USED",
+          foodStatus: d.status === "FOOD_USED" ? "FOOD_USED" : undefined,
           type: d.type,
           name: d.user?.name,
           serial: d.user?.serial,
@@ -244,6 +271,7 @@ export default function ScanClient() {
         setState({
           kind: "result",
           status: "USED",
+          foodStatus: d.status === "FOOD_USED" ? "FOOD_USED" : undefined,
           type: d.type,
           name: d.user?.name,
           serial: d.user?.serial,
@@ -253,6 +281,7 @@ export default function ScanClient() {
           food: d.user?.food,
           usedAt: d.usedAt ?? null,
           justBurned: true,
+          justBurnedKind: d.kind === "food" ? "food" : "entry",
         });
       } else {
         setState({ kind: "result", status: "INVALID" });
@@ -361,15 +390,25 @@ export default function ScanClient() {
 
   const result = state.kind === "result" ? state : null;
   const justBurned = result?.justBurned === true;
+  const lunchClaimed = result?.foodStatus === "FOOD_USED";
+  const lunchDone = justBurned && result?.justBurnedKind === "food";
+  const resultValid = result !== null && result.status !== "INVALID" && result.status !== "EXPIRED";
+  const showGreen =
+    result?.status === "ACTIVE" || justBurned || (mode === "food" && result !== null && !lunchClaimed && result.status !== "INVALID" && result.status !== "EXPIRED");
+  const showRed =
+    !justBurned &&
+    (result?.status === "USED" ||
+      result?.status === "INVALID" ||
+      (mode === "food" && lunchClaimed));
 
   return (
     <div className="space-y-4">
       <div className="rank-card flex items-center gap-3 px-5 py-3">
         <p className="text-3xl font-bold tabular-nums text-green-400">
-          {stats?.entryUsed ?? "–"}
+          {mode === "food" ? (stats?.foodUsed ?? "–") : (stats?.entryUsed ?? "–")}
         </p>
         <div className="min-w-0 text-xs leading-tight text-fog">
-          <p>in gate{stats ? ` · ${stats.users} reg` : ""}</p>
+          <p>{mode === "food" ? "lunches served" : "in gate"}{stats ? ` · ${stats.users} reg` : ""}</p>
           {stats ? <p>Veg {stats.veg} · Non-veg {stats.nonveg}</p> : null}
         </div>
         <span className="flex-1" aria-hidden />
@@ -391,6 +430,36 @@ export default function ScanClient() {
       </div>
 
       <div className="rank-card space-y-3 p-4 sm:p-5">
+        <div
+          role="radiogroup"
+          aria-label="Counter mode"
+          className="flex rounded-2xl border border-line bg-coal p-1.5"
+        >
+          {(["entry", "food"] as const).map((m) => {
+            const active = mode === m;
+            return (
+              <button
+                key={m}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => {
+                  if (!active) switchMode(m);
+                }}
+                className={cn(
+                  "flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all duration-200",
+                  active
+                    ? m === "entry"
+                      ? "bg-gradient-to-b from-brand to-brandpressed text-black shadow-[0_4px_20px_rgba(173,92,255,0.4)]"
+                      : "bg-gradient-to-b from-amber-400 to-amber-600 text-black shadow-[0_4px_20px_rgba(251,191,36,0.35)]"
+                    : "text-fog hover:text-cream",
+                )}
+              >
+                {m === "entry" ? "Gate entry" : "Food counter"}
+              </button>
+            );
+          })}
+        </div>
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-bold text-cream">Scan</h2>
           <button
@@ -490,33 +559,39 @@ export default function ScanClient() {
           key={`${token}-${result.status}-${result.usedAt ?? "active"}-${justBurned ? "burned" : "seen"}`}
           className={cn(
             "rank-card animate-pop-in overflow-hidden",
-            (result.status === "ACTIVE" || justBurned) && "border-green-500/50",
+            showGreen && "border-green-500/50",
             result.status === "EXPIRED" && "border-amber-500/50",
-            (!justBurned && (result.status === "USED" || result.status === "INVALID")) && "border-red-500/50",
+            showRed && "border-red-500/50",
           )}
         >
           <div
             className={cn(
               "flex items-center gap-3 px-5 py-4 text-lg font-bold text-white",
-              (result.status === "ACTIVE" || justBurned) && "bg-green-600",
+              showGreen && "bg-green-600",
               result.status === "EXPIRED" && "bg-amber-600",
-              (!justBurned && (result.status === "USED" || result.status === "INVALID")) && "bg-red-600",
+              showRed && "bg-red-600",
             )}
           >
-            {result.status === "ACTIVE" || justBurned ? (
+            {showGreen ? (
               <CheckCircle2 className={cn("h-6 w-6", justBurned && "animate-check-pop")} aria-hidden />
             ) : (
               <XCircle className="h-6 w-6" aria-hidden />
             )}
-            {justBurned
-              ? `DONE — ${result.type ?? "pass"} recorded`
-              : result.status === "ACTIVE"
-                ? "VALID — allow"
-                : result.status === "USED"
-                  ? "ALREADY USED — block"
-                  : result.status === "EXPIRED"
-                    ? "EXPIRED — block"
-                    : "INVALID — block"}
+            {lunchDone
+              ? "DONE — lunch recorded"
+              : justBurned
+                ? `DONE — ${result.type ?? "pass"} recorded`
+                : mode === "food" && result.status !== "INVALID" && result.status !== "EXPIRED"
+                  ? lunchClaimed
+                    ? "LUNCH CLAIMED — block"
+                    : `LUNCH VALID — serve ${result.food === "Veg" ? "VEG" : "NON-VEG"}`
+                  : result.status === "ACTIVE"
+                    ? "VALID — allow"
+                    : result.status === "USED"
+                      ? "ALREADY USED — block"
+                      : result.status === "EXPIRED"
+                        ? "EXPIRED — block"
+                        : "INVALID — block"}
           </div>
           {result.status !== "INVALID" && result.status !== "EXPIRED" ? (
             <div className="space-y-1 p-5">
@@ -541,7 +616,7 @@ export default function ScanClient() {
               {result.usedAt ? (
                 <p className="text-xs text-fog">Burned at {result.usedAt}</p>
               ) : null}
-              {result.status === "USED" ? (
+              {result.status === "USED" || (mode === "food" && lunchClaimed) ? (
                 <button
                   type="button"
                   onClick={resumeNow}
@@ -551,19 +626,27 @@ export default function ScanClient() {
                   Next person — tap to scan now
                 </button>
               ) : null}
-              {result.status === "ACTIVE" ? (
+              {(result.status === "ACTIVE" && mode === "entry") ||
+              (mode === "food" && !lunchClaimed && resultValid) ? (
                 <button
                   type="button"
                   onClick={burn}
                   disabled={burning}
-                  className="mt-4 inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-green-500 px-6 py-3 text-base font-bold text-black hover:bg-green-400 disabled:opacity-60"
+                  className={cn(
+                    "mt-4 inline-flex min-h-[56px] w-full items-center justify-center rounded-full px-6 py-3 text-base font-bold text-black disabled:opacity-60",
+                    mode === "food"
+                      ? "bg-amber-400 hover:bg-amber-300"
+                      : "bg-green-500 hover:bg-green-400",
+                  )}
                 >
                   {burning ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Burning…
                     </>
+                  ) : mode === "food" ? (
+                    `Confirm lunch (${result.food === "Veg" ? "VEG" : "NON-VEG"}) — burn now`
                   ) : (
-                    `Confirm ${result.type === "ENTRY" ? "entry" : "food"} — burn now`
+                    "Confirm entry — burn now"
                   )}
                 </button>
               ) : null}

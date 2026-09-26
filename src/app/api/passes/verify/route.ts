@@ -34,6 +34,7 @@ export async function GET(req: Request) {
   return NextResponse.json({
     ok: true,
     status: r.alreadyUsed ? "USED" : "ACTIVE",
+    foodStatus: r.foodUsed ? "FOOD_USED" : "FOOD_ACTIVE",
     type: r.pass.type,
     user: {
       name: r.user.name,
@@ -67,6 +68,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     ok: true,
     status: r.alreadyUsed ? "USED" : "ACTIVE",
+    foodStatus: r.foodUsed ? "FOOD_USED" : "FOOD_ACTIVE",
     type: r.pass.type,
     user: {
       name: r.user.name,

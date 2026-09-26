@@ -36,7 +36,7 @@ export async function GET(req: Request) {
     lines = [...seen.values()].map((u) => [u.serial, u.name, u.email, u.mobile, u.rollNo, u.gender, u.food, u.createdAt]);
   } else {
     const filtered = scope === "ALL" ? rows : rows.filter((r) => r.pass.type === scope);
-    header = ["serial", "name", "email", "mobile", "roll_no", "gender", "food", "type", "status", "used_at", "scanned_by", "token"];
+    header = ["serial", "name", "email", "mobile", "roll_no", "gender", "food", "type", "entry_status", "entry_used_at", "food_status", "food_used_at", "token"];
     lines = filtered.map(({ pass, user }) => [
       user?.serial ?? "",
       user?.name ?? "",
@@ -48,7 +48,8 @@ export async function GET(req: Request) {
       pass.type,
       pass.status,
       pass.usedAt ?? "",
-      pass.scannedBy ?? "",
+      pass.food ?? "ACTIVE",
+      pass.foodUsedAt ?? "",
       pass.token,
     ]);
   }
@@ -75,6 +76,8 @@ export async function GET(req: Request) {
       ["non_veg", stats.nonveg],
       ["entry_scanned", stats.entryUsed],
       ["entry_pending", stats.entryActive],
+      ["lunch_served", stats.foodUsed],
+      ["lunch_pending", stats.foodActive],
     ] as const) lunch.addRow([metric, count]);
     const buf = Buffer.from(await wb.xlsx.writeBuffer());
     return new NextResponse(buf, {
