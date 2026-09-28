@@ -60,7 +60,7 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
         tag: "Kickoff",
       },
       {
-        time: "10:30 AM – 1:00 PM",
+        time: "10:30 – 1:00 PM",
         title: "Hackathon – Phase I",
         description: "Architecture sprint, rapid prototyping, and mentor guidance rounds.",
         venue: "APJ Abdul Kalam Auditorium",
