@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { listPasses } from "@/lib/pass-store";
+import { clearAllRegistrations, listPasses } from "@/lib/pass-store";
 
 export async function GET(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -30,4 +30,30 @@ export async function GET(req: Request) {
       food: user?.food ?? "—",
     })),
   });
+}
+
+/**
+ * DELETE all registrations (users + passes). Serial counter reset.
+ * Body must be { confirm: "DELETE ALL" }. Admin cookie required.
+ * Export CSV/XLSX first — this cannot be undone.
+ */
+export async function DELETE(req: Request) {
+  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Confirmation required." }, { status: 400 });
+  }
+  const confirm = (body as Record<string, unknown>).confirm;
+  if (confirm !== "DELETE ALL") {
+    return NextResponse.json({ error: 'Send { "confirm": "DELETE ALL" } to confirm.' }, { status: 400 });
+  }
+  try {
+    const result = await clearAllRegistrations();
+    return NextResponse.json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[admin/passes DELETE]", err);
+    return NextResponse.json({ error: "Delete failed. Retry." }, { status: 500 });
+  }
 }

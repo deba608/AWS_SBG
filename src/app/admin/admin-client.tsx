@@ -99,6 +99,10 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
   const [editForm, setEditForm] = useState({ name: "", email: "", mobile: "", rollNo: "", gender: "", food: "" });
   const [editErr, setEditErr] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+  const [dangerArmed, setDangerArmed] = useState(false);
+  const [dangerText, setDangerText] = useState("");
+  const [deletingAll, setDeletingAll] = useState(false);
+  const [dangerMsg, setDangerMsg] = useState("");
 
   const check = useCallback(async () => {
     try {
@@ -254,6 +258,33 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
     }
   }
 
+  async function deleteAll() {
+    if (dangerText !== "DELETE ALL") {
+      setDangerMsg('Type DELETE ALL to confirm.');
+      return;
+    }
+    if (!window.confirm(`Delete ALL ${settings?.registered ?? rows.length} registrations? Export CSV first — this cannot be undone.`)) return;
+    setDeletingAll(true);
+    setDangerMsg("");
+    try {
+      const res = await fetch("/api/admin/passes", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: "DELETE ALL" }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error ?? "Delete failed.");
+      setDangerMsg(`Deleted ${d.removedUsers} registrations (${d.removedPasses} passes).`);
+      setDangerArmed(false);
+      setDangerText("");
+      await load();
+    } catch (err) {
+      setDangerMsg(err instanceof Error ? err.message : "Delete failed.");
+    } finally {
+      setDeletingAll(false);
+    }
+  }
+
   if (authed === null) {
     return (
       <div className="rank-card flex items-center gap-3 p-6 text-sm text-fog">
@@ -372,6 +403,53 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
             </div>
           </div>
           {settingsMsg ? <p className="mt-2 text-xs text-fog">{settingsMsg}</p> : null}
+          <div className="mt-4 border-t border-red-500/20 pt-4">
+            <h3 className="text-sm font-bold text-red-300">Danger zone</h3>
+            <p className="mt-1 text-xs leading-relaxed text-fog">
+              Delete every registration + pass, reset serials to A01. Export CSV/Excel first — cannot undo.
+            </p>
+            {!dangerArmed ? (
+              <button
+                type="button"
+                onClick={() => { setDangerArmed(true); setDangerMsg(""); }}
+                className="mt-3 inline-flex min-h-[44px] items-center rounded-full border border-red-500/50 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/10"
+              >
+                Delete all registrations…
+              </button>
+            ) : (
+              <div className="mt-3 flex flex-col gap-2">
+                <label className="text-xs text-fog">
+                  Type <code className="font-mono font-bold text-red-300">DELETE ALL</code> to confirm ({settings.registered} regs)
+                  <input
+                    value={dangerText}
+                    onChange={(e) => setDangerText(e.target.value)}
+                    placeholder="DELETE ALL"
+                    autoComplete="off"
+                    className="mt-1.5 w-full min-h-[44px] max-w-xs rounded-xl border border-red-500/50 bg-surface px-3 py-2 font-mono text-sm text-cream placeholder:text-faint focus:ring-2 focus:ring-red-500"
+                  />
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={deletingAll}
+                    onClick={() => void deleteAll()}
+                    className="inline-flex min-h-[44px] items-center rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-60"
+                  >
+                    {deletingAll ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : "Delete everything"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={deletingAll}
+                    onClick={() => { setDangerArmed(false); setDangerText(""); setDangerMsg(""); }}
+                    className="inline-flex min-h-[44px] items-center rounded-full border border-line px-4 py-2 text-sm text-fog hover:text-cream"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+            {dangerMsg ? <p role="status" className="mt-2 text-xs text-fog">{dangerMsg}</p> : null}
+          </div>
         </div>
       ) : null}
 

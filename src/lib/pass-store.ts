@@ -506,3 +506,21 @@ export async function recentScans(limit = 20): Promise<PassRow[]> {
       user: store.users.find((u) => u.id === pass.userId) ?? null,
     }));
 }
+
+/**
+ * Deletes every user + pass, resets serial counter.
+ * Settings (limit / open-closed) preserved.
+ * Irreversible — caller must enforce admin auth + explicit confirm.
+ */
+export async function clearAllRegistrations(): Promise<{
+  removedUsers: number;
+  removedPasses: number;
+}> {
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const removedUsers = store.users.length;
+    const removedPasses = store.passes.length;
+    await writeStore({ users: [], passes: [], seq: 0, settings: store.settings });
+    return { removedUsers, removedPasses };
+  });
+}
