@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { initials } from "@/lib/utils";
 import type { TeamMember } from "@/data/team";
 import { cn } from "@/lib/utils";
@@ -10,6 +13,8 @@ export default function TeamCard({
   member: TeamMember;
   large?: boolean;
 }) {
+  const [failed, setFailed] = useState(false);
+  const showPhoto = Boolean(member.photo) && !failed;
   return (
     <article
       className={cn(
@@ -17,15 +22,31 @@ export default function TeamCard({
         large ? "py-6 md:py-7" : "py-5"
       )}
     >
-      <div
-        aria-hidden
-        className={cn(
-          "flex shrink-0 items-center justify-center rounded-lg border border-line bg-coal font-bold text-cream",
-          large ? "h-14 w-14 text-base" : "h-11 w-11 text-sm"
-        )}
-      >
-        {initials(member.name)}
-      </div>
+      {showPhoto ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={member.photo as string}
+          alt={member.name}
+          width={large ? 56 : 44}
+          height={large ? 56 : 44}
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className={cn(
+            "shrink-0 rounded-lg border border-line object-cover",
+            large ? "h-14 w-14" : "h-11 w-11"
+          )}
+        />
+      ) : (
+        <div
+          aria-hidden
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-lg border border-line bg-coal font-bold text-cream",
+            large ? "h-14 w-14 text-base" : "h-11 w-11 text-sm"
+          )}
+        >
+          {initials(member.name)}
+        </div>
+      )}
       <div className="min-w-0 flex-1">
         <h3
           className={cn(

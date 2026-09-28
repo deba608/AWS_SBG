@@ -6,6 +6,7 @@ export interface TeamMember {
   lead?: boolean;
   email?: string;
   linkedin?: string;
+  photo?: string;
 }
 
 /** Leadership — Captain, President, Secretary */
@@ -16,6 +17,7 @@ export const teamLeads: TeamMember[] = [
     role: "Captain",
     bio: "Leads the AWS Student Builder Group, steering community direction and fostering a culture of cloud-first building.",
     lead: true,
+    photo: "/team/pratik-samal.jpg",
   },
   {
     id: "manas-ranjan-dikshit",
@@ -23,6 +25,7 @@ export const teamLeads: TeamMember[] = [
     role: "President",
     bio: "Drives overall club strategy, partnerships and community growth across campus.",
     lead: true,
+    photo: "/team/manas-ranjan-dikshit.jpg",
   },
   {
     id: "debashish-pradhan",
@@ -30,6 +33,7 @@ export const teamLeads: TeamMember[] = [
     role: "Secretary",
     bio: "Manages club operations, communications and documentation to keep everything running smoothly.",
     lead: true,
+    photo: "/team/debashish-pradhan.jpg",
   },
   {
     id: "abhash-dash",
