@@ -4,7 +4,8 @@ export type EventCategory =
   | "Hackathon"
   | "Build Session"
   | "Community Day"
-  | "Podcast";
+  | "Podcast"
+  | "Comedy";
 
 export type EventStatus = "open" | "filling-fast" | "closed";
 
@@ -30,6 +31,7 @@ export const EVENT_FILTERS = [
   "Hackathons",
   "Build Sessions",
   "Podcasts",
+  "Comedy",
 ] as const;
 
 export type EventFilter = (typeof EVENT_FILTERS)[number];
@@ -41,6 +43,7 @@ const FILTER_TO_CATEGORY: Record<Exclude<EventFilter, "All">, EventCategory> =
     Hackathons: "Hackathon",
     "Build Sessions": "Build Session",
     Podcasts: "Podcast",
+    Comedy: "Comedy",
   };
 
 export function filterEvents(events: EventItem[], filter: EventFilter) {
@@ -122,12 +125,28 @@ export const speakerPodcast: EventItem = {
   detailsUrl: "/events/aws-student-community-day-suiit-2026",
 };
 
+export const standupComedy: EventItem = {
+  id: "standup-comedy-day-3",
+  parentId: "aws-student-community-day-suiit-2026",
+  title: "Standup Comedy (Day 3)",
+  category: "Comedy",
+  date: "8 October 2026",
+  time: "3:30 PM onwards IST",
+  location: "APJ Abdul Kalam Auditorium, SUIIT",
+  description:
+    "Closing laughter riot with comedians Bishal Mohanty and Riten Pattnaik.",
+  status: "open",
+  registerUrl: "/passes",
+  detailsUrl: "/events/aws-student-community-day-suiit-2026",
+};
+
 export const upcomingEvents: EventItem[] = [
   communityDay,
   decodeXHackathon,
   techparlament,
   makeABot,
   speakerPodcast,
+  standupComedy,
 ];
 
 export interface PastEvent {

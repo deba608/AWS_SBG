@@ -102,6 +102,49 @@ export default function CommunityDayAgenda() {
                         {item.description}
                       </p>
                     ) : null}
+                    {item.performers ? (
+                      <div className="mt-2.5 flex flex-wrap gap-2">
+                        {item.performers.map((p) =>
+                          p.link ? (
+                            <a
+                              key={p.name}
+                              href={p.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`${p.name} on Instagram`}
+                              className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line bg-ink py-1 pl-1 pr-3 text-xs font-medium text-cream transition-colors hover:border-brand/60 hover:text-brand"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={p.photo}
+                                alt=""
+                                width={28}
+                                height={28}
+                                loading="lazy"
+                                className="h-7 w-7 rounded-full border border-line object-cover"
+                              />
+                              {p.name}
+                            </a>
+                          ) : (
+                            <span
+                              key={p.name}
+                              className="inline-flex items-center gap-2 rounded-full border border-line bg-ink py-1 pl-1 pr-3 text-xs font-medium text-cream"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={p.photo}
+                                alt={p.name}
+                                width={28}
+                                height={28}
+                                loading="lazy"
+                                className="h-7 w-7 rounded-full border border-line object-cover"
+                              />
+                              {p.name}
+                            </span>
+                          ),
+                        )}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 

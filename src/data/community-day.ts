@@ -24,6 +24,7 @@ export interface AgendaItem {
   description: string;
   venue?: string;
   tag?: string;
+  performers?: { name: string; photo: string; link?: string }[];
 }
 
 export interface DaySchedule {
@@ -148,6 +149,17 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
         description: "Grand community lunch and open networking session.",
         venue: "CR 1",
         tag: "Lunch",
+      },
+      {
+        time: "03:30 PM onwards",
+        title: "Standup Comedy",
+        description: "Closing laughter riot with Bishal Mohanty and Riten Pattnaik.",
+        venue: "APJ Abdul Kalam Auditorium",
+        tag: "Comedy",
+        performers: [
+          { name: "Bishal Mohanty", photo: "/speakers/bishal-mohanty.jpg", link: "https://www.instagram.com/unfunny_attorney/" },
+          { name: "Riten Pattnaik", photo: "/speakers/riten-pattnaik.jpg", link: "https://www.instagram.com/ritenpattnaik_/" },
+        ],
       },
     ],
   },
