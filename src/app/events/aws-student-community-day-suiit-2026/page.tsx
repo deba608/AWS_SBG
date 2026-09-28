@@ -21,6 +21,7 @@ import Countdown from "@/components/Countdown";
 import EventCard from "@/components/EventCard";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
+import SpeakerPhoto from "@/components/SpeakerPhoto";
 import {
   COMMUNITY_DAY_FAQS,
   COMMUNITY_DAY_META,
@@ -253,14 +254,7 @@ export default function CommunityDayPage() {
                   }
                 >
                   {s.photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={s.photo}
-                      alt={s.name ?? s.role}
-                      width={112}
-                      height={112}
-                      className="h-28 w-28 rounded-2xl border border-line object-cover"
-                    />
+                    <SpeakerPhoto src={s.photo} name={s.name ?? s.role} />
                   ) : (
                     <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-ink text-faint">
                       <Mic className="h-6 w-6" aria-hidden />
@@ -271,12 +265,10 @@ export default function CommunityDayPage() {
                       <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-brand">{s.role}</p>
                       <h3 className="mt-1 text-base font-semibold text-cream">{s.name}</h3>
                       <p className="mt-1 text-xs leading-relaxed text-fog">{s.title}</p>
-                      <p className="mt-1 text-xs font-medium text-fog">{s.focus}</p>
                     </>
                   ) : (
                     <>
                       <h3 className="mt-4 text-base font-semibold text-cream">{s.role}</h3>
-                      <p className="mt-1 text-xs font-medium text-fog">{s.focus}</p>
                       <p className="mt-2 text-sm text-faint">To be announced</p>
                     </>
                   )}
