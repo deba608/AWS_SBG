@@ -50,7 +50,7 @@ const whyAttend = [
   {
     icon: Sparkles,
     title: "Learn",
-    description: "Cloud fundamentals to AI/GenAI + DevOps — sessions by AWS pros and community leaders.",
+    description: "Cloud fundamentals to AI/GenAI + DevOps — sessions by AWS pros and startup founders.",
   },
   {
     icon: Laptop,
@@ -240,7 +240,7 @@ export default function CommunityDayPage() {
             align="left"
             eyebrow="Speakers"
             title="Learn from practitioners."
-            description="AWS professionals, community leaders and industry experts. Names will be announced — no placeholders, only confirmed speakers."
+            description="Meet the founders and operators joining us on stage — technologists and entrepreneurs sharing real journeys."
           />
           <h2 id="speakers-heading" className="sr-only">Speakers</h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -249,7 +249,7 @@ export default function CommunityDayPage() {
                 <article
                   className={
                     s.announced
-                      ? "flex h-full flex-col items-center rounded-2xl border border-brand/40 bg-surface p-6 text-center shadow-[0_0_40px_rgba(173,92,255,0.12)]"
+                      ? "group flex h-full flex-col items-center rounded-3xl border border-line bg-surface p-8 text-center transition-all duration-200 hover:-translate-y-1 hover:border-brand/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]"
                       : "flex h-full flex-col items-center rounded-2xl border border-dashed border-line bg-surface p-6 text-center"
                   }
                 >
@@ -262,9 +262,9 @@ export default function CommunityDayPage() {
                   )}
                   {s.announced ? (
                     <>
-                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-brand">{s.role}</p>
-                      <h3 className="mt-1 text-base font-semibold text-cream">{s.name}</h3>
-                      <p className="mt-1 text-xs leading-relaxed text-fog">{s.title}</p>
+                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.22em] text-brand">{s.role}</p>
+                      <h3 className="mt-2 text-lg font-bold tracking-tight text-cream">{s.name}</h3>
+                      <p className="mt-2 flex min-h-[2.75rem] items-start justify-center text-sm leading-relaxed text-fog [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">{s.title}</p>
                     </>
                   ) : (
                     <>
