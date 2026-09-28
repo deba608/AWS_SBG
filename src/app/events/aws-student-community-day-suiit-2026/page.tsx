@@ -243,7 +243,7 @@ export default function CommunityDayPage() {
             description="Meet the founders and operators joining us on stage — technologists and entrepreneurs sharing real journeys."
           />
           <h2 id="speakers-heading" className="sr-only">Speakers</h2>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2">
             {COMMUNITY_DAY_SPEAKERS.map((s, i) => (
               <Reveal key={s.name ?? s.role} delay={Math.min(i * 0.07, 0.14)}>
                 <article
@@ -264,7 +264,7 @@ export default function CommunityDayPage() {
                     <>
                       <p className="mt-5 text-xs font-semibold uppercase tracking-[0.22em] text-brand">{s.role}</p>
                       <h3 className="mt-2 text-lg font-bold tracking-tight text-cream">{s.name}</h3>
-                      <p className="mt-2 flex min-h-[2.75rem] items-start justify-center text-sm leading-relaxed text-fog [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">{s.title}</p>
+                      <p title={s.title} className="mt-2 min-h-0 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] leading-relaxed text-fog">{s.title}</p>
                     </>
                   ) : (
                     <>
