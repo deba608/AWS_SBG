@@ -160,12 +160,29 @@ export const COMMUNITY_DAY_AGENDA: AgendaItem[] = COMMUNITY_DAY_SCHEDULE.flatMap
 export interface SpeakerPlaceholder {
   role: string;
   focus: string;
+  name?: string;
+  title?: string;
+  photo?: string;
+  announced?: boolean;
 }
 
 export const COMMUNITY_DAY_SPEAKERS: SpeakerPlaceholder[] = [
-  { role: "AWS Professional", focus: "Cloud · TBA" },
-  { role: "Community Leader", focus: "AI / GenAI · TBA" },
-  { role: "Industry Expert", focus: "DevOps · TBA" },
+  {
+    role: "Keynote Speaker",
+    focus: "AI Transformation · Day 3",
+    name: "Manas Ranjan Das",
+    title: "Tech Entrepreneur | AI Transformation Leader | Philanthropist",
+    photo: "/speakers/manas-ranjan-das.jpg",
+    announced: true,
+  },
+  {
+    role: "Guest Speaker",
+    focus: "Startups · AI · Day 3",
+    name: "Abhijeet Sahoo",
+    title: "Co-Founder, Goodmeetings | Entrepreneur & Author",
+    photo: "/speakers/abhijeet-sahoo.jpg",
+    announced: true,
+  },
 ];
 
 export const COMMUNITY_DAY_PERKS = [

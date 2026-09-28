@@ -244,14 +244,42 @@ export default function CommunityDayPage() {
           <h2 id="speakers-heading" className="sr-only">Speakers</h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {COMMUNITY_DAY_SPEAKERS.map((s, i) => (
-              <Reveal key={s.role} delay={Math.min(i * 0.07, 0.14)}>
-                <article className="flex h-full flex-col items-center rounded-2xl border border-dashed border-line bg-surface p-6 text-center">
-                  <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-ink text-faint">
-                    <Mic className="h-6 w-6" aria-hidden />
-                  </span>
-                  <h3 className="mt-4 text-base font-semibold text-cream">{s.role}</h3>
-                  <p className="mt-1 text-xs font-medium text-fog">{s.focus}</p>
-                  <p className="mt-2 text-sm text-faint">To be announced</p>
+              <Reveal key={s.name ?? s.role} delay={Math.min(i * 0.07, 0.14)}>
+                <article
+                  className={
+                    s.announced
+                      ? "flex h-full flex-col items-center rounded-2xl border border-brand/40 bg-surface p-6 text-center shadow-[0_0_40px_rgba(173,92,255,0.12)]"
+                      : "flex h-full flex-col items-center rounded-2xl border border-dashed border-line bg-surface p-6 text-center"
+                  }
+                >
+                  {s.photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={s.photo}
+                      alt={s.name ?? s.role}
+                      width={112}
+                      height={112}
+                      className="h-28 w-28 rounded-2xl border border-line object-cover"
+                    />
+                  ) : (
+                    <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-ink text-faint">
+                      <Mic className="h-6 w-6" aria-hidden />
+                    </span>
+                  )}
+                  {s.announced ? (
+                    <>
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-brand">{s.role}</p>
+                      <h3 className="mt-1 text-base font-semibold text-cream">{s.name}</h3>
+                      <p className="mt-1 text-xs leading-relaxed text-fog">{s.title}</p>
+                      <p className="mt-1 text-xs font-medium text-fog">{s.focus}</p>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="mt-4 text-base font-semibold text-cream">{s.role}</h3>
+                      <p className="mt-1 text-xs font-medium text-fog">{s.focus}</p>
+                      <p className="mt-2 text-sm text-faint">To be announced</p>
+                    </>
+                  )}
                 </article>
               </Reveal>
             ))}
