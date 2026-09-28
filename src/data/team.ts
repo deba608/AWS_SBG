@@ -25,7 +25,7 @@ export const teamLeads: TeamMember[] = [
     role: "President",
     bio: "Drives overall club strategy, partnerships and community growth across campus.",
     lead: true,
-    photo: "/team/manas-ranjan-dikshit.png",
+    photo: "/team/manas-ranjan-dikshit.jpg",
   },
   {
     id: "debashish-pradhan",
@@ -33,7 +33,7 @@ export const teamLeads: TeamMember[] = [
     role: "Secretary",
     bio: "Manages club operations, communications and documentation to keep everything running smoothly.",
     lead: true,
-    photo: "/team/debashish-pradhan.png",
+    photo: "/team/debashish-pradhan.jpeg",
   },
   {
     id: "abhash-dash",

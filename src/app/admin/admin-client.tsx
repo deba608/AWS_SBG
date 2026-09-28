@@ -403,8 +403,12 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
             </div>
           </div>
           {settingsMsg ? <p className="mt-2 text-xs text-fog">{settingsMsg}</p> : null}
-          <div className="mt-4 border-t border-red-500/20 pt-4">
-            <h3 className="text-sm font-bold text-red-300">Danger zone</h3>
+          <details className="mt-4 border-t border-line pt-4">
+            <summary className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 text-sm font-semibold text-fog hover:text-cream">
+              Additional settings
+            </summary>
+            <div className="mt-3">
+              <h3 className="text-sm font-bold text-red-300">Danger zone</h3>
             <p className="mt-1 text-xs leading-relaxed text-fog">
               Delete every registration + pass, reset serials to A01. Export CSV/Excel first — cannot undo.
             </p>
@@ -449,7 +453,8 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
               </div>
             )}
             {dangerMsg ? <p role="status" className="mt-2 text-xs text-fog">{dangerMsg}</p> : null}
-          </div>
+            </div>
+          </details>
         </div>
       ) : null}
 
