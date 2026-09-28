@@ -172,7 +172,7 @@ export const COMMUNITY_DAY_SPEAKERS: SpeakerPlaceholder[] = [
     focus: "AI Transformation · Day 3",
     name: "Manas Ranjan Das",
     title: "Tech Entrepreneur | AI Transformation Leader | Philanthropist",
-    photo: "/speakers/manas-ranjan-das.jpg",
+    photo: "/speakers/manas-ranjan-das.png",
     announced: true,
   },
   {
