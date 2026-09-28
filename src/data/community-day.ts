@@ -169,15 +169,13 @@ export interface SpeakerPlaceholder {
 export const COMMUNITY_DAY_SPEAKERS: SpeakerPlaceholder[] = [
   {
     role: "Keynote Speaker",
-    focus: "AI Transformation · Day 3",
     name: "Manas Ranjan Das",
-    title: "Tech Entrepreneur | AI Transformation Leader | Philanthropist",
+    title: "Tech Entrepreneur | Philanthropist",
     photo: "/speakers/manas-ranjan-das.jpg",
     announced: true,
   },
   {
     role: "Guest Speaker",
-    focus: "Startups · AI · Day 3",
     name: "Abhijeet Sahoo",
     title: "Co-Founder, Goodmeetings | Entrepreneur & Author",
     photo: "/speakers/abhijeet-sahoo.jpg",
