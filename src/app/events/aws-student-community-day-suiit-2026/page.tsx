@@ -108,7 +108,7 @@ export default function CommunityDayPage() {
       {/* HERO */}
       <section aria-labelledby="scd-heading" className="relative overflow-hidden">
         <div className="bg-grid bg-grid-fade absolute inset-0" aria-hidden />
-        <div className="glow-brand absolute -top-24 left-1/2 h-96 w-[36rem] max-w-none -translate-x-1/2 sm:w-[52rem]" aria-hidden />
+        <div className="glow-brand absolute -top-24 left-1/2 h-96 w-[36rem] max-w-[100vw] -translate-x-1/2 sm:w-[52rem]" aria-hidden />
         <Container className="relative pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
           <Reveal>
             <div className="flex flex-wrap items-center gap-2">
@@ -264,7 +264,7 @@ export default function CommunityDayPage() {
                     <>
                       <p className="mt-5 text-xs font-semibold uppercase tracking-[0.22em] text-brand">{s.role}</p>
                       <h3 className="mt-2 text-lg font-bold tracking-tight text-cream">{s.name}</h3>
-                      <p title={s.title} className="mt-2 min-h-0 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] leading-relaxed text-fog">{s.title}</p>
+                      <p title={s.title} className="mt-2 max-w-full break-words text-[13px] leading-relaxed text-fog">{s.title}</p>
                     </>
                   ) : (
                     <>
@@ -394,7 +394,7 @@ export default function CommunityDayPage() {
           <Reveal>
             <div className="relative overflow-hidden rounded-3xl border border-brand/30 bg-surface px-5 py-10 text-center sm:px-8 sm:py-12 md:px-12 md:py-16">
               <div className="bg-grid bg-grid-fade absolute inset-0" aria-hidden />
-              <div className="glow-brand absolute left-1/2 top-0 h-72 w-[28rem] max-w-none -translate-x-1/2 -translate-y-1/2 sm:w-[36rem]" aria-hidden />
+              <div className="glow-brand absolute left-1/2 top-0 h-72 w-[28rem] max-w-[100vw] -translate-x-1/2 -translate-y-1/2 sm:w-[36rem]" aria-hidden />
               <div className="relative">
                 <p className="text-sm font-semibold text-cream">
                   October 6–8 at SUIIT, free for students

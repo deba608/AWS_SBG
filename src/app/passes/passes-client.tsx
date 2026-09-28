@@ -151,13 +151,13 @@ export default function PassesClient() {
             ? "Pass already existed — showing your QR. Same QR works at gate."
             : "Entry pass ready. One-time use only — invalid after gate scan. Download image or take a screenshot."}
         </div>
-        <div className={`rank-card flex items-center gap-3 p-4 text-sm print:hidden ${emailSent ? "border-sky-400/30 bg-sky-400/10 text-sky-200" : "border-amber-400/30 bg-amber-400/10 text-amber-200"}`}>
+        <div className={`rank-card flex flex-wrap items-center gap-3 p-4 text-sm print:hidden ${emailSent ? "border-sky-400/30 bg-sky-400/10 text-sky-200" : "border-amber-400/30 bg-amber-400/10 text-amber-200"}`}>
           <Mail className="h-5 w-5 shrink-0" aria-hidden />
-          <div className="flex-1">
+          <div className="min-w-0 flex-1 basis-48">
             {emailSent ? (
-              <p>Pass emailed to <span className="font-semibold">{user.email}</span> — check inbox + spam.</p>
+              <p className="min-w-0 break-words [overflow-wrap:anywhere]">Pass emailed to <span className="font-semibold break-all">{user.email}</span> — check inbox + spam.</p>
             ) : (
-              <p>Mail not sent to <span className="font-semibold">{user.email}</span> yet — keep the downloaded image + screenshot.</p>
+              <p className="min-w-0 break-words [overflow-wrap:anywhere]">Mail not sent to <span className="font-semibold break-all">{user.email}</span> yet — keep the downloaded image + screenshot.</p>
             )}
           </div>
           {!emailSent ? (

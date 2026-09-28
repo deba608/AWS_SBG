@@ -190,12 +190,12 @@ export default function CommunityDayRegisterModal({
               Entry pass ready. One-time use only — invalid after gate scan.
               Download image or take a screenshot.
             </div>
-            <div className={`flex items-center gap-2.5 rounded-xl border p-3 text-sm ${emailSent ? "border-sky-400/30 bg-sky-400/10 text-sky-200" : "border-amber-400/30 bg-amber-400/10 text-amber-200"}`}>
-              <Mail className="h-5 w-5 shrink-0" aria-hidden />
+            <div className={`flex items-start gap-2.5 rounded-xl border p-3 text-sm ${emailSent ? "border-sky-400/30 bg-sky-400/10 text-sky-200" : "border-amber-400/30 bg-amber-400/10 text-amber-200"}`}>
+              <Mail className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
               {emailSent ? (
-                <p>Pass emailed to <span className="font-semibold">{email}</span> — check inbox + spam.</p>
+                <p className="min-w-0 break-words [overflow-wrap:anywhere]">Pass emailed to <span className="font-semibold break-all">{email}</span> — check inbox + spam.</p>
               ) : (
-                <p>Mail not sent to <span className="font-semibold">{email}</span> yet — keep the screenshot.</p>
+                <p className="min-w-0 break-words [overflow-wrap:anywhere]">Mail not sent to <span className="font-semibold break-all">{email}</span> yet — keep the screenshot.</p>
               )}
             </div>
             <div id="pass-print-area">

@@ -35,7 +35,7 @@ export default function JoinCTA() {
                   href={channel.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center py-1 underline decoration-line underline-offset-4 transition-colors hover:text-cream hover:decoration-brand"
+                  className="inline-flex min-h-[44px] items-center py-1 underline decoration-line underline-offset-4 transition-colors hover:text-cream hover:decoration-brand"
                 >
                   {channel.label}
                 </a>
@@ -45,7 +45,7 @@ export default function JoinCTA() {
             or reach out at{" "}
             <a
               href={SITE.links.email}
-              className="inline-flex items-center py-1 underline decoration-line underline-offset-4 break-all transition-colors hover:text-cream hover:decoration-brand"
+              className="inline-flex min-h-[44px] items-center py-1 underline decoration-line underline-offset-4 break-all transition-colors hover:text-cream hover:decoration-brand"
             >
               {SITE.email}
             </a>

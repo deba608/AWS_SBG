@@ -34,7 +34,7 @@ export default function EventGroup({
             parent.title
           )}
         </h3>
-        <p className="mt-1 text-sm text-fog">
+        <p className="mt-1 break-words text-sm text-fog">
           {parent.date} · {parent.location}
         </p>
         <ul className="mt-4 space-y-2 border-l-2 border-brand/50 pl-4">

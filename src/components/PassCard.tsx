@@ -61,7 +61,7 @@ export default function PassCard({
       <div className="relative">
         <div className="bg-grid bg-grid-fade absolute inset-0" aria-hidden />
         <div className="relative px-5 pt-5 sm:px-6">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -109,10 +109,10 @@ export default function PassCard({
               />
             </div>
             <div className="w-full min-w-0 text-center sm:text-left">
-              <p className="truncate text-xl font-bold tracking-tight text-cream">
+              <p className="truncate text-xl font-bold tracking-tight text-cream" title={name}>
                 {name}
               </p>
-              <p className="mt-1 truncate text-sm text-fog">{email}</p>
+              <p className="mt-1 truncate text-sm text-fog [overflow-wrap:anywhere]" title={email}>{email}</p>
               <p className="mt-0.5 truncate text-sm text-fog">{mobile}</p>
               <div className="mt-1.5 flex items-center justify-between gap-3">
                 <p className="font-mono text-xs tracking-wide text-faint">

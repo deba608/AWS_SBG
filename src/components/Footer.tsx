@@ -36,8 +36,8 @@ const communityLinks = [
 export default function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-line bg-coal">
-      <div className="glow-brand pointer-events-none absolute -top-32 left-1/2 h-64 w-[42rem] -translate-x-1/2" aria-hidden />
-      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-2 gap-x-6 gap-y-8 px-5 py-8 sm:gap-10 md:grid-cols-[1.4fr_1fr_1fr] md:px-8 md:py-16">
+      <div className="glow-brand pointer-events-none absolute -top-32 left-1/2 h-64 w-[42rem] max-w-[100vw] -translate-x-1/2" aria-hidden />
+      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-2 gap-x-6 gap-y-8 px-5 py-10 md:grid-cols-[1.4fr_1fr_1fr] md:px-8 md:py-16">
         <div className="col-span-2 min-w-0 md:col-span-1">
           <div className="flex min-h-[44px] items-center gap-3">
             <Logo />
@@ -62,7 +62,7 @@ export default function Footer() {
                 target={href.startsWith("mailto:") ? undefined : "_blank"}
                 rel={href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
                 aria-label={`${SITE.name} on ${label}`}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line text-fog transition-colors hover:border-brand/50 hover:text-cream md:h-11 md:w-11"
+                className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-line text-fog transition-colors hover:border-brand/50 hover:text-cream"
               >
                 <Icon className="h-4 w-4" aria-hidden />
               </a>
@@ -79,7 +79,7 @@ export default function Footer() {
               <li key={link.label}>
                 <Link
                   href={link.href}
-                  className="inline-flex min-h-[40px] items-center text-sm text-fog transition-colors hover:text-brand md:min-h-[44px]"
+                  className="inline-flex min-h-[44px] items-center text-sm text-fog transition-colors hover:text-brand"
                 >
                   {link.label}
                 </Link>
@@ -100,7 +100,7 @@ export default function Footer() {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-[40px] items-center gap-1 text-fog transition-colors hover:text-brand md:min-h-[44px]"
+                    className="inline-flex min-h-[44px] items-center gap-1 text-fog transition-colors hover:text-brand"
                   >
                     {link.label}
                     <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
@@ -110,7 +110,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className={`inline-flex min-h-[40px] items-center gap-1.5 transition-colors hover:text-brand md:min-h-[44px] ${
+                    className={`inline-flex min-h-[44px] items-center gap-1.5 transition-colors hover:text-brand ${
                       link.highlight ? "font-semibold text-brand" : "text-fog"
                     }`}
                   >
@@ -125,7 +125,7 @@ export default function Footer() {
             <li>
               <a
                 href={SITE.links.email}
-                className="inline-flex min-h-[40px] items-center text-fog transition-colors [overflow-wrap:anywhere] hover:text-brand md:min-h-[44px]"
+                className="inline-flex min-h-[44px] items-center text-fog transition-colors [overflow-wrap:anywhere] hover:text-brand"
               >
                 {SITE.email}
               </a>
@@ -134,7 +134,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="relative border-t border-line">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-4 text-xs text-faint md:px-8 md:py-5">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-1 px-5 py-4 text-center text-xs text-faint sm:flex-row sm:text-left md:px-8 md:py-5">
           <p>
             © 2026 AWS Student Builder Group,{" "}
             <span className="md:hidden">{SITE.collegeShortName}</span>
