@@ -105,14 +105,14 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
     defaultVenue: "Seminar Hall",
     schedule: [
       {
-        time: "9:30 – 10:30 AM",
+        time: "09:30 – 10:30 AM",
         title: "Tech Parliament",
         description: "",
         venue: "Seminar Hall",
         tag: "Debate",
       },
       {
-        time: "11:00 AM – 01:00 PM",
+        time: "11:00 – 01:00 PM",
         title: "Make-A-Bot Competition",
         description: "",
         venue: "Seminar Hall",
@@ -129,7 +129,7 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
     defaultVenue: "APJ Abdul Kalam Auditorium",
     schedule: [
       {
-        time: "10:00 AM – 12:00 PM",
+        time: "10:00 – 12:00 PM",
         title: "Speaker / Podcast Session",
         description: "Fireside chat and live podcast with AWS practitioners on engineering journeys and industry insights.",
         venue: "APJ Abdul Kalam Auditorium",
