@@ -11,12 +11,24 @@ import { SITE } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Events",
   description: `Workshops, tech talks, hackathons and build sessions by the ${SITE.name} at ${SITE.collegeName}.`,
+  alternates: { canonical: "/events" },
+  openGraph: {
+    url: "/events",
+    title: `Events · ${SITE.shortName}`,
+    description: `Hands-on workshops, talks from engineers, and hackathons — beginner-friendly and free for students.`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `Events · ${SITE.shortName}`,
+    description: `Hands-on workshops, talks from engineers, and hackathons — beginner-friendly and free for students.`,
+  },
 };
 
 export default function EventsPage() {
   return (
     <div className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
       <Container>
+        <h1 className="sr-only">Events by AWS Student Builder Group at SUIIT</h1>
         <SectionHeading
           eyebrow="Upcoming and past sessions"
           title="Learn by showing up."

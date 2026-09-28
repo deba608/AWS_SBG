@@ -117,7 +117,7 @@ export default function CommunityDayAgenda() {
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={p.photo}
-                                alt=""
+                                alt={p.name}
                                 width={28}
                                 height={28}
                                 loading="lazy"

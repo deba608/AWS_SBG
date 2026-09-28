@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
@@ -7,6 +8,22 @@ import HeroVisual from "@/components/HeroVisual";
 import JoinCTA from "@/components/JoinCTA";
 import { upcomingEvents } from "@/data/events";
 import { SITE } from "@/lib/constants";
+
+export const metadata: Metadata = {
+  title: "Build. Learn. Deploy. Together.",
+  description: SITE.description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    url: "/",
+    title: `${SITE.name} — ${SITE.collegeName}`,
+    description: SITE.description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE.name} — ${SITE.collegeName}`,
+    description: SITE.description,
+  },
+};
 
 const about = [
   {

@@ -1,11 +1,25 @@
 import type { Metadata } from "next";
 import PassesClient from "./passes-client";
 import RetrievePass from "@/components/RetrievePass";
+import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Get Event Entry Pass",
   description:
     "Register, get QR entry pass instantly + emailed copy. Single-use, scan at gate.",
+  alternates: { canonical: "/passes" },
+  openGraph: {
+    url: "/passes",
+    title: `Get Event Entry Pass · ${SITE.shortName}`,
+    description:
+      "Register once — QR entry pass generates instantly, shows here, and emails to you.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `Get Event Entry Pass · ${SITE.shortName}`,
+    description:
+      "Register once — QR entry pass generates instantly, shows here, and emails to you.",
+  },
 };
 
 export default function PassesPage() {

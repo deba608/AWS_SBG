@@ -10,6 +10,17 @@ import { SITE } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Team",
   description: `Meet the student builders running the ${SITE.name} at ${SITE.collegeName}.`,
+  alternates: { canonical: "/team" },
+  openGraph: {
+    url: "/team",
+    title: `Team · ${SITE.shortName}`,
+    description: `36 students across 12 domains — organizing workshops, mentoring newcomers and keeping the projects shipping.`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `Team · ${SITE.shortName}`,
+    description: `36 students across 12 domains — organizing workshops, mentoring newcomers and keeping the projects shipping.`,
+  },
 };
 
 function TeamSection({
@@ -56,6 +67,7 @@ export default function TeamPage() {
   return (
     <div className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
       <Container>
+        <h1 className="sr-only">Team — AWS Student Builder Group at SUIIT</h1>
         <SectionHeading
           eyebrow="AWS Student Builder Group Team 2025–26"
           title="Meet the builders behind the community."

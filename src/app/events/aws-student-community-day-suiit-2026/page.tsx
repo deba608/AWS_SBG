@@ -38,11 +38,33 @@ export const metadata: Metadata = {
   title: "AWS Student Community Day SUIIT 2026 — Oct 6–8",
   description:
     "Free flagship meetup Oct 6–8 at SUIIT: Cloud, AI/GenAI + DevOps, hands-on labs, lunch + certificate. Free entry with QR pass.",
+  alternates: { canonical: "/events/aws-student-community-day-suiit-2026" },
+  keywords: [
+    "AWS Community Day",
+    "SUIIT",
+    "Sambalpur",
+    "cloud",
+    "AI",
+    "GenAI",
+    "DevOps",
+    "hackathon",
+    "student event",
+  ],
   openGraph: {
+    url: "/events/aws-student-community-day-suiit-2026",
+    siteName: SITE.shortName,
     title: "AWS Student Community Day SUIIT 2026 — Oct 6–8",
     description:
       "Cloud, AI/GenAI + DevOps with AWS pros. Free for students — lunch + certificate. APJ Abdul Kalam Auditorium, SUIIT.",
     type: "website",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "AWS Student Community Day SUIIT 2026" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AWS Student Community Day SUIIT 2026 — Oct 6–8",
+    description:
+      "Cloud, AI/GenAI + DevOps with AWS pros. Free for students — lunch + certificate.",
+    images: [`${SITE.url}/opengraph-image`],
   },
 };
 
@@ -98,11 +120,25 @@ export default function CommunityDayPage() {
       "Community-driven meetup: Cloud Computing, AI, Generative AI, DevOps and the AWS ecosystem at SUIIT.",
   };
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: COMMUNITY_DAY_FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
       {/* HERO */}
