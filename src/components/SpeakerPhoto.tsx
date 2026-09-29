@@ -19,6 +19,8 @@ export default function SpeakerPhoto({ src, name }: { src: string; name: string 
       alt={name}
       width={144}
       height={144}
+      loading="lazy"
+      decoding="async"
       onError={() => setFailed(true)}
       className="h-36 w-36 rounded-3xl border border-line object-cover shadow-[0_16px_48px_rgba(0,0,0,0.5)] ring-1 ring-brand/25"
     />

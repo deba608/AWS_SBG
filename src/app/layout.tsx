@@ -21,6 +21,7 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
+  applicationName: SITE.shortName,
   title: {
     default: `${SITE.name} — ${SITE.collegeName}`,
     template: `%s · ${SITE.shortName}`,
@@ -40,9 +41,11 @@ export const metadata: Metadata = {
     "hackathons",
     "Community Day SUIIT 2026",
   ],
-  authors: [{ name: SITE.name }],
+  authors: [{ name: SITE.name, url: SITE.url }],
   creator: SITE.name,
   publisher: SITE.name,
+  category: "technology",
+  formatDetection: { email: false, address: false, telephone: false },
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
@@ -59,15 +62,24 @@ export const metadata: Metadata = {
     description: SITE.description,
     images: [`${SITE.url}/opengraph-image`],
   },
-  robots: { index: true, follow: true },
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
+  // Icons come from file conventions: favicon.ico, icon*.png/svg, apple-icon.png.
 };
 
 export const viewport: Viewport = {
   themeColor: "#0b0e11",
+  colorScheme: "dark",
+  viewportFit: "cover",
   width: "device-width",
   initialScale: 1,
 };
@@ -79,7 +91,15 @@ const orgJsonLd = {
   alternateName: SITE.shortName,
   url: SITE.url,
   logo: `${SITE.url}/logo.png`,
+  description: SITE.description,
   email: SITE.email,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Jyoti Vihar, Burla",
+    addressLocality: "Sambalpur",
+    addressRegion: "Odisha",
+    addressCountry: "IN",
+  },
   sameAs: [SITE.links.linkedin, SITE.links.instagram, SITE.links.whatsapp],
 };
 
@@ -87,7 +107,9 @@ const siteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: SITE.shortName,
+  alternateName: SITE.name,
   url: SITE.url,
+  publisher: { "@type": "Organization", name: SITE.name },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -11,17 +11,20 @@ import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Build. Learn. Deploy. Together.",
-  description: SITE.description,
+  description:
+    "AWS Student Builder Group at SUIIT, Sambalpur: hands-on cloud, AI/GenAI and DevOps workshops, hackathons and Community Day 2026. Free for students.",
   alternates: { canonical: "/" },
   openGraph: {
     url: "/",
     title: `${SITE.name} — ${SITE.collegeName}`,
-    description: SITE.description,
+    description:
+      "Student-led AWS cloud community at SUIIT: workshops, hackathons and Community Day SUIIT 2026. Free, beginner-friendly.",
   },
   twitter: {
     card: "summary_large_image",
     title: `${SITE.name} — ${SITE.collegeName}`,
-    description: SITE.description,
+    description:
+      "Student-led AWS cloud community at SUIIT: workshops, hackathons and Community Day SUIIT 2026.",
   },
 };
 
