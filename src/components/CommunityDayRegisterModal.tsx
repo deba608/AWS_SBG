@@ -245,7 +245,6 @@ export default function CommunityDayRegisterModal({
             ) : null}
 
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-faint">
-              {"// your details"}
             </p>
             <div>
               <label htmlFor="scd-name" className="mb-1.5 block text-sm font-medium text-cream">
@@ -342,7 +341,6 @@ export default function CommunityDayRegisterModal({
               ) : null}
             </div>
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-faint">
-              {"// preferences"}
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
