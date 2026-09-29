@@ -73,7 +73,19 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  // Icons come from file conventions: favicon.ico, icon*.png/svg, apple-icon.png.
+  // Stable icon URLs (public/) so search-engine favicon crawlers see
+  // fixed paths. File-convention icons (app/favicon.ico, icon*, apple-icon.png)
+  // still emit hashed links for browsers.
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+      { url: "/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/web-app-manifest-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/web-app-manifest-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon.ico",
+  },
 };
 
 export const viewport: Viewport = {
