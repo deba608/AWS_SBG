@@ -19,7 +19,7 @@
 ## 1. Goal & Non-Goals
 
 **Goal:** Ship a student-registration funnel for Community Day on the existing Next.js site:
-Discover (Home + `/events`) → Details (`/events/aws-student-community-day-suiit-2026`) → Register on Meetup (external, new tab) → Know what to bring / where to go.
+Discover (Home + `/events`) → Details (`/events/awsscd26`) → Register on Meetup (external, new tab) → Know what to bring / where to go.
 
 **Non-goals (v1):**
 - No custom form / DB / auth / ticket QR — Meetup handles RSVP + headcount.
@@ -49,18 +49,18 @@ Discover (Home + `/events`) → Details (`/events/aws-student-community-day-suii
 |---|---|
 | `/` Home hero | Add `Badge`: `Oct 3 · SUIIT · Free` + secondary CTA `Register for Community Day →` linking to detail page. Featured events section: pin Community Day as first card (`upcomingEvents[0]`). |
 | `/events` | Featured banner at top (Community Day spotlight) + existing `EventsExplorer` grid. Community Day card gets `status: "filling-fast"` + `registerUrl = SITE.links.eventCommunityDay`. |
-| `/events/aws-student-community-day-suiit-2026` **(new)** | Full detail page: hero + countdown + stats + about + agenda + speakers + perks + venue + FAQ + final CTA + related events. `metadata` with OpenGraph. |
+| `/events/awsscd26` **(new)** | Full detail page: hero + countdown + stats + about + agenda + speakers + perks + venue + FAQ + final CTA + related events. `metadata` with OpenGraph. |
 | `Navbar` | Optional: add `Community Day` pill/badge link to detail page during Sep–Oct; remove after event → move to past events. |
 | `/events` past section (post-event) | After Oct 3: move Community Day to `pastEvents` with recap + photos link. |
 
-Route slug: `aws-student-community-day-suiit-2026` — matches Meetup title, SEO-friendly, future-proof for 2027 edition.
+Route slug: `awsscd26` — short canonical `/events/awsscd26`.
 
 ## 4. Data Model Changes
 
 `src/data/events.ts`:
 ```ts
 export const communityDay = {
-  id: "aws-student-community-day-suiit-2026",
+  id: "awsscd26",
   title: "AWS Student Community Day SUIIT 2026",
   category: "Community Day", // extend EventCategory union
   date: "3 October 2026",
@@ -78,7 +78,7 @@ export const communityDay = {
 
 `src/lib/constants.ts`: add `eventCommunityDay`, real `instagram`, `collegeName: "Sambalpur University Institute of Information Technology (SUIIT)"` if approved to de-placeholder.
 
-## 5. Detail Page Sections (`/events/aws-student-community-day-suiit-2026/page.tsx`)
+## 5. Detail Page Sections (`/events/awsscd26/page.tsx`)
 
 Reuse: `Container`, `SectionHeading`, `Badge`, `Button`, `Reveal`, `EventCard`, `StatsSection` patterns, `HeroVisual` / `bg-grid + glow-brand`. No new deps.
 
@@ -115,7 +115,7 @@ Each phase ends with `npm run build` green before proceeding.
 ## 8. Acceptance Checklist
 
 - [ ] Meetup URL lives in exactly one place (`SITE.links.eventCommunityDay`), all Register buttons use it + `utm_*`
-- [ ] `/events/aws-student-community-day-suiit-2026` renders: hero, countdown, agenda, speakers (TBA ok), perks, venue, FAQ, final CTA
+- [ ] `/events/awsscd26` renders: hero, countdown, agenda, speakers (TBA ok), perks, venue, FAQ, final CTA
 - [ ] Home + `/events` surface Community Day above the fold with correct date/venue/status
 - [ ] No invented speaker names, dates, or venue details beyond Meetup copy; TBA where unknown
 - [ ] `npm run build` passes, no TS/ESLint errors; responsive, no horizontal scroll; one h1, focus rings, reduced-motion honored
@@ -126,5 +126,5 @@ Each phase ends with `npm run build` green before proceeding.
 1. Final agenda timings + speaker names/photos/roles? (currently TBA)
 2. Is non-SUIIT / outsider entry allowed? On-spot registration or RSVP-only?
 3. RSVP cap on Meetup (300?) + waitlist policy?
-4. Contact info: `awssbg@suiit.ac.in` and WhatsApp channel confirmed; event website canonical: `/events/aws-student-community-day-suiit-2026`.
+4. Contact info: `awssbg@suiit.ac.in` and WhatsApp channel confirmed; event website canonical: `/events/awsscd26`.
 5. Approve replacing `[COLLEGE NAME]` placeholder with SUIIT publicly? (Resolved: SUIIT is active).

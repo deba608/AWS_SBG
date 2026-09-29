@@ -11,7 +11,7 @@ name, email, mobile — but `onSubmit` only writes to the visitor's **own
 data.** That defeats the purpose of the form and adds friction for zero benefit.
 
 Also broken right now (fix first, 5 min):
-- `src/app/events/aws-student-community-day-suiit-2026/page.tsx` uses `SITE`
+- `src/app/events/awsscd26/page.tsx` uses `SITE`
   (JSON-LD line ~95, RSVP links) but has **no `import { SITE }`** — `tsc` fails.
 - No validation (any string passes mobile), no consent text, no fallback if the
   popup is blocked, no "skip" path.
