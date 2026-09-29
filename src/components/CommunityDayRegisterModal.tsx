@@ -382,10 +382,6 @@ export default function CommunityDayRegisterModal({
                   </>
                 )}
               </button>
-              <p className="flex items-center justify-center gap-1.5 text-center text-xs text-faint">
-                <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-300" aria-hidden />
-                Free entry · One pass per student · Screenshot works as backup
-              </p>
               <div>
                 <button
                   type="button"
