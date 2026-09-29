@@ -2,7 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function Modal({
   open,
@@ -28,11 +29,16 @@ export default function Modal({
     };
   }, [open, onClose]);
 
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const dialog = (
     <AnimatePresence>
       {open ? (
         <motion.div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:pb-4"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:pb-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -48,10 +54,10 @@ export default function Modal({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="rank-panel max-h-[90dvh] w-full max-w-md overflow-y-auto p-5 sm:p-6"
+            className="rank-panel mx-auto max-h-[90dvh] w-full max-w-md overflow-y-auto overscroll-contain p-5 sm:p-6"
           >
             <div className="mb-4 flex items-start justify-between gap-4">
-              <h3 className="text-xl font-bold text-cream">{title}</h3>
+              <h3 className="pt-2 text-xl font-bold text-cream">{title}</h3>
               <button
                 type="button"
                 onClick={onClose}
@@ -67,4 +73,9 @@ export default function Modal({
       ) : null}
     </AnimatePresence>
   );
+
+  // Portal to body: ancestor backdrop-blur / transforms otherwise
+  // become the containing block for `fixed` and offset the dialog.
+  if (!mounted || typeof document === "undefined") return null;
+  return createPortal(dialog, document.body);
 }
