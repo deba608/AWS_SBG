@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Loader2, Mail } from "lucide-react";
+import { ArrowRight, Hash, Loader2, Mail, Phone, ShieldCheck, User, Zap } from "lucide-react";
 import Modal from "@/components/Modal";
 import PassCard from "@/components/PassCard";
 import {
@@ -28,9 +28,12 @@ interface IssuedPass {
 }
 
 const inputClasses = (invalid: boolean) =>
-  `w-full min-h-[44px] rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm ${
+  `w-full min-h-[44px] rounded-xl border bg-ink/60 py-3 pl-10 pr-3 text-base text-cream transition-colors placeholder:text-faint/50 hover:border-faint focus:border-brand/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm ${
     invalid ? "border-red-400/70" : "border-line"
   }`;
+
+const iconClasses =
+  "pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-faint";
 
 export default function CommunityDayRegisterModal({
   className,
@@ -186,9 +189,16 @@ export default function CommunityDayRegisterModal({
       <Modal open={open} onClose={close} title="Register for Community Day">
         {status === "done" && pass ? (
           <div className="space-y-4">
-            <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-200">
-              Entry pass ready. One-time use only — invalid after gate scan.
-              Download image or take a screenshot.
+            <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-4 text-center">
+              <span className="animate-check-pop mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-green-500/20">
+                <svg viewBox="0 0 24 24" className="h-5 w-5 text-green-300" fill="none" stroke="currentColor" strokeWidth={3} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+              <p className="mt-2 text-base font-bold text-cream">You&apos;re in, {passUser.name.split(" ")[0]}!</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-green-200/80">
+                Entry pass ready · one-time use, invalid after gate scan.
+              </p>
             </div>
             <div className={`flex items-start gap-2.5 rounded-xl border p-3 text-sm ${emailSent ? "border-sky-400/30 bg-sky-400/10 text-sky-200" : "border-amber-400/30 bg-amber-400/10 text-amber-200"}`}>
               <Mail className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
@@ -228,30 +238,50 @@ export default function CommunityDayRegisterModal({
             }}
             className="space-y-4"
           >
-            <p className="text-sm leading-relaxed text-fog">
-              Enter details — your QR entry pass generates instantly, shows
-              here, and emails to you.
+            <p className="flex items-center gap-2 text-sm leading-relaxed text-fog">
+              <Zap className="h-4 w-4 shrink-0 text-brand" aria-hidden />
+              30-sec form — your QR entry pass generates instantly + emails to you.
             </p>
             {slots && !slots.open ? (
               <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
-                Registrations full.
+                Registrations full — retrieve your pass below if already registered.
               </p>
             ) : null}
+            {slots?.open ? (
+              <div aria-label={`${slots.registered} of ${slots.limit} passes claimed`}>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-cream">{slots.limit - slots.registered} passes left</span>
+                  <span className="font-mono text-faint">{slots.registered}/{slots.limit} claimed</span>
+                </div>
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-black/40">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-brand to-purple-400"
+                    style={{ width: `${Math.min(100, Math.round((slots.registered / slots.limit) * 100))}%` }}
+                  />
+                </div>
+              </div>
+            ) : null}
 
+            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-faint">
+              {"// your details"}
+            </p>
             <div>
               <label htmlFor="scd-name" className="mb-1.5 block text-sm font-medium text-cream">
                 Full name *
               </label>
-              <input
-                id="scd-name"
-                autoComplete="name"
-                maxLength={60}
-                placeholder="Debashish Pradhan"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                aria-invalid={Boolean(errors.fullName)}
-                className={inputClasses(Boolean(errors.fullName))}
-              />
+              <div className="relative">
+                <User className={iconClasses} aria-hidden />
+                <input
+                  id="scd-name"
+                  autoComplete="name"
+                  maxLength={60}
+                  placeholder="Debashish Pradhan"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  aria-invalid={Boolean(errors.fullName)}
+                  className={inputClasses(Boolean(errors.fullName))}
+                />
+              </div>
               {errors.fullName ? (
                 <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.fullName}</p>
               ) : null}
@@ -260,60 +290,78 @@ export default function CommunityDayRegisterModal({
               <label htmlFor="scd-roll" className="mb-1.5 block text-sm font-medium text-cream">
                 Roll number *
               </label>
-              <input
-                id="scd-roll"
-                autoComplete="off"
-                maxLength={20}
-                placeholder="24BTCSE26"
-                value={rollNo}
-                onChange={(e) => setRollNo(e.target.value)}
-                aria-invalid={Boolean(errors.rollNo)}
-                className={cn(inputClasses(Boolean(errors.rollNo)), "uppercase")}
-              />
+              <div className="relative">
+                <Hash className={iconClasses} aria-hidden />
+                <input
+                  id="scd-roll"
+                  autoComplete="off"
+                  maxLength={20}
+                  placeholder="24BTCSE26"
+                  value={rollNo}
+                  onChange={(e) => setRollNo(e.target.value)}
+                  aria-invalid={Boolean(errors.rollNo)}
+                  aria-describedby="scd-roll-hint"
+                  className={cn(inputClasses(Boolean(errors.rollNo)), "uppercase")}
+                />
+              </div>
               {errors.rollNo ? (
                 <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.rollNo}</p>
-              ) : null}
+              ) : (
+                <p id="scd-roll-hint" className="mt-1.5 text-xs text-faint">As on your ID card.</p>
+              )}
             </div>
             <div>
               <label htmlFor="scd-email" className="mb-1.5 block text-sm font-medium text-cream">
                 College mail *
               </label>
-              <input
-                id="scd-email"
-                type="email"
-                autoComplete="email"
-                maxLength={100}
-                inputMode="email"
-                placeholder="24btcse26@suiit.ac.in"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                aria-invalid={Boolean(errors.email)}
-                className={inputClasses(Boolean(errors.email))}
-              />
+              <div className="relative">
+                <Mail className={iconClasses} aria-hidden />
+                <input
+                  id="scd-email"
+                  type="email"
+                  autoComplete="email"
+                  maxLength={100}
+                  inputMode="email"
+                  placeholder="24btcse26@suiit.ac.in"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby="scd-email-hint"
+                  className={inputClasses(Boolean(errors.email))}
+                />
+              </div>
               {errors.email ? (
                 <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.email}</p>
-              ) : null}
+              ) : (
+                <p id="scd-email-hint" className="mt-1.5 text-xs text-faint">Must end with @suiit.ac.in — pass emails here.</p>
+              )}
             </div>
             <div>
               <label htmlFor="scd-mobile" className="mb-1.5 block text-sm font-medium text-cream">
                 Mobile number *
               </label>
-              <input
-                id="scd-mobile"
-                type="tel"
-                autoComplete="tel-national"
-                inputMode="numeric"
-                maxLength={13}
-                placeholder="9437512345"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                aria-invalid={Boolean(errors.mobile)}
-                className={inputClasses(Boolean(errors.mobile))}
-              />
+              <div className="relative">
+                <Phone className={iconClasses} aria-hidden />
+                <input
+                  id="scd-mobile"
+                  type="tel"
+                  autoComplete="tel-national"
+                  inputMode="numeric"
+                  maxLength={13}
+                  placeholder="9437512345"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
+                  aria-invalid={Boolean(errors.mobile)}
+                  className={inputClasses(Boolean(errors.mobile))}
+                />
+              </div>
               {errors.mobile ? (
                 <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.mobile}</p>
               ) : null}
             </div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-faint">
+              {"// preferences"}
+            </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <GenderSelect
@@ -340,7 +388,7 @@ export default function CommunityDayRegisterModal({
               <button
                 type="submit"
                 disabled={status === "submitting" || (slots !== null && !slots.open)}
-                className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-brandhover disabled:opacity-70"
+                className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-purple-500 px-6 py-3.5 text-[15px] font-bold text-white shadow-[0_4px_24px_rgba(173,92,255,0.4)] transition-all hover:shadow-[0_4px_32px_rgba(173,92,255,0.55)] disabled:opacity-70"
               >
                 {status === "submitting" ? (
                   <>
@@ -354,6 +402,10 @@ export default function CommunityDayRegisterModal({
                   </>
                 )}
               </button>
+              <p className="flex items-center justify-center gap-1.5 text-center text-xs text-faint">
+                <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-300" aria-hidden />
+                Free entry · One pass per student · Screenshot works as backup
+              </p>
               <div>
                 <button
                   type="button"

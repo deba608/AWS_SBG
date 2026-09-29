@@ -36,7 +36,7 @@ export default function FoodSelect({
               aria-checked={active}
               onClick={() => onChange(f)}
               className={cn(
-                "flex min-h-[44px] items-center justify-center gap-2 rounded-xl border px-3 text-sm font-semibold transition-all duration-200",
+                "flex min-h-[44px] items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border px-2 text-[13px] font-semibold transition-all duration-200 sm:text-sm",
                 active
                   ? veg
                     ? "border-emerald-400/60 bg-emerald-400/10 text-cream shadow-[0_0_20px_rgba(52,211,153,0.18)]"
