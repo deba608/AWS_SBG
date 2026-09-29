@@ -302,7 +302,7 @@ export default function Navbar() {
                   className="mt-4 space-y-3 border-t border-white/[0.06] pt-4"
                 >
                   <Link
-                    href="/events/aws-student-community-day-suiit-2026"
+                    href="/events/awsscd26"
                     onClick={close}
                     className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-brand/10 to-purple-500/5 px-4 py-3 text-sm font-medium text-cream shadow-[inset_0_0_0_1px_rgba(173,92,255,0.15)] transition-all hover:from-brand/15 hover:to-purple-500/10"
                   >

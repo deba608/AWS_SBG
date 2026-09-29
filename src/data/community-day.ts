@@ -1,4 +1,4 @@
-export const COMMUNITY_DAY_SLUG = "aws-student-community-day-suiit-2026";
+export const COMMUNITY_DAY_SLUG = "awsscd26";
 
 export const COMMUNITY_DAY_META = {
   title: "AWS Student Community Day SUIIT 2026",

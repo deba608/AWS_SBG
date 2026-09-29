@@ -52,7 +52,7 @@ export function filterEvents(events: EventItem[], filter: EventFilter) {
 }
 
 export const communityDay: EventItem = {
-  id: "aws-student-community-day-suiit-2026",
+  id: "awsscd26",
   title: "AWS Student Community Day SUIIT 2026",
   category: "Community Day",
   date: "6–8 October 2026",
@@ -62,12 +62,12 @@ export const communityDay: EventItem = {
     "Flagship 3-day gathering: DecodeX Hackathon, Tech Parliament, Make-A-Bot, Speaker & Podcast session, networking, lunch and certificates. Free for students.",
   status: "filling-fast",
   registerUrl: "/passes",
-  detailsUrl: "/events/aws-student-community-day-suiit-2026",
+  detailsUrl: "/events/awsscd26",
 };
 
 export const decodeXHackathon: EventItem = {
   id: "decodex-hackathon-2026",
-  parentId: "aws-student-community-day-suiit-2026",
+  parentId: "awsscd26",
   title: "DecodeX Hackathon (Day 1)",
   category: "Hackathon",
   date: "6 October 2026",
@@ -77,12 +77,12 @@ export const decodeXHackathon: EventItem = {
     "Community Day flagship hackathon: Problem statement submission, Phase I & II sprints, mentor guidance, and jury evaluation on AWS.",
   status: "open",
   registerUrl: "/passes",
-  detailsUrl: "/events/aws-student-community-day-suiit-2026",
+  detailsUrl: "/events/awsscd26",
 };
 
 export const techparlament: EventItem = {
   id: "techparlament-2026",
-  parentId: "aws-student-community-day-suiit-2026",
+  parentId: "awsscd26",
   title: "Tech Parliament (Day 2)",
   category: "Tech Talk",
   date: "7 October 2026",
@@ -92,12 +92,12 @@ export const techparlament: EventItem = {
     "",
   status: "open",
   registerUrl: "/passes",
-  detailsUrl: "/events/aws-student-community-day-suiit-2026",
+  detailsUrl: "/events/awsscd26",
 };
 
 export const makeABot: EventItem = {
   id: "make-a-bot-competition",
-  parentId: "aws-student-community-day-suiit-2026",
+  parentId: "awsscd26",
   title: "Make-A-Bot Competition (Day 2)",
   category: "Build Session",
   date: "7 October 2026",
@@ -107,12 +107,12 @@ export const makeABot: EventItem = {
     "",
   status: "open",
   registerUrl: "/passes",
-  detailsUrl: "/events/aws-student-community-day-suiit-2026",
+  detailsUrl: "/events/awsscd26",
 };
 
 export const speakerPodcast: EventItem = {
   id: "speaker-podcast-session",
-  parentId: "aws-student-community-day-suiit-2026",
+  parentId: "awsscd26",
   title: "Speaker & Podcast Session (Day 3)",
   category: "Podcast",
   date: "8 October 2026",
@@ -122,12 +122,12 @@ export const speakerPodcast: EventItem = {
     "Keynote fireside chat and live podcast session with AWS professionals and industry leaders, followed by prize distribution and community lunch.",
   status: "open",
   registerUrl: "/passes",
-  detailsUrl: "/events/aws-student-community-day-suiit-2026",
+  detailsUrl: "/events/awsscd26",
 };
 
 export const standupComedy: EventItem = {
   id: "standup-comedy-day-3",
-  parentId: "aws-student-community-day-suiit-2026",
+  parentId: "awsscd26",
   title: "Standup Comedy (Day 3)",
   category: "Comedy",
   date: "8 October 2026",
@@ -137,7 +137,7 @@ export const standupComedy: EventItem = {
     "Closing laughter riot with comedians Bishal Mohanty and Riten Pattnaik.",
   status: "open",
   registerUrl: "/passes",
-  detailsUrl: "/events/aws-student-community-day-suiit-2026",
+  detailsUrl: "/events/awsscd26",
 };
 
 export const upcomingEvents: EventItem[] = [

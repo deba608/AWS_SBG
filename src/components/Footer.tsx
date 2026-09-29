@@ -19,7 +19,7 @@ const socials = [
 const communityLinks = [
   {
     label: "Community Day — Oct 6–8",
-    href: "/events/aws-student-community-day-suiit-2026",
+    href: "/events/awsscd26",
     external: false,
     highlight: true,
   },

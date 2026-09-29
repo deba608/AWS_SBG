@@ -75,7 +75,7 @@ export default function EventsPage() {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
               <CommunityDayRegisterModal />
               <Button
-                href="/events/aws-student-community-day-suiit-2026"
+                href="/events/awsscd26"
                 variant="secondary"
               >
                 View details

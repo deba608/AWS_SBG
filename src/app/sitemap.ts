@@ -11,7 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: `${base}/events/aws-student-community-day-suiit-2026`,
+      url: `${base}/events/awsscd26`,
       lastModified: new Date("2026-09-07"),
       changeFrequency: "daily",
       priority: 0.9,

@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { ConflictError, getUserById, updateUser } from "@/lib/pass-store";
+import {
+  ConflictError,
+  deleteUser,
+  getUserById,
+  issuePasses,
+  RegistrationsClosedError,
+  RegistrationsFullError,
+  updateUser,
+} from "@/lib/pass-store";
 import {
   collapseSpaces,
+  normalizeRegistration,
   validateRegistration,
 } from "@/lib/validate-contact";
 
@@ -55,5 +64,65 @@ export async function PATCH(req: Request) {
     }
     console.error("[admin/users]", err);
     return NextResponse.json({ error: "Update failed. Retry." }, { status: 500 });
+  }
+}
+
+/** Admin walk-in: POST { fullName, rollNo, email, mobile, gender, food } → issues pass. Duplicate-checked. */
+export async function POST(req: Request) {
+  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
+  }
+  const b = body as Record<string, unknown>;
+  const input = {
+    fullName: String(b.fullName ?? ""),
+    rollNo: String(b.rollNo ?? ""),
+    email: String(b.email ?? ""),
+    mobile: String(b.mobile ?? ""),
+    gender: String(b.gender ?? ""),
+    food: String(b.food ?? ""),
+  };
+  const errors = validateRegistration(input);
+  if (Object.keys(errors).length > 0) {
+    return NextResponse.json({ error: "Validation failed.", errors }, { status: 400 });
+  }
+  try {
+    const { user } = await issuePasses(normalizeRegistration(input));
+    return NextResponse.json({ user }, { status: 201 });
+  } catch (err) {
+    if (err instanceof ConflictError) {
+      return NextResponse.json({ error: err.message }, { status: 409 });
+    }
+    if (err instanceof RegistrationsFullError || err instanceof RegistrationsClosedError) {
+      return NextResponse.json({ error: err.message }, { status: 403 });
+    }
+    console.error("[admin/users POST]", err);
+    return NextResponse.json({ error: "Create failed. Retry." }, { status: 500 });
+  }
+}
+
+/** Delete one registration: DELETE { userId } → removes user + passes. */
+export async function DELETE(req: Request) {
+  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
+  }
+  const userId = String((body as Record<string, unknown>).userId ?? "");
+  if (!userId) return NextResponse.json({ error: "userId required." }, { status: 400 });
+  try {
+    const result = await deleteUser(userId);
+    return NextResponse.json({ ok: true, ...result });
+  } catch (err) {
+    if (err instanceof Error && err.message === "User not found.") {
+      return NextResponse.json({ error: "User not found." }, { status: 404 });
+    }
+    console.error("[admin/users DELETE]", err);
+    return NextResponse.json({ error: "Delete failed. Retry." }, { status: 500 });
   }
 }

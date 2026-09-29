@@ -267,6 +267,23 @@ export async function getUserById(userId: string): Promise<StoredUser | null> {
   return user ? { ...user } : null;
 }
 
+/**
+ * Deletes one registration: user + all their passes.
+ * Freed serial gets reused by the next registration (lowest-gap fill).
+ */
+export async function deleteUser(userId: string): Promise<{ removedPasses: number }> {
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const user = store.users.find((u) => u.id === userId);
+    if (!user) throw new Error("User not found.");
+    const removedPasses = store.passes.filter((p) => p.userId === userId).length;
+    store.users = store.users.filter((u) => u.id !== userId);
+    store.passes = store.passes.filter((p) => p.userId !== userId);
+    await writeStore(store);
+    return { removedPasses };
+  });
+}
+
 /** Patch editable user fields. Uniqueness re-checked. Returns updated user. */export async function updateUser(
   userId: string,
   patch: { name?: string; rollNo?: string; email?: string; mobile?: string; gender?: Gender; food?: FoodPref },
@@ -327,10 +344,15 @@ export async function issuePasses(input: {
 
   const now = new Date().toISOString();
   ensureSerials(store);
-  store.seq += 1;
+  // Fill lowest free serial first (deleted trial entries get reused),
+  // else append after the max. Keeps serials gap-free.
+  const taken = new Set(store.users.map((u) => u.serial));
+  let n = 1;
+  while (taken.has(formatSerial(n))) n += 1;
+  store.seq = Math.max(store.seq, n);
   const user: StoredUser = {
     id: `u_${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`,
-    serial: formatSerial(store.seq),
+    serial: formatSerial(n),
     name: input.name,
     rollNo,
     email,

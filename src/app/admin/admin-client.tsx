@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useState, type ReactNode } from "react";
-import { ChevronDown, Download, Loader2, LogOut, Printer, RotateCw, Search } from "lucide-react";
+import { ChevronDown, Download, Loader2, LogOut, Printer, RotateCw, Search, Trash2, UserPlus } from "lucide-react";
 import AdminLogin from "@/components/AdminLogin";
+import FoodSelect from "@/components/FoodSelect";
+import GenderSelect from "@/components/GenderSelect";
 import { cn } from "@/lib/utils";
 
 interface Stats {
@@ -103,6 +105,12 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
   const [dangerText, setDangerText] = useState("");
   const [deletingAll, setDeletingAll] = useState(false);
   const [dangerMsg, setDangerMsg] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
+  const [newForm, setNewForm] = useState({ name: "", email: "", mobile: "", rollNo: "", gender: "", food: "" });
+  const [addErr, setAddErr] = useState("");
+  const [savingAdd, setSavingAdd] = useState(false);
+  const [addMsg, setAddMsg] = useState("");
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   const check = useCallback(async () => {
     try {
@@ -285,6 +293,58 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
     }
   }
 
+  async function saveNew() {
+    setSavingAdd(true);
+    setAddErr("");
+    setAddMsg("");
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: newForm.name,
+          email: newForm.email,
+          mobile: newForm.mobile,
+          rollNo: newForm.rollNo,
+          gender: newForm.gender,
+          food: newForm.food,
+        }),
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        const fieldErr = d.errors ? Object.values(d.errors as Record<string, string>).join(" ") : "";
+        throw new Error(fieldErr || d.error || "Create failed.");
+      }
+      setAddMsg(`Added ${d.user.name} · serial ${d.user.serial}.`);
+      setNewForm({ name: "", email: "", mobile: "", rollNo: "", gender: "", food: "" });
+      await load();
+    } catch (err) {
+      setAddErr(err instanceof Error ? err.message : "Create failed.");
+    } finally {
+      setSavingAdd(false);
+    }
+  }
+
+  async function removeUser(userId: string, name: string) {
+    if (!window.confirm(`Delete registration for ${name}? Their pass stops working. Cannot undo.`)) return;
+    setDeletingUserId(userId);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error ?? "Delete failed.");
+      setOpenToken(null);
+      await load();
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Delete failed.");
+    } finally {
+      setDeletingUserId(null);
+    }
+  }
+
   if (authed === null) {
     return (
       <div className="rank-card flex items-center gap-3 p-6 text-sm text-fog">
@@ -457,6 +517,64 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
           </details>
         </div>
       ) : null}
+
+      <Section label="Manage registrations">
+        <div className="rank-card p-4 sm:p-5 print:hidden">
+          <button
+            type="button"
+            onClick={() => { setAddOpen((v) => !v); setAddErr(""); setAddMsg(""); }}
+            aria-expanded={addOpen}
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-black hover:bg-brandhover"
+          >
+            <UserPlus className="h-4 w-4" aria-hidden />
+            {addOpen ? "Close add form" : "Add registration (walk-in)"}
+          </button>
+          {addOpen ? (
+            <div className="mt-4 space-y-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {(
+                  [
+                    ["name", "Full name *", "Debashish Pradhan"],
+                    ["rollNo", "Roll no *", "24BTCSE26"],
+                    ["email", "College mail *", "24btcse26@suiit.ac.in"],
+                    ["mobile", "Mobile *", "9437512345"],
+                  ] as const
+                ).map(([k, label, ph]) => (
+                  <label key={k} className="block text-xs text-faint">
+                    {label}
+                    <input
+                      value={newForm[k]}
+                      onChange={(e) => setNewForm((f) => ({ ...f, [k]: e.target.value }))}
+                      placeholder={ph}
+                      autoComplete="off"
+                      className="mt-1 w-full min-h-[44px] rounded-xl border border-line bg-surface px-3 py-2 text-sm text-cream placeholder:text-faint focus:ring-2 focus:ring-brand"
+                    />
+                  </label>
+                ))}
+                <GenderSelect
+                  value={newForm.gender}
+                  onChange={(g) => setNewForm((f) => ({ ...f, gender: g }))}
+                />
+                <FoodSelect
+                  value={newForm.food}
+                  onChange={(f) => setNewForm((s) => ({ ...s, food: f }))}
+                  labelId="admin-add-food"
+                />
+              </div>
+              {addErr ? <p role="alert" className="text-xs text-red-300">{addErr}</p> : null}
+              {addMsg ? <p role="status" className="text-xs text-green-300">{addMsg}</p> : null}
+              <button
+                type="button"
+                disabled={savingAdd}
+                onClick={() => void saveNew()}
+                className="inline-flex min-h-[44px] items-center rounded-full bg-brand px-5 py-2 text-sm font-semibold text-black hover:bg-brandhover disabled:opacity-60"
+              >
+                {savingAdd ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : "Issue pass"}
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </Section>
 
       {stats ? (
       <Section label="Gate live">
@@ -695,13 +813,28 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
                             </div>
                           </div>
                         ) : (
-                          <button
-                            type="button"
-                            onClick={() => startEdit(r)}
-                            className="inline-flex min-h-[44px] items-center rounded-full border border-line px-4 py-2 text-xs font-semibold text-fog hover:text-cream"
-                          >
-                            Modify details
-                          </button>
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => startEdit(r)}
+                              className="inline-flex min-h-[44px] items-center rounded-full border border-line px-4 py-2 text-xs font-semibold text-fog hover:text-cream"
+                            >
+                              Modify details
+                            </button>
+                            <button
+                              type="button"
+                              disabled={deletingUserId === r.userId}
+                              onClick={() => r.userId && void removeUser(r.userId, r.name)}
+                              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-red-500/50 px-4 py-2 text-xs font-semibold text-red-300 hover:bg-red-500/10 disabled:opacity-60"
+                            >
+                              {deletingUserId === r.userId ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                              ) : (
+                                <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                              )}
+                              Delete
+                            </button>
+                          </div>
                         )}
                       </div>
                     ) : null}

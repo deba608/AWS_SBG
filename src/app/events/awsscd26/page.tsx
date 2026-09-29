@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   title: "AWS Student Community Day SUIIT 2026 — Oct 6–8",
   description:
     "Free flagship meetup Oct 6–8 at SUIIT: Cloud, AI/GenAI + DevOps, hands-on labs, lunch + certificate. Free entry with QR pass.",
-  alternates: { canonical: "/events/aws-student-community-day-suiit-2026" },
+  alternates: { canonical: "/events/awsscd26" },
   keywords: [
     "AWS Community Day",
     "SUIIT",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     "student event",
   ],
   openGraph: {
-    url: "/events/aws-student-community-day-suiit-2026",
+    url: "/events/awsscd26",
     siteName: SITE.shortName,
     title: "AWS Student Community Day SUIIT 2026 — Oct 6–8",
     description:
@@ -99,7 +99,7 @@ const bringList = [
 const perkIcons = [UtensilsCrossed, Gift, Award, Users];
 
 export default function CommunityDayPage() {
-  const related = upcomingEvents.filter((e) => e.id !== "aws-student-community-day-suiit-2026").slice(0, 3);
+  const related = upcomingEvents.filter((e) => e.id !== "awsscd26").slice(0, 3);
 
   const jsonLd = {
     "@context": "https://schema.org",

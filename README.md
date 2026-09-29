@@ -25,7 +25,7 @@ The production deployment is live on Vercel:
 - **Audience**: 300+ expected student builders, developers, and cloud enthusiasts
 - **Program**: Day 1 DecodeX Hackathon · Day 2 Tech Parliament + Make-A-Bot Competition · Day 3 Speaker/Podcast + prizes
 - **Perks**: Lunch + certificates for pass holders (no swag)
-- **Event Page**: [`/events/aws-student-community-day-suiit-2026`](https://awssbgsuiit.vercel.app/events/aws-student-community-day-suiit-2026)
+- **Event Page**: [`/events/awsscd26`](https://awssbgsuiit.vercel.app/events/awsscd26)
 - **Registration**: on-site QR entry pass — no Meetup. One `@suiit.ac.in` mail + roll number = one pass.
 
 > Event details (schedule, speaker lineup, FAQs) are managed in [`src/data/community-day.ts`](src/data/community-day.ts). Event cards in [`src/data/events.ts`](src/data/events.ts).
@@ -80,7 +80,7 @@ ADMIN_PASS=<gate-password>
 |---|---|
 | `/` | Landing page featuring hero, mission statement, what we do, and quick join actions |
 | `/events` | Community Day spotlight, upcoming events, and past workshop recaps |
-| `/events/aws-student-community-day-suiit-2026` | Dedicated flagship event landing page with live countdown, speaker lineup, schedule, and registration modal |
+| `/events/awsscd26` | Dedicated flagship event landing page with live countdown, speaker lineup, schedule, and registration modal |
 | `/passes` | Self-serve QR entry pass form |
 | `/admin` | Organizer dashboard (stats, search, export) — `ADMIN_PASS` |
 | `/admin/scan` | Gate scanner (camera + manual verify/burn) |
