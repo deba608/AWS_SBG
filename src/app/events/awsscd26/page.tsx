@@ -109,12 +109,19 @@ export default function CommunityDayPage() {
     endDate: COMMUNITY_DAY_META.endIso,
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
+    image: [`${SITE.url}/opengraph-image`],
     location: {
       "@type": "Place",
       name: COMMUNITY_DAY_META.venueShort,
-      address: COMMUNITY_DAY_META.address,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: COMMUNITY_DAY_META.venue,
+        addressLocality: "Sambalpur",
+        addressRegion: "Odisha",
+        addressCountry: "IN",
+      },
     },
-    organizer: { "@type": "Organization", name: SITE.name },
+    organizer: { "@type": "Organization", name: SITE.name, url: SITE.url },
     offers: { "@type": "Offer", price: "0", priceCurrency: "INR", availability: "https://schema.org/InStock" },
     description:
       "Community-driven meetup: Cloud Computing, AI, Generative AI, DevOps and the AWS ecosystem at SUIIT.",

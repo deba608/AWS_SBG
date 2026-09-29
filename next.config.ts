@@ -32,8 +32,20 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
+      {
+        // Page-experience / trust headers. Camera stays enabled (self)
+        // because the admin gate scanner uses the device camera.
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(self), microphone=(), geolocation=()",
+          },
+        ],
+      },
     ];
-  },
-};
+  };
 
 export default nextConfig;
