@@ -19,15 +19,13 @@ function getParts(target: number, now: number) {
 
 export default function Countdown() {
   const target = new Date(COMMUNITY_DAY_META.startIso).getTime();
+  const end = new Date(COMMUNITY_DAY_META.endIso).getTime();
   const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setNow(Date.now()), 0);
+    setNow(Date.now());
     const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => {
-      clearTimeout(timer);
-      window.clearInterval(id);
-    };
+    return () => window.clearInterval(id);
   }, []);
 
   // SSR / no-JS fallback: static date, no ticking numbers
@@ -35,6 +33,26 @@ export default function Countdown() {
     return (
       <p className="text-sm text-fog">
         {COMMUNITY_DAY_META.date}, {COMMUNITY_DAY_META.time}
+      </p>
+    );
+  }
+
+  if (now >= end) {
+    return (
+      <p role="status" className="border-y border-line py-3 text-sm text-fog">
+        Event ended — see you at the next one.
+      </p>
+    );
+  }
+
+  if (now >= target) {
+    return (
+      <p role="status" className="flex items-center gap-2 border-y border-line py-3 text-sm font-semibold text-cream">
+        <span className="relative flex h-2 w-2" aria-hidden>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+        </span>
+        Live now — on till {COMMUNITY_DAY_META.shortDate.split("–")[1]?.trim() ?? "Oct 8"}.
       </p>
     );
   }

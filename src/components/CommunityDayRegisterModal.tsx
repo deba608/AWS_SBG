@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Hash, Loader2, Mail, Phone, ShieldCheck, User, Zap } from "lucide-react";
+import { ArrowRight, Hash, Loader2, Mail, Phone, ShieldCheck, User } from "lucide-react";
 import Modal from "@/components/Modal";
 import PassCard from "@/components/PassCard";
 import {
@@ -238,28 +238,10 @@ export default function CommunityDayRegisterModal({
             }}
             className="space-y-4"
           >
-            <p className="flex items-center gap-2 text-sm leading-relaxed text-fog">
-              <Zap className="h-4 w-4 shrink-0 text-brand" aria-hidden />
-              30-sec form — your QR entry pass generates instantly + emails to you.
-            </p>
             {slots && !slots.open ? (
               <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
                 Registrations full — retrieve your pass below if already registered.
               </p>
-            ) : null}
-            {slots?.open ? (
-              <div aria-label={`${slots.registered} of ${slots.limit} passes claimed`}>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-cream">{slots.limit - slots.registered} passes left</span>
-                  <span className="font-mono text-faint">{slots.registered}/{slots.limit} claimed</span>
-                </div>
-                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-black/40">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-brand to-purple-400"
-                    style={{ width: `${Math.min(100, Math.round((slots.registered / slots.limit) * 100))}%` }}
-                  />
-                </div>
-              </div>
             ) : null}
 
             <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-faint">
