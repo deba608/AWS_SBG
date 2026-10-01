@@ -32,7 +32,7 @@ export async function POST(req: Request) {
           kind: r.kind,
           type: r.pass?.type,
           user: r.user
-            ? { name: r.user.name, serial: r.user.serial ?? "", email: r.user.email, mobile: r.user.mobile ?? "", rollNo: r.user.rollNo, food: r.user.food }
+            ? { name: r.user.name, serial: r.user.serial ?? "", email: r.user.email, mobile: r.user.mobile ?? "", rollNo: r.user.rollNo, food: r.user.food, year: r.user.year ?? "" }
             : undefined,
           usedAt: r.kind === "food" ? r.pass?.foodUsedAt : r.pass?.usedAt,
         },
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     status: r.kind === "food" ? "FOOD_USED" : "USED",
     kind: r.kind,
     type: r.pass.type,
-    user: { name: r.user.name, serial: r.user.serial ?? "", email: r.user.email, mobile: r.user.mobile ?? "", rollNo: r.user.rollNo, food: r.user.food },
+    user: { name: r.user.name, serial: r.user.serial ?? "", email: r.user.email, mobile: r.user.mobile ?? "", rollNo: r.user.rollNo, food: r.user.food, year: r.user.year ?? "" },
     usedAt: r.kind === "food" ? r.pass.foodUsedAt : r.pass.usedAt,
   });
 }

@@ -221,6 +221,7 @@ export default function CommunityDayRegisterModal({
                 mobile={mobile}
                 rollNo={passUser.rollNo}
                 food={passUser.food}
+                year={passUser.year}
                 type={pass.type}
                 qrImage={pass.qrImage}
                 token={pass.token}

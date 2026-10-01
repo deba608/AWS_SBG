@@ -26,6 +26,7 @@ type VerifyState =
       mobile?: string;
       rollNo?: string;
       food?: string;
+      year?: string;
       usedAt?: string | null;
       /** Fresh burn this session (vs already-used). Shows DONE state. */
       justBurned?: boolean;
@@ -223,6 +224,7 @@ export default function ScanClient() {
           mobile: d.user?.mobile,
           rollNo: d.user?.rollNo,
           food: d.user?.food,
+          year: d.user?.year,
           usedAt: d.usedAt ?? null,
         });
       } else if (d.error === "Too fast. Slow down.") {
@@ -263,6 +265,7 @@ export default function ScanClient() {
           mobile: d.user?.mobile,
           rollNo: d.user?.rollNo,
           food: d.user?.food,
+          year: d.user?.year,
           usedAt: d.usedAt ?? null,
         });
       } else if (d.ok) {
@@ -279,6 +282,7 @@ export default function ScanClient() {
           mobile: d.user?.mobile,
           rollNo: d.user?.rollNo,
           food: d.user?.food,
+          year: d.user?.year,
           usedAt: d.usedAt ?? null,
           justBurned: true,
           justBurnedKind: d.kind === "food" ? "food" : "entry",
@@ -599,7 +603,7 @@ export default function ScanClient() {
                 {result.name}
                 {result.serial ? <span className="ml-2 font-mono text-sm text-brand">Serial No. {result.serial}</span> : null}
               </p>
-              <p className="text-sm text-fog">{result.email}{result.mobile ? ` · ${result.mobile}` : ""} · Roll {result.rollNo}</p>
+              <p className="text-sm text-fog">{result.email}{result.mobile ? ` · ${result.mobile}` : ""} · Roll {result.rollNo}{result.year ? ` · ${result.year} year` : ""}</p>
               {result.food ? (
                 <p className={cn(
                   "mt-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-xs font-bold",

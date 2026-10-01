@@ -28,6 +28,7 @@ export default function PassCard({
   mobile,
   rollNo,
   food,
+  year,
   type,
   qrImage,
   token,
@@ -38,6 +39,7 @@ export default function PassCard({
   mobile: string;
   rollNo: string;
   food: string;
+  year?: string;
   type: PassCardType;
   qrImage: string;
   token: string;
@@ -105,6 +107,12 @@ export default function PassCard({
               <dt className="shrink-0 text-xs text-faint">Roll</dt>
               <dd className="font-mono text-sm font-semibold text-cream">{rollNo}</dd>
             </div>
+            {year ? (
+            <div className="flex items-baseline justify-between gap-3 border-t border-line/60 pt-2.5">
+              <dt className="shrink-0 text-xs text-faint">Year</dt>
+              <dd className="font-mono text-sm font-semibold text-cream">{year} year</dd>
+            </div>
+            ) : null}
             <div className="flex items-baseline justify-between gap-3 border-t border-line/60 pt-2.5">
               <dt className="shrink-0 text-xs text-faint">Email</dt>
               <dd className="min-w-0 break-all text-right text-xs text-fog">{email}</dd>

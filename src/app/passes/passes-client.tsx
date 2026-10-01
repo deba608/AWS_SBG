@@ -185,6 +185,7 @@ export default function PassesClient() {
               mobile={user.mobile ?? ""}
               rollNo={user.rollNo}
               food={user.food}
+              year={user.year ?? ""}
               type={p.type}
               qrImage={p.qrImage}
               token={p.token}

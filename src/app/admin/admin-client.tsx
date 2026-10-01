@@ -396,6 +396,14 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
         { label: "Non-veg lunch", v: stats.nonveg },
       ]
     : [];
+  const yearCards =
+    stats && settings?.perYear
+      ? YEARS.map((y) => ({
+          label: `${y} year`,
+          v: settings.perYear?.[y]?.registered ?? stats.years?.[y] ?? 0,
+          sub: `limit ${settings.perYear?.[y]?.limit ?? 60}`,
+        }))
+      : [];
   const entryPct = stats && stats.issued > 0 ? Math.round((stats.entryUsed / stats.issued) * 100) : 0;
 
   return (
@@ -456,6 +464,27 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
       </div>
       </Section>
 
+      {yearCards.length > 0 ? (
+      <Section label="Year-wise seats">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {yearCards.map((c) => {
+          const slot = settings?.perYear?.[c.label.split(" ")[0]];
+          const pct = slot && slot.limit > 0 ? Math.round((slot.registered / slot.limit) * 100) : 0;
+          return (
+          <div key={c.label} className="rank-card p-4 text-center">
+            <p className="text-3xl font-bold text-cream">{c.v}</p>
+            <p className="mt-1 text-xs text-fog">{c.label}</p>
+            {c.sub ? <p className="text-[11px] text-faint">{c.sub}</p> : null}
+            <div className="mx-auto mt-2 h-2 max-w-[120px] overflow-hidden rounded-full bg-black/40" role="img" aria-label={`${c.label} seats: ${pct}% filled`}>
+              <div className={cn("h-full rounded-full", pct >= 100 ? "bg-red-500" : pct >= 80 ? "bg-amber-500" : "bg-brand")} style={{ width: `${Math.min(pct, 100)}%` }} />
+            </div>
+          </div>
+          );
+        })}
+      </div>
+      </Section>
+      ) : null}
+
       {settings ? (
         <div className="rank-card p-4 sm:p-5 print:hidden">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -496,6 +525,41 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
             </div>
           </div>
           {settingsMsg ? <p className="mt-2 text-xs text-fog">{settingsMsg}</p> : null}
+          <div className="mt-4 border-t border-line pt-4">
+            <h3 className="text-sm font-bold text-cream">Year-wise limits <span className="font-normal text-faint">(customize per year, default 60)</span></h3>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {YEARS.map((y) => {
+                const slot = settings.perYear?.[y];
+                return (
+                  <label key={y} className="block rounded-xl border border-line bg-surface p-3 text-xs text-faint">
+                    {y} year
+                    <span className="ml-1 font-mono text-faint">({slot?.registered ?? 0}/{slot?.limit ?? 60})</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={10000}
+                      value={yearDrafts[y] ?? String(slot?.limit ?? 60)}
+                      onChange={(e) => setYearDrafts((d) => ({ ...d, [y]: e.target.value }))}
+                      aria-label={`${y} year limit`}
+                      className="mt-1.5 w-full min-h-[44px] rounded-xl border border-line bg-ink/60 px-3 py-2 text-sm text-cream focus:ring-2 focus:ring-brand"
+                    />
+                  </label>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              disabled={savingSettings}
+              onClick={() => {
+                const parsed: Record<string, number> = {};
+                for (const y of YEARS) parsed[y] = Number(yearDrafts[y] ?? settings.perYear?.[y]?.limit ?? 60);
+                void saveSettings({ yearLimits: parsed });
+              }}
+              className="mt-3 inline-flex min-h-[44px] items-center rounded-full bg-brand px-4 py-2 text-sm font-semibold text-black hover:bg-brandhover disabled:opacity-60"
+            >
+              Save year limits
+            </button>
+          </div>
           <details className="mt-4 border-t border-line pt-4">
             <summary className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 text-sm font-semibold text-fog hover:text-cream">
               Additional settings
@@ -593,6 +657,11 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
                   onChange={(f) => setNewForm((s) => ({ ...s, food: f }))}
                   labelId="admin-add-food"
                 />
+                <YearSelect
+                  value={newForm.year}
+                  onChange={(y) => setNewForm((s) => ({ ...s, year: y }))}
+                  labelId="admin-add-year"
+                />
               </div>
               {addErr ? <p role="alert" className="text-xs text-red-300">{addErr}</p> : null}
               {addMsg ? <p role="status" className="text-xs text-green-300">{addMsg}</p> : null}
@@ -618,6 +687,9 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
             <Bar label="Female" v={stats.female} total={stats.users} tone="bg-pink-500" />
             <Bar label="Veg" v={stats.veg} total={stats.users} tone="bg-green-500" />
             <Bar label="Non-veg" v={stats.nonveg} total={stats.users} tone="bg-amber-500" />
+            {YEARS.map((y) => (
+              <Bar key={y} label={`${y} year`} v={stats.years?.[y] ?? 0} total={stats.users} tone="bg-brand" />
+            ))}
           </div>
           <div className="rank-card p-4 sm:p-5">
             <div className="flex items-center justify-between">
@@ -677,6 +749,12 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
           <option value="ACTIVE">Active</option>
           <option value="USED">Used</option>
         </select>
+        <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} aria-label="Year" className={selectCls}>
+          <option value="ALL">All years</option>
+          {YEARS.map((y) => (
+            <option key={y} value={y}>{y} year</option>
+          ))}
+        </select>
         <button
           type="submit"
           disabled={loading}
@@ -691,12 +769,13 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
           {total} match{total === 1 ? "" : "es"} · newest first
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-[720px] text-left text-sm">
             <thead>
               <tr className="text-xs text-faint uppercase">
                 <th className="px-4 py-2">Sr</th>
                 <th className="px-4 py-2">Name</th>
                 <th className="px-4 py-2">Contact</th>
+                <th className="px-4 py-2">Year</th>
                 <th className="px-4 py-2">Food</th>
                 <th className="px-4 py-2">Type</th>
                 <th className="px-4 py-2">Status</th>
@@ -726,6 +805,11 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
                     <br />
                     {r.mobile && r.mobile !== "—" ? <>{r.mobile}<br /></> : null}
                     Roll {r.rollNo}
+                  </td>
+                  <td className="px-4 py-2">
+                    <span className="rounded-full bg-brand/10 border border-brand/40 px-2 py-0.5 font-mono text-xs text-brand">
+                      {r.year && r.year !== "—" ? `${r.year} yr` : "—"}
+                    </span>
                   </td>
                   <td className="px-4 py-2">
                     <span
@@ -772,10 +856,11 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
                 </tr>
                 {open ? (
                 <tr key={`${r.token}-detail`} className="border-t border-dashed border-line bg-black/20">
-                  <td colSpan={7} className="px-4 py-3 text-xs">
+                  <td colSpan={8} className="px-4 py-3 text-xs">
                     <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 sm:grid-cols-2">
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Serial</dt><dd className="font-mono text-cream">{r.serial}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Gender</dt><dd className="text-cream">{r.gender}</dd></div>
+                      <div className="flex gap-2"><dt className="shrink-0 text-faint">Year</dt><dd className="text-cream">{r.year}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Issued</dt><dd className="text-cream">{new Date(r.createdAt).toLocaleString("en-IN")}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Gate</dt><dd className="text-cream">{r.scannedBy ?? "—"}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Burned</dt><dd className="text-cream">{r.usedAt ? new Date(r.usedAt).toLocaleString("en-IN") : "—"}</dd></div>
@@ -823,6 +908,19 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
                                 >
                                   <option value="Veg">Veg</option>
                                   <option value="Non-veg">Non-veg</option>
+                                </select>
+                              </label>
+                              <label className="block text-xs text-faint">
+                                Year
+                                <select
+                                  value={editForm.year}
+                                  onChange={(e) => setEditForm((f) => ({ ...f, year: e.target.value }))}
+                                  className={selectCls + " mt-1 w-full"}
+                                >
+                                  <option value="">Select year</option>
+                                  {YEARS.map((y) => (
+                                    <option key={y} value={y}>{y} year</option>
+                                  ))}
                                 </select>
                               </label>
                             </div>
@@ -879,7 +977,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
               })}
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-fog">
+                  <td colSpan={8} className="px-4 py-8 text-center text-fog">
                     No passes yet. Share <code className="font-mono">/passes</code> link.
                   </td>
                 </tr>

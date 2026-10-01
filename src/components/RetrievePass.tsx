@@ -21,6 +21,7 @@ interface FoundUser {
   rollNo: string;
   gender: string;
   food: string;
+  year?: string;
 }
 
 /** Lost QR? Look up by college mail, roll no, or mobile. */
@@ -134,6 +135,7 @@ export default function RetrievePass() {
               mobile={user.mobile ?? ""}
               rollNo={user.rollNo}
               food={user.food}
+              year={user.year ?? ""}
               type={p.type}
               qrImage={p.qrImage}
               token={p.token}
