@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Cpu, Layers, Loader2, Terminal, Trash2, User, Users } from "lucide-react";
 import Container from "@/components/Container";
-import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
 import YearSelect from "@/components/YearSelect";
-import { deriveYearFromRollNo, type FoodPref, type Gender, type Year } from "@/lib/validate-contact";
+import { deriveYearFromRollNo, type Gender, type Year } from "@/lib/validate-contact";
 import type { MemberErrors, TeamErrors } from "@/lib/hackathon-store";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +20,6 @@ interface MemberForm {
   email: string;
   mobile: string;
   year: string;
-  food: string;
   gender: string;
   githubUrl: string;
 }
@@ -30,12 +28,12 @@ interface RegisteredTeam {
   id: string;
   teamName: string;
   preference: string;
-  leader: MemberForm & { year: string; food: string; gender: string };
-  members: (MemberForm & { year: string; food: string; gender: string })[];
+  leader: MemberForm & { year: string; gender: string };
+  members: (MemberForm & { year: string; gender: string })[];
   createdAt: string;
 }
 
-const blankMember = (): MemberForm => ({ name: "", rollNo: "", email: "", mobile: "", year: "", food: "", gender: "", githubUrl: "" });
+const blankMember = (): MemberForm => ({ name: "", rollNo: "", email: "", mobile: "", year: "", gender: "", githubUrl: "" });
 
 const inputCls = (bad: boolean) =>
   `w-full min-h-[44px] rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm ${
@@ -119,18 +117,12 @@ function MemberFields({
         <Field label="College mail *" value={value.email} onChange={set("email")} error={errors?.email} placeholder="24btcse26@suiit.ac.in" type="email" inputMode="email" maxLength={100} autoComplete="email" />
         <Field label="Mobile number *" value={value.mobile} onChange={set("mobile")} error={errors?.mobile} placeholder="9437512345" type="tel" inputMode="numeric" maxLength={13} autoComplete="tel-national" />
       </div>
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="mt-3">
         <GenderSelect
           value={value.gender}
           onChange={(g: Gender) => onChange({ ...value, gender: g })}
           labelId={`${idPrefix}-gender`}
           error={errors?.gender}
-        />
-        <FoodSelect
-          value={value.food}
-          onChange={(f: FoodPref) => onChange({ ...value, food: f })}
-          labelId={`${idPrefix}-food`}
-          error={errors?.food}
         />
       </div>
       <div className="mt-3">
@@ -263,9 +255,9 @@ export default function HackathonClient() {
         <div className="rounded-2xl border border-line bg-ink/40 p-4">
           <p className="text-sm font-bold text-cream">{team.teamName}</p>
           <ul className="mt-2 space-y-1.5 text-sm text-fog">
-            <li><span className="font-semibold text-cream">{team.leader.name}</span> (leader) · {team.leader.rollNo} · {team.leader.year} year · {team.leader.gender} · {team.leader.food}</li>
+            <li><span className="font-semibold text-cream">{team.leader.name}</span> (leader) · {team.leader.rollNo} · {team.leader.year} year · {team.leader.gender}</li>
             {team.members.map((m) => (
-              <li key={m.rollNo}><span className="font-semibold text-cream">{m.name}</span> · {m.rollNo} · {m.year} year · {m.gender} · {m.food}</li>
+              <li key={m.rollNo}><span className="font-semibold text-cream">{m.name}</span> · {m.rollNo} · {m.year} year · {m.gender}</li>
             ))}
           </ul>
         </div>
@@ -284,11 +276,11 @@ export default function HackathonClient() {
     setTeamName("Demo Debuggers");
     setPreference("Both");
     setDeclaration(true);
-    setLeader({ name: "Aarav Sharma", rollNo: "24BTCSE01", email: "24btcse01@suiit.ac.in", mobile: "9437100001", year: "3rd", food: "Veg", gender: "Male", githubUrl: "https://github.com/aaravsharma" });
+    setLeader({ name: "Aarav Sharma", rollNo: "24BTCSE01", email: "24btcse01@suiit.ac.in", mobile: "9437100001", year: "3rd", gender: "Male", githubUrl: "https://github.com/aaravsharma" });
     setMembers([
-      { name: "Diya Patel", rollNo: "24BTCSE02", email: "24btcse02@suiit.ac.in", mobile: "9437100002", year: "3rd", food: "Non-veg", gender: "Female", githubUrl: "" },
-      { name: "Rohan Das", rollNo: "25BTCSE11", email: "25btcse11@suiit.ac.in", mobile: "9437100003", year: "2nd", food: "Veg", gender: "Male", githubUrl: "" },
-      { name: "Sneha Mishra", rollNo: "25BTCSE12", email: "25btcse12@suiit.ac.in", mobile: "9437100004", year: "2nd", food: "Veg", gender: "Female", githubUrl: "" },
+      { name: "Diya Patel", rollNo: "24BTCSE02", email: "24btcse02@suiit.ac.in", mobile: "9437100002", year: "3rd", gender: "Female", githubUrl: "" },
+      { name: "Rohan Das", rollNo: "25BTCSE11", email: "25btcse11@suiit.ac.in", mobile: "9437100003", year: "2nd", gender: "Male", githubUrl: "" },
+      { name: "Sneha Mishra", rollNo: "25BTCSE12", email: "25btcse12@suiit.ac.in", mobile: "9437100004", year: "2nd", gender: "Female", githubUrl: "" },
     ]);
     setErrors({});
     setApiError("");
@@ -357,7 +349,7 @@ export default function HackathonClient() {
         {errors.team ? (
           <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">{errors.team}</p>
         ) : (
-          <p className="text-xs text-faint">Teams of exactly {TEAM_MAX} — leader + 3 teammates, all details required.</p>
+          <p className="text-xs text-faint">Teams of exactly {TEAM_MAX} — leader + 3 teammates, all details required. Lunch is covered by the Community Day pass (8th Oct).</p>
         )}
         <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm leading-relaxed ${errors.declaration ? "border-red-400/70 bg-red-500/10" : "border-line bg-ink/40"}`}>
           <input
