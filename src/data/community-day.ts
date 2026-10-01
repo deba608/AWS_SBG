@@ -36,11 +36,13 @@ export interface AgendaItem {
 
 export interface DaySchedule {
   dayNumber: number;
-  dayLabel: string;
-  date: string;
+  dayLabel: string;  date: string;
   shortDate: string;
   theme: string;
   defaultVenue: string;
+  /** Day-level separate sign-up link, shown in the day header card. */
+  registerUrl?: string;
+  registerLabel?: string;
   schedule: AgendaItem[];
 }
 
@@ -52,6 +54,8 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
     shortDate: "Oct 6",
     theme: "DecodeX Hackathon",
     defaultVenue: "APJ Abdul Kalam Auditorium",
+    registerUrl: "/hackathon",
+    registerLabel: "Register team",
     schedule: [
       {
         time: "08:45 AM",
@@ -73,8 +77,6 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
         description: "Submission deadline — speed counts. Teams must pre-register at /hackathon.",
         venue: "APJ Abdul Kalam Auditorium",
         tag: "Deadline",
-        registerUrl: "/hackathon",
-        registerLabel: "Register team",
       },
       {
         time: "10:30 – 01:00 PM",

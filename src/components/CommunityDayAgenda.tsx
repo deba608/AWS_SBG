@@ -66,6 +66,15 @@ export default function CommunityDayAgenda() {
           <MapPin className="h-3.5 w-3.5 text-brand shrink-0" aria-hidden />
           <span>{currentDay.defaultVenue}</span>
         </div>
+        {currentDay.registerUrl ? (
+          <Link
+            href={currentDay.registerUrl}
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-brand px-5 py-2 text-xs font-bold text-black hover:bg-brandhover sm:text-sm"
+          >
+            Separate registration · {currentDay.registerLabel ?? "Register"}
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+        ) : null}
       </div>
 
       {/* Schedule Items Timeline */}
