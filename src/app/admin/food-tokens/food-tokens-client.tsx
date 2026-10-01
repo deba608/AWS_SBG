@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import QRCode from "qrcode";
 import { Download, Loader2, Printer, RefreshCw, Search, Trash2, Upload } from "lucide-react";
 import AdminLogin from "@/components/AdminLogin";
 import { cn } from "@/lib/utils";
@@ -22,38 +23,7 @@ function normFood(v: string): "Veg" | "Non-veg" {
   return /non/i.test(v) ? "Non-veg" : "Veg";
 }
 
-/** Deterministic barcode-look stripes from serial. Manual-match aid, not a scan standard. */
-function Barcode({ code, compact }: { code: string; compact?: boolean }) {
-  const bars = useMemo(() => {
-    const seed = `*${code.toUpperCase()}*`;
-    const out: { w: number; black: boolean }[] = [];
-    // quiet zone
-    out.push({ w: 6, black: false });
-    for (const ch of seed) {
-      let n = ch.charCodeAt(0);
-      for (let b = 0; b < 8; b++) {
-        const bit = (n >> (7 - b)) & 1;
-        out.push({ w: bit ? 4 : 2, black: b % 2 === 0 ? bit === 1 : bit === 0 });
-        if (b % 2 === 1) out.push({ w: 2, black: false });
-      }
-      out.push({ w: 3, black: false });
-    }
-    return out;
-  }, [code]);
-  return (
-    <div className={cn("flex items-stretch", compact ? "h-7" : "h-9")} role="img" aria-label={`Barcode for ${code}`}>
-      {bars.map((b, i) => (
-        <span
-          key={i}
-          style={{ width: b.w, background: b.black ? "#111" : "transparent" }}
-          className="h-full shrink-0"
-        />
-      ))}
-    </div>
-  );
-}
-
-function Token({ row, compact }: { row: TokenRow; compact: boolean }) {
+function Token({ row, compact, qr }: { row: TokenRow; compact: boolean; qr?: string }) {
   const veg = row.food === "Veg";
   return (
     <div
@@ -81,25 +51,30 @@ function Token({ row, compact }: { row: TokenRow; compact: boolean }) {
       <div className="flex items-end justify-between gap-2 px-2.5 pb-2">
         <div>
           <p className={cn("font-mono font-black leading-none tracking-tight", compact ? "text-[20px]" : "text-[26px]")}>{row.serial}</p>
-          <div className="mt-1 max-w-[150px] overflow-hidden">
-            <Barcode code={row.serial} compact={compact} />
-          </div>
-        </div>
-        <div className="pb-0.5 text-right">
-          <p className="text-[9px] leading-tight text-neutral-500">
+          <p className="mt-1 text-[9px] leading-tight text-neutral-500">
             Show at
             <br />
             food counter
           </p>
-          <div
-            className={cn(
-              "mx-auto mt-1 h-4 w-4 rounded-full border-2",
-              veg ? "border-green-700" : "border-red-700",
-            )}
-            aria-hidden
-          >
-            <div className={cn("m-[2px] h-2 w-2 rounded-full", veg ? "bg-green-600" : "bg-red-600")} />
-          </div>
+        </div>
+        <div className="shrink-0 pb-0.5 text-center">
+          {qr ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={qr}
+              alt={`QR for ${row.serial}`}
+              width={compact ? 64 : 76}
+              height={compact ? 64 : 76}
+              className="h-auto"
+              style={{ width: compact ? 64 : 76 }}
+            />
+          ) : (
+            <div
+              aria-hidden
+              className="animate-pulse bg-neutral-200"
+              style={{ width: compact ? 64 : 76, height: compact ? 64 : 76 }}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -116,6 +91,7 @@ export default function FoodTokensClient() {
   const [density, setDensity] = useState(DENSITY[1]); // 12 / page default
   const [scope, setScope] = useState<"together" | "veg" | "nonveg" | "split">("together");
   const [sortMode, setSortMode] = useState<"serial" | "name">("serial");
+  const [qrMap, setQrMap] = useState<Record<string, string>>({});
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -157,6 +133,34 @@ export default function FoodTokensClient() {
     for (let i = 0; i < list.length; i += density.perPage) out.push(list.slice(i, i + density.perPage));
     return out;
   }
+
+  // Real QR per serial, generated in-browser (offline OK once page loaded).
+  // Any phone camera scans it → shows the serial, e.g. "A07".
+  useEffect(() => {
+    let cancelled = false;
+    const missing = sorted.filter((r) => !qrMap[r.serial]).map((r) => r.serial);
+    if (missing.length === 0) return;
+    void (async () => {
+      const batch: Record<string, string> = {};
+      for (const serial of [...new Set(missing)]) {
+        try {
+          batch[serial] = await QRCode.toDataURL(serial, {
+            width: 220,
+            margin: 1,
+            errorCorrectionLevel: "M",
+          });
+        } catch {
+          // leave placeholder; serial text still printed
+        }
+        if (cancelled) return;
+      }
+      if (!cancelled) setQrMap((prev) => ({ ...prev, ...batch }));
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sorted]);
 
   // Print groups: split mode → veg sheets then non-veg sheets, numbered separately
   const printGroups: { label: string; pages: TokenRow[][] }[] =
@@ -480,7 +484,7 @@ export default function FoodTokensClient() {
                       className="border border-dashed border-neutral-400 p-1.5"
                       style={{ height: `${cellMm}mm` }}
                     >
-                      <Token row={r} compact={compact} />
+                      <Token row={r} compact={compact} qr={qrMap[r.serial]} />
                     </div>
                   ))}
                 </div>
