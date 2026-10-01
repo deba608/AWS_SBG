@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { expandSerialToToken, verifyPass } from "@/lib/pass-store";
+import { expandSerialToToken, verifyPass, effectiveYearOf } from "@/lib/pass-store";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 
 function extractToken(req: Request, bodyToken?: string): string {
@@ -43,7 +43,7 @@ export async function GET(req: Request) {
       mobile: r.user.mobile ?? "",
       rollNo: r.user.rollNo,
       food: r.user.food,
-      year: r.user.year ?? "",
+      year: effectiveYearOf(r.user) ?? "",
     },
     usedAt: r.pass.usedAt,
     scannedBy: r.pass.scannedBy,
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
       mobile: r.user.mobile ?? "",
       rollNo: r.user.rollNo,
       food: r.user.food,
-      year: r.user.year ?? "",
+      year: effectiveYearOf(r.user) ?? "",
     },
     usedAt: r.pass.usedAt,
     scannedBy: r.pass.scannedBy,

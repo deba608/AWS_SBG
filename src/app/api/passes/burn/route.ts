@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { burnPass, expandSerialToToken } from "@/lib/pass-store";
+import { burnPass, expandSerialToToken, effectiveYearOf } from "@/lib/pass-store";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
           kind: r.kind,
           type: r.pass?.type,
           user: r.user
-            ? { name: r.user.name, serial: r.user.serial ?? "", email: r.user.email, mobile: r.user.mobile ?? "", rollNo: r.user.rollNo, food: r.user.food, year: r.user.year ?? "" }
+            ? { name: r.user.name, serial: r.user.serial ?? "", email: r.user.email, mobile: r.user.mobile ?? "", rollNo: r.user.rollNo, food: r.user.food, year: effectiveYearOf(r.user) ?? "" }
             : undefined,
           usedAt: r.kind === "food" ? r.pass?.foodUsedAt : r.pass?.usedAt,
         },
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     status: r.kind === "food" ? "FOOD_USED" : "USED",
     kind: r.kind,
     type: r.pass.type,
-    user: { name: r.user.name, serial: r.user.serial ?? "", email: r.user.email, mobile: r.user.mobile ?? "", rollNo: r.user.rollNo, food: r.user.food, year: r.user.year ?? "" },
+    user: { name: r.user.name, serial: r.user.serial ?? "", email: r.user.email, mobile: r.user.mobile ?? "", rollNo: r.user.rollNo, food: r.user.food, year: effectiveYearOf(r.user) ?? "" },
     usedAt: r.kind === "food" ? r.pass.foodUsedAt : r.pass.usedAt,
   });
 }

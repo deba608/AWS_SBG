@@ -3,6 +3,7 @@ import { isAdmin } from "@/lib/admin-auth";
 import {
   ConflictError,
   deleteUser,
+  effectiveYearOf,
   getUserById,
   issuePasses,
   RegistrationsClosedError,
@@ -42,7 +43,7 @@ export async function PATCH(req: Request) {
     mobile: p.mobile !== undefined ? String(p.mobile) : current.mobile,
     gender: p.gender !== undefined ? String(p.gender) : current.gender,
     food: p.food !== undefined ? String(p.food) : current.food,
-    year: p.year !== undefined ? String(p.year) : (current.year ?? "1st"),
+    year: p.year !== undefined ? String(p.year) : (effectiveYearOf(current) ?? "1st"),
   };
   const errors = validateRegistration(merged);
   if (Object.keys(errors).length > 0) {

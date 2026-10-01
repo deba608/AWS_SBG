@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { listPasses, passStats } from "@/lib/pass-store";
+import { listPasses, passStats, effectiveYearOf } from "@/lib/pass-store";
 
 function csvCell(v: string | null | undefined): string {
   const s = String(v ?? "");
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
         rollNo: user.rollNo,
         gender: user.gender,
         food: user.food,
-        year: user.year ?? "",
+        year: effectiveYearOf(user) ?? "",
         createdAt: user.createdAt,
       });
     }
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
       user?.rollNo ?? "",
       user?.gender ?? "",
       user?.food ?? "",
-      user?.year ?? "",
+      user ? (effectiveYearOf(user) ?? "") : "",
       pass.type,
       pass.status,
       pass.usedAt ?? "",

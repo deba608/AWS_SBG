@@ -7,7 +7,7 @@ import AdminLogin from "@/components/AdminLogin";
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
 import YearSelect from "@/components/YearSelect";
-import { YEARS } from "@/lib/validate-contact";
+import { YEARS, deriveYearFromRollNo } from "@/lib/validate-contact";
 import { cn } from "@/lib/utils";
 
 interface YearSlot {
@@ -110,6 +110,8 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
   const [settings, setSettings] = useState<RegSettings | null>(null);
   const [limitDraft, setLimitDraft] = useState("");
   const [yearDrafts, setYearDrafts] = useState<Record<string, string>>({});
+  const [migrating, setMigrating] = useState(false);
+  const [migrateMsg, setMigrateMsg] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsMsg, setSettingsMsg] = useState("");
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -245,6 +247,24 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
       setSettingsMsg(err instanceof Error ? err.message : "Save failed.");
     } finally {
       setSavingSettings(false);
+    }
+  }
+
+  async function migrateYears() {
+    setMigrating(true);
+    setMigrateMsg("");
+    try {
+      const res = await fetch("/api/admin/migrate-years", { method: "POST" });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error ?? "Migration failed.");
+      const byYear = d.byYear as Record<string, number> | undefined;
+      const parts = byYear ? Object.entries(byYear).map(([y, n]) => `${y}: ${n}`).join(" · ") : "";
+      setMigrateMsg(`Fixed ${d.fixed} of ${d.total} registrations. ${parts}`);
+      await load();
+    } catch (err) {
+      setMigrateMsg(err instanceof Error ? err.message : "Migration failed.");
+    } finally {
+      setMigrating(false);
     }
   }
 
@@ -547,18 +567,30 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
                 );
               })}
             </div>
-            <button
-              type="button"
-              disabled={savingSettings}
-              onClick={() => {
-                const parsed: Record<string, number> = {};
-                for (const y of YEARS) parsed[y] = Number(yearDrafts[y] ?? settings.perYear?.[y]?.limit ?? 60);
-                void saveSettings({ yearLimits: parsed });
-              }}
-              className="mt-3 inline-flex min-h-[44px] items-center rounded-full bg-brand px-4 py-2 text-sm font-semibold text-black hover:bg-brandhover disabled:opacity-60"
-            >
-              Save year limits
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={savingSettings}
+                onClick={() => {
+                  const parsed: Record<string, number> = {};
+                  for (const y of YEARS) parsed[y] = Number(yearDrafts[y] ?? settings.perYear?.[y]?.limit ?? 60);
+                  void saveSettings({ yearLimits: parsed });
+                }}
+                className="mt-3 inline-flex min-h-[44px] items-center rounded-full bg-brand px-4 py-2 text-sm font-semibold text-black hover:bg-brandhover disabled:opacity-60"
+              >
+                Save year limits
+              </button>
+              <button
+                type="button"
+                disabled={migrating}
+                onClick={() => void migrateYears()}
+                title="Assign 24…→3rd year, 25…→2nd year (26…→1st, 23…→4th) to old registrations saved before the Year field"
+                className="mt-3 inline-flex min-h-[44px] items-center rounded-full border border-line px-4 py-2 text-sm font-semibold text-fog hover:text-cream disabled:opacity-60"
+              >
+                {migrating ? "Assigning…" : "Auto-assign years from roll no"}
+              </button>
+            </div>
+            {migrateMsg ? <p role="status" className="mt-2 text-xs text-fog">{migrateMsg}</p> : null}
           </div>
           <details className="mt-4 border-t border-line pt-4">
             <summary className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 text-sm font-semibold text-fog hover:text-cream">
@@ -641,7 +673,17 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
                     {label}
                     <input
                       value={newForm[k]}
-                      onChange={(e) => setNewForm((f) => ({ ...f, [k]: e.target.value }))}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setNewForm((f) => {
+                          const next = { ...f, [k]: v };
+                          if (k === "rollNo" && !f.year) {
+                            const detected = deriveYearFromRollNo(v);
+                            if (detected) next.year = detected;
+                          }
+                          return next;
+                        });
+                      }}
                       placeholder={ph}
                       autoComplete="off"
                       className="mt-1 w-full min-h-[44px] rounded-xl border border-line bg-surface px-3 py-2 text-sm text-cream placeholder:text-faint focus:ring-2 focus:ring-brand"

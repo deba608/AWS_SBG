@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import { mailConfigured } from "@/lib/mailer";
-import { getPassesByContact, issuePasses, registrationCount, ConflictError, RegistrationsClosedError, RegistrationsFullError, YearRegistrationsFullError } from "@/lib/pass-store";
+import { getPassesByContact, issuePasses, registrationCount, effectiveYearOf, ConflictError, RegistrationsClosedError, RegistrationsFullError, YearRegistrationsFullError } from "@/lib/pass-store";
 import { warnDefaultSecrets } from "@/lib/pass-token";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 import {
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
           mobile: user.mobile,
           gender: user.gender,
           food: user.food,
-          year: user.year ?? "",
+          year: effectiveYearOf(user) ?? "",
         },
         passes: withQr,
         duplicate,
@@ -128,7 +128,7 @@ export async function GET(req: Request) {
       mobile: found.user.mobile ?? "",
       gender: found.user.gender,
       food: found.user.food,
-      year: found.user.year ?? "",
+      year: effectiveYearOf(found.user) ?? "",
     },
     passes: withQr,
   });

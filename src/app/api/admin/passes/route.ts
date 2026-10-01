@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { clearAllRegistrations, listPasses } from "@/lib/pass-store";
+import { clearAllRegistrations, effectiveYearOf, listPasses } from "@/lib/pass-store";
 
 export async function GET(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
       rollNo: user?.rollNo ?? "—",
       gender: user?.gender ?? "—",
       food: user?.food ?? "—",
-      year: user?.year ?? "—",
+      year: (user ? (effectiveYearOf(user) ?? "—") : "—"),
     })),
   });
 }

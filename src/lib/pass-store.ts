@@ -9,7 +9,7 @@ import {
   type PassType,
 } from "./pass-token";
 import type { FoodPref, Gender, Year } from "./validate-contact";
-import { YEARS } from "./validate-contact";
+import { YEARS, deriveYearFromRollNo } from "./validate-contact";
 import { getRedis, withRedisLock } from "./pass-redis";
 
 export const DEFAULT_YEAR_LIMIT = 60;
@@ -259,9 +259,43 @@ export function yearLimitFor(year: Year, settings?: PassSettingsState | null): n
 export function countByYear(users: StoredUser[]): Record<Year, number> {
   const out = { "1st": 0, "2nd": 0, "3rd": 0, "4th": 0 } as Record<Year, number>;
   for (const u of users) {
-    if (u.year && u.year in out) out[u.year as Year] += 1;
+    const y = effectiveYearOf(u);
+    if (y) out[y] += 1;
   }
   return out;
+}
+
+/** Stored year wins; legacy rows without year fall back to roll-prefix (24→3rd, 25→2nd…). */
+export function effectiveYearOf(user: { year?: Year | null; rollNo: string }): Year | null {
+  if (user.year && (YEARS as string[]).includes(user.year)) return user.year;
+  return deriveYearFromRollNo(user.rollNo ?? "");
+}
+
+/** Persist roll-derived years onto legacy rows missing one. Returns fixed count. */
+function backfillYearsInPlace(store: StoreShape): number {
+  let fixed = 0;
+  for (const u of store.users) {
+    if (u.year && (YEARS as string[]).includes(u.year)) continue;
+    const derived = deriveYearFromRollNo(u.rollNo ?? "");
+    if (derived) {
+      u.year = derived;
+      fixed += 1;
+    }
+  }
+  return fixed;
+}
+
+/**
+ * One-shot migration: assigns 24…→3rd, 25…→2nd (etc.) to old
+ * registrations saved before the Year field existed. Idempotent.
+ */
+export async function migrateYears(): Promise<{ fixed: number; total: number; byYear: Record<Year, number> }> {
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const fixed = backfillYearsInPlace(store);
+    if (fixed > 0) await writeStore(store);
+    return { fixed, total: store.users.length, byYear: countByYear(store.users) };
+  });
 }
 
 export async function effectiveLimit(): Promise<number> {
@@ -385,7 +419,7 @@ export async function deleteUser(userId: string): Promise<{ removedPasses: numbe
     if (patch.year !== undefined) {
       const target = patch.year;
       if (!YEARS.includes(target)) throw new Error("Invalid year.");
-      if (target !== user.year) {
+      if (target !== effectiveYearOf(user)) {
         const byYear = countByYear(store.users);
         const limit = yearLimitFor(target, store.settings ?? null);
         if (byYear[target] >= limit) throw new YearRegistrationsFullError(target, limit);
@@ -424,7 +458,7 @@ export async function issuePasses(input: {
     throw new RegistrationsClosedError();
   }
   const yearLimit = yearLimitFor(year, store.settings ?? null);
-  const yearCount = store.users.filter((u) => u.year === year).length;
+  const yearCount = store.users.filter((u) => effectiveYearOf(u) === year).length;
   if (yearCount >= yearLimit) {
     throw new YearRegistrationsFullError(year, yearLimit);
   }
@@ -602,7 +636,7 @@ export async function listPasses(filter: {
     if (filter.type && filter.type !== "ALL" && pass.type !== filter.type) continue;
     if (filter.status && filter.status !== "ALL" && pass.status !== filter.status) continue;
     const user = store.users.find((u) => u.id === pass.userId) ?? null;
-    if (filter.year && filter.year !== "ALL" && user?.year !== filter.year) continue;
+    if (filter.year && filter.year !== "ALL" && effectiveYearOf({ year: user?.year, rollNo: user?.rollNo ?? "" }) !== filter.year) continue;
     if (q) {
       const hay = `${user?.name ?? ""} ${user?.serial ?? ""} ${user?.rollNo ?? ""} ${user?.email ?? ""} ${user?.mobile ?? ""} ${user?.food ?? ""} ${user?.year ?? ""} ${user?.gender ?? ""}`.toLowerCase();
       if (!hay.includes(q)) continue;

@@ -40,6 +40,22 @@ export const GENDERS: Gender[] = ["Male", "Female"];
 export const FOODS: FoodPref[] = ["Veg", "Non-veg"];
 export const YEARS: Year[] = ["1st", "2nd", "3rd", "4th"];
 
+/**
+ * Derive study year from roll-number prefix (admission year).
+ * 26… → 1st, 25… → 2nd, 24… → 3rd, 23… and earlier → 4th.
+ * Returns null when no leading 2-digit batch is found.
+ */
+export function deriveYearFromRollNo(rollNo: string): Year | null {
+  const m = /^\s*(\d{2})/.exec(rollNo ?? "");
+  if (!m) return null;
+  const yy = Number(m[1]);
+  if (!Number.isFinite(yy)) return null;
+  if (yy >= 26) return "1st";
+  if (yy === 25) return "2nd";
+  if (yy === 24) return "3rd";
+  return "4th";
+}
+
 export function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }

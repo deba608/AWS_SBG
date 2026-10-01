@@ -5,6 +5,7 @@ import { ArrowRight, Hash, Loader2, Mail, Phone, ShieldCheck, User } from "lucid
 import Modal from "@/components/Modal";
 import PassCard from "@/components/PassCard";
 import {
+  deriveYearFromRollNo,
   normalizedContact,
   validateContact,
   type ContactErrors,
@@ -285,7 +286,14 @@ export default function CommunityDayRegisterModal({
                   maxLength={20}
                   placeholder="24BTCSE26"
                   value={rollNo}
-                  onChange={(e) => setRollNo(e.target.value)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setRollNo(v);
+                    if (!year) {
+                      const detected = deriveYearFromRollNo(v);
+                      if (detected) setYear(detected);
+                    }
+                  }}
                   aria-invalid={Boolean(errors.rollNo)}
                   aria-describedby="scd-roll-hint"
                   className={cn(inputClasses(Boolean(errors.rollNo)), "uppercase")}
@@ -294,7 +302,7 @@ export default function CommunityDayRegisterModal({
               {errors.rollNo ? (
                 <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.rollNo}</p>
               ) : (
-                <p id="scd-roll-hint" className="mt-1.5 text-xs text-faint">As on your ID card.</p>
+                <p id="scd-roll-hint" className="mt-1.5 text-xs text-faint">As on your ID card. 24… → 3rd year, 25… → 2nd year (auto-filled below).</p>
               )}
             </div>
             <div>
