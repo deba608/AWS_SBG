@@ -1,0 +1,272 @@
+import { promises as fs } from "fs";
+import path from "path";
+import { YEARS, deriveYearFromRollNo, normalizeEmail, normalizeMobile, collapseSpaces, type Year } from "./validate-contact";
+import { getRedis, withRedisLock } from "./pass-redis";
+
+export const HACKATHON_MIN_MEMBERS = 2; // leader + at least 1 teammate
+export const HACKATHON_MAX_MEMBERS = 4; // leader + up to 3 teammates
+
+export interface HackathonMemberInput {
+  name: string;
+  rollNo: string;
+  email: string;
+  mobile: string;
+  year: string;
+}
+
+export interface HackathonTeamInput {
+  teamName: string;
+  leader: HackathonMemberInput;
+  members: HackathonMemberInput[];
+}
+
+export interface HackathonMember {
+  name: string;
+  rollNo: string;
+  email: string;
+  mobile: string;
+  year: Year;
+}
+
+export interface HackathonTeam {
+  id: string;
+  teamName: string;
+  leader: HackathonMember;
+  members: HackathonMember[];
+  createdAt: string;
+}
+
+interface HackathonStoreShape {
+  teams: HackathonTeam[];
+}
+
+const FILE = path.join(process.cwd(), ".data-hackathon", "hackathon.json");
+const REDIS_KEY = "sbg:hackathon:v1";
+const REDIS_LOCK = "sbg:hackathon:lock";
+
+const NAME_RE = /^[A-Za-z][A-Za-z.'\- ]*$/;
+const ROLL_RE = /^[A-Za-z0-9][A-Za-z0-9/.\- ]{2,19}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const TEAM_RE = /^[A-Za-z0-9][A-Za-z0-9 .'\-_]{1,38}[A-Za-z0-9]$/;
+
+function emptyStore(): HackathonStoreShape {
+  return { teams: [] };
+}
+
+function parseStore(raw: unknown): HackathonStoreShape {
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw) as HackathonStoreShape;
+      if (Array.isArray(parsed.teams)) return parsed;
+    } catch {
+      // fall through
+    }
+    return emptyStore();
+  }
+  if (typeof raw === "object" && raw !== null && Array.isArray((raw as HackathonStoreShape).teams)) {
+    return raw as HackathonStoreShape;
+  }
+  return emptyStore();
+}
+
+async function readStore(): Promise<HackathonStoreShape> {
+  const redis = getRedis();
+  if (redis) {
+    try {
+      return parseStore(await redis.get(REDIS_KEY));
+    } catch {
+      return emptyStore();
+    }
+  }
+  try {
+    return parseStore(await fs.readFile(FILE, "utf8"));
+  } catch {
+    return emptyStore();
+  }
+}
+
+async function writeStore(store: HackathonStoreShape): Promise<void> {
+  const redis = getRedis();
+  if (redis) {
+    await redis.set(REDIS_KEY, JSON.stringify(store));
+    return;
+  }
+  await fs.mkdir(path.dirname(FILE), { recursive: true });
+  const tmp = `${FILE}.${process.pid}.tmp`;
+  await fs.writeFile(tmp, JSON.stringify(store, null, 2), "utf8");
+  await fs.rename(tmp, FILE);
+}
+
+let writeQueue: Promise<unknown> = Promise.resolve();
+function withWriteLock<T>(fn: () => Promise<T>): Promise<T> {
+  const run = writeQueue.then(
+    () => withRedisLock(REDIS_LOCK, fn),
+    () => withRedisLock(REDIS_LOCK, fn),
+  );
+  writeQueue = run.catch(() => undefined);
+  return run;
+}
+
+/** Thrown on duplicate team name / member. Maps to 409. */
+export class HackathonConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "HackathonConflictError";
+  }
+}
+
+/** Thrown when team cap reached. Maps to 403. */
+export class HackathonFullError extends Error {
+  constructor(limit: number) {
+    super(`Hackathon registrations are full — all ${limit} team slots claimed.`);
+    this.name = "HackathonFullError";
+  }
+}
+
+/** Team cap (overridable via HACKATHON_MAX_TEAMS). */
+export function maxHackathonTeams(): number {
+  const n = Number(process.env.HACKATHON_MAX_TEAMS ?? 40);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 40;
+}
+
+export type MemberErrors = {
+  name?: string;
+  rollNo?: string;
+  email?: string;
+  mobile?: string;
+  year?: string;
+};
+
+export interface TeamErrors {
+  teamName?: string;
+  leader?: MemberErrors;
+  members?: MemberErrors[];
+  team?: string;
+}
+
+function validateMember(m: HackathonMemberInput): MemberErrors {
+  const errors: MemberErrors = {};
+  const name = collapseSpaces(m.name ?? "");
+  if (!name) errors.name = "Name required.";
+  else if (name.length < 2) errors.name = "Enter full name.";
+  else if (name.length > 60) errors.name = "Name too long (max 60).";
+  else if (!NAME_RE.test(name)) errors.name = "Letters, spaces ( . ' - ) only.";
+
+  const roll = String(m.rollNo ?? "").trim().toUpperCase();
+  if (!roll) errors.rollNo = "Roll number required.";
+  else if (roll.length > 20) errors.rollNo = "Roll number too long.";
+  else if (!ROLL_RE.test(roll)) errors.rollNo = "Enter a valid roll number.";
+
+  const email = normalizeEmail(String(m.email ?? ""));
+  if (!email) errors.email = "College mail required.";
+  else if (email.length > 100) errors.email = "Email too long.";
+  else if (!EMAIL_RE.test(email)) errors.email = "Enter a valid email.";
+  else if (!email.endsWith("@suiit.ac.in")) errors.email = "Use SUIIT mail (@suiit.ac.in).";
+
+  const mobile = normalizeMobile(String(m.mobile ?? ""));
+  if (!mobile) errors.mobile = "Mobile required.";
+  else if (!/^[6-9]\d{9}$/.test(mobile)) errors.mobile = "Enter a valid 10-digit Indian mobile.";
+
+  const year = String(m.year ?? "");
+  if (!YEARS.includes(year as Year)) {
+    const derived = deriveYearFromRollNo(String(m.rollNo ?? ""));
+    if (!derived) errors.year = "Select year.";
+  }
+  return errors;
+}
+
+export function validateTeam(input: HackathonTeamInput): TeamErrors {
+  const errors: TeamErrors = {};
+  const teamName = collapseSpaces(input.teamName ?? "");
+  if (!teamName) errors.teamName = "Team name is required.";
+  else if (teamName.length < 3) errors.teamName = "Team name too short (min 3).";
+  else if (teamName.length > 40) errors.teamName = "Team name too long (max 40).";
+  else if (!TEAM_RE.test(teamName)) errors.teamName = "Letters, numbers, spaces ( . ' - _ ) only.";
+
+  const leaderErr = validateMember(input.leader ?? ({} as HackathonMemberInput));
+  if (Object.keys(leaderErr).length > 0) errors.leader = leaderErr;
+
+  const members = Array.isArray(input.members) ? input.members : [];
+  if (members.length + 1 < HACKATHON_MIN_MEMBERS) {
+    errors.team = `Add at least ${HACKATHON_MIN_MEMBERS - 1} teammate (teams of ${HACKATHON_MIN_MEMBERS}–${HACKATHON_MAX_MEMBERS}).`;
+  } else if (members.length + 1 > HACKATHON_MAX_MEMBERS) {
+    errors.team = `Max ${HACKATHON_MAX_MEMBERS} per team — remove ${members.length + 1 - HACKATHON_MAX_MEMBERS}.`;
+  }
+  const memberErrs = members.map(validateMember);
+  if (memberErrs.some((e) => Object.keys(e).length > 0)) errors.members = memberErrs;
+  return errors;
+}
+
+function normalizeMember(m: HackathonMemberInput): HackathonMember {
+  const year = String(m.year ?? "");
+  return {
+    name: collapseSpaces(m.name ?? ""),
+    rollNo: String(m.rollNo ?? "").trim().toUpperCase(),
+    email: normalizeEmail(String(m.email ?? "")),
+    mobile: normalizeMobile(String(m.mobile ?? "")),
+    year: (YEARS.includes(year as Year) ? year : (deriveYearFromRollNo(String(m.rollNo ?? "")) as Year)) ?? "1st",
+  };
+}
+
+function allPeople(team: { leader: HackathonMember; members: HackathonMember[] }): HackathonMember[] {
+  return [team.leader, ...team.members];
+}
+
+export async function hackathonCount(): Promise<{ registered: number; limit: number; open: boolean }> {
+  const store = await readStore();
+  const limit = maxHackathonTeams();
+  return { registered: store.teams.length, limit, open: store.teams.length < limit };
+}
+
+export async function registerTeam(input: HackathonTeamInput): Promise<{ team: HackathonTeam }> {
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const teamName = collapseSpaces(input.teamName ?? "");
+    if (store.teams.some((t) => t.teamName.toLowerCase() === teamName.toLowerCase())) {
+      throw new HackathonConflictError(`Team name "${teamName}" is already taken — pick another.`);
+    }
+    const leader = normalizeMember(input.leader);
+    const members = (Array.isArray(input.members) ? input.members : []).map(normalizeMember);
+    // one student = one team
+    const seen = new Map<string, string>(); // contact key -> who
+    const claim = (who: string, email: string, roll: string, mobile: string) => {
+      for (const [key, label] of [["e:" + email, "email"], ["r:" + roll, "roll number"], ["m:" + mobile, "mobile"]] as const) {
+        if (seen.has(key)) throw new HackathonConflictError(`${who} and ${seen.get(key)} share the same ${label} — each member must be unique.`);
+        seen.set(key, who);
+      }
+    };
+    claim(`${leader.name} (leader)`, leader.email, leader.rollNo, leader.mobile);
+    members.forEach((m) => claim(m.name, m.email, m.rollNo, m.mobile));
+    for (const t of store.teams) {
+      for (const p of allPeople({ leader, members })) {
+        const clash = allPeople(t).find(
+          (q) => q.email === p.email || q.rollNo === p.rollNo || (p.mobile !== "" && q.mobile === p.mobile),
+        );
+        if (clash) {
+          throw new HackathonConflictError(
+            `${p.name} is already registered with team "${t.teamName}" — one student, one team.`,
+          );
+        }
+      }
+    }
+    const limit = maxHackathonTeams();
+    if (store.teams.length >= limit) throw new HackathonFullError(limit);
+    const now = new Date().toISOString();
+    const team: HackathonTeam = {
+      id: `h_${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`,
+      teamName,
+      leader,
+      members,
+      createdAt: now,
+    };
+    store.teams.push(team);
+    await writeStore(store);
+    return { team };
+  });
+}
+
+export async function listHackathonTeams(): Promise<{ teams: HackathonTeam[]; total: number }> {
+  const store = await readStore();
+  const teams = [...store.teams].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return { teams, total: teams.length };
+}
