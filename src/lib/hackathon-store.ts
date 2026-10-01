@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { YEARS, FOODS, GENDERS, deriveYearFromRollNo, normalizeEmail, normalizeMobile, collapseSpaces, type Year, type FoodPref, type Gender } from "./validate-contact";
+import { YEARS, GENDERS, deriveYearFromRollNo, normalizeEmail, normalizeMobile, collapseSpaces, type Year, type FoodPref, type Gender } from "./validate-contact";
 import { getRedis, withRedisLock } from "./pass-redis";
 
 export const HACKATHON_MIN_MEMBERS = 4; // leader + 3 teammates, exact
@@ -15,7 +15,6 @@ export interface HackathonMemberInput {
   email: string;
   mobile: string;
   year: string;
-  food: string;
   gender: string;
   githubUrl: string;
 }
@@ -34,9 +33,10 @@ export interface HackathonMember {
   email: string;
   mobile: string;
   year: Year;
-  food: FoodPref;
   gender: Gender;
   githubUrl: string;
+  /** Legacy: food was collected before it moved to the SCD pass. */
+  food?: FoodPref;
 }
 
 export interface HackathonTeam {
@@ -147,7 +147,6 @@ export type MemberErrors = {
   email?: string;
   mobile?: string;
   year?: string;
-  food?: string;
   gender?: string;
   githubUrl?: string;
 };
@@ -190,7 +189,6 @@ function validateMember(m: HackathonMemberInput, opts?: { githubRequired?: boole
     if (!derived) errors.year = "Select year.";
   }
 
-  if (!FOODS.includes(m.food as FoodPref)) errors.food = "Pick Veg or Non-veg.";
   if (!GENDERS.includes(m.gender as Gender)) errors.gender = "Pick Male or Female.";
 
   const github = String(m.githubUrl ?? "").trim();
@@ -247,7 +245,6 @@ function normalizeMember(m: HackathonMemberInput): HackathonMember {
     email: normalizeEmail(String(m.email ?? "")),
     mobile: normalizeMobile(String(m.mobile ?? "")),
     year: resolved,
-    food: (FOODS.includes(m.food as FoodPref) ? m.food : "Veg") as FoodPref,
     gender: (GENDERS.includes(m.gender as Gender) ? m.gender : "Male") as Gender,
     githubUrl: String(m.githubUrl ?? "").trim(),
   };
@@ -314,8 +311,7 @@ export async function registerTeam(input: HackathonTeamInput): Promise<{ team: H
   });
 }
 
-export async function listHackathonTeams(): Promise<{ teams: HackathonTeam[]; total: number }> {
-  const store = await readStore();
+export async function listHackathonTeams(): Promise<{ teams: HackathonTeam[]; total: number }> {  const store = await readStore();
   const teams = [...store.teams].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   return { teams, total: teams.length };
 }
