@@ -225,16 +225,14 @@ export function validateTeam(input: HackathonTeamInput): TeamErrors {
     errors.declaration = "Please accept the declaration to register.";
   }
 
-  const leaderErr = validateMember(input.leader ?? ({} as HackathonMemberInput));
+  const leaderErr = validateMember(input.leader ?? ({} as HackathonMemberInput), { githubRequired: true });
   if (Object.keys(leaderErr).length > 0) errors.leader = leaderErr;
 
   const members = Array.isArray(input.members) ? input.members : [];
-  if (members.length + 1 < HACKATHON_MIN_MEMBERS) {
-    errors.team = `Add at least ${HACKATHON_MIN_MEMBERS - 1} teammate (teams of ${HACKATHON_MIN_MEMBERS}–${HACKATHON_MAX_MEMBERS}).`;
-  } else if (members.length + 1 > HACKATHON_MAX_MEMBERS) {
-    errors.team = `Max ${HACKATHON_MAX_MEMBERS} per team — remove ${members.length + 1 - HACKATHON_MAX_MEMBERS}.`;
+  if (members.length + 1 !== HACKATHON_MAX_MEMBERS) {
+    errors.team = `Team must have exactly ${HACKATHON_MAX_MEMBERS} members (leader + ${HACKATHON_MAX_MEMBERS - 1} teammates).`;
   }
-  const memberErrs = members.map(validateMember);
+  const memberErrs = members.map((m) => validateMember(m));
   if (memberErrs.some((e) => Object.keys(e).length > 0)) errors.members = memberErrs;
   return errors;
 }

@@ -6,27 +6,27 @@ import { SITE } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "DecodeX Hackathon — Team Registration · ₹15,000 Prize Pool",
   description:
-    "Register your team (2–4 members) for the DecodeX Hackathon on Day 1, 6th October 2026 at SUIIT. ₹15,000 prize pool: 1st ₹7,000, 2nd ₹5,000, 3rd ₹3,000.",
+    "Register your team (exactly 4 members) for the DecodeX Hackathon on Day 1, 6th October 2026 at SUIIT. ₹15,000 prize pool: 1st ₹7,000, 2nd ₹5,000, 3rd ₹3,000.",
   alternates: { canonical: "/hackathon" },
   openGraph: {
     url: "/hackathon",
     title: `DecodeX Hackathon Team Registration · ${SITE.shortName}`,
     description:
-      "Day 1, 6th October — register your team of 2–4. ₹15,000 prize pool. Separate from the Community Day pass.",
+      "Day 1, 6th October — register your team of exactly 4. ₹15,000 prize pool. Separate from the Community Day pass.",
   },
 };
 
 const rules = [
-  { icon: Users, text: "Teams of 2–4 · one student, one team · SUIIT mail required" },
+  { icon: Users, text: "Teams of exactly 4 · one student, one team · SUIIT mail required" },
   { icon: CalendarDays, text: "Day 1 — Tuesday, 6th October 2026, 9:00 AM onwards" },
   { icon: MapPin, text: "APJ Abdul Kalam Auditorium, SUIIT, Burla" },
   { icon: Trophy, text: "₹15,000 prize pool · winners felicitated on Day 3" },
 ];
 
 const prizes = [
-  { icon: Trophy, label: "1st Prize", amount: "₹7,000", tone: "border-amber-400/50 bg-amber-400/10 text-amber-300" },
-  { icon: Medal, label: "2nd Prize", amount: "₹5,000", tone: "border-slate-300/40 bg-slate-300/10 text-slate-200" },
-  { icon: Award, label: "3rd Prize", amount: "₹3,000", tone: "border-orange-400/50 bg-orange-400/10 text-orange-300" },
+  { icon: Medal, label: "2nd Prize", amount: "₹5,000", place: "2", tone: "border-slate-300/40 bg-slate-300/10 text-slate-200", bar: "h-16 sm:h-20", order: "order-1 sm:order-1" },
+  { icon: Trophy, label: "1st Prize", amount: "₹7,000", place: "1", tone: "border-amber-400/60 bg-amber-400/15 text-amber-300 shadow-[0_0_40px_rgba(251,191,36,0.25)]", bar: "h-24 sm:h-32", order: "order-first sm:order-2" },
+  { icon: Award, label: "3rd Prize", amount: "₹3,000", place: "3", tone: "border-orange-400/50 bg-orange-400/10 text-orange-300", bar: "h-12 sm:h-16", order: "order-2 sm:order-3" },
 ];
 
 export default function HackathonPage() {

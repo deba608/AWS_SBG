@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Cpu, Layers, Loader2, Plus, Terminal, Trash2, User, Users } from "lucide-react";
+import { ArrowRight, Cpu, Layers, Loader2, Terminal, Trash2, User, Users } from "lucide-react";
 import Container from "@/components/Container";
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
@@ -10,8 +10,7 @@ import { deriveYearFromRollNo, type FoodPref, type Gender, type Year } from "@/l
 import type { MemberErrors, TeamErrors } from "@/lib/hackathon-store";
 import { cn } from "@/lib/utils";
 
-// Mirrors HACKATHON_MIN/MAX_MEMBERS + HACKATHON_PREFERENCES in lib/hackathon-store (not imported: server-only module).
-const TEAM_MIN = 2;
+// Mirrors HACKATHON_MAX_MEMBERS + HACKATHON_PREFERENCES in lib/hackathon-store (not imported: server-only module).
 const TEAM_MAX = 4;
 const PREFS = ["Hardware", "Software", "Both"] as const;
 const PREF_ICONS = { Hardware: Cpu, Software: Terminal, Both: Layers } as const;
@@ -144,7 +143,7 @@ function MemberFields({
       </div>
       {showGithub ? (
         <div className="mt-3">
-          <Field label="GitHub profile URL (optional)" value={value.githubUrl} onChange={set("githubUrl")} error={errors?.githubUrl} placeholder="https://github.com/username" type="url" inputMode="text" maxLength={200} autoComplete="url" />
+          <Field label="GitHub profile URL *" value={value.githubUrl} onChange={set("githubUrl")} error={errors?.githubUrl} placeholder="https://github.com/username" type="url" inputMode="text" maxLength={200} autoComplete="url" />
         </div>
       ) : null}
     </div>
@@ -199,12 +198,13 @@ export default function HackathonClient() {
   const [preference, setPreference] = useState("");
   const [declaration, setDeclaration] = useState(false);
   const [leader, setLeader] = useState<MemberForm>(blankMember());
-  const [members, setMembers] = useState<MemberForm[]>([blankMember()]);
+  const [members, setMembers] = useState<MemberForm[]>([blankMember(), blankMember(), blankMember()]);
   const [errors, setErrors] = useState<TeamErrors>({});
   const [status, setStatus] = useState<"form" | "busy" | "done">("form");
   const [apiError, setApiError] = useState("");
   const [team, setTeam] = useState<RegisteredTeam | null>(null);
   const [slots, setSlots] = useState<{ registered: number; limit: number; open: boolean } | null>(null);
+  // Fixed squad: leader + exactly 3 teammates.
 
   useEffect(() => {
     fetch("/api/hackathon/register?count=1", { cache: "no-store" })
@@ -280,14 +280,15 @@ export default function HackathonClient() {
     );
   }
 
-  const canAdd = members.length + 1 < TEAM_MAX;
-
   function fillDemo() {
     setTeamName("Demo Debuggers");
-    setLeader({ name: "Aarav Sharma", rollNo: "24BTCSE01", email: "24btcse01@suiit.ac.in", mobile: "9437100001", year: "3rd", food: "Veg", gender: "Male" });
+    setPreference("Both");
+    setDeclaration(true);
+    setLeader({ name: "Aarav Sharma", rollNo: "24BTCSE01", email: "24btcse01@suiit.ac.in", mobile: "9437100001", year: "3rd", food: "Veg", gender: "Male", githubUrl: "https://github.com/aaravsharma" });
     setMembers([
-      { name: "Diya Patel", rollNo: "24BTCSE02", email: "24btcse02@suiit.ac.in", mobile: "9437100002", year: "3rd", food: "Non-veg", gender: "Female" },
-      { name: "Rohan Das", rollNo: "25BTCSE11", email: "25btcse11@suiit.ac.in", mobile: "9437100003", year: "2nd", food: "Veg", gender: "Male" },
+      { name: "Diya Patel", rollNo: "24BTCSE02", email: "24btcse02@suiit.ac.in", mobile: "9437100002", year: "3rd", food: "Non-veg", gender: "Female", githubUrl: "" },
+      { name: "Rohan Das", rollNo: "25BTCSE11", email: "25btcse11@suiit.ac.in", mobile: "9437100003", year: "2nd", food: "Veg", gender: "Male", githubUrl: "" },
+      { name: "Sneha Mishra", rollNo: "25BTCSE12", email: "25btcse12@suiit.ac.in", mobile: "9437100004", year: "2nd", food: "Veg", gender: "Female", githubUrl: "" },
     ]);
     setErrors({});
     setApiError("");
@@ -305,6 +306,16 @@ export default function HackathonClient() {
         </p>
       ) : null}
       <form noValidate onSubmit={submit} className="space-y-4">
+        <div className="flex justify-end print:hidden">
+          <button
+            type="button"
+            onClick={fillDemo}
+            title="Fill sample values to preview the form — edit before submitting"
+            className="inline-flex min-h-[40px] items-center rounded-full border border-dashed border-line px-4 py-1.5 text-xs font-semibold text-faint hover:text-cream"
+          >
+            Fill demo data
+          </button>
+        </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-cream">Team name *</label>
           <input
@@ -331,6 +342,10 @@ export default function HackathonClient() {
           showGithub
         />
 
+        <p className="rounded-xl border border-line bg-ink/40 p-3 text-sm text-fog">
+          Squad of <span className="font-mono font-bold text-cream">4</span> — leader + 3 teammates, all required.
+        </p>
+
         {members.map((m, i) => (
           <MemberFields
             key={i}
@@ -340,26 +355,13 @@ export default function HackathonClient() {
             onChange={(v) => setMembers((prev) => prev.map((p, j) => (j === i ? v : p)))}
             errors={errors.members?.[i]}
             idPrefix={`hack-member-${i}`}
-            removable={members.length > 1}
-            onRemove={() => setMembers((prev) => prev.filter((_, j) => j !== i))}
           />
         ))}
-
-        {canAdd ? (
-          <button
-            type="button"
-            onClick={() => setMembers((prev) => [...prev, blankMember()])}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-semibold text-fog hover:text-cream"
-          >
-            <Plus className="h-4 w-4" aria-hidden />
-            Add teammate ({members.length + 1}/{TEAM_MAX})
-          </button>
-        ) : null}
 
         {errors.team ? (
           <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">{errors.team}</p>
         ) : (
-          <p className="text-xs text-faint">Teams of {TEAM_MIN}–{TEAM_MAX} · one student, one team · SUIIT mail required.</p>
+          <p className="text-xs text-faint">Teams of exactly {TEAM_MAX} · one student, one team · SUIIT mail required.</p>
         )}
         <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm leading-relaxed ${errors.declaration ? "border-red-400/70 bg-red-500/10" : "border-line bg-ink/40"}`}>
           <input
