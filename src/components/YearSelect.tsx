@@ -38,7 +38,7 @@ export default function YearSelect({
               aria-checked={active}
               disabled={full && !active}
               onClick={() => onChange(y)}
-              title={slot ? `${slot.registered}/${slot.limit} claimed` : undefined}
+              title={full ? "Full" : undefined}
               className={cn(
                 "relative flex min-h-[44px] flex-col items-center justify-center rounded-xl border px-3 py-1.5 text-sm font-semibold transition-all",
                 active
@@ -49,10 +49,8 @@ export default function YearSelect({
               )}
             >
               <span>{y} year</span>
-              {slot ? (
-                <span className="font-mono text-[10px] font-normal text-faint">
-                  {slot.registered}/{slot.limit}{full ? " · full" : ""}
-                </span>
+              {full ? (
+                <span className="font-mono text-[10px] font-normal text-faint">full</span>
               ) : null}
               {active ? (
                 <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand">
