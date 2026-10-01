@@ -1,6 +1,6 @@
 "use client";
 
-import { Drumstick, Leaf } from "lucide-react";
+import { Beef, Leaf } from "lucide-react";
 import { FOODS, type FoodPref } from "@/lib/validate-contact";
 import { cn } from "@/lib/utils";
 
@@ -8,17 +8,19 @@ export default function FoodSelect({
   value,
   onChange,
   labelId,
+  label,
   error,
 }: {
   value: string;
   onChange: (f: FoodPref) => void;
   labelId: string;
+  label?: string;
   error?: string;
 }) {
   return (
     <div>
       <span className="mb-1.5 block text-sm font-medium text-cream" id={labelId}>
-        Food preference *
+        {label ?? "Food preference *"}
       </span>
       <div
         role="radiogroup"
@@ -47,7 +49,7 @@ export default function FoodSelect({
               {veg ? (
                 <Leaf className="h-4 w-4 text-current" aria-hidden />
               ) : (
-                <Drumstick className="h-4 w-4 text-current" aria-hidden />
+                <Beef className="h-4 w-4 text-current" aria-hidden />
               )}
               {veg ? "Veg" : "Non-veg"}
             </button>

@@ -402,6 +402,20 @@ export async function deleteHackathonTeam(id: string): Promise<{ removedMembers:
   });
 }
 
+/** Day-1 lunch headcount across hackathon teams — kept separate from SCD pass lunch. */
+export async function hackathonLunchCounts(): Promise<{ veg: number; nonveg: number; total: number }> {
+  const store = await readStore();
+  let veg = 0;
+  let nonveg = 0;
+  for (const t of store.teams) {
+    for (const p of allPeople(t)) {
+      if (p.lunch === "Non-veg") nonveg += 1;
+      else veg += 1;
+    }
+  }
+  return { veg, nonveg, total: veg + nonveg };
+}
+
 export async function listHackathonTeams(): Promise<{ teams: HackathonTeam[]; total: number }> {  const store = await readStore();
   const teams = [...store.teams].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   return { teams, total: teams.length };

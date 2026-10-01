@@ -3,6 +3,7 @@ import { isAdmin } from "@/lib/admin-auth";
 import {
   deleteHackathonTeam,
   hackathonCount,
+  hackathonLunchCounts,
   listHackathonTeams,
   registerTeam,
   updateHackathonTeam,
@@ -24,10 +25,10 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const { teams, total } = await listHackathonTeams();
   if (searchParams.get("format") === "csv") {
-    const header = ["team", "preference", "role", "name", "email", "mobile", "roll_no", "year", "gender", "github_url", "registered_at"];
+    const header = ["team", "preference", "role", "name", "email", "mobile", "roll_no", "year", "gender", "day1_lunch", "github_url", "registered_at"];
     const lines: string[][] = [];
-    const memberLine = (teamName: string, preference: string, role: string, m: { name: string; email: string; mobile: string; rollNo: string; year: string; gender: string; githubUrl?: string }, at: string) =>
-      [teamName, preference, role, m.name, m.email, m.mobile, m.rollNo, m.year, m.gender, m.githubUrl ?? "", at];
+    const memberLine = (teamName: string, preference: string, role: string, m: { name: string; email: string; mobile: string; rollNo: string; year: string; gender: string; lunch?: string; githubUrl?: string }, at: string) =>
+      [teamName, preference, role, m.name, m.email, m.mobile, m.rollNo, m.year, m.gender, m.lunch ?? "", m.githubUrl ?? "", at];
     for (const t of teams) {
       const pref = t.preference ?? "";
       lines.push(memberLine(t.teamName, pref, "leader", t.leader, t.createdAt));
@@ -44,7 +45,8 @@ export async function GET(req: Request) {
     });
   }
   const count = await hackathonCount();
-  return NextResponse.json({ total, registered: count.registered, limit: count.limit, open: count.open, teams });
+  const lunch = await hackathonLunchCounts();
+  return NextResponse.json({ total, registered: count.registered, limit: count.limit, open: count.open, lunch, teams });
 }
 
 function memberOf(v: unknown): HackathonMemberInput {
@@ -57,6 +59,7 @@ function memberOf(v: unknown): HackathonMemberInput {
     year: String(o.year ?? ""),
     gender: String(o.gender ?? ""),
     githubUrl: String(o.githubUrl ?? ""),
+    lunch: String(o.lunch ?? ""),
   };
 }
 

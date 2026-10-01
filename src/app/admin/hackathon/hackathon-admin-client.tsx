@@ -18,6 +18,7 @@ interface Member {
   year: string;
   gender?: string;
   githubUrl?: string;
+  lunch?: string;
 }
 
 interface Team {
@@ -37,6 +38,7 @@ interface MemberDraft {
   year: string;
   gender: string;
   githubUrl: string;
+  lunch: string;
 }
 
 interface TeamDraft {
@@ -54,6 +56,7 @@ const blankMember = (): MemberDraft => ({
   year: "",
   gender: "",
   githubUrl: "",
+  lunch: "",
 });
 
 const blankTeam = (): TeamDraft => ({
@@ -72,6 +75,7 @@ function toDraft(t: Team): TeamDraft {
     year: x.year ?? "",
     gender: x.gender ?? "",
     githubUrl: x.githubUrl ?? "",
+    lunch: x.lunch ?? "",
   });
   return { teamName: t.teamName, preference: t.preference ?? "", leader: m(t.leader), members: t.members.map(m) };
 }
@@ -154,6 +158,15 @@ function MemberEditor({
             <option value="Female">Female</option>
           </select>
           {errors?.gender ? <span className="text-red-300">{errors.gender}</span> : null}
+        </label>
+        <label className="block text-xs text-faint">
+          Day-1 lunch *
+          <select value={value.lunch} onChange={set("lunch")} className={selectCls + " mt-1 w-full"}>
+            <option value="">Select lunch</option>
+            <option value="Veg">Veg</option>
+            <option value="Non-veg">Non-veg</option>
+          </select>
+          {errors?.lunch ? <span className="text-red-300">{errors.lunch}</span> : null}
         </label>
         {showGithub ? (
           <label className="block text-xs text-faint sm:col-span-2">
@@ -247,6 +260,7 @@ export default function HackathonAdminClient() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [total, setTotal] = useState(0);
   const [limit, setLimit] = useState(0);
+  const [lunch, setLunch] = useState<{ veg: number; nonveg: number; total: number } | null>(null);
   const [q, setQ] = useState("");
   const [prefFilter, setPrefFilter] = useState("ALL");
   const [loading, setLoading] = useState(false);
@@ -282,6 +296,7 @@ export default function HackathonAdminClient() {
         setTeams(d.teams as Team[]);
         setTotal(d.total as number);
         setLimit(d.limit as number);
+        if (d.lunch) setLunch(d.lunch as { veg: number; nonveg: number; total: number });
       }
     } finally {
       setLoading(false);
@@ -415,6 +430,11 @@ export default function HackathonAdminClient() {
             {p}: <span className="ml-1 font-mono font-bold text-cream">{n}</span>
           </span>
         ))}
+        {lunch ? (
+          <span className="inline-flex min-h-[44px] items-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-2 text-xs font-bold text-emerald-300" title="Hackathon Day-1 lunch only — not Community Day lunch">
+            Day-1 lunch · VEG {lunch.veg} / NON-VEG {lunch.nonveg}
+          </span>
+        ) : null}
         <span className="flex-1" aria-hidden />
         <a
           href="/api/admin/hackathon?format=csv"
@@ -515,6 +535,14 @@ export default function HackathonAdminClient() {
                   <td className="px-4 py-2 text-xs text-fog">
                     <span className="font-medium text-cream">{t.leader.name}</span>
                     <br />{t.leader.email}<br />{t.leader.mobile} · {t.leader.rollNo} · {t.leader.year} yr
+                    {t.leader.lunch ? (
+                      <span className={cn(
+                        "ml-1.5 inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold",
+                        t.leader.lunch === "Veg" ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300" : "border-red-400/40 bg-red-400/10 text-red-300",
+                      )}>
+                        {t.leader.lunch === "Veg" ? "VEG" : "NON-VEG"}
+                      </span>
+                    ) : null}
                     {t.leader.githubUrl ? (
                       <><br /><a href={t.leader.githubUrl} target="_blank" rel="noopener noreferrer" className="break-all text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">GitHub</a></>
                     ) : null}
@@ -524,7 +552,7 @@ export default function HackathonAdminClient() {
                       <ul className="space-y-1">
                         {t.members.map((m) => (
                           <li key={m.rollNo}>
-                            <span className="font-medium text-cream">{m.name}</span> · {m.rollNo} · {m.year} yr
+                            <span className="font-medium text-cream">{m.name}</span> · {m.rollNo} · {m.year} yr{m.lunch ? ` · ${m.lunch}` : ""}
                           </li>
                         ))}
                       </ul>
