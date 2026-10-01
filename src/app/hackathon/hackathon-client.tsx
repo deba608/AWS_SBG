@@ -282,6 +282,17 @@ export default function HackathonClient() {
 
   const canAdd = members.length + 1 < TEAM_MAX;
 
+  function fillDemo() {
+    setTeamName("Demo Debuggers");
+    setLeader({ name: "Aarav Sharma", rollNo: "24BTCSE01", email: "24btcse01@suiit.ac.in", mobile: "9437100001", year: "3rd", food: "Veg", gender: "Male" });
+    setMembers([
+      { name: "Diya Patel", rollNo: "24BTCSE02", email: "24btcse02@suiit.ac.in", mobile: "9437100002", year: "3rd", food: "Non-veg", gender: "Female" },
+      { name: "Rohan Das", rollNo: "25BTCSE11", email: "25btcse11@suiit.ac.in", mobile: "9437100003", year: "2nd", food: "Veg", gender: "Male" },
+    ]);
+    setErrors({});
+    setApiError("");
+  }
+
   return (
     <Container className="rank-card p-5 sm:p-6">
       {slots && !slots.open ? (
@@ -347,7 +358,9 @@ export default function HackathonClient() {
 
         {errors.team ? (
           <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">{errors.team}</p>
-        ) : null}
+        ) : (
+          <p className="text-xs text-faint">Teams of {TEAM_MIN}–{TEAM_MAX} · one student, one team · SUIIT mail required.</p>
+        )}
         <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm leading-relaxed ${errors.declaration ? "border-red-400/70 bg-red-500/10" : "border-line bg-ink/40"}`}>
           <input
             type="checkbox"

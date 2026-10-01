@@ -3,8 +3,8 @@ import path from "path";
 import { YEARS, FOODS, GENDERS, deriveYearFromRollNo, normalizeEmail, normalizeMobile, collapseSpaces, type Year, type FoodPref, type Gender } from "./validate-contact";
 import { getRedis, withRedisLock } from "./pass-redis";
 
-export const HACKATHON_MIN_MEMBERS = 2; // leader + at least 1 teammate
-export const HACKATHON_MAX_MEMBERS = 4; // leader + up to 3 teammates
+export const HACKATHON_MIN_MEMBERS = 4; // leader + 3 teammates, exact
+export const HACKATHON_MAX_MEMBERS = 4; // leader + 3 teammates, exact
 
 export type HackathonPreference = "Hardware" | "Software" | "Both";
 export const HACKATHON_PREFERENCES: HackathonPreference[] = ["Hardware", "Software", "Both"];
@@ -161,7 +161,7 @@ export interface TeamErrors {
   team?: string;
 }
 
-function validateMember(m: HackathonMemberInput): MemberErrors {
+function validateMember(m: HackathonMemberInput, opts?: { githubRequired?: boolean }): MemberErrors {
   const errors: MemberErrors = {};
   const name = collapseSpaces(m.name ?? "");
   if (!name) errors.name = "Name required.";
@@ -194,16 +194,17 @@ function validateMember(m: HackathonMemberInput): MemberErrors {
   if (!GENDERS.includes(m.gender as Gender)) errors.gender = "Pick Male or Female.";
 
   const github = String(m.githubUrl ?? "").trim();
-  if (github) {
-    if (github.length > 200) errors.githubUrl = "GitHub URL too long.";
-    else {
-      try {
-        const u = new URL(github);
-        if (u.protocol !== "http:" && u.protocol !== "https:") errors.githubUrl = "Enter a valid URL.";
-        else if (!u.hostname.toLowerCase().includes("github.com")) errors.githubUrl = "Must be a github.com URL.";
-      } catch {
-        errors.githubUrl = "Enter full URL (https://github.com/…).";
-      }
+  if (!github) {
+    if (opts?.githubRequired) errors.githubUrl = "Leader GitHub profile URL is required.";
+  } else if (github.length > 200) {
+    errors.githubUrl = "GitHub URL too long.";
+  } else {
+    try {
+      const u = new URL(github);
+      if (u.protocol !== "http:" && u.protocol !== "https:") errors.githubUrl = "Enter a valid URL.";
+      else if (!u.hostname.toLowerCase().includes("github.com")) errors.githubUrl = "Must be a github.com URL.";
+    } catch {
+      errors.githubUrl = "Enter full URL (https://github.com/…).";
     }
   }
   return errors;

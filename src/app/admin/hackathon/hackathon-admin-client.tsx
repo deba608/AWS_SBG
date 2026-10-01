@@ -13,11 +13,13 @@ interface Member {
   year: string;
   food?: string;
   gender?: string;
+  githubUrl?: string;
 }
 
 interface Team {
   id: string;
   teamName: string;
+  preference?: string;
   leader: Member;
   members: Member[];
   createdAt: string;
@@ -75,7 +77,7 @@ export default function HackathonAdminClient() {
   const needle = q.trim().toLowerCase();
   const filtered = needle
     ? teams.filter((t) =>
-        [t.teamName, t.leader.name, t.leader.rollNo, t.leader.email, ...t.members.flatMap((m) => [m.name, m.rollNo, m.email])]
+        [t.teamName, t.preference ?? "", t.leader.name, t.leader.rollNo, t.leader.email, ...t.members.flatMap((m) => [m.name, m.rollNo, m.email])]
           .join(" ")
           .toLowerCase()
           .includes(needle),
@@ -142,10 +144,18 @@ export default function HackathonAdminClient() {
             <tbody>
               {filtered.map((t) => (
                 <tr key={t.id} className="border-t border-line align-top">
-                  <td className="px-4 py-2 font-semibold text-cream">{t.teamName}</td>
+                  <td className="px-4 py-2">
+                    <span className="font-semibold text-cream">{t.teamName}</span>
+                    {t.preference ? (
+                      <span className="mt-1 inline-block rounded-full border border-brand/40 bg-brand/10 px-2 py-0.5 text-[11px] font-bold text-brand">{t.preference}</span>
+                    ) : null}
+                  </td>
                   <td className="px-4 py-2 text-xs text-fog">
                     <span className="font-medium text-cream">{t.leader.name}</span>
                     <br />{t.leader.email}<br />{t.leader.mobile} · {t.leader.rollNo} · {t.leader.year} yr{t.leader.gender ? ` · ${t.leader.gender}` : ""}{t.leader.food ? ` · ${t.leader.food}` : ""}
+                    {t.leader.githubUrl ? (
+                      <><br /><a href={t.leader.githubUrl} target="_blank" rel="noopener noreferrer" className="break-all text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">GitHub</a></>
+                    ) : null}
                   </td>
                   <td className="px-4 py-2 text-xs text-fog">
                     {t.members.length === 0 ? "—" : (
