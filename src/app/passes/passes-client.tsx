@@ -266,10 +266,8 @@ export default function PassesClient() {
             aria-invalid={Boolean(errors.rollNo)}
             className={cn(inputCls(Boolean(errors.rollNo)), "uppercase")}
           />
-          {errors.rollNo ? (
+          {errors.rollNo && (
             <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.rollNo}</p>
-          ) : (
-            <p className="mt-1.5 text-xs text-faint">As on your ID card. 24… → 3rd year, 25… → 2nd year (auto-filled below).</p>
           )}
         </div>
         <div>
