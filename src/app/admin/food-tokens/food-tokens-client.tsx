@@ -115,6 +115,7 @@ export default function FoodTokensClient() {
   const [foodFilter, setFoodFilter] = useState<"ALL" | "Veg" | "Non-veg">("ALL");
   const [density, setDensity] = useState(DENSITY[1]); // 12 / page default
   const [scope, setScope] = useState<"together" | "veg" | "nonveg" | "split">("together");
+  const [sortMode, setSortMode] = useState<"serial" | "name">("serial");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -140,6 +141,14 @@ export default function FoodTokensClient() {
     return hay.includes(q.trim().toLowerCase());
   });
 
+  const sorted = useMemo(() => {
+    const list = [...filtered];
+    list.sort((a, b) =>
+      sortMode === "name" ? a.name.localeCompare(b.name) : a.serial.localeCompare(b.serial),
+    );
+    return list;
+  }, [filtered, sortMode]);
+
   function chunk(list: TokenRow[]): TokenRow[][] {
     const out: TokenRow[][] = [];
     for (let i = 0; i < list.length; i += density.perPage) out.push(list.slice(i, i + density.perPage));
@@ -149,15 +158,15 @@ export default function FoodTokensClient() {
   // Print groups: split mode → veg sheets then non-veg sheets, numbered separately
   const printGroups: { label: string; pages: TokenRow[][] }[] =
     scope === "veg"
-      ? [{ label: "VEG", pages: chunk(filtered.filter((r) => r.food === "Veg")) }]
+      ? [{ label: "VEG", pages: chunk(sorted.filter((r) => r.food === "Veg")) }]
       : scope === "nonveg"
-        ? [{ label: "NON-VEG", pages: chunk(filtered.filter((r) => r.food === "Non-veg")) }]
+        ? [{ label: "NON-VEG", pages: chunk(sorted.filter((r) => r.food === "Non-veg")) }]
         : scope === "split"
           ? [
-              { label: "VEG", pages: chunk(filtered.filter((r) => r.food === "Veg")) },
-              { label: "NON-VEG", pages: chunk(filtered.filter((r) => r.food === "Non-veg")) },
+              { label: "VEG", pages: chunk(sorted.filter((r) => r.food === "Veg")) },
+              { label: "NON-VEG", pages: chunk(sorted.filter((r) => r.food === "Non-veg")) },
             ]
-          : [{ label: "", pages: chunk(filtered) }];
+          : [{ label: "", pages: chunk(sorted) }];
   const pages: TokenRow[][] = printGroups.flatMap((g) => g.pages);
   const totalSheets = pages.length;
   const rowsPerSheet = density.perPage / density.cols;
@@ -336,6 +345,28 @@ export default function FoodTokensClient() {
                 </button>
               ))}
             </div>
+            <div role="group" aria-label="Token order" className="flex overflow-hidden rounded-xl border border-line">
+              {(
+                [
+                  ["serial", "Serial order"],
+                  ["name", "Name A–Z"],
+                ] as const
+              ).map(([v, label]) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setSortMode(v)}
+                  aria-pressed={sortMode === v}
+                  title={v === "name" ? "Alphabetical — fastest for finding random people" : "Registration order"}
+                  className={cn(
+                    "min-h-[44px] px-3 py-2 text-xs font-bold",
+                    sortMode === v ? "bg-brand text-black" : "text-fog hover:text-cream",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         ) : null}
 
@@ -381,7 +412,7 @@ export default function FoodTokensClient() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((r) => (
+                  {sorted.map((r) => (
                     <tr key={r.serial} className="border-t border-line">
                       <td className="px-4 py-2 font-mono text-xs font-bold text-brand">{r.serial}</td>
                       <td className="px-4 py-2 text-cream">{r.name}</td>
