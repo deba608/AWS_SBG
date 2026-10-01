@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { YEARS, GENDERS, deriveYearFromRollNo, normalizeEmail, normalizeMobile, collapseSpaces, type Year, type FoodPref, type Gender } from "./validate-contact";
+import { YEARS, FOODS, GENDERS, deriveYearFromRollNo, normalizeEmail, normalizeMobile, collapseSpaces, type Year, type FoodPref, type Gender } from "./validate-contact";
 import { getRedis, withRedisLock } from "./pass-redis";
 
 export const HACKATHON_MIN_MEMBERS = 4; // leader + 3 teammates, exact
@@ -17,6 +17,8 @@ export interface HackathonMemberInput {
   year: string;
   gender: string;
   githubUrl: string;
+  /** Hackathon Day-1 lunch only — never mixed with the SCD pass lunch. */
+  lunch: string;
 }
 
 export interface HackathonTeamInput {
@@ -35,6 +37,8 @@ export interface HackathonMember {
   year: Year;
   gender: Gender;
   githubUrl: string;
+  /** Hackathon Day-1 lunch only — never mixed with the SCD pass lunch. */
+  lunch: FoodPref;
   /** Legacy: food was collected before it moved to the SCD pass. */
   food?: FoodPref;
 }
