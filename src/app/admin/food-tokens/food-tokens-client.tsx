@@ -114,6 +114,7 @@ export default function FoodTokensClient() {
   const [q, setQ] = useState("");
   const [foodFilter, setFoodFilter] = useState<"ALL" | "Veg" | "Non-veg">("ALL");
   const [density, setDensity] = useState(DENSITY[1]); // 12 / page default
+  const [scope, setScope] = useState<"together" | "veg" | "nonveg" | "split">("together");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -139,12 +140,30 @@ export default function FoodTokensClient() {
     return hay.includes(q.trim().toLowerCase());
   });
 
-  const pages: TokenRow[][] = [];
+  function chunk(list: TokenRow[]): TokenRow[][] {
+    const out: TokenRow[][] = [];
+    for (let i = 0; i < list.length; i += density.perPage) out.push(list.slice(i, i + density.perPage));
+    return out;
+  }
+
+  // Print groups: split mode → veg sheets then non-veg sheets, numbered separately
+  const printGroups: { label: string; pages: TokenRow[][] }[] =
+    scope === "veg"
+      ? [{ label: "VEG", pages: chunk(filtered.filter((r) => r.food === "Veg")) }]
+      : scope === "nonveg"
+        ? [{ label: "NON-VEG", pages: chunk(filtered.filter((r) => r.food === "Non-veg")) }]
+        : scope === "split"
+          ? [
+              { label: "VEG", pages: chunk(filtered.filter((r) => r.food === "Veg")) },
+              { label: "NON-VEG", pages: chunk(filtered.filter((r) => r.food === "Non-veg")) },
+            ]
+          : [{ label: "", pages: chunk(filtered) }];
+  const pages: TokenRow[][] = printGroups.flatMap((g) => g.pages);
+  const totalSheets = pages.length;
   const rowsPerSheet = density.perPage / density.cols;
   const compact = rowsPerSheet >= 6;
   // 281mm usable height on A4 after 8mm margins; 2mm gaps + ~10mm footer
   const cellMm = Math.floor((281 - (rowsPerSheet - 1) * 2 - 10) / rowsPerSheet);
-  for (let i = 0; i < filtered.length; i += density.perPage) pages.push(filtered.slice(i, i + density.perPage));
   const vegCount = filtered.filter((r) => r.food === "Veg").length;
 
   async function uploadFile(f: File) {
@@ -263,7 +282,7 @@ export default function FoodTokensClient() {
               className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-green-600 px-5 py-2 text-sm font-semibold text-white hover:bg-green-500 disabled:opacity-60"
             >
               <Printer className="h-4 w-4" aria-hidden />
-              Print {pages.length > 0 ? `${pages.length} page${pages.length > 1 ? "s" : ""}` : ""}
+              Print {totalSheets > 0 ? `${totalSheets} page${totalSheets > 1 ? "s" : ""}` : ""}
             </button>
           </div>
           <p className="text-xs text-faint">
@@ -324,7 +343,32 @@ export default function FoodTokensClient() {
           <div className="rank-card overflow-hidden">
             <div className="border-b border-line px-4 py-3 text-sm text-fog">
               {filtered.length} tokens · {vegCount} veg · {filtered.length - vegCount} non-veg ·{" "}
-              {pages.length} A4 page{pages.length === 1 ? "" : "s"}
+              {totalSheets} A4 page{totalSheets === 1 ? "" : "s"}
+            </div>
+            <div className="flex flex-wrap gap-2 border-b border-line px-4 py-3 print:hidden" role="group" aria-label="Print scope">
+              {(
+                [
+                  ["together", "Print: all together"],
+                  ["veg", "VEG only"],
+                  ["nonveg", "NON-VEG only"],
+                  ["split", "Veg + Non-veg split"],
+                ] as const
+              ).map(([v, label]) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setScope(v)}
+                  aria-pressed={scope === v}
+                  className={cn(
+                    "inline-flex min-h-[40px] items-center rounded-full border px-4 py-1.5 text-xs font-bold",
+                    scope === v
+                      ? "border-amber-400 bg-amber-400/15 text-amber-200"
+                      : "border-line text-fog hover:text-cream",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
             <div className="max-h-72 overflow-auto">
               <table className="w-full min-w-[520px] text-left text-sm">
@@ -383,34 +427,35 @@ export default function FoodTokensClient() {
       </div>
 
       {/* A4 pages — preview on screen, print target */}
-      {pages.length > 0 ? (
+      {totalSheets > 0 ? (
         <div id="food-print-area" className="mt-6 space-y-6 print:mt-0 print:space-y-0">
-          {pages.map((pageRows, pi) => (
-            <section
-              key={pi}
-              className="food-page mx-auto w-full max-w-[820px] bg-white p-4 shadow-xl print:p-0 print:shadow-none"
-              aria-label={`Food token sheet ${pi + 1} of ${pages.length}`}
-            >
-              <div
-                className="grid gap-3"
-                style={{ gridTemplateColumns: `repeat(${density.cols}, minmax(0, 1fr))` }}
+          {printGroups.map((group) =>
+            group.pages.map((pageRows, pi) => (
+              <section
+                key={`${group.label}-${pi}`}
+                className="food-page mx-auto w-full max-w-[820px] bg-white p-4 shadow-xl print:p-0 print:shadow-none"
+                aria-label={`Food token sheet ${group.label} ${pi + 1} of ${group.pages.length}`}
               >
-                {pageRows.map((r) => (
-                  <div
-                    key={r.serial}
-                    className="border border-dashed border-neutral-400 p-1.5"
-                    style={{ height: `${cellMm}mm` }}
-                  >
-                    <Token row={r} compact={compact} />
-                  </div>
-                ))}
-              </div>
-              <p className="mt-2 text-center text-[10px] text-neutral-500 print:text-neutral-600">
-                AWS Community Day · SUIIT · Food token · Sheet {pi + 1}/{pages.length} · Cut along
-                dotted lines
-              </p>
-            </section>
-          ))}
+                <div
+                  className="grid gap-3"
+                  style={{ gridTemplateColumns: `repeat(${density.cols}, minmax(0, 1fr))` }}
+                >
+                  {pageRows.map((r) => (
+                    <div
+                      key={r.serial}
+                      className="border border-dashed border-neutral-400 p-1.5"
+                      style={{ height: `${cellMm}mm` }}
+                    >
+                      <Token row={r} compact={compact} />
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-2 text-center font-mono text-[10px] text-neutral-500 print:text-neutral-600">
+                  {pi + 1} / {group.pages.length}
+                </p>
+              </section>
+            )),
+          )}
         </div>
       ) : (
         <div className="rank-card mt-6 p-8 text-center text-sm text-fog print:hidden">
