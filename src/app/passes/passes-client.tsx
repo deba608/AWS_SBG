@@ -157,6 +157,9 @@ export default function PassesClient() {
             ? "Pass already existed — showing your QR. Same QR works at gate."
             : "Entry pass ready. One-time use only — invalid after gate scan. Download image or take a screenshot."}
         </div>
+        <div className="print:hidden">
+          <PassScopeNote />
+        </div>
         <div className={`rank-card flex flex-wrap items-center gap-3 p-4 text-sm print:hidden ${emailSent ? "border-sky-400/30 bg-sky-400/10 text-sky-200" : "border-amber-400/30 bg-amber-400/10 text-amber-200"}`}>
           <Mail className="h-5 w-5 shrink-0" aria-hidden />
           <div className="min-w-0 flex-1 basis-48">
@@ -347,6 +350,10 @@ export default function PassesClient() {
             {apiError}
           </p>
         ) : null}
+        <p className="rounded-xl border border-line bg-surface p-3 text-xs leading-relaxed text-fog">
+          This pass covers <span className="font-semibold text-cream">Student Community Day — 8th October</span> only.
+          Hackathon, Tech Parliament &amp; Make-A-Bot need separate registration (links shown after you register).
+        </p>
         <button
           type="submit"
           disabled={status === "busy" || (slots !== null && !slots.open) || (year !== "" && slots?.perYear?.[year] !== undefined && !slots.perYear[year].open)}

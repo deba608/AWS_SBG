@@ -5,7 +5,7 @@ import EventCard, { statusMeta } from "./EventCard";
 import { cn } from "@/lib/utils";
 import type { EventItem } from "@/data/events";
 
-/** Flagship parent with its sessions nested inside — one pass covers all. */
+/** Flagship parent with its sessions nested inside — QR pass covers Day 3 Community Day; contests need separate sign-ups. */
 export default function EventGroup({
   parent,
   sessions,
@@ -52,7 +52,7 @@ export default function EventGroup({
             className={cn("inline-block h-2 w-2 shrink-0 rounded-full", status.dot)}
             aria-hidden
           />
-          {status.label} · one pass covers all
+          {status.label} · pass covers Day 3 (Oct 8), contests need separate sign-up
         </p>
         <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-1 pt-2">
           <CommunityDayRegisterModal className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-cream underline decoration-brand/60 underline-offset-4 transition-colors hover:decoration-cream">
@@ -142,7 +142,7 @@ export default function EventGroup({
       </div>
       <div className="p-5 sm:p-6">
         <p className="text-xs font-semibold tracking-wider text-faint uppercase">
-          {sessions.length} sessions inside · one pass covers all
+          {sessions.length} sessions inside · Day 3 pass + separate contest sign-ups
         </p>
         <div className="mt-2 border-l-2 border-brand/50 pl-4 sm:pl-5">
           {sessions.map((child) => (

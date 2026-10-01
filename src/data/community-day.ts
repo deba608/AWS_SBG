@@ -221,7 +221,11 @@ export const COMMUNITY_DAY_FAQS = [
   },
   {
     q: "How do I register?",
-    a: "Click Get event pass — fill name, roll number, college mail, gender, food preference and year (auto-detected from roll: 24… → 3rd, 25… → 2nd). Your QR pass shows instantly and emails to you. Show it at the venue gate.",
+    a: "Click Get event pass — fill name, roll number, college mail, gender, food preference and year (auto-detected from roll: 24… → 3rd, 25… → 2nd). Your QR pass shows instantly and is also emailed to you. Show it at the venue gate on 8th October.",
+  },
+  {
+    q: "Does this pass cover the Hackathon, Tech Parliament or Make-A-Bot?",
+    a: "No. This pass is valid only for Student Community Day on 8th October (Speaker session, Prize Distribution, Lunch & Comedy). Contests need separate registration: DecodeX Hackathon via the team form on this website (/hackathon), Tech Parliament and Make-A-Bot via their Google Forms (links on the event cards, also shared by mail).",
   },
   {
     q: "Do I need prior AWS experience?",
