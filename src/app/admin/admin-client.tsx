@@ -539,17 +539,33 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
             ))}
           </div>
         </div>
-        <div className="rank-card p-4">
+        <div className="rank-card space-y-3 p-4">
           <p className="text-xs font-bold uppercase tracking-widest text-brand">{daywise.day3.label}</p>
-          <p className="mt-2 text-3xl font-bold text-cream">
+          <p className="text-3xl font-bold text-cream">
             {daywise.day3.registered}<span className="text-base font-normal text-faint">/{daywise.day3.limit} passes</span>
           </p>
-          <p className="mt-1 text-xs text-fog">
-            Day-3 lunch VEG {daywise.day3.lunchVeg} / NON-VEG {daywise.day3.lunchNonveg}
-            {Object.entries(daywise.day3.perYear).map(([y, s]) => (
-              <span key={y} className="ml-2 font-mono text-faint">{y}:{s.registered}/{s.limit}</span>
-            ))}
-          </p>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-faint">Day-3 lunch</p>
+            <div className="mt-1.5 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-2.5 py-1 text-xs font-bold text-emerald-300">
+                VEG {daywise.day3.lunchVeg}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-400/40 bg-red-400/10 px-2.5 py-1 text-xs font-bold text-red-300">
+                NON-VEG {daywise.day3.lunchNonveg}
+              </span>
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-faint">Year seats</p>
+            <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+              {Object.entries(daywise.day3.perYear).map(([y, s]) => (
+                <div key={y} className="flex items-center justify-between rounded-lg border border-line bg-black/20 px-2.5 py-1.5">
+                  <span className="text-xs text-fog">{y}</span>
+                  <span className="font-mono text-xs text-cream">{s.registered}/{s.limit}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
       </Section>
