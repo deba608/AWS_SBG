@@ -84,15 +84,9 @@ export default function HackathonPage() {
       </h1>
       <p className="measure mt-3 text-sm leading-relaxed text-fog sm:text-base">
         Problem statement submission, Phase I &amp; II build sprints, mentor
-        guidance and jury evaluation on AWS.
+        guidance and jury evaluation on AWS. Register your team below —
+        this is separate from the Community Day pass.
       </p>
-      <a
-        href="#register"
-        className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-brand px-5 py-2 text-sm font-semibold text-black hover:bg-brandhover"
-      >
-        Separate registration — register your team
-        <span aria-hidden>↓</span>
-      </a>
       <ul className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
         {rules.map((r) => (
           <li key={r.text} className="flex items-center gap-2.5 rounded-xl border border-line bg-surface px-3 py-2.5 text-xs text-fog sm:text-sm">
@@ -125,7 +119,7 @@ export default function HackathonPage() {
           ))}
         </div>
       </section>
-      <div className="mt-8 scroll-mt-24" id="register">
+      <div className="mt-8">
         <HackathonClient />
       </div>
 
