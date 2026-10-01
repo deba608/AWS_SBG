@@ -909,6 +909,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Serial</dt><dd className="font-mono text-cream">{r.serial}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Gender</dt><dd className="text-cream">{r.gender}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Year</dt><dd className="text-cream">{r.year}</dd></div>
+                      <div className="flex gap-2"><dt className="shrink-0 text-faint">Food</dt><dd className="text-cream">{r.food}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Issued</dt><dd className="text-cream">{new Date(r.createdAt).toLocaleString("en-IN")}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Gate</dt><dd className="text-cream">{r.scannedBy ?? "—"}</dd></div>
                       <div className="flex gap-2"><dt className="shrink-0 text-faint">Burned</dt><dd className="text-cream">{r.usedAt ? new Date(r.usedAt).toLocaleString("en-IN") : "—"}</dd></div>
