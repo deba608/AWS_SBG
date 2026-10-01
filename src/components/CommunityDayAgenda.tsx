@@ -94,9 +94,9 @@ export default function CommunityDayAgenda() {
                 className="group flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5 transition-all duration-150 hover:border-brand/40 hover:bg-surface/90"
               >
                 <div className="flex min-w-0 items-start gap-4">
-                  <div className="flex w-[96px] shrink-0 items-center gap-1.5 text-xs font-semibold text-brand sm:w-auto sm:min-w-[120px] sm:text-sm">
+                  <div className="flex w-[132px] shrink-0 items-center gap-1.5 text-xs font-semibold text-brand sm:w-[176px] sm:text-sm">
                     <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                    <span className="break-words">{item.time}</span>
+                    <span className="whitespace-nowrap">{item.time}</span>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
