@@ -7,9 +7,11 @@ import PassCard from "@/components/PassCard";
 import {
   validateContact,
   type ContactErrors,
+  type Year,
 } from "@/lib/validate-contact";
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
+import YearSelect from "@/components/YearSelect";
 import { emailExactPass } from "@/lib/pass-image";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +31,7 @@ interface IssuedUser {
   rollNo: string;
   gender: string;
   food: string;
+  year: string;
 }
 
 const inputCls = (bad: boolean) =>
@@ -43,6 +46,7 @@ export default function PassesClient() {
   const [mobile, setMobile] = useState("");
   const [gender, setGender] = useState("");
   const [food, setFood] = useState("");
+  const [year, setYear] = useState("");
   const [errors, setErrors] = useState<ContactErrors>({});
   const [status, setStatus] = useState<"form" | "busy" | "done">("form");
   const [apiError, setApiError] = useState("");
@@ -51,7 +55,7 @@ export default function PassesClient() {
   const [wasDuplicate, setWasDuplicate] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [resending, setResending] = useState(false);
-  const [slots, setSlots] = useState<{ registered: number; limit: number; open: boolean } | null>(null);
+  const [slots, setSlots] = useState<{ registered: number; limit: number; open: boolean; perYear?: Record<string, { registered: number; limit: number; open: boolean }> } | null>(null);
 
   useEffect(() => {
     fetch("/api/passes/issue?count=1", { cache: "no-store" })
@@ -84,7 +88,7 @@ export default function PassesClient() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const fe = validateContact({ fullName, rollNo, email, mobile, gender, food });
+    const fe = validateContact({ fullName, rollNo, email, mobile, gender, food, year });
     setErrors(fe);
     if (Object.keys(fe).length > 0) return;
     setStatus("busy");
@@ -93,7 +97,7 @@ export default function PassesClient() {
       const res = await fetch("/api/passes/issue", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, rollNo, email, mobile, gender, food }),
+        body: JSON.stringify({ fullName, rollNo, email, mobile, gender, food, year }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -314,6 +318,20 @@ export default function PassesClient() {
             />
           </div>
         </div>
+        <div>
+          <YearSelect
+            value={year}
+            onChange={(y: Year) => setYear(y)}
+            labelId="pass-year-label"
+            error={errors.year}
+            counts={slots?.perYear}
+          />
+        </div>
+        {year && slots?.perYear?.[year] && !slots.perYear[year].open ? (
+          <p role="alert" className="rounded-xl border border-amber-400/40 bg-amber-500/10 p-3 text-sm text-amber-200">
+            {year} year is full ({slots.perYear[year].registered}/{slots.perYear[year].limit}) — pick another year or retrieve your pass below if already registered.
+          </p>
+        ) : null}
         {apiError ? (
           <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
             {apiError}
@@ -321,7 +339,7 @@ export default function PassesClient() {
         ) : null}
         <button
           type="submit"
-          disabled={status === "busy" || (slots !== null && !slots.open)}
+          disabled={status === "busy" || (slots !== null && !slots.open) || (year !== "" && slots?.perYear?.[year] !== undefined && !slots.perYear[year].open)}
           className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black hover:bg-brandhover disabled:opacity-70"
         >
           {status === "busy" ? (

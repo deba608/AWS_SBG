@@ -29,7 +29,12 @@ export const metadata: Metadata = {
   description: SITE.description,
   keywords: [
     "AWS",
+    "AWS SBG",
     "AWS Student Builder Group",
+    "AWS Student Builder Group SUIIT",
+    "AWS SCD",
+    "AWS Student Community Day",
+    "AWS Student Community Day SUIIT 2026",
     "SUIIT",
     "Sambalpur University",
     "cloud computing",

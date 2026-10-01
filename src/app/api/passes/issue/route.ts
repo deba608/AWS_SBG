@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import { mailConfigured } from "@/lib/mailer";
-import { getPassesByContact, issuePasses, registrationCount, ConflictError, RegistrationsClosedError, RegistrationsFullError } from "@/lib/pass-store";
+import { getPassesByContact, issuePasses, registrationCount, ConflictError, RegistrationsClosedError, RegistrationsFullError, YearRegistrationsFullError } from "@/lib/pass-store";
 import { warnDefaultSecrets } from "@/lib/pass-token";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 import {
@@ -28,6 +28,7 @@ export async function POST(req: Request) {
     mobile: String(b.mobile ?? ""),
     gender: String(b.gender ?? ""),
     food: String(b.food ?? ""),
+    year: String(b.year ?? ""),
   };
   const errors = validateContact(input);
   if (Object.keys(errors).length > 0) {
@@ -57,6 +58,7 @@ export async function POST(req: Request) {
           mobile: user.mobile,
           gender: user.gender,
           food: user.food,
+          year: user.year ?? "",
         },
         passes: withQr,
         duplicate,
@@ -68,7 +70,7 @@ export async function POST(req: Request) {
     if (err instanceof ConflictError) {
       return NextResponse.json({ error: err.message }, { status: 409 });
     }
-    if (err instanceof RegistrationsFullError || err instanceof RegistrationsClosedError) {
+    if (err instanceof RegistrationsFullError || err instanceof RegistrationsClosedError || err instanceof YearRegistrationsFullError) {
       return NextResponse.json({ error: err.message }, { status: 403 });
     }
     console.error("[passes/issue]", err);
@@ -126,6 +128,7 @@ export async function GET(req: Request) {
       mobile: found.user.mobile ?? "",
       gender: found.user.gender,
       food: found.user.food,
+      year: found.user.year ?? "",
     },
     passes: withQr,
   });

@@ -9,8 +9,9 @@ import CommunityDayRegisterModal from "@/components/CommunityDayRegisterModal";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Events",
-  description: `Workshops, tech talks, hackathons and build sessions by the ${SITE.name} at ${SITE.collegeName}.`,
+  title: "AWS SBG Events — Workshops, Hackathons & Meetups",
+  description: `Free workshops, tech talks, hackathons and build sessions by AWS SBG — the ${SITE.name} at ${SITE.collegeName}.`,
+  keywords: ["AWS SBG events", "AWS SBG", "SUIIT workshops", "AWS SCD", "hackathons Sambalpur"],
   alternates: { canonical: "/events" },
   openGraph: {
     url: "/events",

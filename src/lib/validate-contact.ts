@@ -1,5 +1,6 @@
 export type Gender = "Male" | "Female";
 export type FoodPref = "Veg" | "Non-veg";
+export type Year = "1st" | "2nd" | "3rd" | "4th";
 
 export interface RegistrationInput {
   fullName: string;
@@ -8,6 +9,7 @@ export interface RegistrationInput {
   mobile: string;
   gender: string;
   food: string;
+  year: string;
 }
 
 export interface RegistrationErrors {
@@ -17,6 +19,7 @@ export interface RegistrationErrors {
   mobile?: string;
   gender?: string;
   food?: string;
+  year?: string;
 }
 
 export interface NormalizedRegistration {
@@ -26,6 +29,7 @@ export interface NormalizedRegistration {
   mobile: string;
   gender: Gender;
   food: FoodPref;
+  year: Year;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -34,6 +38,7 @@ const ROLL_RE = /^[A-Za-z0-9][A-Za-z0-9/.\- ]{2,19}$/;
 
 export const GENDERS: Gender[] = ["Male", "Female"];
 export const FOODS: FoodPref[] = ["Veg", "Non-veg"];
+export const YEARS: Year[] = ["1st", "2nd", "3rd", "4th"];
 
 export function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -83,6 +88,7 @@ export function validateRegistration(input: RegistrationInput): RegistrationErro
 
   if (!GENDERS.includes(input.gender as Gender)) errors.gender = "Select gender.";
   if (!FOODS.includes(input.food as FoodPref)) errors.food = "Select food preference.";
+  if (!YEARS.includes(input.year as Year)) errors.year = "Select year.";
 
   return errors;
 }
@@ -95,6 +101,7 @@ export function normalizeRegistration(input: RegistrationInput): NormalizedRegis
     mobile: normalizeMobile(input.mobile),
     gender: input.gender as Gender,
     food: input.food as FoodPref,
+    year: input.year as Year,
   };
 }
 

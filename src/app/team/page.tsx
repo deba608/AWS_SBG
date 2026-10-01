@@ -8,8 +8,8 @@ import { teamLeads, domainLeads, opsTeam, coordinators } from "@/data/team";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Team",
-  description: `Meet the student builders running the ${SITE.name} at ${SITE.collegeName}.`,
+  title: "Team — AWS SBG SUIIT Student Builders",
+  description: `Meet the student builders running AWS SBG — the ${SITE.name} at ${SITE.collegeName}.`,
   alternates: { canonical: "/team" },
   openGraph: {
     url: "/team",

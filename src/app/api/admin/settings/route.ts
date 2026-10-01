@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
 import {
+  DEFAULT_YEAR_LIMIT,
   effectiveLimit,
   getSettings,
   registrationCount,
   updateSettings,
+  type YearLimits,
 } from "@/lib/pass-store";
+import { YEARS, type Year } from "@/lib/validate-contact";
 
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -15,6 +18,9 @@ export async function GET() {
     registered: count.registered,
     limit: count.limit,
     open: count.open,
+    perYear: count.perYear,
+    yearLimits: settings.yearLimits ?? {},
+    defaultYearLimit: DEFAULT_YEAR_LIMIT,
     envLimit: await effectiveLimit(),
   });
 }
@@ -28,7 +34,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
   const b = body as Record<string, unknown>;
-  const patch: { maxPasses?: number | null; registrationsOpen?: boolean | null } = {};
+  const patch: { maxPasses?: number | null; registrationsOpen?: boolean | null; yearLimits?: YearLimits } = {};
   if ("maxPasses" in b) {
     if (b.maxPasses === null) patch.maxPasses = null;
     else {
@@ -45,6 +51,27 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "registrationsOpen must be boolean or null." }, { status: 400 });
     } else patch.registrationsOpen = b.registrationsOpen;
   }
+  if ("yearLimits" in b) {
+    const yl = b.yearLimits as Record<string, unknown>;
+    if (typeof yl !== "object" || yl === null) {
+      return NextResponse.json({ error: "yearLimits must be an object." }, { status: 400 });
+    }
+    const parsed: YearLimits = {};
+    for (const y of YEARS) {
+      if (!(y in yl)) continue;
+      const v = (yl as Record<string, unknown>)[y];
+      if (v === null || v === undefined || v === "") {
+        parsed[y as Year] = null;
+        continue;
+      }
+      const n = Number(v);
+      if (!Number.isFinite(n) || n < 1 || n > 10000) {
+        return NextResponse.json({ error: `yearLimits.${y} must be 1–10000 or null.` }, { status: 400 });
+      }
+      parsed[y as Year] = Math.floor(n);
+    }
+    patch.yearLimits = parsed;
+  }
   const settings = await updateSettings(patch);
   const count = await registrationCount();
   return NextResponse.json({
@@ -52,5 +79,7 @@ export async function PATCH(req: Request) {
     registered: count.registered,
     limit: count.limit,
     open: count.open,
+    perYear: count.perYear,
+    yearLimits: settings.yearLimits ?? {},
   });
 }

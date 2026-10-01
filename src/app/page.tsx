@@ -10,23 +10,55 @@ import { upcomingEvents } from "@/data/events";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Build. Learn. Deploy. Together.",
+  title: "AWS SBG SUIIT — Workshops, Hackathons & Student Community Day",
   description:
-    "AWS Student Builder Group at SUIIT, Sambalpur: hands-on cloud, AI/GenAI and DevOps workshops, hackathons and Community Day 2026. Free for students.",
+    "AWS SBG — AWS Student Builder Group at SUIIT, Sambalpur. Free workshops, hackathons & AWS Student Community Day (AWS SCD) on cloud, AI/GenAI and DevOps.",
+  keywords: [
+    "AWS SBG",
+    "AWS Student Builder Group",
+    "AWS Student Builder Group SUIIT",
+    "AWS SCD",
+    "AWS Student Community Day",
+    "SUIIT",
+    "Sambalpur",
+  ],
   alternates: { canonical: "/" },
   openGraph: {
     url: "/",
-    title: `${SITE.name} — ${SITE.collegeName}`,
+    title: "AWS SBG SUIIT — AWS Student Builder Group",
     description:
-      "Student-led AWS cloud community at SUIIT: workshops, hackathons and Community Day SUIIT 2026. Free, beginner-friendly.",
+      "Student-led AWS cloud community at SUIIT: free workshops, hackathons and AWS Student Community Day (AWS SCD) 2026. Beginner-friendly.",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE.name} — ${SITE.collegeName}`,
+    title: "AWS SBG SUIIT — AWS Student Builder Group",
     description:
-      "Student-led AWS cloud community at SUIIT: workshops, hackathons and Community Day SUIIT 2026.",
+      "Student-led AWS cloud community at SUIIT: free workshops, hackathons and AWS Student Community Day (AWS SCD) 2026.",
   },
 };
+
+const homeFaqs = [
+  {
+    q: "What is AWS SBG SUIIT?",
+    a: "AWS SBG (AWS Student Builder Group) at SUIIT is a student-led cloud community at Sambalpur University Institute of Information Technology, Burla. Members learn AWS, AI/GenAI and DevOps through free hands-on workshops, real projects and hackathons.",
+  },
+  {
+    q: "What is AWS SCD?",
+    a: "AWS SCD is the AWS Student Community Day — the flagship annual meetup organised by AWS SBG SUIIT. AWS SCD 2026 runs October 6–8 at SUIIT with the DecodeX Hackathon, Tech Parliament, Make-A-Bot competition, speaker sessions, lunch and certificates.",
+  },
+  {
+    q: "How do I join the AWS Student Builder Group?",
+    a: "Join the WhatsApp community linked on this page, then register for any event to get your free QR entry pass. No prior cloud experience needed.",
+  },
+  {
+    q: "Is AWS SBG free for students?",
+    a: "Yes. All AWS SBG workshops, meetups and the AWS Student Community Day are free for students, including lunch and participation certificates at the flagship event.",
+  },
+  {
+    q: "Where is AWS SCD 2026 held?",
+    a: "AWS Student Community Day SUIIT 2026 is held October 6–8 at the APJ Abdul Kalam Auditorium, SUIIT, Burla, Sambalpur, Odisha.",
+  },
+];
 
 const about = [
   {
@@ -75,9 +107,23 @@ function QuietHeading({
   );
 }
 
+const homeFaqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: homeFaqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
 export default function HomePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeFaqJsonLd) }}
+      />
       {/* HERO */}
       <section aria-labelledby="hero-heading">
         <Container className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
@@ -90,6 +136,7 @@ export default function HomePage() {
                 id="hero-heading"
                 className="mt-4 max-w-xl text-4xl font-bold leading-[1.05] tracking-tight text-cream sm:text-5xl md:text-6xl lg:text-7xl"
               >
+                <span className="sr-only">AWS SBG SUIIT — AWS Student Builder Group: </span>
                 Build. Learn. Deploy. Together.
               </h1>
               <p className="mt-6 max-w-xl text-base leading-relaxed text-fog md:text-lg">
@@ -177,6 +224,34 @@ export default function HomePage() {
               View all events
             </Link>
           </p>
+        </Container>
+      </section>
+
+      {/* FAQ */}
+      <section aria-labelledby="faq-heading" className="border-t border-line py-12 sm:py-16 lg:py-24">
+        <Container>
+          <QuietHeading
+            id="faq-heading"
+            label="FAQ"
+            title="AWS SBG & AWS SCD, explained"
+            description="What the community is, what Community Day covers, and how to join."
+          />
+          <div className="grid max-w-3xl gap-3">
+            {homeFaqs.map((f) => (
+              <details
+                key={f.q}
+                className="group rounded-2xl border border-line bg-surface px-5 py-4 open:border-brand/40"
+              >
+                <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold text-cream">
+                  {f.q}
+                  <span className="shrink-0 text-brand transition-transform group-open:rotate-45" aria-hidden>
+                    +
+                  </span>
+                </summary>
+                <p className="mt-2 text-sm leading-relaxed text-fog">{f.a}</p>
+              </details>
+            ))}
+          </div>
         </Container>
       </section>
 

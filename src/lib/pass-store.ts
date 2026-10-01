@@ -8,8 +8,12 @@ import {
   verifyPassToken,
   type PassType,
 } from "./pass-token";
-import type { FoodPref, Gender } from "./validate-contact";
+import type { FoodPref, Gender, Year } from "./validate-contact";
+import { YEARS } from "./validate-contact";
 import { getRedis, withRedisLock } from "./pass-redis";
+
+export const DEFAULT_YEAR_LIMIT = 60;
+export type YearLimits = Partial<Record<Year, number | null>>;
 
 export interface StoredUser {
   id: string;
@@ -21,6 +25,8 @@ export interface StoredUser {
   mobile: string;
   gender: Gender;
   food: FoodPref;
+  /** Study year. Missing on pre-year registrations (legacy). */
+  year?: Year;
   createdAt: string;
 }
 
@@ -51,6 +57,8 @@ export interface PassSettingsState {
   maxPasses: number | null;
   /** Null = open. False stops registration. */
   registrationsOpen: boolean | null;
+  /** Per-year caps. Null/missing entry = DEFAULT_YEAR_LIMIT (60). */
+  yearLimits?: YearLimits;
 }
 
 interface StoreShape {
@@ -198,6 +206,18 @@ export class RegistrationsFullError extends Error {
   }
 }
 
+/** Thrown when a single year's cap is reached. Maps to 403. */
+export class YearRegistrationsFullError extends Error {
+  year: Year;
+  limit: number;
+  constructor(year: Year, limit: number) {
+    super(`Registrations are full for ${year} year — all ${limit} passes claimed.`);
+    this.name = "YearRegistrationsFullError";
+    this.year = year;
+    this.limit = limit;
+  }
+}
+
 /** Thrown when organizers stopped registration. Maps to 403. */
 export class RegistrationsClosedError extends Error {
   constructor() {
@@ -217,7 +237,31 @@ export async function getSettings(): Promise<PassSettingsState> {
   return {
     maxPasses: store.settings?.maxPasses ?? null,
     registrationsOpen: store.settings?.registrationsOpen ?? null,
+    yearLimits: store.settings?.yearLimits ?? {},
   };
+}
+
+/** Resolved per-year caps (custom or default 60). */
+export function resolveYearLimits(settings?: PassSettingsState | null): Record<Year, number> {
+  const out = {} as Record<Year, number>;
+  for (const y of YEARS) {
+    const v = settings?.yearLimits?.[y];
+    out[y] = typeof v === "number" && Number.isFinite(v) && v > 0 ? Math.floor(v) : DEFAULT_YEAR_LIMIT;
+  }
+  return out;
+}
+
+export function yearLimitFor(year: Year, settings?: PassSettingsState | null): number {
+  const v = settings?.yearLimits?.[year];
+  return typeof v === "number" && Number.isFinite(v) && v > 0 ? Math.floor(v) : DEFAULT_YEAR_LIMIT;
+}
+
+export function countByYear(users: StoredUser[]): Record<Year, number> {
+  const out = { "1st": 0, "2nd": 0, "3rd": 0, "4th": 0 } as Record<Year, number>;
+  for (const u of users) {
+    if (u.year && u.year in out) out[u.year as Year] += 1;
+  }
+  return out;
 }
 
 export async function effectiveLimit(): Promise<number> {
@@ -234,6 +278,7 @@ export async function registrationsAccepting(): Promise<boolean> {
 export async function updateSettings(patch: {
   maxPasses?: number | null;
   registrationsOpen?: boolean | null;
+  yearLimits?: YearLimits;
 }): Promise<PassSettingsState> {
   return withWriteLock(async () => {
     const store = await readStore();
@@ -247,18 +292,46 @@ export async function updateSettings(patch: {
     if (patch.registrationsOpen !== undefined) {
       cur.registrationsOpen = patch.registrationsOpen;
     }
+    if (patch.yearLimits !== undefined) {
+      cur.yearLimits = { ...(cur.yearLimits ?? {}) };
+      for (const y of YEARS) {
+        if (patch.yearLimits[y] === undefined) continue;
+        const v = patch.yearLimits[y];
+        cur.yearLimits[y] =
+          v === null || v === undefined
+            ? null
+            : Math.min(10000, Math.max(1, Math.floor(v)));
+      }
+    }
     store.settings = cur;
     await writeStore(store);
     return { ...cur };
   });
 }
 
-export async function registrationCount(): Promise<{ registered: number; limit: number; open: boolean }> {
+export interface YearSlot {
+  registered: number;
+  limit: number;
+  open: boolean;
+}
+
+export async function registrationCount(): Promise<{ registered: number; limit: number; open: boolean; perYear: Record<Year, YearSlot> }> {
   const store = await readStore();
   const s = store.settings;
   const limit = s?.maxPasses ?? maxRegistrations();
-  const open = s?.registrationsOpen !== false && store.users.length < limit;
-  return { registered: store.users.length, limit, open };
+  const byYear = countByYear(store.users);
+  const limits = resolveYearLimits(s ?? null);
+  const globallyOpen = s?.registrationsOpen !== false;
+  const perYear = {} as Record<Year, YearSlot>;
+  for (const y of YEARS) {
+    perYear[y] = {
+      registered: byYear[y],
+      limit: limits[y],
+      open: globallyOpen && byYear[y] < limits[y],
+    };
+  }
+  const open = globallyOpen && store.users.length < limit;
+  return { registered: store.users.length, limit, open, perYear };
 }
 
 export async function getUserById(userId: string): Promise<StoredUser | null> {
@@ -286,7 +359,7 @@ export async function deleteUser(userId: string): Promise<{ removedPasses: numbe
 
 /** Patch editable user fields. Uniqueness re-checked. Returns updated user. */export async function updateUser(
   userId: string,
-  patch: { name?: string; rollNo?: string; email?: string; mobile?: string; gender?: Gender; food?: FoodPref },
+  patch: { name?: string; rollNo?: string; email?: string; mobile?: string; gender?: Gender; food?: FoodPref; year?: Year },
 ): Promise<StoredUser> {
   return withWriteLock(async () => {
     const store = await readStore();
@@ -309,6 +382,16 @@ export async function deleteUser(userId: string): Promise<{ removedPasses: numbe
     user.mobile = mobile;
     if (patch.gender !== undefined) user.gender = patch.gender;
     if (patch.food !== undefined) user.food = patch.food;
+    if (patch.year !== undefined) {
+      const target = patch.year;
+      if (!YEARS.includes(target)) throw new Error("Invalid year.");
+      if (target !== user.year) {
+        const byYear = countByYear(store.users);
+        const limit = yearLimitFor(target, store.settings ?? null);
+        if (byYear[target] >= limit) throw new YearRegistrationsFullError(target, limit);
+      }
+      user.year = target;
+    }
     await writeStore(store);
     return { ...user };
   });
@@ -322,11 +405,14 @@ export async function issuePasses(input: {
   mobile: string;
   gender: Gender;
   food: FoodPref;
+  year: Year;
 }): Promise<{ user: StoredUser; passes: StoredPass[]; duplicate: boolean }> {
   return withWriteLock(async () => {
   const email = input.email.trim().toLowerCase();
   const rollNo = input.rollNo.trim().toUpperCase();
   const mobile = input.mobile.replace(/\D/g, "").slice(-10);
+  const year = input.year;
+  if (!YEARS.includes(year)) throw new Error("Invalid year.");
   const store = await readStore();
   const existing = findUser(store, email, rollNo, mobile);
   if (existing) {
@@ -336,6 +422,11 @@ export async function issuePasses(input: {
   }
   if (store.settings?.registrationsOpen === false) {
     throw new RegistrationsClosedError();
+  }
+  const yearLimit = yearLimitFor(year, store.settings ?? null);
+  const yearCount = store.users.filter((u) => u.year === year).length;
+  if (yearCount >= yearLimit) {
+    throw new YearRegistrationsFullError(year, yearLimit);
   }
   const limit = store.settings?.maxPasses ?? maxRegistrations();
   if (store.users.length >= limit) {
@@ -359,6 +450,7 @@ export async function issuePasses(input: {
     mobile,
     gender: input.gender,
     food: input.food,
+    year: input.year,
     createdAt: now,
   };
   store.users.push(user);
@@ -470,8 +562,10 @@ export async function passStats(): Promise<{
   female: number;
   foodUsed: number;
   foodActive: number;
+  years: Record<Year, number>;
 }> {
   const store = await readStore();
+  const years = countByYear(store.users);
   return {
     issued: store.passes.length,
     users: store.users.length,
@@ -483,6 +577,7 @@ export async function passStats(): Promise<{
     female: store.users.filter((u) => u.gender === "Female").length,
     foodUsed: store.passes.filter((p) => foodStatusOf(p) === "USED").length,
     foodActive: store.passes.filter((p) => foodStatusOf(p) === "ACTIVE").length,
+    years,
   };
 }
 
@@ -497,6 +592,7 @@ export async function listPasses(filter: {
   type?: string;
   status?: string;
   limit?: number;
+  year?: string;
 }): Promise<{ rows: PassRow[]; total: number }> {
   const store = await readStore();
   const q = (filter.query ?? "").trim().toLowerCase();
@@ -506,8 +602,9 @@ export async function listPasses(filter: {
     if (filter.type && filter.type !== "ALL" && pass.type !== filter.type) continue;
     if (filter.status && filter.status !== "ALL" && pass.status !== filter.status) continue;
     const user = store.users.find((u) => u.id === pass.userId) ?? null;
+    if (filter.year && filter.year !== "ALL" && user?.year !== filter.year) continue;
     if (q) {
-      const hay = `${user?.name ?? ""} ${user?.serial ?? ""} ${user?.rollNo ?? ""} ${user?.email ?? ""} ${user?.mobile ?? ""} ${user?.food ?? ""}`.toLowerCase();
+      const hay = `${user?.name ?? ""} ${user?.serial ?? ""} ${user?.rollNo ?? ""} ${user?.email ?? ""} ${user?.mobile ?? ""} ${user?.food ?? ""} ${user?.year ?? ""} ${user?.gender ?? ""}`.toLowerCase();
       if (!hay.includes(q)) continue;
     }
     rows.push({ pass, user });

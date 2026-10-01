@@ -10,6 +10,7 @@ export async function GET(req: Request) {
     type: searchParams.get("type") ?? "ALL",
     status: searchParams.get("status") ?? "ALL",
     limit: Number(searchParams.get("limit") ?? 200),
+    year: searchParams.get("year") ?? "ALL",
   });
   return NextResponse.json({
     total,
@@ -28,6 +29,7 @@ export async function GET(req: Request) {
       rollNo: user?.rollNo ?? "—",
       gender: user?.gender ?? "—",
       food: user?.food ?? "—",
+      year: user?.year ?? "—",
     })),
   });
 }

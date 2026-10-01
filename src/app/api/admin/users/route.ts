@@ -7,15 +7,17 @@ import {
   issuePasses,
   RegistrationsClosedError,
   RegistrationsFullError,
+  YearRegistrationsFullError,
   updateUser,
 } from "@/lib/pass-store";
 import {
   collapseSpaces,
   normalizeRegistration,
   validateRegistration,
+  type Year,
 } from "@/lib/validate-contact";
 
-/** Admin edit of a registration: PATCH { userId, patch: { name?, rollNo?, email?, mobile?, gender?, food? } } */
+/** Admin edit of a registration: PATCH { userId, patch: { name?, rollNo?, email?, mobile?, gender?, food?, year? } } */
 export async function PATCH(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   let body: unknown;
@@ -40,6 +42,7 @@ export async function PATCH(req: Request) {
     mobile: p.mobile !== undefined ? String(p.mobile) : current.mobile,
     gender: p.gender !== undefined ? String(p.gender) : current.gender,
     food: p.food !== undefined ? String(p.food) : current.food,
+    year: p.year !== undefined ? String(p.year) : (current.year ?? "1st"),
   };
   const errors = validateRegistration(merged);
   if (Object.keys(errors).length > 0) {
@@ -53,11 +56,15 @@ export async function PATCH(req: Request) {
       ...(p.mobile !== undefined ? { mobile: String(p.mobile) } : {}),
       ...(p.gender !== undefined ? { gender: String(p.gender) as "Male" | "Female" } : {}),
       ...(p.food !== undefined ? { food: String(p.food) as "Veg" | "Non-veg" } : {}),
+      ...(p.year !== undefined ? { year: String(p.year) as Year } : {}),
     });
     return NextResponse.json({ user });
   } catch (err) {
     if (err instanceof ConflictError) {
       return NextResponse.json({ error: err.message }, { status: 409 });
+    }
+    if (err instanceof YearRegistrationsFullError) {
+      return NextResponse.json({ error: err.message }, { status: 403 });
     }
     if (err instanceof Error && err.message === "User not found.") {
       return NextResponse.json({ error: "User not found." }, { status: 404 });
@@ -67,7 +74,7 @@ export async function PATCH(req: Request) {
   }
 }
 
-/** Admin walk-in: POST { fullName, rollNo, email, mobile, gender, food } → issues pass. Duplicate-checked. */
+/** Admin walk-in: POST { fullName, rollNo, email, mobile, gender, food, year } → issues pass. Duplicate-checked. */
 export async function POST(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   let body: unknown;
@@ -78,12 +85,13 @@ export async function POST(req: Request) {
   }
   const b = body as Record<string, unknown>;
   const input = {
-    fullName: String(b.fullName ?? ""),
+    fullName: String(b.fullName ?? b.name ?? ""),
     rollNo: String(b.rollNo ?? ""),
     email: String(b.email ?? ""),
     mobile: String(b.mobile ?? ""),
     gender: String(b.gender ?? ""),
     food: String(b.food ?? ""),
+    year: String(b.year ?? ""),
   };
   const errors = validateRegistration(input);
   if (Object.keys(errors).length > 0) {
@@ -96,7 +104,7 @@ export async function POST(req: Request) {
     if (err instanceof ConflictError) {
       return NextResponse.json({ error: err.message }, { status: 409 });
     }
-    if (err instanceof RegistrationsFullError || err instanceof RegistrationsClosedError) {
+    if (err instanceof RegistrationsFullError || err instanceof RegistrationsClosedError || err instanceof YearRegistrationsFullError) {
       return NextResponse.json({ error: err.message }, { status: 403 });
     }
     console.error("[admin/users POST]", err);

@@ -40,7 +40,12 @@ export const metadata: Metadata = {
     "Free flagship meetup Oct 6–8 at SUIIT: Cloud, AI/GenAI + DevOps, hands-on labs, lunch + certificate. Free entry with QR pass.",
   alternates: { canonical: "/events/awsscd26" },
   keywords: [
+    "AWS SCD",
+    "AWS SCD SUIIT 2026",
+    "AWS Student Community Day",
+    "AWS Student Community Day SUIIT 2026",
     "AWS Community Day",
+    "AWS SBG",
     "SUIIT",
     "Sambalpur",
     "cloud",
@@ -105,6 +110,7 @@ export default function CommunityDayPage() {
     "@context": "https://schema.org",
     "@type": "Event",
     name: COMMUNITY_DAY_META.title,
+    alternateName: "AWS SCD SUIIT 2026",
     startDate: COMMUNITY_DAY_META.startIso,
     endDate: COMMUNITY_DAY_META.endIso,
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
@@ -168,10 +174,10 @@ export default function CommunityDayPage() {
                 AWS Student Community Day SUIIT 2026
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-fog md:text-lg">
-                A community-driven meetup bringing together students, developers
-                and cloud enthusiasts — technical sessions, hands-on learning,
-                real-world insights and networking on Cloud, AI, Generative AI,
-                DevOps and the AWS ecosystem.
+                AWS SCD — a community-driven meetup bringing together students,
+                developers and cloud enthusiasts — technical sessions, hands-on
+                learning, real-world insights and networking on Cloud, AI,
+                Generative AI, DevOps and the AWS ecosystem.
               </p>
               <dl className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-fog">
                 <div className="flex items-center gap-2">

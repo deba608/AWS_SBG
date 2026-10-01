@@ -8,9 +8,11 @@ import {
   normalizedContact,
   validateContact,
   type ContactErrors,
+  type Year,
 } from "@/lib/validate-contact";
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
+import YearSelect from "@/components/YearSelect";
 import { emailExactPass } from "@/lib/pass-image";
 import { cn } from "@/lib/utils";
 
@@ -49,13 +51,14 @@ export default function CommunityDayRegisterModal({
   const [mobile, setMobile] = useState("");
   const [gender, setGender] = useState("");
   const [food, setFood] = useState("");
+  const [year, setYear] = useState("");
   const [errors, setErrors] = useState<ContactErrors>({});
   const [status, setStatus] = useState<Status>("form");
   const [apiError, setApiError] = useState("");
   const [pass, setPass] = useState<IssuedPass | null>(null);
-  const [passUser, setPassUser] = useState({ name: "", serial: "", rollNo: "", food: "" });
+  const [passUser, setPassUser] = useState({ name: "", serial: "", rollNo: "", food: "", year: "" });
   const [emailSent, setEmailSent] = useState(false);
-  const [slots, setSlots] = useState<{ registered: number; limit: number; open: boolean } | null>(null);
+  const [slots, setSlots] = useState<{ registered: number; limit: number; open: boolean; perYear?: Record<string, { registered: number; limit: number; open: boolean }> } | null>(null);
 
   const openModal = () => {
     try {
@@ -68,6 +71,7 @@ export default function CommunityDayRegisterModal({
         if (s.mobile) setMobile(String(s.mobile));
         if (s.gender) setGender(String(s.gender));
         if (s.food) setFood(String(s.food));
+        if (s.year) setYear(String(s.year));
       }
     } catch {
       // ignore
@@ -93,18 +97,18 @@ export default function CommunityDayRegisterModal({
   };
 
   async function submit() {
-    const fieldErrors = validateContact({ fullName, rollNo, email, mobile, gender, food });
+    const fieldErrors = validateContact({ fullName, rollNo, email, mobile, gender, food, year });
     setErrors(fieldErrors);
     if (Object.keys(fieldErrors).length > 0) return;
 
-    const contact = normalizedContact({ fullName, rollNo, email, mobile, gender, food });
+    const contact = normalizedContact({ fullName, rollNo, email, mobile, gender, food, year });
     setStatus("submitting");
     setApiError("");
 
     try {
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ fullName, rollNo, email, mobile, gender, food }),
+        JSON.stringify({ fullName, rollNo, email, mobile, gender, food, year }),
       );
     } catch {
       // private mode etc.
@@ -132,7 +136,7 @@ export default function CommunityDayRegisterModal({
       const res = await fetch("/api/passes/issue", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, rollNo, email, mobile, gender, food }),
+        body: JSON.stringify({ fullName, rollNo, email, mobile, gender, food, year }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -140,13 +144,14 @@ export default function CommunityDayRegisterModal({
         throw new Error(data.error ?? "Pass issue failed.");
       }
       const issued = (data.passes as IssuedPass[])[0];
-      const u = data.user as { name: string; serial?: string; rollNo: string; food: string };
+      const u = data.user as { name: string; serial?: string; rollNo: string; food: string; year?: string };
       setPass(issued);
       setPassUser({
         name: u.name,
         serial: u.serial ?? "",
         rollNo: u.rollNo,
         food: u.food,
+        year: u.year ?? year,
       });
       setEmailSent(false);
       setStatus("done");
@@ -359,6 +364,20 @@ export default function CommunityDayRegisterModal({
                 />
               </div>
             </div>
+            <div>
+              <YearSelect
+                value={year}
+                onChange={(y: Year) => setYear(y)}
+                labelId="scd-year-label"
+                error={errors.year}
+                counts={slots?.perYear}
+              />
+            </div>
+            {year && slots?.perYear?.[year] && !slots.perYear[year].open ? (
+              <p role="alert" className="rounded-xl border border-amber-400/40 bg-amber-500/10 p-3 text-sm text-amber-200">
+                {year} year is full ({slots.perYear[year].registered}/{slots.perYear[year].limit}) — pick another year or retrieve your pass below if already registered.
+              </p>
+            ) : null}
             {apiError ? (
               <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
                 {apiError}
@@ -367,7 +386,7 @@ export default function CommunityDayRegisterModal({
             <div className="flex flex-col gap-3 pt-1">
               <button
                 type="submit"
-                disabled={status === "submitting" || (slots !== null && !slots.open)}
+                disabled={status === "submitting" || (slots !== null && !slots.open) || (year !== "" && slots?.perYear?.[year] !== undefined && !slots.perYear[year].open)}
                 className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-purple-500 px-6 py-3.5 text-[15px] font-bold text-white shadow-[0_4px_24px_rgba(173,92,255,0.4)] transition-all hover:shadow-[0_4px_32px_rgba(173,92,255,0.55)] disabled:opacity-70"
               >
                 {status === "submitting" ? (

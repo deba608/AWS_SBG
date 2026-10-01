@@ -18,7 +18,7 @@ const socials = [
 
 const communityLinks = [
   {
-    label: "Community Day — Oct 6–8",
+    label: "AWS Student Community Day (AWS SCD) — Oct 6–8",
     href: "/events/awsscd26",
     external: false,
     highlight: true,

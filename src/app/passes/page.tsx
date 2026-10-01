@@ -4,9 +4,9 @@ import RetrievePass from "@/components/RetrievePass";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Get Event Entry Pass",
+  title: "AWS SCD Pass — Free QR Entry Pass",
   description:
-    "Register, get QR entry pass instantly + emailed copy. Single-use, scan at gate.",
+    "Register for AWS SBG events and AWS Student Community Day, get your free QR entry pass instantly + emailed copy. Single-use, scanned at gate.",
   alternates: { canonical: "/passes" },
   openGraph: {
     url: "/passes",

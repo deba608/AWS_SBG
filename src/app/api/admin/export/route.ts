@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   let header: string[];
   let lines: string[][];
   if (scope === "USERS") {
-    const seen = new Map<string, { serial: string; name: string; email: string; mobile: string; rollNo: string; gender: string; food: string; createdAt: string }>();
+    const seen = new Map<string, { serial: string; name: string; email: string; mobile: string; rollNo: string; gender: string; food: string; year: string; createdAt: string }>();
     for (const { user } of rows) {
       if (!user || seen.has(user.id)) continue;
       seen.set(user.id, {
@@ -29,14 +29,15 @@ export async function GET(req: Request) {
         rollNo: user.rollNo,
         gender: user.gender,
         food: user.food,
+        year: user.year ?? "",
         createdAt: user.createdAt,
       });
     }
-    header = ["serial", "name", "email", "mobile", "roll_no", "gender", "food", "registered_at"];
-    lines = [...seen.values()].map((u) => [u.serial, u.name, u.email, u.mobile, u.rollNo, u.gender, u.food, u.createdAt]);
+    header = ["serial", "name", "email", "mobile", "roll_no", "gender", "food", "year", "registered_at"];
+    lines = [...seen.values()].map((u) => [u.serial, u.name, u.email, u.mobile, u.rollNo, u.gender, u.food, u.year, u.createdAt]);
   } else {
     const filtered = scope === "ALL" ? rows : rows.filter((r) => r.pass.type === scope);
-    header = ["serial", "name", "email", "mobile", "roll_no", "gender", "food", "type", "entry_status", "entry_used_at", "food_status", "food_used_at", "token"];
+    header = ["serial", "name", "email", "mobile", "roll_no", "gender", "food", "year", "type", "entry_status", "entry_used_at", "food_status", "food_used_at", "token"];
     lines = filtered.map(({ pass, user }) => [
       user?.serial ?? "",
       user?.name ?? "",
@@ -45,6 +46,7 @@ export async function GET(req: Request) {
       user?.rollNo ?? "",
       user?.gender ?? "",
       user?.food ?? "",
+      user?.year ?? "",
       pass.type,
       pass.status,
       pass.usedAt ?? "",
@@ -74,6 +76,10 @@ export async function GET(req: Request) {
       ["passes_issued", stats.issued],
       ["veg", stats.veg],
       ["non_veg", stats.nonveg],
+      ["year_1st", stats.years["1st"]],
+      ["year_2nd", stats.years["2nd"]],
+      ["year_3rd", stats.years["3rd"]],
+      ["year_4th", stats.years["4th"]],
       ["entry_scanned", stats.entryUsed],
       ["entry_pending", stats.entryActive],
       ["lunch_served", stats.foodUsed],
