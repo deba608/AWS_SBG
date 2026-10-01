@@ -664,6 +664,7 @@ export default function HackathonAdminClient() {
                           Delete team
                         </button>
                       </div>
+                      </div>
                     )}
                   </td>
                 </tr>
