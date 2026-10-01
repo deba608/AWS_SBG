@@ -311,6 +311,80 @@ export async function registerTeam(input: HackathonTeamInput): Promise<{ team: H
   });
 }
 
+export interface HackathonTeamPatch {
+  teamName?: string;
+  preference?: string;
+  leader?: HackathonMemberInput;
+  members?: HackathonMemberInput[];
+}
+
+/** Admin edit: full-team validate + duplicate check (excluding self). */
+export async function updateHackathonTeam(id: string, patch: HackathonTeamPatch): Promise<{ team: HackathonTeam }> {
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const team = store.teams.find((t) => t.id === id);
+    if (!team) throw new Error("Team not found.");
+    const toInput = (m: HackathonMember): HackathonMemberInput => ({
+      name: m.name,
+      rollNo: m.rollNo,
+      email: m.email,
+      mobile: m.mobile,
+      year: m.year,
+      gender: m.gender,
+      githubUrl: m.githubUrl ?? "",
+    });
+    const merged = {
+      teamName: patch.teamName !== undefined ? patch.teamName : team.teamName,
+      preference: patch.preference !== undefined ? patch.preference : team.preference,
+      declaration: true,
+      leader: patch.leader !== undefined ? patch.leader : toInput(team.leader),
+      members: patch.members !== undefined ? patch.members : team.members.map(toInput),
+    };
+    const errors = validateTeam(merged);
+    if (Object.keys(errors).length > 0) {
+      const first = errors.teamName ?? errors.preference ?? errors.declaration ?? errors.team ?? "Validation failed.";
+      throw new HackathonConflictError(typeof first === "string" ? first : "Validation failed.");
+    }
+    const teamName = collapseSpaces(merged.teamName);
+    if (store.teams.some((t) => t.id !== id && t.teamName.toLowerCase() === teamName.toLowerCase())) {
+      throw new HackathonConflictError(`Team name "${teamName}" is already taken — pick another.`);
+    }
+    const leader = normalizeMember(merged.leader);
+    const members = merged.members.map(normalizeMember);
+    for (const p of allPeople({ leader, members })) {
+      const clash = store.teams
+        .filter((t) => t.id !== id)
+        .flatMap((t) => allPeople(t).map((q) => ({ q, t })))
+        .find(({ q }) => q.email === p.email || q.rollNo === p.rollNo || (p.mobile !== "" && q.mobile === p.mobile));
+      if (clash) {
+        throw new HackathonConflictError(
+          `${p.name} is already registered with team "${clash.t.teamName}" — one student, one team.`,
+        );
+      }
+    }
+    team.teamName = teamName;
+    team.preference = HACKATHON_PREFERENCES.includes(merged.preference as HackathonPreference)
+      ? (merged.preference as HackathonPreference)
+      : team.preference;
+    team.leader = leader;
+    team.members = members;
+    await writeStore(store);
+    return { team };
+  });
+}
+
+/** Admin/owner remove: deletes the whole team. */
+export async function deleteHackathonTeam(id: string): Promise<{ removedMembers: number }> {
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const team = store.teams.find((t) => t.id === id);
+    if (!team) throw new Error("Team not found.");
+    store.teams = store.teams.filter((t) => t.id !== id);
+    await writeStore(store);
+    return { removedMembers: 1 + team.members.length };
+  });
+}
+
 export async function listHackathonTeams(): Promise<{ teams: HackathonTeam[]; total: number }> {  const store = await readStore();
   const teams = [...store.teams].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   return { teams, total: teams.length };
