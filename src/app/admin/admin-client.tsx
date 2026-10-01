@@ -6,7 +6,15 @@ import { ChevronDown, Download, Loader2, LogOut, Printer, RotateCw, Search, Tras
 import AdminLogin from "@/components/AdminLogin";
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
+import YearSelect from "@/components/YearSelect";
+import { YEARS } from "@/lib/validate-contact";
 import { cn } from "@/lib/utils";
+
+interface YearSlot {
+  registered: number;
+  limit: number;
+  open: boolean;
+}
 
 interface Stats {
   issued: number;
@@ -19,6 +27,7 @@ interface Stats {
   female: number;
   foodUsed: number;
   foodActive: number;
+  years: Record<string, number>;
 }
 
 interface Scan {
@@ -45,6 +54,7 @@ interface Row {
   rollNo: string;
   gender: string;
   food: string;
+  year: string;
 }
 
 interface RegSettings {
@@ -53,6 +63,9 @@ interface RegSettings {
   registered: number;
   limit: number;
   open: boolean;
+  perYear?: Record<string, YearSlot>;
+  yearLimits?: Record<string, number | null>;
+  defaultYearLimit?: number;
 }
 
 const selectCls =
@@ -90,15 +103,17 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
   const [q, setQ] = useState("");
   const [type, setType] = useState("ALL");
   const [status, setStatus] = useState("ALL");
+  const [yearFilter, setYearFilter] = useState("ALL");
   const [loading, setLoading] = useState(false);
   const [scans, setScans] = useState<Scan[]>([]);
   const [openToken, setOpenToken] = useState<string | null>(null);
   const [settings, setSettings] = useState<RegSettings | null>(null);
   const [limitDraft, setLimitDraft] = useState("");
+  const [yearDrafts, setYearDrafts] = useState<Record<string, string>>({});
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsMsg, setSettingsMsg] = useState("");
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", email: "", mobile: "", rollNo: "", gender: "", food: "" });
+  const [editForm, setEditForm] = useState({ name: "", email: "", mobile: "", rollNo: "", gender: "", food: "", year: "" });
   const [editErr, setEditErr] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
   const [dangerArmed, setDangerArmed] = useState(false);
@@ -106,7 +121,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
   const [deletingAll, setDeletingAll] = useState(false);
   const [dangerMsg, setDangerMsg] = useState("");
   const [addOpen, setAddOpen] = useState(false);
-  const [newForm, setNewForm] = useState({ name: "", email: "", mobile: "", rollNo: "", gender: "", food: "" });
+  const [newForm, setNewForm] = useState({ name: "", email: "", mobile: "", rollNo: "", gender: "", food: "", year: "" });
   const [addErr, setAddErr] = useState("");
   const [savingAdd, setSavingAdd] = useState(false);
   const [addMsg, setAddMsg] = useState("");
@@ -127,7 +142,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
       const [s, l, r, g] = await Promise.all([
         fetch("/api/admin/stats", { cache: "no-store" }),
         fetch(
-          `/api/admin/passes?q=${encodeURIComponent(q)}&type=${type}&status=${status}&limit=200`,
+          `/api/admin/passes?q=${encodeURIComponent(q)}&type=${type}&status=${status}&year=${yearFilter}&limit=200`,
           { cache: "no-store" },
         ),
         fetch("/api/admin/recent?limit=10", { cache: "no-store" }),
@@ -148,11 +163,20 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
         const d = (await g.json()) as RegSettings;
         setSettings(d);
         setLimitDraft((prev) => (prev === "" ? String(d.limit) : prev));
+        setYearDrafts((prev) => {
+          if (Object.keys(prev).length > 0) return prev;
+          const init: Record<string, string> = {};
+          for (const y of YEARS) {
+            const slot = d.perYear?.[y];
+            init[y] = String(slot?.limit ?? d.yearLimits?.[y] ?? d.defaultYearLimit ?? 60);
+          }
+          return init;
+        });
       }
     } finally {
       setLoading(false);
     }
-  }, [q, type, status]);
+  }, [q, type, status, yearFilter]);
 
   useEffect(() => {
     // init once: auth check hits external API
@@ -175,7 +199,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
     }, 400);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed, q, type, status]);
+  }, [authed, q, type, status, yearFilter]);
 
   useEffect(() => {
     // live gate view: stats + scans refresh every 15s
@@ -197,7 +221,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
     setEditingUserId(null);
   }
 
-  async function saveSettings(patch: { maxPasses?: number | null; registrationsOpen?: boolean | null }) {
+  async function saveSettings(patch: { maxPasses?: number | null; registrationsOpen?: boolean | null; yearLimits?: Record<string, number | null> }) {
     setSavingSettings(true);
     setSettingsMsg("");
     try {
@@ -210,6 +234,12 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
       if (!res.ok) throw new Error(d.error ?? "Save failed.");
       setSettings(d as RegSettings);
       setLimitDraft(String((d as RegSettings).limit));
+      const per = (d as RegSettings).perYear;
+      if (per) {
+        const next: Record<string, string> = {};
+        for (const y of YEARS) next[y] = String(per[y]?.limit ?? 60);
+        setYearDrafts(next);
+      }
       setSettingsMsg("Saved.");
     } catch (err) {
       setSettingsMsg(err instanceof Error ? err.message : "Save failed.");
@@ -228,6 +258,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
       rollNo: r.rollNo,
       gender: r.gender,
       food: r.food,
+      year: YEARS.includes(r.year as (typeof YEARS)[number]) ? r.year : "",
     });
     setEditingUserId(r.userId);
   }
@@ -249,6 +280,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
             rollNo: editForm.rollNo,
             gender: editForm.gender,
             food: editForm.food,
+            year: editForm.year,
           },
         }),
       });
@@ -308,6 +340,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
           rollNo: newForm.rollNo,
           gender: newForm.gender,
           food: newForm.food,
+          year: newForm.year,
         }),
       });
       const d = await res.json();
@@ -316,7 +349,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
         throw new Error(fieldErr || d.error || "Create failed.");
       }
       setAddMsg(`Added ${d.user.name} · serial ${d.user.serial}.`);
-      setNewForm({ name: "", email: "", mobile: "", rollNo: "", gender: "", food: "" });
+      setNewForm({ name: "", email: "", mobile: "", rollNo: "", gender: "", food: "", year: "" });
       await load();
     } catch (err) {
       setAddErr(err instanceof Error ? err.message : "Create failed.");
@@ -887,6 +920,14 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
               <Printer className="h-4 w-4" aria-hidden />
               Print gate list
             </button>
+            <Link
+              href="/admin/food-tokens"
+              title="Upload Excel → food tokens, 10 per A4, print & cut"
+              className="col-span-2 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-400 sm:col-span-3"
+            >
+              <Printer className="h-4 w-4" aria-hidden />
+              Food tokens — print (10/A4)
+            </Link>
           </div>
           <p className="mt-3 text-xs text-faint">
             CSV opens in Excel/Sheets. Print the gate list before the event as the offline fallback.
