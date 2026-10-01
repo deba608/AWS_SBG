@@ -55,7 +55,7 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
     theme: "DecodeX Hackathon",
     defaultVenue: "APJ Abdul Kalam Auditorium",
     registerUrl: "/hackathon",
-    registerLabel: "Register team",
+    registerLabel: "Register your team",
     schedule: [
       {
         time: "08:45 AM",
