@@ -103,6 +103,27 @@ export default function CommunityDayAgenda() {
                         {item.description}
                       </p>
                     ) : null}
+                    {item.registerUrl ? (
+                      item.registerUrl.startsWith("http") ? (
+                        <a
+                          href={item.registerUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 text-xs font-semibold text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream sm:text-sm"
+                        >
+                          Separate registration · {item.registerLabel ?? "Google Form"}
+                          <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                        </a>
+                      ) : (
+                        <Link
+                          href={item.registerUrl}
+                          className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 text-xs font-semibold text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream sm:text-sm"
+                        >
+                          Separate registration · {item.registerLabel ?? "Register"}
+                          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                        </Link>
+                      )
+                    ) : null}
                     {item.performers ? (
                       <div className="mt-2.5 flex flex-wrap gap-2">
                         {item.performers.map((p) =>

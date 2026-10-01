@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, Mail, Search } from "lucide-react";
 import PassCard from "@/components/PassCard";
+import PassScopeNote from "@/components/PassScopeNote";
 import { emailExactPass } from "@/lib/pass-image";
 
 interface FoundPass {
@@ -83,6 +84,9 @@ export default function RetrievePass() {
       <p className="mt-1 text-sm text-fog">
         Lost your QR? Enter college mail, roll number, or mobile — one pass per student, no duplicates.
       </p>
+      <div className="mt-3">
+        <PassScopeNote compact />
+      </div>
       <form onSubmit={submit} className="mt-4 flex flex-col gap-2 sm:flex-row">
         <input
           value={query}
