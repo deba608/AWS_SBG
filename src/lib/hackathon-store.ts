@@ -318,6 +318,16 @@ export interface HackathonTeamPatch {
   members?: HackathonMemberInput[];
 }
 
+/** Thrown when team data fails validation. Maps to 400 with field errors. */
+export class HackathonValidationError extends Error {
+  errors: TeamErrors;
+  constructor(errors: TeamErrors) {
+    super("Validation failed.");
+    this.name = "HackathonValidationError";
+    this.errors = errors;
+  }
+}
+
 /** Admin edit: full-team validate + duplicate check (excluding self). */
 export async function updateHackathonTeam(id: string, patch: HackathonTeamPatch): Promise<{ team: HackathonTeam }> {
   return withWriteLock(async () => {
@@ -342,8 +352,7 @@ export async function updateHackathonTeam(id: string, patch: HackathonTeamPatch)
     };
     const errors = validateTeam(merged);
     if (Object.keys(errors).length > 0) {
-      const first = errors.teamName ?? errors.preference ?? errors.declaration ?? errors.team ?? "Validation failed.";
-      throw new HackathonConflictError(typeof first === "string" ? first : "Validation failed.");
+      throw new HackathonValidationError(errors);
     }
     const teamName = collapseSpaces(merged.teamName);
     if (store.teams.some((t) => t.id !== id && t.teamName.toLowerCase() === teamName.toLowerCase())) {
