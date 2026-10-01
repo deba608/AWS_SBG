@@ -24,9 +24,9 @@ const rules = [
 ];
 
 const prizes = [
-  { icon: Medal, label: "2nd Prize", amount: "₹5,000", place: "2", tone: "border-slate-300/40 bg-slate-300/10 text-slate-200", bar: "h-16 sm:h-20", order: "order-1 sm:order-1" },
-  { icon: Trophy, label: "1st Prize", amount: "₹7,000", place: "1", tone: "border-amber-400/60 bg-amber-400/15 text-amber-300 shadow-[0_0_40px_rgba(251,191,36,0.25)]", bar: "h-24 sm:h-32", order: "order-first sm:order-2" },
-  { icon: Award, label: "3rd Prize", amount: "₹3,000", place: "3", tone: "border-orange-400/50 bg-orange-400/10 text-orange-300", bar: "h-12 sm:h-16", order: "order-2 sm:order-3" },
+  { icon: Trophy, label: "1st", amount: "₹7,000", tone: "border-amber-400/50 bg-amber-400/10 text-amber-300" },
+  { icon: Medal, label: "2nd", amount: "₹5,000", tone: "border-slate-300/30 bg-slate-300/10 text-slate-200" },
+  { icon: Award, label: "3rd", amount: "₹3,000", tone: "border-orange-400/40 bg-orange-400/10 text-orange-300" },
 ];
 
 const timeline = [
@@ -99,16 +99,22 @@ export default function HackathonPage() {
         <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
         Check-in 8:45 AM, 6th October · bring laptops + your team
       </p>
-      <section aria-label="Prize pool" className="mt-6 overflow-hidden rounded-3xl border border-amber-400/30 bg-gradient-to-br from-amber-400/10 via-surface to-surface p-5 sm:p-6">
-        <p className="text-xs font-mono tracking-widest text-amber-300/80 uppercase">{"// prize pool"}</p>
-        <p className="mt-1 text-2xl font-bold tracking-tight text-cream sm:text-3xl">₹15,000</p>
-        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:items-end sm:gap-3">
+      <section aria-label="Prize pool" className="mt-6 rounded-2xl border border-line bg-surface p-4">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <div className="min-w-[110px]">
+            <p className="text-[11px] font-mono uppercase tracking-widest text-faint">{"// prize pool"}</p>
+            <p className="mt-0.5 text-xl font-bold tracking-tight text-cream">₹15,000</p>
+          </div>
+          <div className="hidden h-10 w-px shrink-0 bg-line sm:block" aria-hidden />
           {prizes.map((p) => (
-            <div key={p.label} className={`${p.order} rounded-2xl border p-3 text-center sm:p-4 ${p.tone}`}>
-              <p.icon className="mx-auto h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
-              <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider sm:text-xs">{p.label}</p>
-              <p className="mt-0.5 text-lg font-bold sm:text-2xl">{p.amount}</p>
-              <div className={`mx-auto mt-3 hidden w-full rounded-t-lg bg-current opacity-20 sm:block ${p.bar}`} aria-hidden />
+            <div key={p.label} className="flex min-w-[96px] flex-1 items-center gap-2.5">
+              <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${p.tone}`}>
+                <p.icon className="h-4 w-4" aria-hidden />
+              </span>
+              <span>
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-faint">{p.label} prize</span>
+                <span className="block text-base font-bold leading-tight text-cream">{p.amount}</span>
+              </span>
             </div>
           ))}
         </div>
