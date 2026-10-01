@@ -246,7 +246,7 @@ export default function HackathonPage() {
         <div className="flex flex-col gap-2 rounded-2xl border border-line bg-surface p-4 text-sm text-fog sm:flex-row sm:items-center">
           <Phone className="h-4 w-4 shrink-0 text-brand" aria-hidden />
           <p>
-            <span className="font-semibold text-cream">Contact:</span> Manas Ranjan Dikshit (SUIIT) ·{" "}
+            <span className="font-semibold text-cream">Contact:</span> Manas Ranjan Dikshit ·{" "}
             <a href="tel:+919337978805" className="font-medium text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">+91 93379 78805</a>
             {" · "}
             <a href="mailto:awssbg@suiit.ac.in" className="font-medium text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">awssbg@suiit.ac.in</a>
