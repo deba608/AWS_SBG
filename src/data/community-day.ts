@@ -110,14 +110,14 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
       {
         time: "09:30 – 10:30 AM",
         title: "Tech Parliament",
-        description: "",
+        description: "Debate battle on tech motions. Separate Google Form registration required — Community Day pass alone is not enough.",
         venue: "Seminar Hall",
         tag: "Debate",
       },
       {
         time: "11:00 – 01:00 PM",
         title: "Make-A-Bot Competition",
-        description: "",
+        description: "Bot-building showdown. Separate Google Form registration required — Community Day pass alone is not enough.",
         venue: "Seminar Hall",
         tag: "Competition",
       },
