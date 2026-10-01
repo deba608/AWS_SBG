@@ -19,6 +19,7 @@ function memberOf(v: unknown): HackathonMemberInput {
     year: String(o.year ?? ""),
     food: String(o.food ?? ""),
     gender: String(o.gender ?? ""),
+    githubUrl: String(o.githubUrl ?? ""),
   };
 }
 
@@ -35,6 +36,8 @@ export async function POST(req: Request) {
   const b = (body ?? {}) as Record<string, unknown>;
   const input = {
     teamName: String(b.teamName ?? ""),
+    preference: String(b.preference ?? ""),
+    declaration: b.declaration === true,
     leader: memberOf(b.leader),
     members: Array.isArray(b.members) ? (b.members as unknown[]).slice(0, 8).map(memberOf) : [],
   };

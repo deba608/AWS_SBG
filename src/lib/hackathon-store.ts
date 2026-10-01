@@ -6,6 +6,9 @@ import { getRedis, withRedisLock } from "./pass-redis";
 export const HACKATHON_MIN_MEMBERS = 2; // leader + at least 1 teammate
 export const HACKATHON_MAX_MEMBERS = 4; // leader + up to 3 teammates
 
+export type HackathonPreference = "Hardware" | "Software" | "Both";
+export const HACKATHON_PREFERENCES: HackathonPreference[] = ["Hardware", "Software", "Both"];
+
 export interface HackathonMemberInput {
   name: string;
   rollNo: string;
@@ -14,10 +17,13 @@ export interface HackathonMemberInput {
   year: string;
   food: string;
   gender: string;
+  githubUrl: string;
 }
 
 export interface HackathonTeamInput {
   teamName: string;
+  preference: string;
+  declaration: boolean;
   leader: HackathonMemberInput;
   members: HackathonMemberInput[];
 }
@@ -30,11 +36,13 @@ export interface HackathonMember {
   year: Year;
   food: FoodPref;
   gender: Gender;
+  githubUrl: string;
 }
 
 export interface HackathonTeam {
   id: string;
   teamName: string;
+  preference: HackathonPreference;
   leader: HackathonMember;
   members: HackathonMember[];
   createdAt: string;
@@ -141,10 +149,13 @@ export type MemberErrors = {
   year?: string;
   food?: string;
   gender?: string;
+  githubUrl?: string;
 };
 
 export interface TeamErrors {
   teamName?: string;
+  preference?: string;
+  declaration?: string;
   leader?: MemberErrors;
   members?: MemberErrors[];
   team?: string;
@@ -181,6 +192,20 @@ function validateMember(m: HackathonMemberInput): MemberErrors {
 
   if (!FOODS.includes(m.food as FoodPref)) errors.food = "Pick Veg or Non-veg.";
   if (!GENDERS.includes(m.gender as Gender)) errors.gender = "Pick Male or Female.";
+
+  const github = String(m.githubUrl ?? "").trim();
+  if (github) {
+    if (github.length > 200) errors.githubUrl = "GitHub URL too long.";
+    else {
+      try {
+        const u = new URL(github);
+        if (u.protocol !== "http:" && u.protocol !== "https:") errors.githubUrl = "Enter a valid URL.";
+        else if (!u.hostname.toLowerCase().includes("github.com")) errors.githubUrl = "Must be a github.com URL.";
+      } catch {
+        errors.githubUrl = "Enter full URL (https://github.com/…).";
+      }
+    }
+  }
   return errors;
 }
 
@@ -191,6 +216,13 @@ export function validateTeam(input: HackathonTeamInput): TeamErrors {
   else if (teamName.length < 3) errors.teamName = "Team name too short (min 3).";
   else if (teamName.length > 40) errors.teamName = "Team name too long (max 40).";
   else if (!TEAM_RE.test(teamName)) errors.teamName = "Letters, numbers, spaces ( . ' - _ ) only.";
+
+  if (!HACKATHON_PREFERENCES.includes(input.preference as HackathonPreference)) {
+    errors.preference = "Pick Hardware, Software or Both.";
+  }
+  if (input.declaration !== true) {
+    errors.declaration = "Please accept the declaration to register.";
+  }
 
   const leaderErr = validateMember(input.leader ?? ({} as HackathonMemberInput));
   if (Object.keys(leaderErr).length > 0) errors.leader = leaderErr;
@@ -218,6 +250,7 @@ function normalizeMember(m: HackathonMemberInput): HackathonMember {
     year: resolved,
     food: (FOODS.includes(m.food as FoodPref) ? m.food : "Veg") as FoodPref,
     gender: (GENDERS.includes(m.gender as Gender) ? m.gender : "Male") as Gender,
+    githubUrl: String(m.githubUrl ?? "").trim(),
   };
 }
 
@@ -265,9 +298,13 @@ export async function registerTeam(input: HackathonTeamInput): Promise<{ team: H
     const limit = maxHackathonTeams();
     if (store.teams.length >= limit) throw new HackathonFullError(limit);
     const now = new Date().toISOString();
+    const preference = HACKATHON_PREFERENCES.includes(input.preference as HackathonPreference)
+      ? (input.preference as HackathonPreference)
+      : "Both";
     const team: HackathonTeam = {
       id: `h_${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`,
       teamName,
+      preference,
       leader,
       members,
       createdAt: now,

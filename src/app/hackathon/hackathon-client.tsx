@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Loader2, Plus, Trash2, User, Users } from "lucide-react";
+import { ArrowRight, Cpu, Layers, Loader2, Plus, Terminal, Trash2, User, Users } from "lucide-react";
 import Container from "@/components/Container";
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
@@ -10,9 +10,11 @@ import { deriveYearFromRollNo, type FoodPref, type Gender, type Year } from "@/l
 import type { MemberErrors, TeamErrors } from "@/lib/hackathon-store";
 import { cn } from "@/lib/utils";
 
-// Mirrors HACKATHON_MIN/MAX_MEMBERS in lib/hackathon-store (not imported: server-only module).
+// Mirrors HACKATHON_MIN/MAX_MEMBERS + HACKATHON_PREFERENCES in lib/hackathon-store (not imported: server-only module).
 const TEAM_MIN = 2;
 const TEAM_MAX = 4;
+const PREFS = ["Hardware", "Software", "Both"] as const;
+const PREF_ICONS = { Hardware: Cpu, Software: Terminal, Both: Layers } as const;
 
 interface MemberForm {
   name: string;
@@ -22,17 +24,19 @@ interface MemberForm {
   year: string;
   food: string;
   gender: string;
+  githubUrl: string;
 }
 
 interface RegisteredTeam {
   id: string;
   teamName: string;
+  preference: string;
   leader: MemberForm & { year: string; food: string; gender: string };
   members: (MemberForm & { year: string; food: string; gender: string })[];
   createdAt: string;
 }
 
-const blankMember = (): MemberForm => ({ name: "", rollNo: "", email: "", mobile: "", year: "", food: "", gender: "" });
+const blankMember = (): MemberForm => ({ name: "", rollNo: "", email: "", mobile: "", year: "", food: "", gender: "", githubUrl: "" });
 
 const inputCls = (bad: boolean) =>
   `w-full min-h-[44px] rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm ${
@@ -73,7 +77,7 @@ function Field({
 }
 
 function MemberFields({
-  title, icon, value, onChange, errors, idPrefix, onRemove, removable,
+  title, icon, value, onChange, errors, idPrefix, onRemove, removable, showGithub,
 }: {
   title: string;
   icon: React.ReactNode;
@@ -83,6 +87,7 @@ function MemberFields({
   idPrefix: string;
   onRemove?: () => void;
   removable?: boolean;
+  showGithub?: boolean;
 }) {
   const set = (k: keyof MemberForm) => (v: string) => {
     if (k === "rollNo" && !value.year) {
@@ -137,12 +142,62 @@ function MemberFields({
           error={errors?.year}
         />
       </div>
+      {showGithub ? (
+        <div className="mt-3">
+          <Field label="GitHub profile URL (optional)" value={value.githubUrl} onChange={set("githubUrl")} error={errors?.githubUrl} placeholder="https://github.com/username" type="url" inputMode="text" maxLength={200} autoComplete="url" />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function PreferenceSelect({
+  value, onChange, error,
+}: {
+  value: string;
+  onChange: (p: string) => void;
+  error?: string;
+}) {
+  return (
+    <div>
+      <span className="mb-1.5 block text-sm font-medium text-cream" id="hack-pref-label">
+        Project preference *
+      </span>
+      <div role="radiogroup" aria-labelledby="hack-pref-label" className="grid grid-cols-3 gap-2">
+        {PREFS.map((p) => {
+          const active = value === p;
+          const Icon = PREF_ICONS[p];
+          return (
+            <button
+              key={p}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => onChange(p)}
+              className={cn(
+                "flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-sm font-semibold transition-all",
+                active
+                  ? "border-brand/60 bg-brand/10 text-cream shadow-[0_0_20px_rgba(173,92,255,0.18)]"
+                  : "border-line bg-surface text-fog hover:border-faint hover:text-cream",
+              )}
+            >
+              <Icon className="h-4 w-4" aria-hidden />
+              {p}
+            </button>
+          );
+        })}
+      </div>
+      {error ? (
+        <p role="alert" className="mt-1.5 text-xs text-red-300">{error}</p>
+      ) : null}
     </div>
   );
 }
 
 export default function HackathonClient() {
   const [teamName, setTeamName] = useState("");
+  const [preference, setPreference] = useState("");
+  const [declaration, setDeclaration] = useState(false);
   const [leader, setLeader] = useState<MemberForm>(blankMember());
   const [members, setMembers] = useState<MemberForm[]>([blankMember()]);
   const [errors, setErrors] = useState<TeamErrors>({});
@@ -169,7 +224,7 @@ export default function HackathonClient() {
       const res = await fetch("/api/hackathon/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ teamName, leader, members }),
+        body: JSON.stringify({ teamName, preference, declaration, leader, members }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -196,7 +251,7 @@ export default function HackathonClient() {
           </span>
           <p className="mt-2 text-base font-bold text-cream">Team {team.teamName} is in!</p>
           <p className="mt-0.5 text-xs leading-relaxed text-green-200/80">
-            DecodeX Hackathon · Day 1, 6th October · {total} member{total === 1 ? "" : "s"} · Team ID {team.id}
+            DecodeX Hackathon · Day 1, 6th October · {total} member{total === 1 ? "" : "s"} · {team.preference} track · Team ID {team.id}
           </p>
         </div>
         <div className="rounded-xl border border-brand/30 bg-brand/10 p-3 text-sm leading-relaxed text-cream">
@@ -253,6 +308,8 @@ export default function HackathonClient() {
           {errors.teamName ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.teamName}</p> : null}
         </div>
 
+        <PreferenceSelect value={preference} onChange={setPreference} error={errors.preference} />
+
         <MemberFields
           title="Team leader"
           icon={<User className="h-4 w-4" aria-hidden />}
@@ -260,6 +317,7 @@ export default function HackathonClient() {
           onChange={setLeader}
           errors={errors.leader}
           idPrefix="hack-leader"
+          showGithub
         />
 
         {members.map((m, i) => (
@@ -289,6 +347,23 @@ export default function HackathonClient() {
 
         {errors.team ? (
           <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">{errors.team}</p>
+        ) : null}
+        <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm leading-relaxed ${errors.declaration ? "border-red-400/70 bg-red-500/10" : "border-line bg-ink/40"}`}>
+          <input
+            type="checkbox"
+            checked={declaration}
+            onChange={(e) => setDeclaration(e.target.checked)}
+            aria-invalid={Boolean(errors.declaration)}
+            className="mt-1 h-5 w-5 min-h-[20px] min-w-[20px] shrink-0 cursor-pointer accent-[#ad5cff]"
+          />
+          <span className="text-fog">
+            <span className="font-semibold text-cream">Declaration: </span>
+            I declare that all team details are correct, every member is an eligible SUIIT student,
+            our hackathon work will be original, and our team will follow the event rules and code of conduct. *
+          </span>
+        </label>
+        {errors.declaration ? (
+          <p role="alert" className="-mt-2 text-xs text-red-300">{errors.declaration}</p>
         ) : null}
         {apiError ? (
           <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">

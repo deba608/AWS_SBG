@@ -77,7 +77,7 @@ export const decodeXHackathon: EventItem = {
   time: "9:00 AM – 5:30 PM IST",
   location: "APJ Abdul Kalam Auditorium, SUIIT",
   description:
-    "Community Day flagship hackathon: Problem statement submission, Phase I & II sprints, mentor guidance, and jury evaluation on AWS. Register your team on this website — needs separate sign-up, Community Day pass alone is not enough.",
+    "Community Day flagship hackathon: Problem statement submission, Phase I & II sprints, mentor guidance, and jury evaluation on AWS. ₹15,000 prize pool (1st ₹7,000 · 2nd ₹5,000 · 3rd ₹3,000). Register your team on this website — needs separate sign-up, Community Day pass alone is not enough.",
   status: "open",
   registerUrl: "/hackathon",
   detailsUrl: "/events/awsscd26",
