@@ -125,7 +125,7 @@ export default function HackathonPage() {
           ))}
         </div>
       </section>
-      <div className="mt-8">
+      <div className="mt-8 scroll-mt-24" id="register">
         <HackathonClient />
       </div>
 
