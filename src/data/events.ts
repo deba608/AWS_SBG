@@ -62,9 +62,9 @@ export const communityDay: EventItem = {
   time: "9:00 AM – 5:30 PM IST",
   location: "APJ Abdul Kalam Auditorium, SUIIT, Burla",
   description:
-    "Day 2 bot-building showdown — design, build and demo your bot. Needs separate registration via Google Form (link also shared by mail). Community Day pass alone is not enough.",
-  status: "open",
-  registerUrl: MAKE_A_BOT_FORM_URL,
+    "Flagship 3-day gathering: DecodeX Hackathon (Day 1), Tech Parliament + Make-A-Bot (Day 2), Speaker & Podcast session, prize distribution, lunch and comedy (Day 3). The free QR pass covers Student Community Day on 8th October — contests need separate registration.",
+  status: "filling-fast",
+  registerUrl: "/passes",
   detailsUrl: "/events/awsscd26",
 };
 
@@ -92,9 +92,9 @@ export const techparlament: EventItem = {
   time: "9:30 AM – 10:30 AM IST",
   location: "Seminar Hall, SUIIT",
   description:
-    "",
+    "Day 2 debate battle on tech motions — argue, rebut, win. Needs separate registration via Google Form (link also shared by mail). Community Day pass alone is not enough.",
   status: "open",
-  registerUrl: "/passes",
+  registerUrl: TECH_PARLIAMENT_FORM_URL,
   detailsUrl: "/events/awsscd26",
 };
 
@@ -107,9 +107,9 @@ export const makeABot: EventItem = {
   time: "11:00 AM – 1:00 PM IST",
   location: "Seminar Hall, SUIIT",
   description:
-    "",
+    "Day 2 bot-building showdown — design, build and demo your bot. Needs separate registration via Google Form (link also shared by mail). Community Day pass alone is not enough.",
   status: "open",
-  registerUrl: "/passes",
+  registerUrl: MAKE_A_BOT_FORM_URL,
   detailsUrl: "/events/awsscd26",
 };
 
