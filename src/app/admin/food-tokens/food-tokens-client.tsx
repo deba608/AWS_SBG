@@ -125,21 +125,15 @@ export default function FoodTokensClient() {
       .catch(() => setAuthed(false));
   }, []);
 
-  if (authed === null) {
-    return (
-      <div className="rank-card flex items-center gap-3 p-6 text-sm text-fog print:hidden">
-        <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Checking admin…
-      </div>
-    );
-  }
-  if (!authed) return <AdminLogin onDone={() => setAuthed(true)} />;
-
-  const filtered = rows.filter((r) => {
-    if (foodFilter !== "ALL" && r.food !== foodFilter) return false;
-    if (!q.trim()) return true;
-    const hay = `${r.name} ${r.serial} ${r.rollNo}`.toLowerCase();
-    return hay.includes(q.trim().toLowerCase());
-  });
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return rows.filter((r) => {
+      if (foodFilter !== "ALL" && r.food !== foodFilter) return false;
+      if (!needle) return true;
+      const hay = `${r.name} ${r.serial} ${r.rollNo}`.toLowerCase();
+      return hay.includes(needle);
+    });
+  }, [rows, foodFilter, q]);
 
   const sorted = useMemo(() => {
     const list = [...filtered];
@@ -148,6 +142,15 @@ export default function FoodTokensClient() {
     );
     return list;
   }, [filtered, sortMode]);
+
+  if (authed === null) {
+    return (
+      <div className="rank-card flex items-center gap-3 p-6 text-sm text-fog print:hidden">
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Checking admin…
+      </div>
+    );
+  }
+  if (!authed) return <AdminLogin onDone={() => setAuthed(true)} />;
 
   function chunk(list: TokenRow[]): TokenRow[][] {
     const out: TokenRow[][] = [];
