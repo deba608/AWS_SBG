@@ -68,6 +68,21 @@ interface RegSettings {
   defaultYearLimit?: number;
 }
 
+interface Daywise {
+  day1: { label: string; teams: number; teamLimit: number; teamsOpen: boolean; members: number; lunchVeg: number; lunchNonveg: number; href: string };
+  day2: { label: string; note: string; forms: { label: string; url: string }[] };
+  day3: {
+    label: string;
+    registered: number;
+    limit: number;
+    open: boolean;
+    perYear: Record<string, { registered: number; limit: number; open: boolean }>;
+    lunchVeg: number;
+    lunchNonveg: number;
+    href: string;
+  };
+}
+
 const selectCls =
   "min-h-[44px] rounded-xl border border-line bg-surface px-3 py-2 text-sm text-cream focus:ring-2 focus:ring-brand";
 
