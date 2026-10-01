@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Award, BookOpen, CalendarDays, Clock, Gavel, ListChecks, MapPin, Medal, Phone, TriangleAlert, Trophy, Users } from "lucide-react";
+import { Award, BookOpen, CalendarDays, Clock, Download, Gavel, ListChecks, MapPin, Medal, Phone, TriangleAlert, Trophy, Users } from "lucide-react";
 import HackathonClient from "./hackathon-client";
 import { SITE } from "@/lib/constants";
 
@@ -121,10 +121,21 @@ export default function HackathonPage() {
       <section aria-labelledby="rulebook-heading" className="mt-10 space-y-4">
         <div>
           <p className="text-xs font-mono tracking-widest text-brand uppercase">{"// official rulebook · operation: inside job"}</p>
-          <h2 id="rulebook-heading" className="mt-2 flex items-center gap-2 text-2xl font-bold tracking-tight text-cream sm:text-3xl">
-            <BookOpen className="h-6 w-6 shrink-0 text-brand" aria-hidden />
-            DecodeX rulebook
-          </h2>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <h2 id="rulebook-heading" className="flex items-center gap-2 text-2xl font-bold tracking-tight text-cream sm:text-3xl">
+              <BookOpen className="h-6 w-6 shrink-0 text-brand" aria-hidden />
+              DecodeX rulebook
+            </h2>
+            <span className="flex-1" aria-hidden />
+            <a
+              href="/decodex-rulebook.pdf"
+              download="DecodeX-Rulebook.pdf"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-brand px-5 py-2 text-sm font-semibold text-black hover:bg-brandhover"
+            >
+              <Download className="h-4 w-4" aria-hidden />
+              Download PDF
+            </a>
+          </div>
           <p className="measure mt-2 text-sm leading-relaxed text-fog">
             DecodeX is not a conventional hackathon — no predefined problem statements. Each team gets a{" "}
             <span className="font-semibold text-cream">GitHub case repository</span>, investigates it to uncover hidden
