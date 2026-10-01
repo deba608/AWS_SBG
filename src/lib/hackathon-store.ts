@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { YEARS, deriveYearFromRollNo, normalizeEmail, normalizeMobile, collapseSpaces, type Year } from "./validate-contact";
+import { YEARS, FOODS, GENDERS, deriveYearFromRollNo, normalizeEmail, normalizeMobile, collapseSpaces, type Year, type FoodPref, type Gender } from "./validate-contact";
 import { getRedis, withRedisLock } from "./pass-redis";
 
 export const HACKATHON_MIN_MEMBERS = 2; // leader + at least 1 teammate
@@ -12,6 +12,8 @@ export interface HackathonMemberInput {
   email: string;
   mobile: string;
   year: string;
+  food: string;
+  gender: string;
 }
 
 export interface HackathonTeamInput {
@@ -26,6 +28,8 @@ export interface HackathonMember {
   email: string;
   mobile: string;
   year: Year;
+  food: FoodPref;
+  gender: Gender;
 }
 
 export interface HackathonTeam {
@@ -125,8 +129,8 @@ export class HackathonFullError extends Error {
 
 /** Team cap (overridable via HACKATHON_MAX_TEAMS). */
 export function maxHackathonTeams(): number {
-  const n = Number(process.env.HACKATHON_MAX_TEAMS ?? 40);
-  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 40;
+  const n = Number(process.env.HACKATHON_MAX_TEAMS ?? 25);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 25;
 }
 
 export type MemberErrors = {
@@ -135,6 +139,8 @@ export type MemberErrors = {
   email?: string;
   mobile?: string;
   year?: string;
+  food?: string;
+  gender?: string;
 };
 
 export interface TeamErrors {
@@ -172,6 +178,9 @@ function validateMember(m: HackathonMemberInput): MemberErrors {
     const derived = deriveYearFromRollNo(String(m.rollNo ?? ""));
     if (!derived) errors.year = "Select year.";
   }
+
+  if (!FOODS.includes(m.food as FoodPref)) errors.food = "Pick Veg or Non-veg.";
+  if (!GENDERS.includes(m.gender as Gender)) errors.gender = "Pick Male or Female.";
   return errors;
 }
 
@@ -207,6 +216,8 @@ function normalizeMember(m: HackathonMemberInput): HackathonMember {
     email: normalizeEmail(String(m.email ?? "")),
     mobile: normalizeMobile(String(m.mobile ?? "")),
     year: resolved,
+    food: (FOODS.includes(m.food as FoodPref) ? m.food : "Veg") as FoodPref,
+    gender: (GENDERS.includes(m.gender as Gender) ? m.gender : "Male") as Gender,
   };
 }
 

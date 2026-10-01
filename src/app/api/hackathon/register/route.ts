@@ -17,6 +17,8 @@ function memberOf(v: unknown): HackathonMemberInput {
     email: String(o.email ?? ""),
     mobile: String(o.mobile ?? ""),
     year: String(o.year ?? ""),
+    food: String(o.food ?? ""),
+    gender: String(o.gender ?? ""),
   };
 }
 

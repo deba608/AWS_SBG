@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Hash, Loader2, Mail, Phone, Plus, Trash2, User, Users } from "lucide-react";
+import { ArrowRight, Loader2, Plus, Trash2, User, Users } from "lucide-react";
 import Container from "@/components/Container";
+import FoodSelect from "@/components/FoodSelect";
+import GenderSelect from "@/components/GenderSelect";
 import YearSelect from "@/components/YearSelect";
-import { deriveYearFromRollNo, type Year } from "@/lib/validate-contact";
+import { deriveYearFromRollNo, type FoodPref, type Gender, type Year } from "@/lib/validate-contact";
 import type { MemberErrors, TeamErrors } from "@/lib/hackathon-store";
 import { cn } from "@/lib/utils";
 
@@ -18,17 +20,19 @@ interface MemberForm {
   email: string;
   mobile: string;
   year: string;
+  food: string;
+  gender: string;
 }
 
 interface RegisteredTeam {
   id: string;
   teamName: string;
-  leader: MemberForm & { year: string };
-  members: (MemberForm & { year: string })[];
+  leader: MemberForm & { year: string; food: string; gender: string };
+  members: (MemberForm & { year: string; food: string; gender: string })[];
   createdAt: string;
 }
 
-const blankMember = (): MemberForm => ({ name: "", rollNo: "", email: "", mobile: "", year: "" });
+const blankMember = (): MemberForm => ({ name: "", rollNo: "", email: "", mobile: "", year: "", food: "", gender: "" });
 
 const inputCls = (bad: boolean) =>
   `w-full min-h-[44px] rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm ${
@@ -111,6 +115,20 @@ function MemberFields({
         <Field label="College mail *" value={value.email} onChange={set("email")} error={errors?.email} placeholder="24btcse26@suiit.ac.in" type="email" inputMode="email" maxLength={100} autoComplete="email" />
         <Field label="Mobile number *" value={value.mobile} onChange={set("mobile")} error={errors?.mobile} placeholder="9437512345" type="tel" inputMode="numeric" maxLength={13} autoComplete="tel-national" />
       </div>
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <GenderSelect
+          value={value.gender}
+          onChange={(g: Gender) => onChange({ ...value, gender: g })}
+          labelId={`${idPrefix}-gender`}
+          error={errors?.gender}
+        />
+        <FoodSelect
+          value={value.food}
+          onChange={(f: FoodPref) => onChange({ ...value, food: f })}
+          labelId={`${idPrefix}-food`}
+          error={errors?.food}
+        />
+      </div>
       <div className="mt-3">
         <YearSelect
           value={value.year}
@@ -190,9 +208,9 @@ export default function HackathonClient() {
         <div className="rounded-2xl border border-line bg-ink/40 p-4">
           <p className="text-sm font-bold text-cream">{team.teamName}</p>
           <ul className="mt-2 space-y-1.5 text-sm text-fog">
-            <li><span className="font-semibold text-cream">{team.leader.name}</span> (leader) · {team.leader.rollNo} · {team.leader.year} year</li>
+            <li><span className="font-semibold text-cream">{team.leader.name}</span> (leader) · {team.leader.rollNo} · {team.leader.year} year · {team.leader.gender} · {team.leader.food}</li>
             {team.members.map((m) => (
-              <li key={m.rollNo}><span className="font-semibold text-cream">{m.name}</span> · {m.rollNo} · {m.year} year</li>
+              <li key={m.rollNo}><span className="font-semibold text-cream">{m.name}</span> · {m.rollNo} · {m.year} year · {m.gender} · {m.food}</li>
             ))}
           </ul>
         </div>
@@ -271,9 +289,7 @@ export default function HackathonClient() {
 
         {errors.team ? (
           <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">{errors.team}</p>
-        ) : (
-          <p className="text-xs text-faint">Teams of {TEAM_MIN}–{TEAM_MAX} · one student, one team · SUIIT mail required.</p>
-        )}
+        ) : null}
         {apiError ? (
           <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
             {apiError}
@@ -297,12 +313,6 @@ export default function HackathonClient() {
           )}
         </button>
       </form>
-      <div className="mt-4 flex items-center gap-2 text-xs text-faint">
-        <Hash className="h-3.5 w-3.5" aria-hidden />
-        <Mail className="h-3.5 w-3.5" aria-hidden />
-        <Phone className="h-3.5 w-3.5" aria-hidden />
-        <span>Roll prefix auto-fills year (24… → 3rd, 25… → 2nd).</span>
-      </div>
     </Container>
   );
 }

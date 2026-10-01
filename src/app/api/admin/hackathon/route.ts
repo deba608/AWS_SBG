@@ -13,12 +13,12 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const { teams, total } = await listHackathonTeams();
   if (searchParams.get("format") === "csv") {
-    const header = ["team", "role", "name", "email", "mobile", "roll_no", "year", "registered_at"];
+    const header = ["team", "role", "name", "email", "mobile", "roll_no", "year", "gender", "food", "registered_at"];
     const lines: string[][] = [];
     for (const t of teams) {
-      lines.push([t.teamName, "leader", t.leader.name, t.leader.email, t.leader.mobile, t.leader.rollNo, t.leader.year, t.createdAt]);
+      lines.push([t.teamName, "leader", t.leader.name, t.leader.email, t.leader.mobile, t.leader.rollNo, t.leader.year, t.leader.gender, t.leader.food, t.createdAt]);
       for (const m of t.members) {
-        lines.push([t.teamName, "member", m.name, m.email, m.mobile, m.rollNo, m.year, t.createdAt]);
+        lines.push([t.teamName, "member", m.name, m.email, m.mobile, m.rollNo, m.year, m.gender, m.food, t.createdAt]);
       }
     }
     const csv = [header, ...lines].map((r) => r.map(csvCell).join(",")).join("\n");

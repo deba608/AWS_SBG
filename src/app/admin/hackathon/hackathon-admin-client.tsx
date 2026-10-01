@@ -5,11 +5,21 @@ import Link from "next/link";
 import { ArrowLeft, Download, Loader2, Search } from "lucide-react";
 import AdminLogin from "@/components/AdminLogin";
 
+interface Member {
+  name: string;
+  email: string;
+  mobile: string;
+  rollNo: string;
+  year: string;
+  food?: string;
+  gender?: string;
+}
+
 interface Team {
   id: string;
   teamName: string;
-  leader: { name: string; email: string; mobile: string; rollNo: string; year: string };
-  members: { name: string; email: string; mobile: string; rollNo: string; year: string }[];
+  leader: Member;
+  members: Member[];
   createdAt: string;
 }
 
@@ -135,14 +145,14 @@ export default function HackathonAdminClient() {
                   <td className="px-4 py-2 font-semibold text-cream">{t.teamName}</td>
                   <td className="px-4 py-2 text-xs text-fog">
                     <span className="font-medium text-cream">{t.leader.name}</span>
-                    <br />{t.leader.email}<br />{t.leader.mobile} · {t.leader.rollNo} · {t.leader.year} yr
+                    <br />{t.leader.email}<br />{t.leader.mobile} · {t.leader.rollNo} · {t.leader.year} yr{t.leader.gender ? ` · ${t.leader.gender}` : ""}{t.leader.food ? ` · ${t.leader.food}` : ""}
                   </td>
                   <td className="px-4 py-2 text-xs text-fog">
                     {t.members.length === 0 ? "—" : (
                       <ul className="space-y-1">
                         {t.members.map((m) => (
                           <li key={m.rollNo}>
-                            <span className="font-medium text-cream">{m.name}</span> · {m.rollNo} · {m.year} yr
+                            <span className="font-medium text-cream">{m.name}</span> · {m.rollNo} · {m.year} yr{m.gender ? ` · ${m.gender}` : ""}{m.food ? ` · ${m.food}` : ""}
                           </li>
                         ))}
                       </ul>
