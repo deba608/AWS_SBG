@@ -153,6 +153,7 @@ export type MemberErrors = {
   year?: string;
   gender?: string;
   githubUrl?: string;
+  lunch?: string;
 };
 
 export interface TeamErrors {
@@ -194,6 +195,7 @@ function validateMember(m: HackathonMemberInput, opts?: { githubRequired?: boole
   }
 
   if (!GENDERS.includes(m.gender as Gender)) errors.gender = "Pick Male or Female.";
+  if (!FOODS.includes(m.lunch as FoodPref)) errors.lunch = "Pick Veg or Non-veg for Day-1 lunch.";
 
   const github = String(m.githubUrl ?? "").trim();
   if (!github) {
@@ -251,6 +253,7 @@ function normalizeMember(m: HackathonMemberInput): HackathonMember {
     year: resolved,
     gender: (GENDERS.includes(m.gender as Gender) ? m.gender : "Male") as Gender,
     githubUrl: String(m.githubUrl ?? "").trim(),
+    lunch: (FOODS.includes(m.lunch as FoodPref) ? m.lunch : "Veg") as FoodPref,
   };
 }
 
@@ -346,6 +349,7 @@ export async function updateHackathonTeam(id: string, patch: HackathonTeamPatch)
       year: m.year,
       gender: m.gender,
       githubUrl: m.githubUrl ?? "",
+      lunch: m.lunch ?? "Veg",
     });
     const merged = {
       teamName: patch.teamName !== undefined ? patch.teamName : team.teamName,
