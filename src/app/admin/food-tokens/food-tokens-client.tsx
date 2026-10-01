@@ -12,14 +12,18 @@ interface TokenRow {
   rollNo: string;
 }
 
-const PER_PAGE = 10;
+const DENSITY: { label: string; perPage: number; cols: number }[] = [
+  { label: "10 / page", perPage: 10, cols: 2 },
+  { label: "12 / page", perPage: 12, cols: 2 },
+  { label: "15 / page", perPage: 15, cols: 3 },
+];
 
 function normFood(v: string): "Veg" | "Non-veg" {
   return /non/i.test(v) ? "Non-veg" : "Veg";
 }
 
 /** Deterministic barcode-look stripes from serial. Manual-match aid, not a scan standard. */
-function Barcode({ code }: { code: string }) {
+function Barcode({ code, compact }: { code: string; compact?: boolean }) {
   const bars = useMemo(() => {
     const seed = `*${code.toUpperCase()}*`;
     const out: { w: number; black: boolean }[] = [];
@@ -37,7 +41,7 @@ function Barcode({ code }: { code: string }) {
     return out;
   }, [code]);
   return (
-    <div className="flex h-9 items-stretch" role="img" aria-label={`Barcode for ${code}`}>
+    <div className={cn("flex items-stretch", compact ? "h-7" : "h-9")} role="img" aria-label={`Barcode for ${code}`}>
       {bars.map((b, i) => (
         <span
           key={i}
@@ -49,20 +53,20 @@ function Barcode({ code }: { code: string }) {
   );
 }
 
-function Token({ row }: { row: TokenRow }) {
+function Token({ row, compact }: { row: TokenRow; compact: boolean }) {
   const veg = row.food === "Veg";
   return (
     <div
       className="relative flex h-full flex-col justify-between overflow-hidden rounded-md bg-white text-black"
       style={{ border: "1.5px solid #111" }}
     >
-      <div className={cn("h-1.5 w-full", veg ? "bg-green-600" : "bg-red-600")} />
+      <div className={cn("w-full", veg ? "bg-green-600" : "bg-red-600", compact ? "h-1" : "h-1.5")} />
       <div className="flex items-start justify-between gap-2 px-2.5 pt-1.5">
         <div className="min-w-0">
           <p className="text-[9px] font-bold tracking-[0.18em] text-neutral-500 uppercase">
             AWS Community Day · Food token
           </p>
-          <p className="truncate text-[13px] font-bold leading-tight">{row.name}</p>
+          <p className={cn("truncate font-bold leading-tight", compact ? "text-[11px]" : "text-[13px]")}>{row.name}</p>
           {row.rollNo ? <p className="text-[10px] text-neutral-600">{row.rollNo}</p> : null}
         </div>
         <span
@@ -76,9 +80,9 @@ function Token({ row }: { row: TokenRow }) {
       </div>
       <div className="flex items-end justify-between gap-2 px-2.5 pb-2">
         <div>
-          <p className="font-mono text-[26px] font-black leading-none tracking-tight">{row.serial}</p>
+          <p className={cn("font-mono font-black leading-none tracking-tight", compact ? "text-[20px]" : "text-[26px]")}>{row.serial}</p>
           <div className="mt-1 max-w-[150px] overflow-hidden">
-            <Barcode code={row.serial} />
+            <Barcode code={row.serial} compact={compact} />
           </div>
         </div>
         <div className="pb-0.5 text-right">
@@ -109,6 +113,7 @@ export default function FoodTokensClient() {
   const [busy, setBusy] = useState(false);
   const [q, setQ] = useState("");
   const [foodFilter, setFoodFilter] = useState<"ALL" | "Veg" | "Non-veg">("ALL");
+  const [density, setDensity] = useState(DENSITY[1]); // 12 / page default
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -135,7 +140,11 @@ export default function FoodTokensClient() {
   });
 
   const pages: TokenRow[][] = [];
-  for (let i = 0; i < filtered.length; i += PER_PAGE) pages.push(filtered.slice(i, i + PER_PAGE));
+  const rowsPerSheet = density.perPage / density.cols;
+  const compact = rowsPerSheet >= 6;
+  // 281mm usable height on A4 after 8mm margins; 2mm gaps + ~10mm footer
+  const cellMm = Math.floor((281 - (rowsPerSheet - 1) * 2 - 10) / rowsPerSheet);
+  for (let i = 0; i < filtered.length; i += density.perPage) pages.push(filtered.slice(i, i + density.perPage));
   const vegCount = filtered.filter((r) => r.food === "Veg").length;
 
   async function uploadFile(f: File) {
@@ -292,6 +301,22 @@ export default function FoodTokensClient() {
             >
               <Download className="h-4 w-4" aria-hidden /> CSV
             </button>
+            <div role="group" aria-label="Tokens per page" className="flex overflow-hidden rounded-xl border border-line">
+              {DENSITY.map((d) => (
+                <button
+                  key={d.perPage}
+                  type="button"
+                  onClick={() => setDensity(d)}
+                  aria-pressed={density.perPage === d.perPage}
+                  className={cn(
+                    "min-h-[44px] px-3 py-2 text-xs font-bold",
+                    density.perPage === d.perPage ? "bg-brand text-black" : "text-fog hover:text-cream",
+                  )}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
           </div>
         ) : null}
 
@@ -367,16 +392,16 @@ export default function FoodTokensClient() {
               aria-label={`Food token sheet ${pi + 1} of ${pages.length}`}
             >
               <div
-                className="grid grid-cols-2 gap-3"
-                style={{ gridTemplateRows: "repeat(5, minmax(0, 1fr))" }}
+                className="grid gap-3"
+                style={{ gridTemplateColumns: `repeat(${density.cols}, minmax(0, 1fr))` }}
               >
                 {pageRows.map((r) => (
                   <div
                     key={r.serial}
                     className="border border-dashed border-neutral-400 p-1.5"
-                    style={{ height: "48mm" }}
+                    style={{ height: `${cellMm}mm` }}
                   >
-                    <Token row={r} />
+                    <Token row={r} compact={compact} />
                   </div>
                 ))}
               </div>

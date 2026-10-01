@@ -1066,7 +1066,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
               className="col-span-2 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-400 sm:col-span-3"
             >
               <Printer className="h-4 w-4" aria-hidden />
-              Food tokens — print (10/A4)
+              Food tokens — print (10–15/A4)
             </Link>
           </div>
           <p className="mt-3 text-xs text-faint">
