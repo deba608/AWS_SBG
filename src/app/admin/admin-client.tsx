@@ -123,6 +123,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
   const [scans, setScans] = useState<Scan[]>([]);
   const [openToken, setOpenToken] = useState<string | null>(null);
   const [settings, setSettings] = useState<RegSettings | null>(null);
+  const [daywise, setDaywise] = useState<Daywise | null>(null);
   const [limitDraft, setLimitDraft] = useState("");
   const [yearDrafts, setYearDrafts] = useState<Record<string, string>>({});
   const [migrating, setMigrating] = useState(false);
@@ -156,7 +157,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [s, l, r, g] = await Promise.all([
+      const [s, l, r, g, d] = await Promise.all([
         fetch("/api/admin/stats", { cache: "no-store" }),
         fetch(
           `/api/admin/passes?q=${encodeURIComponent(q)}&type=${type}&status=${status}&year=${yearFilter}&limit=200`,
@@ -164,6 +165,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
         ),
         fetch("/api/admin/recent?limit=10", { cache: "no-store" }),
         fetch("/api/admin/settings", { cache: "no-store" }),
+        fetch("/api/admin/daywise", { cache: "no-store" }),
       ]);
       if (l.status === 401) {
         setAuthed(false);
@@ -190,6 +192,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
           return init;
         });
       }
+      if (d.ok) setDaywise((await d.json()) as Daywise);
     } finally {
       setLoading(false);
     }
@@ -235,6 +238,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
     setScans([]);
     setOpenToken(null);
     setSettings(null);
+    setDaywise(null);
     setEditingUserId(null);
   }
 
@@ -504,6 +508,52 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
         ))}
       </div>
       </Section>
+
+      {daywise ? (
+      <Section label="Day-wise preview">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <div className="rank-card p-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-brand">{daywise.day1.label}</p>
+          <p className="mt-2 text-3xl font-bold text-cream">
+            {daywise.day1.teams}<span className="text-base font-normal text-faint">/{daywise.day1.teamLimit} teams</span>
+          </p>
+          <p className="mt-1 text-xs text-fog">{daywise.day1.members} hackers · Day-1 lunch VEG {daywise.day1.lunchVeg} / NON-VEG {daywise.day1.lunchNonveg}</p>
+          <Link href="/admin/hackathon" className="mt-3 inline-flex min-h-[44px] items-center text-sm font-semibold text-cream underline decoration-brand/60 underline-offset-4 hover:decoration-cream">
+            Manage teams
+          </Link>
+        </div>
+        <div className="rank-card p-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-brand">{daywise.day2.label}</p>
+          <p className="mt-2 text-sm text-fog">{daywise.day2.note}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {daywise.day2.forms.map((f) => (
+              <a
+                key={f.label}
+                href={f.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-line px-4 py-2 text-xs font-semibold text-fog hover:text-cream"
+              >
+                {f.label} ↗
+              </a>
+            ))}
+          </div>
+        </div>
+        <div className="rank-card p-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-brand">{daywise.day3.label}</p>
+          <p className="mt-2 text-3xl font-bold text-cream">
+            {daywise.day3.registered}<span className="text-base font-normal text-faint">/{daywise.day3.limit} passes</span>
+          </p>
+          <p className="mt-1 text-xs text-fog">
+            Day-3 lunch VEG {daywise.day3.lunchVeg} / NON-VEG {daywise.day3.lunchNonveg}
+            {Object.entries(daywise.day3.perYear).map(([y, s]) => (
+              <span key={y} className="ml-2 font-mono text-faint">{y}:{s.registered}/{s.limit}</span>
+            ))}
+          </p>
+        </div>
+      </div>
+      </Section>
+      ) : null}
 
       {yearCards.length > 0 ? (
       <Section label="Year-wise seats">

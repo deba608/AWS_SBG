@@ -66,6 +66,10 @@ const blankTeam = (): TeamDraft => ({
   members: [blankMember(), blankMember(), blankMember()],
 });
 
+function allMembers(t: Team): Member[] {
+  return [t.leader, ...t.members];
+}
+
 function toDraft(t: Team): TeamDraft {
   const m = (x: Member): MemberDraft => ({
     name: x.name,
@@ -587,6 +591,57 @@ export default function HackathonAdminClient() {
                         </div>
                       </div>
                     ) : (
+                      <div className="space-y-3">
+                      <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-xs sm:grid-cols-2">
+                        <div className="flex gap-2"><dt className="shrink-0 text-faint">Track</dt><dd className="text-cream">{t.preference ?? "—"}</dd></div>
+                        <div className="flex gap-2"><dt className="shrink-0 text-faint">Registered</dt><dd className="text-cream">{new Date(t.createdAt).toLocaleString("en-IN")}</dd></div>
+                        <div className="flex gap-2"><dt className="shrink-0 text-faint">Day-1 lunch</dt><dd className="text-cream">VEG {allMembers(t).filter((m) => m.lunch === "Veg").length} / NON-VEG {allMembers(t).filter((m) => m.lunch === "Non-veg").length}</dd></div>
+                        <div className="flex gap-2"><dt className="shrink-0 text-faint">Team ID</dt><dd className="break-all font-mono text-[11px] text-faint">{t.id}</dd></div>
+                      </dl>
+                      <div className="overflow-x-auto">
+                        <table className="w-full min-w-[560px] text-left text-xs">
+                          <thead>
+                            <tr className="text-[11px] uppercase text-faint">
+                              <th className="px-2 py-1.5">Member</th>
+                              <th className="px-2 py-1.5">Contact</th>
+                              <th className="px-2 py-1.5">Year</th>
+                              <th className="px-2 py-1.5">Day-1 lunch</th>
+                              <th className="px-2 py-1.5">GitHub</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {[{ ...t.leader, role: "Leader" }, ...t.members.map((m) => ({ ...m, role: "Member" }))].map((m) => (
+                              <tr key={`${m.role}-${m.rollNo}`} className="border-t border-line/60">
+                                <td className="px-2 py-1.5">
+                                  <span className="font-semibold text-cream">{m.name}</span>
+                                  <span className="ml-1.5 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] text-fog">{m.role}</span>
+                                  <br /><span className="font-mono text-fog">{m.rollNo}</span>
+                                </td>
+                                <td className="px-2 py-1.5 text-fog">
+                                  <span className="break-all">{m.email}</span><br />
+                                  <span className="font-mono">{m.mobile}</span>
+                                </td>
+                                <td className="px-2 py-1.5 text-cream">{m.year}{m.gender ? ` · ${m.gender}` : ""}</td>
+                                <td className="px-2 py-1.5">
+                                  {m.lunch ? (
+                                    <span className={cn(
+                                      "inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold",
+                                      m.lunch === "Veg" ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300" : "border-red-400/40 bg-red-400/10 text-red-300",
+                                    )}>
+                                      {m.lunch === "Veg" ? "VEG" : "NON-VEG"}
+                                    </span>
+                                  ) : "—"}
+                                </td>
+                                <td className="px-2 py-1.5">
+                                  {m.githubUrl ? (
+                                    <a href={m.githubUrl} target="_blank" rel="noopener noreferrer" className="break-all text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">Open</a>
+                                  ) : "—"}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
