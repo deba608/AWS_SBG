@@ -58,7 +58,7 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
       {
         time: "09:30 – 10:30 AM",
         title: "Problem Statement Submission",
-        description: "Hackathon challenge briefing, team submissions, and guideline walkthrough.",
+        description: "Hackathon challenge briefing, team submissions, and guideline walkthrough. Teams must pre-register at /hackathon.",
         venue: "APJ Abdul Kalam Auditorium",
         tag: "Kickoff",
       },

@@ -435,6 +435,12 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
         >
           Open scanner
         </Link>
+        <Link
+          href="/admin/hackathon"
+          className="inline-flex min-h-[44px] items-center rounded-full border border-line px-5 py-2 text-sm font-semibold text-fog hover:text-cream"
+        >
+          Hackathon teams
+        </Link>
         {settings ? (
           <span
             className={cn(
