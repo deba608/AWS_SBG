@@ -599,13 +599,14 @@ export default function HackathonAdminClient() {
                         <div className="flex gap-2"><dt className="shrink-0 text-faint">Team ID</dt><dd className="break-all font-mono text-[11px] text-faint">{t.id}</dd></div>
                       </dl>
                       <div className="overflow-x-auto">
-                        <table className="w-full min-w-[560px] text-left text-xs">
+                        <table className="w-full min-w-[640px] text-left text-xs">
                           <thead>
                             <tr className="text-[11px] uppercase text-faint">
-                              <th className="px-2 py-1.5">Member</th>
+                              <th className="px-2 py-1.5">Name</th>
+                              <th className="px-2 py-1.5">Roll no</th>
+                              <th className="px-2 py-1.5">Food pref</th>
                               <th className="px-2 py-1.5">Contact</th>
                               <th className="px-2 py-1.5">Year</th>
-                              <th className="px-2 py-1.5">Day-1 lunch</th>
                               <th className="px-2 py-1.5">GitHub</th>
                             </tr>
                           </thead>
@@ -615,13 +616,8 @@ export default function HackathonAdminClient() {
                                 <td className="px-2 py-1.5">
                                   <span className="font-semibold text-cream">{m.name}</span>
                                   <span className="ml-1.5 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] text-fog">{m.role}</span>
-                                  <br /><span className="font-mono text-fog">{m.rollNo}</span>
                                 </td>
-                                <td className="px-2 py-1.5 text-fog">
-                                  <span className="break-all">{m.email}</span><br />
-                                  <span className="font-mono">{m.mobile}</span>
-                                </td>
-                                <td className="px-2 py-1.5 text-cream">{m.year}{m.gender ? ` · ${m.gender}` : ""}</td>
+                                <td className="px-2 py-1.5 font-mono text-fog">{m.rollNo}</td>
                                 <td className="px-2 py-1.5">
                                   {m.lunch ? (
                                     <span className={cn(
@@ -632,6 +628,11 @@ export default function HackathonAdminClient() {
                                     </span>
                                   ) : "—"}
                                 </td>
+                                <td className="px-2 py-1.5 text-fog">
+                                  <span className="break-all">{m.email}</span><br />
+                                  <span className="font-mono">{m.mobile}</span>
+                                </td>
+                                <td className="px-2 py-1.5 text-cream">{m.year}{m.gender ? ` · ${m.gender}` : ""}</td>
                                 <td className="px-2 py-1.5">
                                   {m.githubUrl ? (
                                     <a href={m.githubUrl} target="_blank" rel="noopener noreferrer" className="break-all text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">Open</a>
@@ -640,6 +641,16 @@ export default function HackathonAdminClient() {
                               </tr>
                             ))}
                           </tbody>
+                          <tfoot>
+                            <tr className="border-t-2 border-line">
+                              <td colSpan={6} className="px-2 py-2 text-xs font-bold text-cream">
+                                Team total: {1 + t.members.length} members ·{" "}
+                                <span className="text-emerald-300">VEG {allMembers(t).filter((m) => m.lunch === "Veg").length}</span>
+                                {" / "}
+                                <span className="text-red-300">NON-VEG {allMembers(t).filter((m) => m.lunch === "Non-veg").length}</span>
+                              </td>
+                            </tr>
+                          </tfoot>
                         </table>
                       </div>
                       <div className="flex flex-wrap gap-2">
