@@ -342,10 +342,6 @@ export default function HackathonClient() {
           showGithub
         />
 
-        <p className="rounded-xl border border-line bg-ink/40 p-3 text-sm text-fog">
-          Squad of <span className="font-mono font-bold text-cream">4</span> — leader + 3 teammates, all required.
-        </p>
-
         {members.map((m, i) => (
           <MemberFields
             key={i}
