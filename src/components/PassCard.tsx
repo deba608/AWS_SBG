@@ -11,7 +11,7 @@ export type PassCardType = "ENTRY" | "FOOD";
 const TYPE_META = {
   ENTRY: {
     label: "Event Entry Pass",
-    hint: "One-time entry pass. Show at gate — invalid after first scan.",
+    hint: "One-time entry pass for Community Day · 8 Oct. Show at gate — invalid after first scan.",
     chip: "border-brand/40 bg-brand/10 text-brand",
   },
   FOOD: {
@@ -100,6 +100,10 @@ export default function PassCard({
 
           <dl className="mt-4 space-y-2.5 rounded-2xl border border-line bg-ink/40 p-4 text-left">
             <div className="flex items-baseline justify-between gap-3">
+              <dt className="shrink-0 text-xs text-faint">Valid for</dt>
+              <dd className="min-w-0 break-words text-right text-sm font-semibold text-cream">Community Day · 8 Oct</dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-3 border-t border-line/60 pt-2.5">
               <dt className="shrink-0 text-xs text-faint">Name</dt>
               <dd className="min-w-0 break-words text-right text-sm font-semibold text-cream">{name}</dd>
             </div>

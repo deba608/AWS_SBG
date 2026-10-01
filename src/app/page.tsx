@@ -48,7 +48,11 @@ const homeFaqs = [
   },
   {
     q: "How do I join the AWS Student Builder Group?",
-    a: "Join the WhatsApp community linked on this page, then register for any event to get your free QR entry pass. No prior cloud experience needed.",
+    a: "Join the WhatsApp community linked on this page. For Community Day, get your free QR entry pass (valid only for Student Community Day on 8th October) — Hackathon, Tech Parliament and Make-A-Bot need separate registration. No prior cloud experience needed.",
+  },
+  {
+    q: "Does the Community Day pass cover the Hackathon, Tech Parliament or Make-A-Bot?",
+    a: "No. The QR pass is valid only for Student Community Day on 8th October. Register DecodeX Hackathon teams at /hackathon on this website; Tech Parliament and Make-A-Bot via their Google Forms (links on the event cards, also shared by mail).",
   },
   {
     q: "Is AWS SBG free for students?",

@@ -49,9 +49,10 @@ export default function EventsPage() {
             >
               {COMMUNITY_DAY_META.title}
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-fog md:text-base">
-              Cloud, AI/GenAI and DevOps with AWS pros, hands-on labs,
-              networking, lunch and certificate.
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-fog">
+              QR pass covers Community Day on 8th October only — Hackathon teams register at{" "}
+              <a href="/hackathon" className="font-medium text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">/hackathon</a>
+              {", "}Tech Parliament &amp; Make-A-Bot via Google Forms (also shared by mail).
             </p>
             <dl className="mt-4 flex max-w-2xl flex-wrap gap-x-6 gap-y-1 text-sm">
               <div className="flex min-w-0 gap-2">

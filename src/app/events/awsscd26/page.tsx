@@ -201,6 +201,8 @@ export default function CommunityDayPage() {
               </div>
               <p className="mt-4 text-xs text-faint">
                 300 expected, lunch and certificate, {COMMUNITY_DAY_META.host}
+                <br />
+                Pass valid for Community Day — 8th October only · contests need separate sign-up
               </p>
             </div>
             <Reveal delay={0.12}>
@@ -232,7 +234,9 @@ export default function CommunityDayPage() {
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </CommunityDayRegisterModal>
                 <p className="mt-3 text-center text-xs text-faint">
-                  30-sec form, instant QR pass · show at entry
+                  30-sec form, instant QR pass · show at entry on 8th Oct
+                  <br />
+                  Hackathon / Tech Parliament / Make-A-Bot need separate sign-up
                 </p>
               </div>
             </Reveal>
@@ -452,8 +456,13 @@ export default function CommunityDayPage() {
                   See you at Community Day?
                 </h2>
                 <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-fog">
-                  Register now — 300+ builders already in. Lunch and
-                  certificate for pass holders.
+                  Register now — 300+ builders already in. Pass covers Community Day
+                  on 8th October (lunch and certificate for pass holders).
+                </p>
+                <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-faint">
+                  Competing? DecodeX Hackathon teams register at{" "}
+                  <a href="/hackathon" className="font-medium text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">/hackathon</a>
+                  {" "}· Tech Parliament &amp; Make-A-Bot via Google Forms (also shared by mail).
                 </p>
                 <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:[&>*]:w-auto [&>*]:w-full [&>*]:max-w-sm">
                   <CommunityDayRegisterModal />

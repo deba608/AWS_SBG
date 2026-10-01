@@ -198,13 +198,15 @@ export function validateTeam(input: HackathonTeamInput): TeamErrors {
 }
 
 function normalizeMember(m: HackathonMemberInput): HackathonMember {
-  const year = String(m.year ?? "");
+  const rawYear = String(m.year ?? "");
+  const resolved: Year =
+    (YEARS.includes(rawYear as Year) ? (rawYear as Year) : deriveYearFromRollNo(String(m.rollNo ?? ""))) ?? "1st";
   return {
     name: collapseSpaces(m.name ?? ""),
     rollNo: String(m.rollNo ?? "").trim().toUpperCase(),
     email: normalizeEmail(String(m.email ?? "")),
     mobile: normalizeMobile(String(m.mobile ?? "")),
-    year: (YEARS.includes(year as Year) ? year : (deriveYearFromRollNo(String(m.rollNo ?? "")) as Year)) ?? "1st",
+    year: resolved,
   };
 }
 

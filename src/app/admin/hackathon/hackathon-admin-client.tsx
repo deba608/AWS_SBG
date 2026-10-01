@@ -48,6 +48,8 @@ export default function HackathonAdminClient() {
   }, []);
 
   useEffect(() => {
+    // authed change pulls fresh server data
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (authed) void load();
   }, [authed, load]);
 

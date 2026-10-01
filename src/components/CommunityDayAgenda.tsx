@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { ArrowRight, Calendar, Clock, ExternalLink, MapPin } from "lucide-react";
+import Link from "next/link";
 import Badge from "@/components/Badge";
 import { COMMUNITY_DAY_SCHEDULE } from "@/data/community-day";
 

@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import type { EventItem } from "@/data/events";
 import { cn } from "@/lib/utils";
@@ -50,6 +50,10 @@ export default function EventCard({
 }) {
   const status = statusMeta[event.status];
   const { day, month } = dateParts(event.date);
+  const registerUrl = event.registerUrl ?? "/passes";
+  const isExternalForm = registerUrl.startsWith("http");
+  const isHackathon = registerUrl === "/hackathon";
+  const registerLabel = isExternalForm ? "Register · Google Form" : isHackathon ? "Register team" : "Register";
   return (
     <article className="flex min-w-0 gap-4 border-t border-line py-6 sm:gap-6">
       <div className="w-12 shrink-0 text-left sm:w-14">
@@ -105,10 +109,10 @@ export default function EventCard({
           ) : event.registerUrl?.startsWith("/") ? (
             <Link
               href={event.registerUrl}
-              aria-label={`Register for ${event.title}`}
+              aria-label={`${registerLabel} for ${event.title}`}
               className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-cream underline decoration-brand/60 underline-offset-4 transition-colors hover:decoration-cream"
             >
-              Register
+              {registerLabel}
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           ) : (
@@ -116,11 +120,15 @@ export default function EventCard({
               href={event.registerUrl ?? "/passes"}
               target={event.registerUrl?.startsWith("http") ? "_blank" : undefined}
               rel="noopener noreferrer"
-              aria-label={`Register for ${event.title}`}
+              aria-label={`${registerLabel} for ${event.title}`}
               className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-cream underline decoration-brand/60 underline-offset-4 transition-colors hover:decoration-cream"
             >
-              Register
-              <ArrowRight className="h-4 w-4" aria-hidden />
+              {registerLabel}
+              {isExternalForm ? (
+                <ExternalLink className="h-4 w-4" aria-hidden />
+              ) : (
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              )}
             </a>
           )}
           {event.detailsUrl ? (
@@ -133,6 +141,11 @@ export default function EventCard({
             </Link>
           ) : null}
         </div>
+        {isExternalForm || isHackathon ? (
+          <p className="mt-1 text-xs text-faint">
+            Separate sign-up — Community Day (8 Oct) pass alone is not enough.
+          </p>
+        ) : null}
       </div>
     </article>
   );

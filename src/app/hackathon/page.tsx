@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { CalendarDays, Clock, MapPin, Trophy, Users } from "lucide-react";
-import Container from "@/components/Container";
 import HackathonClient from "./hackathon-client";
 import { SITE } from "@/lib/constants";
 

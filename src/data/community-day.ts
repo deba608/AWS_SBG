@@ -1,3 +1,5 @@
+import { MAKE_A_BOT_FORM_URL, TECH_PARLIAMENT_FORM_URL } from "./events";
+
 export const COMMUNITY_DAY_SLUG = "awsscd26";
 
 export const COMMUNITY_DAY_META = {
@@ -26,6 +28,9 @@ export interface AgendaItem {
   description: string;
   venue?: string;
   tag?: string;
+  /** Separate sign-up link for contests (hackathon / GForms). */
+  registerUrl?: string;
+  registerLabel?: string;
   performers?: { name: string; photo: string; link?: string }[];
 }
 
@@ -61,6 +66,8 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
         description: "Hackathon challenge briefing, team submissions, and guideline walkthrough. Teams must pre-register at /hackathon.",
         venue: "APJ Abdul Kalam Auditorium",
         tag: "Kickoff",
+        registerUrl: "/hackathon",
+        registerLabel: "Register team",
       },
       {
         time: "10:30 – 01:00 PM",
@@ -113,6 +120,8 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
         description: "Debate battle on tech motions. Separate Google Form registration required — Community Day pass alone is not enough.",
         venue: "Seminar Hall",
         tag: "Debate",
+        registerUrl: TECH_PARLIAMENT_FORM_URL,
+        registerLabel: "Google Form",
       },
       {
         time: "11:00 – 01:00 PM",
@@ -120,6 +129,8 @@ export const COMMUNITY_DAY_SCHEDULE: DaySchedule[] = [
         description: "Bot-building showdown. Separate Google Form registration required — Community Day pass alone is not enough.",
         venue: "Seminar Hall",
         tag: "Competition",
+        registerUrl: MAKE_A_BOT_FORM_URL,
+        registerLabel: "Google Form",
       },
     ],
   },

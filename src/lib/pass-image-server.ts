@@ -105,7 +105,7 @@ export async function drawPassImageServer(input: {
     ctx.fillText("One-time entry · invalid after gate scan", 50, 1132);
     ctx.fillStyle = "#6b7480";
     ctx.font = "26px sans-serif";
-    ctx.fillText("Backup: take a screenshot of this pass.", 50, 1176);
+    ctx.fillText("Valid only: Community Day · 8 Oct", 50, 1176);
 
     return Buffer.from(canvas.toBuffer("image/png"));
   } catch (err) {
