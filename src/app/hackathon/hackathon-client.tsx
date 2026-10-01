@@ -361,7 +361,7 @@ export default function HackathonClient() {
         {errors.team ? (
           <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">{errors.team}</p>
         ) : (
-          <p className="text-xs text-faint">Teams of exactly {TEAM_MAX} · one student, one team · SUIIT mail required.</p>
+          <p className="text-xs text-faint">Teams of exactly {TEAM_MAX} — leader + 3 teammates, all details required.</p>
         )}
         <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm leading-relaxed ${errors.declaration ? "border-red-400/70 bg-red-500/10" : "border-line bg-ink/40"}`}>
           <input

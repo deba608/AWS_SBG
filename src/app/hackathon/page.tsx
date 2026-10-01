@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Award, CalendarDays, Clock, MapPin, Medal, Trophy, Users } from "lucide-react";
+import { Award, BookOpen, CalendarDays, Clock, Gavel, ListChecks, MapPin, Medal, Phone, TriangleAlert, Trophy, Users } from "lucide-react";
 import HackathonClient from "./hackathon-client";
 import { SITE } from "@/lib/constants";
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 const rules = [
-  { icon: Users, text: "Teams of exactly 4 · one student, one team · SUIIT mail required" },
+  { icon: Users, text: "Teams of exactly 4 · leader + 3 teammates" },
   { icon: CalendarDays, text: "Day 1 — Tuesday, 6th October 2026, 9:00 AM onwards" },
   { icon: MapPin, text: "APJ Abdul Kalam Auditorium, SUIIT, Burla" },
   { icon: Trophy, text: "₹15,000 prize pool · winners felicitated on Day 3" },
@@ -27,6 +27,50 @@ const prizes = [
   { icon: Medal, label: "2nd Prize", amount: "₹5,000", place: "2", tone: "border-slate-300/40 bg-slate-300/10 text-slate-200", bar: "h-16 sm:h-20", order: "order-1 sm:order-1" },
   { icon: Trophy, label: "1st Prize", amount: "₹7,000", place: "1", tone: "border-amber-400/60 bg-amber-400/15 text-amber-300 shadow-[0_0_40px_rgba(251,191,36,0.25)]", bar: "h-24 sm:h-32", order: "order-first sm:order-2" },
   { icon: Award, label: "3rd Prize", amount: "₹3,000", place: "3", tone: "border-orange-400/50 bg-orange-400/10 text-orange-300", bar: "h-12 sm:h-16", order: "order-2 sm:order-3" },
+];
+
+const timeline = [
+  { time: "08:45 AM", tag: "Check-in", text: "Check-in & opening address" },
+  { time: "09:00 AM", tag: "Briefing", text: "Case investigation & problem discovery begins" },
+  { time: "10:30 AM", tag: "Deadline", text: "Problem statement submission — submission speed counts" },
+  { time: "10:30 AM", tag: "Build", text: "Hackathon Phase I — design, develop, implement" },
+  { time: "01:00 PM", tag: "Pause", text: "Lunch break" },
+  { time: "02:00 PM", tag: "Build", text: "Hackathon Phase II — test, refine, prepare pitch" },
+  { time: "03:00 PM", tag: "Evaluation", text: "Pitch, live demo & judge interaction" },
+  { time: "05:00 PM", tag: "Final", text: "Hackathon ends · final evaluation & closure" },
+];
+
+const judging = [
+  { label: "Workingness / Implementation", pct: 30, note: "Functionality, completeness, demo quality, technical execution" },
+  { label: "Problem Decoding Efficiency", pct: 20, note: "How quickly & accurately you find a relevant problem" },
+  { label: "Feasibility", pct: 20, note: "Practicality, scalability, real-world potential" },
+  { label: "Pitching", pct: 15, note: "" },
+  { label: "Question & Answer", pct: 15, note: "Defend your solution under questioning" },
+];
+
+const rulesA = [
+  "Max 4 members per team — compete only in the track you registered for",
+  "Only your submitted problem statement may be the basis of your final solution",
+  "Prototype must be functional enough to demo",
+  "Public libraries, frameworks, APIs, datasets & tools allowed unless restricted",
+];
+const rulesB = [
+  "Disclose any external service, API, model or dataset that materially contributes",
+  "No copying another team's solution, implementation or presentation",
+  "Plagiarism, impersonation or interference may lead to disqualification",
+  "Be ready to explain architecture, data flow & technical decisions",
+  "Organizers' decisions on rules & eligibility are final",
+];
+
+const checklist = [
+  "Report to the venue early & complete check-in",
+  "Bring your own laptops & dev equipment",
+  "Chargers, adapters & cables",
+  "Hardware teams: boards, sensors & components",
+  "Keep regular backups of your work",
+  "Follow venue rules & respect everyone",
+  "Internet use for research & dev is permitted",
+  "Report repo or process issues immediately",
 ];
 
 export default function HackathonPage() {
@@ -53,17 +97,18 @@ export default function HackathonPage() {
       </ul>
       <p className="mt-4 flex items-center gap-2 text-xs text-faint">
         <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
-        Reporting 9:00 AM, 6th October · bring laptops + your team
+        Check-in 8:45 AM, 6th October · bring laptops + your team
       </p>
       <section aria-label="Prize pool" className="mt-6 overflow-hidden rounded-3xl border border-amber-400/30 bg-gradient-to-br from-amber-400/10 via-surface to-surface p-5 sm:p-6">
         <p className="text-xs font-mono tracking-widest text-amber-300/80 uppercase">{"// prize pool"}</p>
         <p className="mt-1 text-2xl font-bold tracking-tight text-cream sm:text-3xl">₹15,000</p>
-        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:items-end sm:gap-3">
           {prizes.map((p) => (
-            <div key={p.label} className={`rounded-2xl border p-3 text-center sm:p-4 ${p.tone}`}>
-              <p.icon className="mx-auto h-5 w-5" aria-hidden />
+            <div key={p.label} className={`${p.order} rounded-2xl border p-3 text-center sm:p-4 ${p.tone}`}>
+              <p.icon className="mx-auto h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
               <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider sm:text-xs">{p.label}</p>
               <p className="mt-0.5 text-lg font-bold sm:text-2xl">{p.amount}</p>
+              <div className={`mx-auto mt-3 hidden w-full rounded-t-lg bg-current opacity-20 sm:block ${p.bar}`} aria-hidden />
             </div>
           ))}
         </div>
@@ -71,6 +116,128 @@ export default function HackathonPage() {
       <div className="mt-8">
         <HackathonClient />
       </div>
+
+      {/* OFFICIAL RULEBOOK */}
+      <section aria-labelledby="rulebook-heading" className="mt-10 space-y-4">
+        <div>
+          <p className="text-xs font-mono tracking-widest text-brand uppercase">{"// official rulebook · operation: inside job"}</p>
+          <h2 id="rulebook-heading" className="mt-2 flex items-center gap-2 text-2xl font-bold tracking-tight text-cream sm:text-3xl">
+            <BookOpen className="h-6 w-6 shrink-0 text-brand" aria-hidden />
+            DecodeX rulebook
+          </h2>
+          <p className="measure mt-2 text-sm leading-relaxed text-fog">
+            DecodeX is not a conventional hackathon — no predefined problem statements. Each team gets a{" "}
+            <span className="font-semibold text-cream">GitHub case repository</span>, investigates it to uncover hidden
+            problem statements, picks one, builds a working solution, then defends it before the judges. You are judged
+            on problem discovery, analytical thinking, decision-making, feasibility, pitching and Q&amp;A — not just code.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-line bg-surface p-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand">Software track</p>
+            <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-fog">
+              <li>Repository handed to registered teams on the spot, at the start</li>
+              <li>Decode it, list the problem statements you discover</li>
+              <li>Select ONE and submit it by 10:30 AM</li>
+            </ul>
+          </div>
+          <div className="rounded-2xl border border-line bg-surface p-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand">Hardware track</p>
+            <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-fog">
+              <li>Repository shared one day before the hackathon</li>
+              <li>You may investigate early — but submit only within the discovery window on the day</li>
+              <li>Build your solution around the ONE problem you submit</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
+          <p className="text-xs font-bold uppercase tracking-widest text-brand">Operation timeline · 6th October</p>
+          <ol className="mt-3 space-y-2">
+            {timeline.map((t) => (
+              <li key={`${t.time}-${t.tag}`} className="flex items-baseline gap-3 border-b border-dashed border-line pb-2 text-sm last:border-0 last:pb-0">
+                <span className="w-20 shrink-0 font-mono text-xs font-bold text-brand">{t.time}</span>
+                <span className="w-20 shrink-0 text-[11px] font-bold uppercase tracking-wider text-faint">{t.tag}</span>
+                <span className="min-w-0 text-fog">{t.text}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
+          <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand">
+            <Gavel className="h-4 w-4" aria-hidden /> Rules of the operation
+          </p>
+          <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1.5 sm:grid-cols-2">
+            {[...rulesA, ...rulesB].map((r) => (
+              <p key={r} className="flex gap-2 text-sm leading-relaxed text-fog">
+                <span className="shrink-0 font-mono font-bold text-brand" aria-hidden>&gt;</span>
+                {r}
+              </p>
+            ))}
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-faint">
+            Registration details must be accurate and complete — only registered &amp; verified teams can compete.
+            Changes to team composition after registration need organizer approval.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
+          <p className="text-xs font-bold uppercase tracking-widest text-brand">How you will be judged</p>
+          <div className="mt-3 space-y-3">
+            {judging.map((j) => (
+              <div key={j.label}>
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-fog">{j.label}</span>
+                  <span className="font-mono font-bold text-brand">{j.pct}%</span>
+                </div>
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-black/40" role="img" aria-label={`${j.label}: ${j.pct} percent`}>
+                  <div className="h-full rounded-full bg-brand" style={{ width: `${j.pct}%` }} />
+                </div>
+                {j.note ? <p className="mt-1 text-xs text-faint">{j.note}</p> : null}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
+          <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand">
+            <ListChecks className="h-4 w-4" aria-hidden /> Pre-mission checklist
+          </p>
+          <ul className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1.5 sm:grid-cols-2">
+            {checklist.map((c) => (
+              <li key={c} className="flex gap-2 text-sm leading-relaxed text-fog">
+                <span className="shrink-0 font-mono font-bold text-green-400" aria-hidden>[✓]</span>
+                {c}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="rounded-2xl border border-dashed border-red-400/50 bg-red-500/5 p-4 text-xs leading-relaxed text-fog sm:text-sm">
+          <p className="flex items-center gap-2 font-bold uppercase tracking-widest text-red-300">
+            <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden /> Disclaimer
+          </p>
+          <p className="mt-2">
+            Case repositories may contain fictional organizations, systems, datasets or incidents. Never use case
+            material to access, attack or interfere with any real-world system — activity outside the authorized scope
+            may lead to disqualification. You are responsible for your own code, hardware, accounts and credentials.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 rounded-2xl border border-line bg-surface p-4 text-sm text-fog sm:flex-row sm:items-center">
+          <Phone className="h-4 w-4 shrink-0 text-brand" aria-hidden />
+          <p>
+            <span className="font-semibold text-cream">Contact:</span> RS Swayam Prakash ·{" "}
+            <a href="tel:+918950335183" className="font-medium text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">+91 89503 35183</a>
+            {" · "}
+            <a href="mailto:awssbg@suiit.ac.in" className="font-medium text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">awssbg@suiit.ac.in</a>
+            {" · "}
+            <a href="mailto:ecell@suiit.ac.in" className="font-medium text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">ecell@suiit.ac.in</a>
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
