@@ -13,6 +13,7 @@ import {
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
 import YearSelect from "@/components/YearSelect";
+import PassScopeNote from "@/components/PassScopeNote";
 import { emailExactPass } from "@/lib/pass-image";
 import { cn } from "@/lib/utils";
 

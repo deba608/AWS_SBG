@@ -13,6 +13,8 @@ export const COMMUNITY_DAY_META = {
   // 9 AM IST Oct 6 2026
   startIso: "2026-10-06T09:00:00+05:30",
   endIso: "2026-10-08T14:00:00+05:30",
+  // Countdown target: main day, 9 AM IST Oct 8 2026
+  countdownIso: "2026-10-08T09:00:00+05:30",
   capacity: 300,
   entry: "FREE",
   host: "AWS SBG at SUIIT · Hosted by Pratik Samal",

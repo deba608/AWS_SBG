@@ -51,6 +51,9 @@ export function filterEvents(events: EventItem[], filter: EventFilter) {
   return events.filter((e) => e.category === FILTER_TO_CATEGORY[filter]);
 }
 
+export const TECH_PARLIAMENT_FORM_URL = "https://forms.gle/HEhSJX6haLVgtzMVA";
+export const MAKE_A_BOT_FORM_URL = "https://forms.gle/MJnt1N8ajY1JUyRm7";
+
 export const communityDay: EventItem = {
   id: "awsscd26",
   title: "AWS Student Community Day SUIIT 2026",
@@ -59,9 +62,9 @@ export const communityDay: EventItem = {
   time: "9:00 AM – 5:30 PM IST",
   location: "APJ Abdul Kalam Auditorium, SUIIT, Burla",
   description:
-    "Flagship 3-day gathering: DecodeX Hackathon, Tech Parliament, Make-A-Bot, Speaker & Podcast session, networking, lunch and certificates. Free for students.",
-  status: "filling-fast",
-  registerUrl: "/passes",
+    "Day 2 bot-building showdown — design, build and demo your bot. Needs separate registration via Google Form (link also shared by mail). Community Day pass alone is not enough.",
+  status: "open",
+  registerUrl: MAKE_A_BOT_FORM_URL,
   detailsUrl: "/events/awsscd26",
 };
 
@@ -74,9 +77,9 @@ export const decodeXHackathon: EventItem = {
   time: "9:00 AM – 5:30 PM IST",
   location: "APJ Abdul Kalam Auditorium, SUIIT",
   description:
-    "Community Day flagship hackathon: Problem statement submission, Phase I & II sprints, mentor guidance, and jury evaluation on AWS.",
+    "Community Day flagship hackathon: Problem statement submission, Phase I & II sprints, mentor guidance, and jury evaluation on AWS. Register your team on this website — needs separate sign-up, Community Day pass alone is not enough.",
   status: "open",
-  registerUrl: "/passes",
+  registerUrl: "/hackathon",
   detailsUrl: "/events/awsscd26",
 };
 

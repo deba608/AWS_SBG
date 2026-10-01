@@ -14,6 +14,7 @@ import {
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
 import YearSelect from "@/components/YearSelect";
+import PassScopeNote from "@/components/PassScopeNote";
 import { emailExactPass } from "@/lib/pass-image";
 import { cn } from "@/lib/utils";
 
@@ -206,6 +207,7 @@ export default function CommunityDayRegisterModal({
                 Entry pass ready · one-time use, invalid after gate scan.
               </p>
             </div>
+            <PassScopeNote />
             <div className={`flex items-start gap-2.5 rounded-xl border p-3 text-sm ${emailSent ? "border-sky-400/30 bg-sky-400/10 text-sky-200" : "border-amber-400/30 bg-amber-400/10 text-amber-200"}`}>
               <Mail className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
               {emailSent ? (
@@ -389,6 +391,10 @@ export default function CommunityDayRegisterModal({
                 {apiError}
               </p>
             ) : null}
+            <p className="rounded-xl border border-line bg-surface p-3 text-xs leading-relaxed text-fog">
+              This pass covers <span className="font-semibold text-cream">Student Community Day — 8th October</span> only.
+              Hackathon, Tech Parliament &amp; Make-A-Bot need separate registration (links shown after you register).
+            </p>
             <div className="flex flex-col gap-3 pt-1">
               <button
                 type="submit"

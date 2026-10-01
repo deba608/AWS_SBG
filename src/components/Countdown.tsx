@@ -18,7 +18,7 @@ function getParts(target: number, now: number) {
 }
 
 export default function Countdown() {
-  const target = new Date(COMMUNITY_DAY_META.startIso).getTime();
+  const target = new Date(COMMUNITY_DAY_META.countdownIso).getTime();
   const end = new Date(COMMUNITY_DAY_META.endIso).getTime();
   const [now, setNow] = useState<number | null>(null);
 

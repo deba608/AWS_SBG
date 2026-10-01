@@ -206,7 +206,7 @@ export default function CommunityDayPage() {
             <Reveal delay={0.12}>
               <div className="rounded-2xl border border-line bg-surface/80 p-5 backdrop-blur sm:p-6">
                 <p className="text-sm font-semibold text-cream">
-                  Countdown to October 6
+                  Countdown to October 8
                 </p>
                 <div className="mt-4">
                   <Countdown />
