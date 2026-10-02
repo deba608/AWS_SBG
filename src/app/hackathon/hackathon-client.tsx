@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Cpu, Layers, Loader2, Terminal, Trash2, User, Users } from "lucide-react";
+import { ArrowRight, Cpu, Layers, Loader2, Mail, Terminal, Trash2, User, Users } from "lucide-react";
 import Container from "@/components/Container";
 import FoodSelect from "@/components/FoodSelect";
 import GenderSelect from "@/components/GenderSelect";
@@ -282,6 +282,14 @@ export default function HackathonClient() {
             Join DecodeX Hackathon group for updates
             <ArrowRight className="h-4 w-4" aria-hidden />
           </a>
+        </div>
+        <div className={`flex items-start gap-2.5 rounded-xl border p-3 text-sm ${emailSent ? "border-sky-400/30 bg-sky-400/10 text-sky-200" : "border-amber-400/30 bg-amber-400/10 text-amber-200"}`}>
+          <Mail className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+          {emailSent ? (
+            <p className="min-w-0 break-words [overflow-wrap:anywhere]">Confirmation emailed to <span className="font-semibold break-all">{team.leader.email}</span> with the WhatsApp group link — check inbox + spam.</p>
+          ) : (
+            <p className="min-w-0 break-words [overflow-wrap:anywhere]">Confirmation mail to <span className="font-semibold break-all">{team.leader.email}</span> not sent yet — join the WhatsApp group above for updates.</p>
+          )}
         </div>
         <div className="rounded-xl border border-brand/30 bg-brand/10 p-3 text-sm leading-relaxed text-cream">
           Each member still needs their own <span className="font-semibold">Community Day pass (8th October)</span> for Day-3 entry + lunch —{" "}
