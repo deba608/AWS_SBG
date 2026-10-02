@@ -23,6 +23,14 @@ function normFood(v: string): "Veg" | "Non-veg" {
   return /non/i.test(v) ? "Non-veg" : "Veg";
 }
 
+/** Serial order that survives A100+: compare the numeric tail, not the string. */
+function serialCmp(a: string, b: string): number {
+  const na = Number(/^A(\d+)$/i.exec(a.trim())?.[1]);
+  const nb = Number(/^A(\d+)$/i.exec(b.trim())?.[1]);
+  if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+  return a.localeCompare(b);
+}
+
 function Token({ row, compact, qr }: { row: TokenRow; compact: boolean; qr?: string }) {
   const veg = row.food === "Veg";
   return (
@@ -114,7 +122,7 @@ export default function FoodTokensClient() {
   const sorted = useMemo(() => {
     const list = [...filtered];
     list.sort((a, b) =>
-      sortMode === "name" ? a.name.localeCompare(b.name) : a.serial.localeCompare(b.serial),
+      sortMode === "name" ? a.name.localeCompare(b.name) : serialCmp(a.serial, b.serial),
     );
     return list;
   }, [filtered, sortMode]);
@@ -221,7 +229,7 @@ export default function FoodTokensClient() {
           food: normFood(r.food),
           rollNo: r.rollNo === "—" ? "" : r.rollNo,
         }))
-        .sort((a, b) => a.serial.localeCompare(b.serial));
+        .sort((a, b) => serialCmp(a.serial, b.serial));
       setRows(mapped);
       setMsg(`Pulled ${mapped.length} live registrations.`);
     } catch {

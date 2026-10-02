@@ -24,6 +24,14 @@ function headerIndex(header: string[], ...needles: string[]): number {
   return -1;
 }
 
+/** Serial order that survives A100+: compare the numeric tail, not the string. */
+function serialCmp(a: string, b: string): number {
+  const na = Number(/^A(\d+)$/i.exec(a.trim())?.[1]);
+  const nb = Number(/^A(\d+)$/i.exec(b.trim())?.[1]);
+  if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+  return a.localeCompare(b);
+}
+
 function normalizeTable(header: string[], data: string[][]): FoodTokenRow[] {
   const nameI = headerIndex(header, "name", "student", "attendee");
   const serialI = headerIndex(header, "serial", "sr", "sl", "barcode", "token", "id", "no");
@@ -42,7 +50,7 @@ function normalizeTable(header: string[], data: string[][]): FoodTokenRow[] {
   // serial order, de-dupe by serial (keep first)
   const seen = new Set<string>();
   return out
-    .sort((a, b) => a.serial.localeCompare(b.serial))
+    .sort((a, b) => serialCmp(a.serial, b.serial))
     .filter((r) => (seen.has(r.serial) ? false : (seen.add(r.serial), true)));
 }
 
