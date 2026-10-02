@@ -24,9 +24,9 @@ const LEADER_PLACEHOLDERS = {
   githubUrl: "https://github.com/manasranjandikshit",
 };
 const MEMBER_PLACEHOLDERS = [
+  { name: "Debashish Pradhan", rollNo: "25BTCSE35", email: "25btcse35@suiit.ac.in", mobile: "9437131035" },
   { name: "Bibhuprasad Samal", rollNo: "24BTCSE32", email: "24btcse32@suiit.ac.in", mobile: "9437131032" },
   { name: "Ashish Abhisek Panda", rollNo: "24BTCSE33", email: "24btcse33@suiit.ac.in", mobile: "9437131033" },
-  { name: "Aditya Padhihari", rollNo: "25BTCSE34", email: "25btcse34@suiit.ac.in", mobile: "9437131034" },
 ];
 
 interface MemberForm {
