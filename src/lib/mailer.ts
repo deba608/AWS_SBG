@@ -12,6 +12,56 @@ export function mailConfigured(): boolean {
 
 export async function sendPassEmail(input: {
   to: string;
+  teamName: string;
+  leaderName: string;
+  preference: string;
+  members: string[];
+  whatsappUrl: string;
+}): Promise<EmailResult> {
+  if (!mailConfigured()) return { sent: false, reason: "email-not-configured" };
+  try {
+    const port = Number(process.env.SMTP_PORT ?? 587);
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port,
+      secure: port === 465,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    });
+    const from = process.env.SMTP_FROM ?? "awssbg@suiit.ac.in";
+    const memberLines = input.members.map((m, i) => `  ${i + 1}. ${m}`).join("\n");
+    await transporter.sendMail({
+      from: `"AWS SBG" <${from}>`,
+      to: input.to,
+      subject: `DecodeX Hackathon — team ${input.teamName} registered`,
+      text: [
+        `Hi ${input.leaderName},`,
+        ``,
+        `Your team "${input.teamName}" is registered for the DecodeX Hackathon (Day 1, 6th October 2026).`,
+        ``,
+        `Track preference: ${input.preference}`,
+        `Team:`,
+        memberLines,
+        ``,
+        `Check-in 8:45 AM at APJ Abdul Kalam Auditorium, SUIIT, Burla. Bring laptops + your team.`,
+        ``,
+        `Join the DecodeX Hackathon WhatsApp group for updates:`,
+        input.whatsappUrl,
+        ``,
+        `Note: each member still needs their own Community Day pass (8th October) for Day-3 entry + lunch — get passes at https://awssbgsuiit.in/passes.`,
+        ``,
+        `See you there!`,
+        ``,
+        `Best regards,`,
+        `AWS Student Builder Group, SUIIT`,
+      ].join("\n"),
+    });
+    return { sent: true };
+  } catch (err) {
+    console.error("[hackathon/email]", err);
+    return { sent: false, reason: "email-failed" };
+  }
+}
+  to: string;
   name: string;
   rollNo: string;
   serial: string;
