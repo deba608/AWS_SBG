@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Cpu, Layers, Loader2, Mail, Terminal, Trash2, User, Users } from "lucide-react";
 import Container from "@/components/Container";
 import FoodSelect from "@/components/FoodSelect";
@@ -223,6 +223,7 @@ export default function HackathonClient() {
   const [team, setTeam] = useState<RegisteredTeam | null>(null);
   const [emailSent, setEmailSent] = useState(false);
   const [slots, setSlots] = useState<{ registered: number; limit: number; open: boolean } | null>(null);
+  const topRef = useRef<HTMLDivElement>(null);
   // Fixed squad: leader + exactly 3 teammates.
 
   useEffect(() => {
@@ -233,6 +234,12 @@ export default function HackathonClient() {
       })
       .catch(() => {});
   }, []);
+
+  // Form (~3000px) swaps to short success card (~400px) on done. Browser
+  // keeps absolute scrollY → user lands in rulebook. Pull back to result.
+  useEffect(() => {
+    if (status === "done") topRef.current?.scrollIntoView({ block: "start" });
+  }, [status]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -262,7 +269,7 @@ export default function HackathonClient() {
   if (status === "done" && team) {
     const total = 1 + team.members.length;
     return (
-      <div className="space-y-4">
+      <div ref={topRef} className="space-y-4 scroll-mt-28">
         <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-4 text-center">
           <span className="animate-check-pop mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-green-500/20">
             <svg viewBox="0 0 24 24" className="h-5 w-5 text-green-300" fill="none" stroke="currentColor" strokeWidth={3} aria-hidden>
