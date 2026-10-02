@@ -18,9 +18,9 @@ export const metadata: Metadata = {
 
 const rules = [
   { icon: Users, text: "Teams of exactly 4 · leader + 3 teammates" },
-  { icon: CalendarDays, text: "Day 1 — Tuesday, 6th October 2026, 8:45 AM – 5:00 PM" },
+  { icon: CalendarDays, text: "Day 1 · Tue, 6 Oct 2026 · 8:45 AM – 5 PM" },
   { icon: MapPin, text: "APJ Abdul Kalam Auditorium, SUIIT, Burla" },
-  { icon: Trophy, text: "₹15,000 prize pool · winners felicitated on Day 3" },
+  { icon: Trophy, text: "₹15,000 prize pool · Day-3 felicitation" },
 ];
 
 const prizes = [
