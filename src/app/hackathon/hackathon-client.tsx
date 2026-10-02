@@ -115,10 +115,10 @@ function MemberFields({
         ) : null}
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Field label="Full name *" value={value.name} onChange={set("name")} error={errors?.name} placeholder="Debashish Pradhan" maxLength={60} autoComplete="name" />
-        <Field label="Roll number *" value={value.rollNo} onChange={set("rollNo")} error={errors?.rollNo} placeholder="24BTCSE26" maxLength={20} upper />
-        <Field label="College mail *" value={value.email} onChange={set("email")} error={errors?.email} placeholder="24btcse26@suiit.ac.in" type="email" inputMode="email" maxLength={100} autoComplete="email" />
-        <Field label="Mobile number *" value={value.mobile} onChange={set("mobile")} error={errors?.mobile} placeholder="9437512345" type="tel" inputMode="numeric" maxLength={13} autoComplete="tel-national" />
+        <Field label="Full name *" value={value.name} onChange={set("name")} error={errors?.name} placeholder={placeholders?.name ?? "Debashish Pradhan"} maxLength={60} autoComplete="name" />
+        <Field label="Roll number *" value={value.rollNo} onChange={set("rollNo")} error={errors?.rollNo} placeholder={placeholders?.rollNo ?? "24BTCSE26"} maxLength={20} upper />
+        <Field label="College mail *" value={value.email} onChange={set("email")} error={errors?.email} placeholder={placeholders?.email ?? "24btcse26@suiit.ac.in"} type="email" inputMode="email" maxLength={100} autoComplete="email" />
+        <Field label="Mobile number *" value={value.mobile} onChange={set("mobile")} error={errors?.mobile} placeholder={placeholders?.mobile ?? "9437512345"} type="tel" inputMode="numeric" maxLength={13} autoComplete="tel-national" />
       </div>
       <div className="mt-3">
         <GenderSelect
@@ -147,7 +147,7 @@ function MemberFields({
       </div>
       {showGithub ? (
         <div className="mt-3">
-          <Field label="GitHub profile URL *" value={value.githubUrl} onChange={set("githubUrl")} error={errors?.githubUrl} placeholder="https://github.com/username" type="url" inputMode="text" maxLength={200} autoComplete="url" />
+          <Field label="GitHub profile URL *" value={value.githubUrl} onChange={set("githubUrl")} error={errors?.githubUrl} placeholder={placeholders?.githubUrl ?? "https://github.com/username"} type="url" inputMode="text" maxLength={200} autoComplete="url" />
         </div>
       ) : null}
     </div>
@@ -301,7 +301,7 @@ export default function HackathonClient() {
           <input
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
-            placeholder="Binary Builders"
+            placeholder="Team DevX"
             maxLength={40}
             autoComplete="off"
             aria-invalid={Boolean(errors.teamName)}
