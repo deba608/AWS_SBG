@@ -89,9 +89,9 @@ export default function HackathonPage() {
       </p>
       <ul className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
         {rules.map((r) => (
-          <li key={r.text} className="flex items-center gap-2.5 rounded-xl border border-line bg-surface px-3 py-2.5 text-xs text-fog sm:text-sm">
+          <li key={r.text} className="flex items-center gap-2.5 rounded-xl border border-line bg-surface px-3 py-2.5 text-xs leading-snug text-fog sm:text-[13px]">
             <r.icon className="h-4 w-4 shrink-0 text-brand" aria-hidden />
-            {r.text}
+            <span className="min-w-0 break-words">{r.text}</span>
           </li>
         ))}
       </ul>
@@ -107,13 +107,13 @@ export default function HackathonPage() {
           </div>
           <div className="hidden h-10 w-px shrink-0 bg-line sm:block" aria-hidden />
           {prizes.map((p) => (
-            <div key={p.label} className="flex min-w-[96px] flex-1 items-center gap-2.5">
+            <div key={p.label} className="flex min-w-[104px] flex-1 basis-28 items-center gap-2.5">
               <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${p.tone}`}>
                 <p.icon className="h-4 w-4" aria-hidden />
               </span>
-              <span>
-                <span className="block text-[11px] font-semibold uppercase tracking-wider text-faint">{p.label} prize</span>
-                <span className="block text-base font-bold leading-tight text-cream">{p.amount}</span>
+              <span className="min-w-0">
+                <span className="block whitespace-nowrap text-[11px] font-semibold uppercase tracking-wider text-faint">{p.label} prize</span>
+                <span className="block whitespace-nowrap text-base font-bold leading-tight text-cream">{p.amount}</span>
               </span>
             </div>
           ))}
