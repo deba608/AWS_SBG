@@ -10,6 +10,10 @@ export function mailConfigured(): boolean {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
+function escHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 export async function sendHackathonEmail(input: {
   to: string;
   teamName: string;
@@ -29,6 +33,9 @@ export async function sendHackathonEmail(input: {
     });
     const from = process.env.SMTP_FROM ?? "awssbg@suiit.ac.in";
     const memberLines = input.members.map((m, i) => `  ${i + 1}. ${m}`).join("\n");
+    const memberRows = input.members
+      .map((m, i) => `<tr><td style="padding:2px 8px 2px 0;color:#9ca3af;">${i + 1}.</td><td style="padding:2px 0;">${escHtml(m)}</td></tr>`)
+      .join("");
     await transporter.sendMail({
       from: `"AWS SBG" <${from}>`,
       to: input.to,
@@ -61,6 +68,21 @@ export async function sendHackathonEmail(input: {
         `AWS Student Builder Group, SUIIT`,
         `Sambalpur University Institute of Information Technology`,
         `Sambalpur, Odisha - 768019`,
+      ].join("\n"),
+      html: [
+        `<div style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.5;color:#111;">`,
+        `<p style="margin:0;">Hi ${escHtml(input.leaderName)},</p>`,
+        `<p style="margin:12px 0 0;">Congratulations!<br>Your team "${escHtml(input.teamName)}" is registered for the DecodeX Hackathon</p>`,
+        `<p style="margin:12px 0 0;font-weight:bold;">REGISTRATION SUMMARY</p>`,
+        `<p style="margin:0;">Team name: ${escHtml(input.teamName)}<br>Track: ${escHtml(input.preference)}</p>`,
+        `<p style="margin:12px 0 0;font-weight:bold;">TEAM MEMBERS</p>`,
+        `<table cellpadding="0" cellspacing="0" style="margin:0;border-collapse:collapse;">${memberRows}</table>`,
+        `<p style="margin:12px 0 0;font-weight:bold;">EVENT DETAILS</p>`,
+        `<p style="margin:0;">Date: Tuesday, 6th October 2026<br>Check-in: 8:45 AM sharp<br>Venue: APJ Abdul Kalam Auditorium, SUIIT, Burla<br>Bring: Laptops, chargers &amp; your team (hardware teams: boards, sensors &amp; components)</p>`,
+        `<p style="margin:12px 0 0;font-weight:bold;">STAY UPDATED :</p>`,
+        `<p style="margin:0;">Join the DecodeX Hackathon WhatsApp group for problem statements, announcements and schedule changes:<br><a href="${escHtml(input.whatsappUrl)}">${escHtml(input.whatsappUrl)}</a></p>`,
+        `<p style="margin:12px 0 0;">See you at there!<br>Best regards,<br>AWS Student Builder Group, SUIIT<br>Sambalpur University Institute of Information Technology<br>Sambalpur, Odisha - 768019</p>`,
+        `</div>`,
       ].join("\n"),
     });
     return { sent: true };
