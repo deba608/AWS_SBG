@@ -173,10 +173,10 @@ export default function HackathonPage() {
           <p className="text-xs font-bold uppercase tracking-widest text-brand">Operation timeline · 6th October</p>
           <ol className="mt-3 space-y-2">
             {timeline.map((t) => (
-              <li key={`${t.time}-${t.tag}`} className="flex items-baseline gap-3 border-b border-dashed border-line pb-2 text-sm last:border-0 last:pb-0">
+              <li key={`${t.time}-${t.tag}`} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 border-b border-dashed border-line pb-2 text-sm last:border-0 last:pb-0">
                 <span className="w-20 shrink-0 font-mono text-xs font-bold text-brand">{t.time}</span>
                 <span className="w-20 shrink-0 text-[11px] font-bold uppercase tracking-wider text-faint">{t.tag}</span>
-                <span className="min-w-0 text-fog">{t.text}</span>
+                <span className="min-w-0 basis-full text-fog sm:basis-auto sm:flex-1">{t.text}</span>
               </li>
             ))}
           </ol>

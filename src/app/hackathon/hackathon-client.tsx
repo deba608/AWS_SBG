@@ -192,7 +192,7 @@ function PreferenceSelect({
               aria-checked={active}
               onClick={() => onChange(p)}
               className={cn(
-                "flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-sm font-semibold transition-all",
+                "flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl border px-1 py-2 text-xs font-semibold transition-all sm:px-2 sm:text-sm",
                 active
                   ? "border-brand/60 bg-brand/10 text-cream shadow-[0_0_20px_rgba(173,92,255,0.18)]"
                   : "border-line bg-surface text-fog hover:border-faint hover:text-cream",
