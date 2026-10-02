@@ -119,21 +119,7 @@ export default function FoodTokensClient() {
     return list;
   }, [filtered, sortMode]);
 
-  if (authed === null) {
-    return (
-      <div className="rank-card flex items-center gap-3 p-6 text-sm text-fog print:hidden">
-        <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Checking admin…
-      </div>
-    );
-  }
-  if (!authed) return <AdminLogin onDone={() => setAuthed(true)} />;
-
-  function chunk(list: TokenRow[]): TokenRow[][] {
-    const out: TokenRow[][] = [];
-    for (let i = 0; i < list.length; i += density.perPage) out.push(list.slice(i, i + density.perPage));
-    return out;
-  }
-
+  // Hooks must run on every render, before any early return (Rules of Hooks).
   // Real QR per serial, generated in-browser (offline OK once page loaded).
   // Any phone camera scans it → shows the serial, e.g. "A07".
   useEffect(() => {
@@ -161,6 +147,21 @@ export default function FoodTokensClient() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sorted]);
+
+  if (authed === null) {
+    return (
+      <div className="rank-card flex items-center gap-3 p-6 text-sm text-fog print:hidden">
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Checking admin…
+      </div>
+    );
+  }
+  if (!authed) return <AdminLogin onDone={() => setAuthed(true)} />;
+
+  function chunk(list: TokenRow[]): TokenRow[][] {
+    const out: TokenRow[][] = [];
+    for (let i = 0; i < list.length; i += density.perPage) out.push(list.slice(i, i + density.perPage));
+    return out;
+  }
 
   // Print groups: split mode → veg sheets then non-veg sheets, numbered separately
   const printGroups: { label: string; pages: TokenRow[][] }[] =
