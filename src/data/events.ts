@@ -74,7 +74,7 @@ export const decodeXHackathon: EventItem = {
   title: "DecodeX Hackathon (Day 1)",
   category: "Hackathon",
   date: "6 October 2026",
-  time: "9:00 AM – 5:30 PM IST",
+  time: "8:45 AM – 5:00 PM IST",
   location: "APJ Abdul Kalam Auditorium, SUIIT",
   description:
     "Community Day flagship hackathon: Problem statement submission, Phase I & II sprints, mentor guidance, and jury evaluation on AWS. ₹15,000 prize pool (1st ₹7,000 · 2nd ₹5,000 · 3rd ₹3,000). Register your team on this website — needs separate sign-up, Community Day pass alone is not enough.",

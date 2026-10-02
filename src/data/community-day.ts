@@ -12,8 +12,8 @@ export const COMMUNITY_DAY_META = {
   address: "SUIIT, Jyoti Vihar, Burla, Sambalpur, Odisha",
   mapsUrl:
     "https://www.google.com/maps/search/?api=1&query=APJ+Abdul+Kalam+Auditorium+SUIIT+Burla+Sambalpur",
-  // 9 AM IST Oct 6 2026
-  startIso: "2026-10-06T09:00:00+05:30",
+  // 8:45 AM IST Oct 6 2026 — rulebook check-in
+  startIso: "2026-10-06T08:45:00+05:30",
   endIso: "2026-10-08T14:00:00+05:30",
   // Countdown target: main day, 9 AM IST Oct 8 2026
   countdownIso: "2026-10-08T09:00:00+05:30",
