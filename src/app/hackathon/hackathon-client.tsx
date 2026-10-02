@@ -221,6 +221,7 @@ export default function HackathonClient() {
   const [status, setStatus] = useState<"form" | "busy" | "done">("form");
   const [apiError, setApiError] = useState("");
   const [team, setTeam] = useState<RegisteredTeam | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
   const [slots, setSlots] = useState<{ registered: number; limit: number; open: boolean } | null>(null);
   // Fixed squad: leader + exactly 3 teammates.
 
@@ -250,6 +251,7 @@ export default function HackathonClient() {
         throw new Error(data.error ?? "Registration failed.");
       }
       setTeam(data.team as RegisteredTeam);
+      setEmailSent(Boolean(data.email?.sent));
       setStatus("done");
     } catch (err) {
       setApiError(err instanceof Error ? err.message : "Registration failed.");
