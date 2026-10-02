@@ -57,7 +57,6 @@ export async function sendHackathonEmail(input: {
         input.whatsappUrl,
         ``,
         `See you at there!`,
-        ``,
         `Best regards,`,
         `AWS Student Builder Group, SUIIT`,
         `Sambalpur University Institute of Information Technology`,
