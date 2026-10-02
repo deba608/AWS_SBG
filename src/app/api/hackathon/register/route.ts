@@ -50,7 +50,7 @@ export async function POST(req: Request) {
   }
   try {
     const { team } = await registerTeam(input);
-    // Confirmation email to leader (fire-and-forget — never blocks registration).
+    // Confirmation email to leader — email failure never fails registration.
     const configured = mailConfigured();
     let emailed = false;
     if (configured) {
