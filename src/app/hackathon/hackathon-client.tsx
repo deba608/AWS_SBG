@@ -271,6 +271,15 @@ export default function HackathonClient() {
           <p className="mt-0.5 text-xs leading-relaxed text-green-200/80">
             DecodeX Hackathon · Day 1, 6th October · {total} member{total === 1 ? "" : "s"} · {team.preference} track · Team ID {team.id}
           </p>
+          <a
+            href="https://chat.whatsapp.com/F0ZtzWyBtV6Fm6NQ6q7dzR"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mx-auto mt-3 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-2 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+          >
+            Join DecodeX Hackathon group for updates
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </a>
         </div>
         <div className="rounded-xl border border-brand/30 bg-brand/10 p-3 text-sm leading-relaxed text-cream">
           Each member still needs their own <span className="font-semibold">Community Day pass (8th October)</span> for Day-3 entry + lunch —{" "}
