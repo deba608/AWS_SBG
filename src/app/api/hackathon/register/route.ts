@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     let emailed = false;
     if (configured) {
       const people = [team.leader, ...team.members].map(
-        (m) => `${m.name} · ${m.rollNo} · ${m.year} year`,
+        (m, i) => `${m.name}${i === 0 ? " (Leader)" : ""} — ${m.lunch}`,
       );
       emailed = (
         await sendHackathonEmail({
