@@ -35,8 +35,6 @@ interface RegisteredTeam {
   createdAt: string;
 }
 
-const blankMember = (): MemberForm => ({ name: "", rollNo: "", email: "", mobile: "", year: "", gender: "", githubUrl: "", lunch: "" });
-
 const inputCls = (bad: boolean) =>
   `w-full min-h-[44px] rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm ${
     bad ? "border-red-400/70" : "border-line"
@@ -197,11 +195,15 @@ function PreferenceSelect({
 }
 
 export default function HackathonClient() {
-  const [teamName, setTeamName] = useState("");
+  const [teamName, setTeamName] = useState("Team DevX");
   const [preference, setPreference] = useState("");
   const [declaration, setDeclaration] = useState(false);
-  const [leader, setLeader] = useState<MemberForm>(blankMember());
-  const [members, setMembers] = useState<MemberForm[]>([blankMember(), blankMember(), blankMember()]);
+  const [leader, setLeader] = useState<MemberForm>({ name: "Manas Ranjan Dikshit", rollNo: "24BTCSE31", email: "24btcse31@suiit.ac.in", mobile: "9437131031", year: "3rd", gender: "Male", githubUrl: "https://github.com/manasranjandikshit", lunch: "Veg" });
+  const [members, setMembers] = useState<MemberForm[]>([
+    { name: "Bibhuprasad Samal", rollNo: "24BTCSE32", email: "24btcse32@suiit.ac.in", mobile: "9437131032", year: "3rd", gender: "Male", githubUrl: "", lunch: "Non-veg" },
+    { name: "Ashish Abhisek Panda", rollNo: "24BTCSE33", email: "24btcse33@suiit.ac.in", mobile: "9437131033", year: "3rd", gender: "Male", githubUrl: "", lunch: "Veg" },
+    { name: "Aditya Padhihari", rollNo: "25BTCSE34", email: "25btcse34@suiit.ac.in", mobile: "9437131034", year: "2nd", gender: "Male", githubUrl: "", lunch: "Veg" },
+  ]);
   const [errors, setErrors] = useState<TeamErrors>({});
   const [status, setStatus] = useState<"form" | "busy" | "done">("form");
   const [apiError, setApiError] = useState("");
@@ -283,20 +285,6 @@ export default function HackathonClient() {
     );
   }
 
-  function fillDemo() {
-    setTeamName("Demo Debuggers");
-    setPreference("Both");
-    setDeclaration(true);
-    setLeader({ name: "Aarav Sharma", rollNo: "24BTCSE01", email: "24btcse01@suiit.ac.in", mobile: "9437100001", year: "3rd", gender: "Male", githubUrl: "https://github.com/aaravsharma", lunch: "Veg" });
-    setMembers([
-      { name: "Diya Patel", rollNo: "24BTCSE02", email: "24btcse02@suiit.ac.in", mobile: "9437100002", year: "3rd", gender: "Female", githubUrl: "", lunch: "Non-veg" },
-      { name: "Rohan Das", rollNo: "25BTCSE11", email: "25btcse11@suiit.ac.in", mobile: "9437100003", year: "2nd", gender: "Male", githubUrl: "", lunch: "Veg" },
-      { name: "Sneha Mishra", rollNo: "25BTCSE12", email: "25btcse12@suiit.ac.in", mobile: "9437100004", year: "2nd", gender: "Female", githubUrl: "", lunch: "Veg" },
-    ]);
-    setErrors({});
-    setApiError("");
-  }
-
   return (
     <Container className="rank-card p-5 sm:p-6">
       {slots && !slots.open ? (
@@ -309,16 +297,6 @@ export default function HackathonClient() {
         </p>
       ) : null}
       <form noValidate onSubmit={submit} className="space-y-4">
-        <div className="flex justify-end print:hidden">
-          <button
-            type="button"
-            onClick={fillDemo}
-            title="Fill sample values to preview the form — edit before submitting"
-            className="inline-flex min-h-[40px] items-center rounded-full border border-dashed border-line px-4 py-1.5 text-xs font-semibold text-faint hover:text-cream"
-          >
-            Fill demo data
-          </button>
-        </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-cream">Team name *</label>
           <input
