@@ -100,21 +100,18 @@ export default function HackathonPage() {
         Check-in 8:45 AM, 6th October · bring laptops + your team
       </p>
       <section aria-label="Prize pool" className="mt-6 rounded-2xl border border-line bg-surface p-4">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-          <div className="min-w-[110px]">
-            <p className="text-[11px] font-mono uppercase tracking-widest text-faint">{"// prize pool"}</p>
-            <p className="mt-0.5 text-xl font-bold tracking-tight text-cream">₹15,000</p>
-          </div>
-          <div className="hidden h-10 w-px shrink-0 bg-line sm:block" aria-hidden />
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="text-[11px] font-mono uppercase tracking-widest text-faint">{"// prize pool"}</p>
+          <p className="text-xl font-bold tracking-tight text-cream">₹15,000</p>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2">
           {prizes.map((p) => (
-            <div key={p.label} className="flex min-w-[104px] flex-1 basis-28 items-center gap-2.5">
-              <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${p.tone}`}>
+            <div key={p.label} className="flex flex-col items-center gap-1 rounded-xl border border-line/60 bg-ink/40 px-1 py-3 text-center">
+              <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${p.tone}`}>
                 <p.icon className="h-4 w-4" aria-hidden />
               </span>
-              <span className="min-w-0">
-                <span className="block whitespace-nowrap text-[11px] font-semibold uppercase tracking-wider text-faint">{p.label} prize</span>
-                <span className="block whitespace-nowrap text-base font-bold leading-tight text-cream">{p.amount}</span>
-              </span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-faint">{p.label} prize</span>
+              <span className="text-base font-bold leading-none text-cream">{p.amount}</span>
             </div>
           ))}
         </div>
