@@ -15,6 +15,20 @@ const TEAM_MAX = 4;
 const PREFS = ["Hardware", "Software", "Both"] as const;
 const PREF_ICONS = { Hardware: Cpu, Software: Terminal, Both: Layers } as const;
 
+// Faint demo hints (placeholders) — never submitted, vanish on typing.
+const LEADER_PLACEHOLDERS = {
+  name: "Manas Ranjan Dikshit",
+  rollNo: "24BTCSE31",
+  email: "24btcse31@suiit.ac.in",
+  mobile: "9437131031",
+  githubUrl: "https://github.com/manasranjandikshit",
+};
+const MEMBER_PLACEHOLDERS = [
+  { name: "Bibhuprasad Samal", rollNo: "24BTCSE32", email: "24btcse32@suiit.ac.in", mobile: "9437131032" },
+  { name: "Ashish Abhisek Panda", rollNo: "24BTCSE33", email: "24btcse33@suiit.ac.in", mobile: "9437131033" },
+  { name: "Aditya Padhihari", rollNo: "25BTCSE34", email: "25btcse34@suiit.ac.in", mobile: "9437131034" },
+];
+
 interface MemberForm {
   name: string;
   rollNo: string;
@@ -320,6 +334,7 @@ export default function HackathonClient() {
           errors={errors.leader}
           idPrefix="hack-leader"
           showGithub
+          placeholders={LEADER_PLACEHOLDERS}
         />
 
         {members.map((m, i) => (
@@ -331,6 +346,7 @@ export default function HackathonClient() {
             onChange={(v) => setMembers((prev) => prev.map((p, j) => (j === i ? v : p)))}
             errors={errors.members?.[i]}
             idPrefix={`hack-member-${i}`}
+            placeholders={MEMBER_PLACEHOLDERS[i % MEMBER_PLACEHOLDERS.length]}
           />
         ))}
 
