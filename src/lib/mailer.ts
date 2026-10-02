@@ -64,7 +64,10 @@ export async function sendHackathonEmail(input: {
         input.whatsappUrl,
         ``,
         `See you at there!`,
-        `Best regards — AWS Student Builder Group, SUIIT · Sambalpur, Odisha - 768019`,
+        `Best regards,`,
+        `AWS Student Builder Group, SUIIT`,
+        `Sambalpur University Institute of Information Technology`,
+        `Sambalpur, Odisha - 768019`,
       ].join("\n"),
       html: [
         `<div style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.5;color:#111;">`,
@@ -78,7 +81,7 @@ export async function sendHackathonEmail(input: {
         `<p style="margin:0;">Date: Tuesday, 6th October 2026<br>Check-in: 8:45 AM sharp<br>Venue: APJ Abdul Kalam Auditorium, SUIIT, Burla<br>Bring: Laptops, chargers &amp; your team (hardware teams: boards, sensors &amp; components)</p>`,
         `<p style="margin:12px 0 0;font-weight:bold;">STAY UPDATED :</p>`,
         `<p style="margin:0;">Join the DecodeX Hackathon WhatsApp group for problem statements, announcements and schedule changes:<br><a href="${escHtml(input.whatsappUrl)}">${escHtml(input.whatsappUrl)}</a></p>`,
-        `<p style="margin:12px 0 0;">See you at there!<br>Best regards — AWS Student Builder Group, SUIIT · Sambalpur, Odisha - 768019</p>`,
+        `<p style="margin:12px 0 0;">See you at there!<br>Best regards,<br>AWS Student Builder Group, SUIIT<br>Sambalpur University Institute of Information Technology<br>Sambalpur, Odisha - 768019</p>`,
         `</div>`,
       ].join("\n"),
     });
