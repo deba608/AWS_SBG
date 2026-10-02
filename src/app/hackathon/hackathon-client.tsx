@@ -35,6 +35,8 @@ interface RegisteredTeam {
   createdAt: string;
 }
 
+const blankMember = (): MemberForm => ({ name: "", rollNo: "", email: "", mobile: "", year: "", gender: "", githubUrl: "", lunch: "" });
+
 const inputCls = (bad: boolean) =>
   `w-full min-h-[44px] rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm ${
     bad ? "border-red-400/70" : "border-line"
@@ -74,7 +76,7 @@ function Field({
 }
 
 function MemberFields({
-  title, icon, value, onChange, errors, idPrefix, onRemove, removable, showGithub,
+  title, icon, value, onChange, errors, idPrefix, onRemove, removable, showGithub, placeholders,
 }: {
   title: string;
   icon: React.ReactNode;
@@ -85,6 +87,7 @@ function MemberFields({
   onRemove?: () => void;
   removable?: boolean;
   showGithub?: boolean;
+  placeholders?: { name?: string; rollNo?: string; email?: string; mobile?: string; githubUrl?: string };
 }) {
   const set = (k: keyof MemberForm) => (v: string) => {
     if (k === "rollNo" && !value.year) {
@@ -195,15 +198,11 @@ function PreferenceSelect({
 }
 
 export default function HackathonClient() {
-  const [teamName, setTeamName] = useState("Team DevX");
+  const [teamName, setTeamName] = useState("");
   const [preference, setPreference] = useState("");
   const [declaration, setDeclaration] = useState(false);
-  const [leader, setLeader] = useState<MemberForm>({ name: "Manas Ranjan Dikshit", rollNo: "24BTCSE31", email: "24btcse31@suiit.ac.in", mobile: "9437131031", year: "3rd", gender: "Male", githubUrl: "https://github.com/manasranjandikshit", lunch: "Veg" });
-  const [members, setMembers] = useState<MemberForm[]>([
-    { name: "Bibhuprasad Samal", rollNo: "24BTCSE32", email: "24btcse32@suiit.ac.in", mobile: "9437131032", year: "3rd", gender: "Male", githubUrl: "", lunch: "Non-veg" },
-    { name: "Ashish Abhisek Panda", rollNo: "24BTCSE33", email: "24btcse33@suiit.ac.in", mobile: "9437131033", year: "3rd", gender: "Male", githubUrl: "", lunch: "Veg" },
-    { name: "Aditya Padhihari", rollNo: "25BTCSE34", email: "25btcse34@suiit.ac.in", mobile: "9437131034", year: "2nd", gender: "Male", githubUrl: "", lunch: "Veg" },
-  ]);
+  const [leader, setLeader] = useState<MemberForm>(blankMember());
+  const [members, setMembers] = useState<MemberForm[]>([blankMember(), blankMember(), blankMember()]);
   const [errors, setErrors] = useState<TeamErrors>({});
   const [status, setStatus] = useState<"form" | "busy" | "done">("form");
   const [apiError, setApiError] = useState("");
