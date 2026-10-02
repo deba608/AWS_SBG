@@ -307,6 +307,20 @@ export default function HackathonClient() {
     );
   }
 
+  function fillDemo() {
+    setTeamName("Team DevX");
+    setPreference("Both");
+    setDeclaration(true);
+    setLeader({ name: "Manas Ranjan Dikshit", rollNo: "24BTCSE31", email: "24btcse31@suiit.ac.in", mobile: "9437131031", year: "3rd", gender: "Male", githubUrl: "https://github.com/manasranjandikshit", lunch: "Veg" });
+    setMembers([
+      { name: "Debashish Pradhan", rollNo: "25BTCSE35", email: "25btcse35@suiit.ac.in", mobile: "9437131035", year: "2nd", gender: "Male", githubUrl: "", lunch: "Veg" },
+      { name: "Bibhuprasad Samal", rollNo: "24BTCSE32", email: "24btcse32@suiit.ac.in", mobile: "9437131032", year: "3rd", gender: "Male", githubUrl: "", lunch: "Non-veg" },
+      { name: "Ashish Abhisek Panda", rollNo: "24BTCSE33", email: "24btcse33@suiit.ac.in", mobile: "9437131033", year: "3rd", gender: "Male", githubUrl: "", lunch: "Veg" },
+    ]);
+    setErrors({});
+    setApiError("");
+  }
+
   return (
     <Container className="rank-card p-5 sm:p-6">
       {slots && !slots.open ? (
@@ -319,6 +333,16 @@ export default function HackathonClient() {
         </p>
       ) : null}
       <form noValidate onSubmit={submit} className="space-y-4">
+        <div className="flex justify-end print:hidden">
+          <button
+            type="button"
+            onClick={fillDemo}
+            title="Fill sample values to preview the form — edit before submitting"
+            className="inline-flex min-h-[40px] items-center rounded-full border border-dashed border-line px-4 py-1.5 text-xs font-semibold text-faint hover:text-cream"
+          >
+            Fill demo data (temp)
+          </button>
+        </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-cream">Team name *</label>
           <input
