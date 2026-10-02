@@ -82,7 +82,10 @@ export default function ScanClient() {
   });
   const videoRef = useRef<HTMLVideoElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const controlsRef = useRef<{ stop: () => void } | null>(null);
+  // Camera decode callback outlives renders — read live mode through ref
+  // so a phone switched to Food counter stops using entry-mode rules.
+  const modeRef = useRef<ScanMode>(mode);
+  modeRef.current = mode;  const controlsRef = useRef<{ stop: () => void } | null>(null);
   const lastScanRef = useRef<string>("");
   const resumeTimer = useRef<number | null>(null);
   const scanningRef = useRef(false);
@@ -211,7 +214,15 @@ export default function ScanClient() {
         if (auto) {
           // freeze frame: decision made, stop decode spam
           stopCamera();
-          if (d.status !== "ACTIVE" || d.foodStatus === "FOOD_USED") scheduleResume(2400);
+          // Food counter scans the same ENTRY QR: entry USED is the normal
+          // case there. Only auto-dismiss when lunch is claimed (or pass
+          // expired); otherwise hold the screen for Confirm lunch.
+          const liveMode = modeRef.current;
+          const consumed =
+            liveMode === "food"
+              ? d.foodStatus === "FOOD_USED" || d.status === "EXPIRED"
+              : d.status !== "ACTIVE";
+          if (consumed) scheduleResume(2400);
         }
         setState({
           kind: "result",
@@ -401,8 +412,8 @@ export default function ScanClient() {
     result?.status === "ACTIVE" || justBurned || (mode === "food" && result !== null && !lunchClaimed && result.status !== "INVALID" && result.status !== "EXPIRED");
   const showRed =
     !justBurned &&
-    (result?.status === "USED" ||
-      result?.status === "INVALID" ||
+    (result?.status === "INVALID" ||
+      (mode === "entry" && result?.status === "USED") ||
       (mode === "food" && lunchClaimed));
 
   return (
