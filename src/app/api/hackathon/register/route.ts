@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { clientIp, rateOk } from "@/lib/rate-limit";
+import { mailConfigured, sendHackathonEmail } from "@/lib/mailer";
 import {
   hackathonCount,
   registerTeam,
@@ -8,6 +9,8 @@ import {
   HackathonFullError,
   type HackathonMemberInput,
 } from "@/lib/hackathon-store";
+
+export const HACKATHON_WHATSAPP_URL = "https://chat.whatsapp.com/F0ZtzWyBtV6Fm6NQ6q7dzR";
 
 function memberOf(v: unknown): HackathonMemberInput {
   const o = (v ?? {}) as Record<string, unknown>;
@@ -47,7 +50,25 @@ export async function POST(req: Request) {
   }
   try {
     const { team } = await registerTeam(input);
-    return NextResponse.json({ team }, { status: 201 });
+    // Confirmation email to leader (fire-and-forget — never blocks registration).
+    const configured = mailConfigured();
+    let emailed = false;
+    if (configured) {
+      const people = [team.leader, ...team.members].map(
+        (m) => `${m.name} · ${m.rollNo} · ${m.year} year`,
+      );
+      emailed = (
+        await sendHackathonEmail({
+          to: team.leader.email,
+          teamName: team.teamName,
+          leaderName: team.leader.name,
+          preference: team.preference,
+          members: people,
+          whatsappUrl: HACKATHON_WHATSAPP_URL,
+        }).catch(() => ({ sent: false as boolean }))
+      ).sent;
+    }
+    return NextResponse.json({ team, email: { sent: emailed, configured } }, { status: 201 });
   } catch (err) {
     if (err instanceof HackathonConflictError) {
       return NextResponse.json({ error: err.message }, { status: 409 });

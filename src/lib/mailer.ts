@@ -10,7 +10,7 @@ export function mailConfigured(): boolean {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
-export async function sendPassEmail(input: {
+export async function sendHackathonEmail(input: {
   to: string;
   teamName: string;
   leaderName: string;
@@ -61,6 +61,8 @@ export async function sendPassEmail(input: {
     return { sent: false, reason: "email-failed" };
   }
 }
+
+export async function sendPassEmail(input: {
   to: string;
   name: string;
   rollNo: string;
