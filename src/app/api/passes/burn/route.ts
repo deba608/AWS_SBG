@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { burnPass, expandSerialToToken, effectiveYearOf } from "@/lib/pass-store";
+import { burnPassByRaw, effectiveYearOf } from "@/lib/pass-store";
 import { clientIp, rateOk } from "@/lib/rate-limit";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+/** Gate burst budget: ~5 burns/sec per phone (double-tap + retries). */
+const SCAN_LIMIT = 300;
 
 export async function POST(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  if (!rateOk(`scan:${clientIp(req)}`, 120, 60_000)) {
+  if (!rateOk(`scan:${clientIp(req)}`, SCAN_LIMIT, 60_000)) {
     return NextResponse.json({ error: "Too fast. Slow down." }, { status: 429 });
   }
   let body: unknown;
@@ -18,8 +24,7 @@ export async function POST(req: Request) {
   const scannedBy = String((body as Record<string, unknown>).scannedBy ?? "admin").slice(0, 60);
   const kind = String((body as Record<string, unknown>).kind ?? "entry") === "food" ? "food" : "entry";
   if (!raw) return NextResponse.json({ error: "token required." }, { status: 400 });
-  const token = await expandSerialToToken(raw);
-  const r = await burnPass(token, scannedBy, kind);
+  const r = await burnPassByRaw(raw, scannedBy, kind);
   if (!r.ok) {
     if (r.reason === "EXPIRED") {
       return NextResponse.json({ ok: false, status: "EXPIRED", kind }, { status: 410 });

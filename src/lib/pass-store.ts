@@ -119,23 +119,46 @@ function parseStore(raw: unknown): StoreShape {
   return emptyStore();
 }
 
-async function readStore(): Promise<StoreShape> {
+/**
+ * Short-lived in-process cache for the whole pass blob.
+ * Gate scanning bursts hit verify many times/sec — without this every
+ * verify = 1 Redis GET + JSON parse, and expandSerial+verify = 2 GETs.
+ * 2.5s TTL keeps scan results fresh while cutting Redis round trips;
+ * every write invalidates immediately so burns never read stale.
+ */
+const STORE_CACHE_TTL_MS = 2500;
+let storeCache: { at: number; store: StoreShape } | null = null;
+
+async function readStore(useCache = true): Promise<StoreShape> {
+  const now = Date.now();
+  if (useCache && storeCache && now - storeCache.at < STORE_CACHE_TTL_MS) {
+    return storeCache.store;
+  }
   const redis = getRedis();
   if (redis) {
     try {
-      return parseStore(await redis.get(REDIS_KEY));
+      const parsed = parseStore(await redis.get(REDIS_KEY));
+      storeCache = { at: now, store: parsed };
+      return parsed;
     } catch {
       return emptyStore();
     }
   }
   try {
-    return parseStore(await fs.readFile(FILE, "utf8"));
+    const parsed = parseStore(await fs.readFile(FILE, "utf8"));
+    storeCache = { at: now, store: parsed };
+    return parsed;
   } catch {
     return emptyStore();
   }
 }
 
+function invalidateStoreCache(): void {
+  storeCache = null;
+}
+
 async function writeStore(store: StoreShape): Promise<void> {
+  invalidateStoreCache();
   const redis = getRedis();
   if (redis) {
     await redis.set(REDIS_KEY, JSON.stringify(store));
@@ -542,15 +565,38 @@ export async function expandSerialToToken(input: string): Promise<string> {
 
 /** Check signature first, then store lookup, then expiry. */
 export async function verifyPass(token: string): Promise<VerifyResult> {
-  const parsed = verifyPassToken(token.trim());
+  const t = token.trim();
+  const parsed = verifyPassToken(t);
   if (!parsed) return { ok: false, reason: "INVALID" };
   const store = await readStore();
-  const pass = store.passes.find((p) => p.token === token.trim());
+  const pass = store.passes.find((p) => p.token === t);
   if (!pass) return { ok: false, reason: "INVALID" };
   const user = store.users.find((u) => u.id === pass.userId);
   if (!user) return { ok: false, reason: "INVALID" };
   if (isExpired()) return { ok: false, reason: "EXPIRED" };
   return { ok: true, user, pass, alreadyUsed: pass.status === "USED", foodUsed: foodStatusOf(pass) === "USED" };
+}
+
+/**
+ * Fast scan path: serial-or-token → verify in ONE store read.
+ * Replaces expandSerialToToken()+verifyPass() (2 reads) on scan routes.
+ */
+export async function verifyPassByRaw(raw: string): Promise<VerifyResult> {
+  let t = raw.trim();
+  if (/^A\d+$/i.test(t)) {
+    const serial = t.toUpperCase();
+    const store = await readStore();
+    const user = store.users.find((u) => (u.serial ?? "").toUpperCase() === serial);
+    const pass = user
+      ? (store.passes.find((p) => p.userId === user.id && p.type === "ENTRY") ??
+        store.passes.find((p) => p.userId === user.id))
+      : undefined;
+    if (!pass || !user) return { ok: false, reason: "INVALID" };
+    t = pass.token;
+    if (isExpired()) return { ok: false, reason: "EXPIRED" };
+    return { ok: true, user, pass, alreadyUsed: pass.status === "USED", foodUsed: foodStatusOf(pass) === "USED" };
+  }
+  return verifyPass(t);
 }
 
 export type BurnResult =
@@ -563,7 +609,8 @@ export async function burnPass(token: string, scannedBy: string, kind: BurnKind 
   const t = token.trim();
   if (!verifyPassToken(t)) return { ok: false, reason: "INVALID", kind };
   if (isExpired()) return { ok: false, reason: "EXPIRED", kind };
-  const store = await readStore();
+  // Fresh read under lock — never trust the scan cache for a state change.
+  const store = await readStore(false);
   const pass = store.passes.find((p) => p.token === t);
   if (!pass) return { ok: false, reason: "INVALID", kind };
   const user = store.users.find((u) => u.id === pass.userId);
@@ -582,6 +629,48 @@ export async function burnPass(token: string, scannedBy: string, kind: BurnKind 
   pass.scannedBy = scannedBy || "admin";
   await writeStore(store);
   return { ok: true, kind, user, pass };
+  });
+}
+
+/**
+ * Fast scan path: serial-or-token → burn in ONE locked store read.
+ * Serials resolve inside the same read so gate manual entry is as fast as QR.
+ */
+export async function burnPassByRaw(raw: string, scannedBy: string, kind: BurnKind = "entry"): Promise<BurnResult> {
+  return withWriteLock(async () => {
+    let t = raw.trim();
+    if (isExpired()) return { ok: false, reason: "EXPIRED", kind };
+    // Fresh read under lock — never trust the scan cache for a state change.
+    const store = await readStore(false);
+    if (/^A\d+$/i.test(t)) {
+      const serial = t.toUpperCase();
+      const user = store.users.find((u) => (u.serial ?? "").toUpperCase() === serial);
+      const pass = user
+        ? (store.passes.find((p) => p.userId === user.id && p.type === "ENTRY") ??
+          store.passes.find((p) => p.userId === user.id))
+        : undefined;
+      if (!pass || !user) return { ok: false, reason: "INVALID", kind };
+      t = pass.token;
+    }
+    if (!verifyPassToken(t)) return { ok: false, reason: "INVALID", kind };
+    const pass = store.passes.find((p) => p.token === t);
+    if (!pass) return { ok: false, reason: "INVALID", kind };
+    const user = store.users.find((u) => u.id === pass.userId);
+    if (!user) return { ok: false, reason: "INVALID", kind };
+    if (kind === "food") {
+      if (foodStatusOf(pass) === "USED") return { ok: false, reason: "ALREADY_USED", kind, user, pass };
+      pass.food = "USED";
+      pass.foodUsedAt = new Date().toISOString();
+      pass.foodScannedBy = scannedBy || "admin";
+      await writeStore(store);
+      return { ok: true, kind, user, pass };
+    }
+    if (pass.status === "USED") return { ok: false, reason: "ALREADY_USED", kind, user, pass };
+    pass.status = "USED";
+    pass.usedAt = new Date().toISOString();
+    pass.scannedBy = scannedBy || "admin";
+    await writeStore(store);
+    return { ok: true, kind, user, pass };
   });
 }
 

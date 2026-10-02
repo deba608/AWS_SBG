@@ -85,11 +85,27 @@ export default function ScanClient() {
   // Camera decode callback outlives renders — read live mode through ref
   // so a phone switched to Food counter stops using entry-mode rules.
   const modeRef = useRef<ScanMode>(mode);
-  modeRef.current = mode;  const controlsRef = useRef<{ stop: () => void } | null>(null);
+  const controlsRef = useRef<{ stop: () => void } | null>(null);
   const lastScanRef = useRef<string>("");
   const resumeTimer = useRef<number | null>(null);
   const scanningRef = useRef(false);
-  scanningRef.current = scanning;
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
+  useEffect(() => {
+    scanningRef.current = scanning;
+  }, [scanning]);
+  // Fast-scan refs: keep stream alive across burns, pause decode instead of
+  // tearing down getUserMedia (re-init costs 1-2s per person on gate phones).
+  const decodePausedRef = useRef(false);
+  const streamRef = useRef<MediaStream | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const detectorRef = useRef<{ detect: (v: HTMLVideoElement) => Promise<Array<{ rawValue: string }>> } | null>(null);
+  const zxingPromiseRef = useRef<Promise<unknown> | null>(null);
+  const verifyCacheRef = useRef(new Map<string, { at: number; body: unknown }>());
+  const verifySeqRef = useRef(0);
+  const lastStatsAtRef = useRef(0);
+  const lastDecodeAtRef = useRef(0);
 
   const refreshMe = useCallback(async () => {
     try {
@@ -101,7 +117,10 @@ export default function ScanClient() {
     }
   }, []);
 
-  const refreshStats = useCallback(async () => {
+  const refreshStats = useCallback(async (force = false) => {
+    const now = Date.now();
+    if (!force && now - lastStatsAtRef.current < 5000) return;
+    lastStatsAtRef.current = now;
     try {
       const r = await fetch("/api/admin/stats", { cache: "no-store" });
       if (r.ok) setStats((await r.json()) as Stats);
@@ -110,27 +129,27 @@ export default function ScanClient() {
     }
   }, []);
 
+  /** Warm scanner libs while admin types — first startCamera then instant. */
+  const preloadScanner = useCallback(() => {
+    try {
+      const BD = (window as unknown as { BarcodeDetector?: unknown }).BarcodeDetector;
+      if (BD) {
+        const Ctor = BD as new (opts: { formats: string[] }) => { detect: (v: HTMLVideoElement) => Promise<Array<{ rawValue: string }>> };
+        detectorRef.current = new Ctor({ formats: ["qr_code"] });
+      }
+    } catch {
+      // native unavailable — zxing fallback below
+    }
+    if (!zxingPromiseRef.current) {
+      zxingPromiseRef.current = import("@zxing/browser").catch(() => null);
+    }
+  }, []);
+
   useEffect(() => {
     // init once: auth check hits external API
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshMe();
   }, [refreshMe]);
-
-  useEffect(() => {
-    if (!authed) return;
-    // init: stats + (camera now OR ?t= token verify)
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void refreshStats();
-    const q = new URLSearchParams(window.location.search).get("t");
-    if (q) {
-      setToken(q);
-      void verify(q);
-    } else {
-      void startCamera();
-    }
-    // verify/startCamera intentionally run once per login
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -170,16 +189,26 @@ export default function ScanClient() {
     resumeNow();
   }
 
-  /** Reset to idle + camera back on (continuous gate mode). */
+  /** Pause decoding but keep the stream — resume is instant (~50ms). */
+  function pauseDecoding() {
+    decodePausedRef.current = true;
+  }
+
+  function unpauseDecoding() {
+    decodePausedRef.current = false;
+    lastScanRef.current = "";
+  }
+
+  /** Reset to idle + resume decoding (no camera re-init when stream alive). */
   function resumeNow() {
     if (resumeTimer.current) {
       window.clearTimeout(resumeTimer.current);
       resumeTimer.current = null;
     }
     setToken("");
-    lastScanRef.current = "";
+    unpauseDecoding();
     setState({ kind: "idle" });
-    void startCamera(true);
+    if (!scanningRef.current) void startCamera(true);
   }
 
   function scheduleResume(ms: number) {
@@ -187,16 +216,65 @@ export default function ScanClient() {
     resumeTimer.current = window.setTimeout(() => {
       resumeTimer.current = null;
       setToken("");
-      lastScanRef.current = "";
+      unpauseDecoding();
       setState({ kind: "idle" });
-      void startCamera(true);
+      if (!scanningRef.current) void startCamera(true);
     }, ms);
+  }
+
+  function applyVerifyBody(d: unknown) {
+    const body = d as {
+      status?: string;
+      foodStatus?: "FOOD_ACTIVE" | "FOOD_USED";
+      type?: "ENTRY" | "FOOD";
+      user?: { name?: string; serial?: string; email?: string; mobile?: string; rollNo?: string; food?: string; year?: string };
+      usedAt?: string | null;
+      error?: string;
+    };
+    if (body.status === "ACTIVE" || body.status === "USED" || body.status === "EXPIRED") {
+      setState({
+        kind: "result",
+        status: body.status,
+        foodStatus: body.foodStatus,
+        type: body.type,
+        name: body.user?.name,
+        serial: body.user?.serial,
+        email: body.user?.email,
+        mobile: body.user?.mobile,
+        rollNo: body.user?.rollNo,
+        food: body.user?.food,
+        year: body.user?.year,
+        usedAt: body.usedAt ?? null,
+      });
+    } else if (body.error === "Too fast. Slow down.") {
+      setState({ kind: "error", message: "Too fast — wait a moment, then retry." });
+    } else {
+      setState({ kind: "result", status: "INVALID" });
+    }
+    return body;
   }
 
   async function verify(raw: string, auto = false) {
     const t = tokenFromQRText(raw);
     if (!t) return;
     setToken(t);
+    // Camera re-reads the same QR ~10x/sec — serve repeats from cache.
+    const cached = verifyCacheRef.current.get(t);
+    // eslint-disable-next-line react-hooks/purity -- event handler, not render
+    if (cached && Date.now() - cached.at < 10_000) {
+      const body = applyVerifyBody(cached.body);
+      if (auto && (body.status === "ACTIVE" || body.status === "USED" || body.status === "EXPIRED")) {
+        pauseDecoding();
+        const liveMode = modeRef.current;
+        const consumed =
+          liveMode === "food"
+            ? body.foodStatus === "FOOD_USED" || body.status === "EXPIRED"
+            : body.status !== "ACTIVE";
+        if (consumed) scheduleResume(900);
+      }
+      return;
+    }
+    const seq = ++verifySeqRef.current;
     setState({ kind: "busy" });
     try {
       const r = await fetch("/api/passes/verify", {
@@ -205,15 +283,22 @@ export default function ScanClient() {
         body: JSON.stringify({ token: t }),
       });
       const d = await r.json();
+      if (seq !== verifySeqRef.current) return; // stale: newer scan won
       if (!r.ok && d.error === "Unauthorized.") {
         setAuthed(false);
         setState({ kind: "idle" });
         return;
       }
       if (d.status === "ACTIVE" || d.status === "USED" || d.status === "EXPIRED") {
+        // eslint-disable-next-line react-hooks/purity -- event handler, not render
+        verifyCacheRef.current.set(t, { at: Date.now(), body: d });
+        if (verifyCacheRef.current.size > 200) {
+          const oldest = verifyCacheRef.current.keys().next().value;
+          if (oldest) verifyCacheRef.current.delete(oldest);
+        }
         if (auto) {
-          // freeze frame: decision made, stop decode spam
-          stopCamera();
+          // freeze decode, keep video: decision made, stop decode spam
+          pauseDecoding();
           // Food counter scans the same ENTRY QR: entry USED is the normal
           // case there. Only auto-dismiss when lunch is claimed (or pass
           // expired); otherwise hold the screen for Confirm lunch.
@@ -222,7 +307,7 @@ export default function ScanClient() {
             liveMode === "food"
               ? d.foodStatus === "FOOD_USED" || d.status === "EXPIRED"
               : d.status !== "ACTIVE";
-          if (consumed) scheduleResume(2400);
+          if (consumed) scheduleResume(900);
         }
         setState({
           kind: "result",
@@ -244,6 +329,7 @@ export default function ScanClient() {
         setState({ kind: "result", status: "INVALID" });
       }
     } catch {
+      if (seq !== verifySeqRef.current) return;
       setState({ kind: "error", message: "Network failed. Check connection, then retry — nothing burned." });
     }
   }
@@ -263,8 +349,9 @@ export default function ScanClient() {
       if (r.status === 410 || d.status === "EXPIRED") {
         setState({ kind: "result", status: "EXPIRED", type: d.type });
       } else if (r.status === 409 || d.status === "USED" || d.status === "FOOD_USED") {
-        stopCamera();
-        scheduleResume(2400);
+        pauseDecoding();
+        scheduleResume(900);
+        verifyCacheRef.current.delete(t);
         setState({
           kind: "result",
           status: "USED",
@@ -280,8 +367,9 @@ export default function ScanClient() {
           usedAt: d.usedAt ?? null,
         });
       } else if (d.ok) {
-        stopCamera();
-        scheduleResume(1500);
+        pauseDecoding();
+        scheduleResume(700);
+        verifyCacheRef.current.delete(t);
         setState({
           kind: "result",
           status: "USED",
@@ -309,50 +397,147 @@ export default function ScanClient() {
     }
   }
 
-  function stopCamera() {
+  function stopLoop() {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
     try {
       controlsRef.current?.stop();
     } catch {
       // ignore
     }
     controlsRef.current = null;
-    const v = videoRef.current;
-    if (v?.srcObject) {
-      for (const tr of (v.srcObject as MediaStream).getTracks()) tr.stop();
-      v.srcObject = null;
+  }
+
+  function stopCamera() {
+    stopLoop();
+    decodePausedRef.current = false;
+    const s = streamRef.current;
+    if (s) {
+      for (const tr of s.getTracks()) tr.stop();
+      streamRef.current = null;
     }
+    const v = videoRef.current;
+    if (v?.srcObject) v.srcObject = null;
     scanningRef.current = false;
     setScanning(false);
   }
 
+  function handleDecodedText(text: string) {
+    if (decodePausedRef.current) return;
+    // eslint-disable-next-line react-hooks/purity -- camera callback, not render
+    const now = Date.now();
+    // Throttle decode callbacks: camera fires ~10-30x/sec on same QR.
+    if (now - lastDecodeAtRef.current < 400) return;
+    if (!text || text === lastScanRef.current) return;
+    lastDecodeAtRef.current = now;
+    lastScanRef.current = text;
+    void verify(text, true);
+  }
+
+  function startNativeLoop(video: HTMLVideoElement) {
+    const detector = detectorRef.current;
+    if (!detector) return false;
+    stopLoop();
+    const tick = async () => {
+      if (!scanningRef.current) return;
+      try {
+        if (!decodePausedRef.current && video.readyState >= 2) {
+          const codes = await detector.detect(video);
+          const raw = codes?.[0]?.rawValue;
+          if (raw) handleDecodedText(raw);
+        }
+      } catch {
+        // single-frame miss — keep looping
+      }
+      rafRef.current = requestAnimationFrame(() => {
+        // ~12fps is plenty for QR + saves battery on gate phones
+        window.setTimeout(() => void tick(), 80);
+      });
+    };
+    void tick();
+    return true;
+  }
+
+  async function startZxingFallback(video: HTMLVideoElement, stream: MediaStream) {
+    if (!zxingPromiseRef.current) {
+      zxingPromiseRef.current = import("@zxing/browser").catch(() => null);
+    }
+    const mod = (await zxingPromiseRef.current) as unknown as {
+      BrowserQRCodeReader?: new () => {
+        decodeFromStream: (
+          s: MediaStream,
+          v: HTMLVideoElement,
+          cb: (result: { getText: () => string } | null, err: unknown) => void,
+        ) => Promise<{ stop: () => void }>;
+      };
+    } | null;
+    const Ctor = mod?.BrowserQRCodeReader;
+    if (!Ctor) throw new Error("Scanner unavailable. Use manual entry.");
+    stopLoop();
+    const reader = new Ctor();
+    const controls = await reader.decodeFromStream(stream, video, (result) => {
+      if (result) handleDecodedText(result.getText());
+    });
+    controlsRef.current = controls;
+  }
+
   async function startCamera(force = false) {
     setCamErr("");
-    if (scanningRef.current) {
-      if (!force) stopCamera();
+    // Stream already alive → just unpause (instant, no getUserMedia).
+    if (scanningRef.current && streamRef.current) {
+      if (!force) {
+        stopCamera();
+        return;
+      }
+      unpauseDecoding();
+      const video = videoRef.current;
+      if (video && rafRef.current === null && !controlsRef.current && detectorRef.current) {
+        startNativeLoop(video);
+      }
       return;
     }
+    if (scanningRef.current && !force) {
+      stopCamera();
+      return;
+    }
+    preloadScanner();
     try {
-      const { BrowserQRCodeReader } = await import("@zxing/browser");
-      const reader = new BrowserQRCodeReader();
       const video = videoRef.current;
       if (!video) return;
+      // Low-res = faster decode + faster autofocus on budget gate phones.
+      // 640x480 @ ~15fps decodes QR in ~100ms vs ~500ms at 1080p.
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment",
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: 15 },
+        },
+        audio: false,
+      });
+      streamRef.current = stream;
+      video.srcObject = stream;
+      video.setAttribute("playsinline", "true");
+      await video.play().catch(() => undefined);
       scanningRef.current = true;
       setScanning(true);
-      const controls = await reader.decodeFromVideoDevice(
-        undefined,
-        video,
-        (result, err) => {
-          if (result) {
-            const text = result.getText();
-            if (text && text !== lastScanRef.current) {
-              lastScanRef.current = text;
-              void verify(text, true);
-            }
-          }
-          if (err && !(err instanceof Error)) setCamErr("Camera read error.");
-        },
-      );
-      controlsRef.current = controls;
+      unpauseDecoding();
+      // Native BarcodeDetector (Chrome/Edge/Android): hardware-fast, no wasm.
+      if (!detectorRef.current) {
+        try {
+          const BD = (window as unknown as { BarcodeDetector?: new (opts: { formats: string[] }) => { detect: (v: HTMLVideoElement) => Promise<Array<{ rawValue: string }>> } }).BarcodeDetector;
+          if (BD) detectorRef.current = new BD({ formats: ["qr_code"] });
+        } catch {
+          detectorRef.current = null;
+        }
+      }
+      if (detectorRef.current) {
+        startNativeLoop(video);
+        return;
+      }
+      await startZxingFallback(video, stream);
     } catch (err) {
       setCamErr(
         err instanceof Error ? err.message : "Camera unavailable. Use manual entry.",
@@ -362,9 +547,27 @@ export default function ScanClient() {
     }
   }
 
+  useEffect(() => {
+    if (!authed) return;
+    // init: stats + (camera now OR ?t= token verify)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void refreshStats(true);
+    preloadScanner();
+    const q = new URLSearchParams(window.location.search).get("t");
+    if (q) {
+      setToken(q);
+      void verify(q);
+    } else {
+      void startCamera();
+    }
+    // verify/startCamera intentionally run once per login
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed]);
+
   useEffect(() => () => {
     stopCamera();
     if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (authed === null) {
@@ -490,6 +693,7 @@ export default function ScanClient() {
           <video
             ref={videoRef}
             muted
+            autoPlay
             playsInline
             onClick={() => {
               if (!scanning && (state.kind === "idle" || state.kind === "error")) void startCamera(true);

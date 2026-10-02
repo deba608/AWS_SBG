@@ -24,16 +24,17 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /**
  * Distributed mutex via SET NX EX. Serializes read-modify-write across
  * serverless instances. Lock auto-expires in 30s if a holder crashes.
+ * Fast poll (12ms) so gate bursts don't queue up behind a slow holder.
  */
 export async function withRedisLock<T>(key: string, fn: () => Promise<T>): Promise<T> {
   const redis = getRedis();
   if (!redis) return fn();
   const token = `${process.pid}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 60; i++) {
     const ok = await redis.set(key, token, { nx: true, ex: 30 });
     if (ok === "OK") break;
-    if (i === 199) throw new Error("Store busy. Retry.");
-    await sleep(50);
+    if (i === 59) throw new Error("Store busy. Retry.");
+    await sleep(12);
   }
   try {
     return await fn();

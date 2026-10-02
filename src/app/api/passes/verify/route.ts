@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { expandSerialToToken, verifyPass, effectiveYearOf } from "@/lib/pass-store";
+import { verifyPassByRaw, effectiveYearOf } from "@/lib/pass-store";
 import { clientIp, rateOk } from "@/lib/rate-limit";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+/** Gate burst budget: ~5 scans/sec per phone (camera re-reads + retries). */
+const SCAN_LIMIT = 300;
 
 function extractToken(req: Request, bodyToken?: string): string {
   if (bodyToken) return bodyToken;
@@ -23,13 +29,12 @@ function extractToken(req: Request, bodyToken?: string): string {
 
 export async function GET(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  if (!rateOk(`scan:${clientIp(req)}`, 120, 60_000)) {
+  if (!rateOk(`scan:${clientIp(req)}`, SCAN_LIMIT, 60_000)) {
     return NextResponse.json({ error: "Too fast. Slow down." }, { status: 429 });
   }
   const raw = extractToken(req).trim();
   if (!raw) return NextResponse.json({ error: "token required." }, { status: 400 });
-  const token = await expandSerialToToken(raw);
-  const r = await verifyPass(token);
+  const r = await verifyPassByRaw(raw);
   if (!r.ok) return NextResponse.json({ ok: false, status: r.reason });
   return NextResponse.json({
     ok: true,
@@ -52,7 +57,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  if (!rateOk(`scan:${clientIp(req)}`, 120, 60_000)) {
+  if (!rateOk(`scan:${clientIp(req)}`, SCAN_LIMIT, 60_000)) {
     return NextResponse.json({ error: "Too fast. Slow down." }, { status: 429 });
   }
   let body: unknown = {};
@@ -63,8 +68,7 @@ export async function POST(req: Request) {
   }
   const raw = extractToken(req, String((body as Record<string, unknown>).token ?? "")).trim();
   if (!raw) return NextResponse.json({ error: "token required." }, { status: 400 });
-  const token = await expandSerialToToken(raw);
-  const r = await verifyPass(token);
+  const r = await verifyPassByRaw(raw);
   if (!r.ok) return NextResponse.json({ ok: false, status: r.reason });
   return NextResponse.json({
     ok: true,
