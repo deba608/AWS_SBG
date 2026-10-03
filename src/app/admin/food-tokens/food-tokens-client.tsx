@@ -55,8 +55,6 @@ function Barcode({ code, height }: { code: string; height: number }) {
         background: "#ffffff",
         lineColor: "#000000",
       });
-      ref.current.setAttribute("width", "100%");
-      ref.current.setAttribute("preserveAspectRatio", "xMidYMid meet");
     } catch {
       // leave blank; big serial text still printed below
     }
@@ -66,7 +64,7 @@ function Barcode({ code, height }: { code: string; height: number }) {
       ref={ref}
       role="img"
       aria-label={`Barcode for ${code}`}
-      className="block h-auto w-full"
+      className="block h-auto w-auto max-w-full"
       style={{ height }}
     />
   );
@@ -114,21 +112,24 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
           ) : null}
         </span>
       </div>
-      <div className={cn("px-2.5", tiny ? "pt-0.5" : "pt-1")}>
-        <p className={cn("font-mono font-black leading-none tracking-tight text-black", tiny ? "text-[20px]" : compact ? "text-[24px]" : "text-[30px]")}>
-          {row.serial}
-          {row.extra && tiny ? <span className="ml-1 rounded bg-amber-400 px-1 align-middle font-sans text-[8px] text-black">X</span> : null}
-        </p>
-      </div>
-      <div className={cn("px-2.5", tiny ? "pt-0.5 pb-1" : "pt-1 pb-2")}>
-        <div className="w-full overflow-hidden rounded-sm bg-white">
-          <Barcode code={row.serial} height={tiny ? 30 : compact ? 52 : 64} />
-        </div>
-        {!tiny ? (
-          <p className="mt-1 text-center text-[9px] leading-tight text-neutral-500">
-            Show at food counter
+      <div className={cn("flex items-center justify-between gap-3 px-3", tiny ? "py-1" : "py-2")}>
+        <div className="min-w-0">
+          <p className={cn("font-mono font-black leading-none tracking-tight text-black", tiny ? "text-[22px]" : compact ? "text-[30px]" : "text-[36px]")}>
+            {row.serial}
           </p>
-        ) : null}
+          {row.extra ? (
+            <span className="mt-1 inline-block rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black tracking-wider text-black">
+              EXTRA
+            </span>
+          ) : !tiny ? (
+            <p className="mt-1 text-[9px] leading-tight whitespace-nowrap text-neutral-500">
+              Show at food counter
+            </p>
+          ) : null}
+        </div>
+        <div className="shrink-0 overflow-hidden rounded-sm bg-white">
+          <Barcode code={row.serial} height={tiny ? 36 : compact ? 56 : 68} />
+        </div>
       </div>
     </div>
   );
