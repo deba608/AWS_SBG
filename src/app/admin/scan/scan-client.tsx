@@ -135,7 +135,7 @@ export default function ScanClient() {
       const BD = (window as unknown as { BarcodeDetector?: unknown }).BarcodeDetector;
       if (BD) {
         const Ctor = BD as new (opts: { formats: string[] }) => { detect: (v: HTMLVideoElement) => Promise<Array<{ rawValue: string }>> };
-        detectorRef.current = new Ctor({ formats: ["qr_code"] });
+        detectorRef.current = new Ctor({ formats: ["qr_code", "code_128"] });
       }
     } catch {
       // native unavailable — zxing fallback below
@@ -462,21 +462,38 @@ export default function ScanClient() {
 
   async function startZxingFallback(video: HTMLVideoElement, stream: MediaStream) {
     if (!zxingPromiseRef.current) {
-      zxingPromiseRef.current = import("@zxing/browser").catch(() => null);
+      zxingPromiseRef.current = Promise.all([import("@zxing/browser"), import("@zxing/library")]).catch(() => null);
     }
-    const mod = (await zxingPromiseRef.current) as unknown as {
-      BrowserQRCodeReader?: new () => {
-        decodeFromStream: (
-          s: MediaStream,
-          v: HTMLVideoElement,
-          cb: (result: { getText: () => string } | null, err: unknown) => void,
-        ) => Promise<{ stop: () => void }>;
-      };
-    } | null;
-    const Ctor = mod?.BrowserQRCodeReader;
+    const [browserMod, libMod] = ((await zxingPromiseRef.current) ?? []) as unknown as [
+      {
+        BrowserMultiFormatReader?: new (
+          hints?: Map<unknown, unknown>,
+        ) => {
+          decodeFromStream: (
+            s: MediaStream,
+            v: HTMLVideoElement,
+            cb: (result: { getText: () => string } | null, err: unknown) => void,
+          ) => Promise<{ stop: () => void }>;
+        };
+      } | undefined,
+      {
+        DecodeHintType?: { POSSIBLE_FORMATS?: unknown };
+        BarcodeFormat?: { QR_CODE?: unknown; CODE_128?: unknown };
+      } | undefined,
+    ];
+    const Ctor = browserMod?.BrowserMultiFormatReader;
     if (!Ctor) throw new Error("Scanner unavailable. Use manual entry.");
     stopLoop();
-    const reader = new Ctor();
+    // QR (entry passes) + Code128 (food tokens). Nothing changes for gate entry.
+    let hints: Map<unknown, unknown> | undefined;
+    try {
+      const key = libMod?.DecodeHintType?.POSSIBLE_FORMATS;
+      const formats = [libMod?.BarcodeFormat?.QR_CODE, libMod?.BarcodeFormat?.CODE_128].filter((f) => f !== undefined);
+      if (key !== undefined && formats.length === 2) hints = new Map([[key, formats]]);
+    } catch {
+      hints = undefined;
+    }
+    const reader = new Ctor(hints);
     const controls = await reader.decodeFromStream(stream, video, (result) => {
       if (result) handleDecodedText(result.getText());
     });
@@ -528,7 +545,7 @@ export default function ScanClient() {
       if (!detectorRef.current) {
         try {
           const BD = (window as unknown as { BarcodeDetector?: new (opts: { formats: string[] }) => { detect: (v: HTMLVideoElement) => Promise<Array<{ rawValue: string }>> } }).BarcodeDetector;
-          if (BD) detectorRef.current = new BD({ formats: ["qr_code"] });
+          if (BD) detectorRef.current = new BD({ formats: ["qr_code", "code_128"] });
         } catch {
           detectorRef.current = null;
         }

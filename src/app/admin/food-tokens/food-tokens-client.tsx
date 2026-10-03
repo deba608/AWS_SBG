@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import QRCode from "qrcode";
+import JsBarcode from "jsbarcode";
 import { Download, Loader2, Printer, RefreshCw, Search, Trash2, Upload } from "lucide-react";
 import AdminLogin from "@/components/AdminLogin";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,28 @@ function normFood(v: string): "Veg" | "Non-veg" {
   return /non/i.test(v) ? "Non-veg" : "Veg";
 }
 
+/** Real scannable Code128 barcode of the serial — gate scanner reads it. */
+function Barcode({ code, height }: { code: string; height: number }) {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    try {
+      JsBarcode(ref.current, code, {
+        format: "CODE128",
+        width: 2,
+        height,
+        displayValue: false,
+        margin: 0,
+        background: "#ffffff",
+        lineColor: "#000000",
+      });
+    } catch {
+      // leave blank; big serial text still printed below
+    }
+  }, [code, height]);
+  return <svg ref={ref} role="img" aria-label={`Barcode for ${code}`} className="h-auto max-w-full" />;
+}
+
 /** Serial order that survives A100+: compare the numeric tail, not the string. */
 function serialCmp(a: string, b: string): number {
   const na = Number(/^A(\d+)$/i.exec(a.trim())?.[1]);
@@ -48,9 +70,8 @@ function serialCmp(a: string, b: string): number {
   return a.localeCompare(b);
 }
 
-function Token({ row, compact, tiny, qr }: { row: TokenRow; compact: boolean; tiny?: boolean; qr?: string }) {
+function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?: boolean }) {
   const veg = row.food === "Veg";
-  const qrSize = tiny ? 44 : compact ? 64 : 76;
   return (
     <div
       className="relative flex h-full flex-col justify-between overflow-hidden rounded-md bg-white text-black"
@@ -95,24 +116,8 @@ function Token({ row, compact, tiny, qr }: { row: TokenRow; compact: boolean; ti
             </p>
           ) : null}
         </div>
-        <div className="shrink-0 pb-0.5 text-center">
-          {qr ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={qr}
-              alt={`QR for ${row.serial}`}
-              width={qrSize}
-              height={qrSize}
-              className="h-auto"
-              style={{ width: qrSize }}
-            />
-          ) : (
-            <div
-              aria-hidden
-              className="animate-pulse bg-neutral-200"
-              style={{ width: qrSize, height: qrSize }}
-            />
-          )}
+        <div className="shrink-0 pb-0.5">
+          <Barcode code={row.serial} height={tiny ? 34 : compact ? 50 : 60} />
         </div>
       </div>
     </div>
@@ -129,7 +134,6 @@ export default function FoodTokensClient() {
   const [density, setDensity] = useState(DENSITY[1]); // 12 / page default
   const [scope, setScope] = useState<"together" | "veg" | "nonveg" | "split" | "extras">("together");
   const [sortMode, setSortMode] = useState<"serial" | "name">("serial");
-  const [qrMap, setQrMap] = useState<Record<string, string>>({});
   const [extraName, setExtraName] = useState("");
   const [extraFood, setExtraFood] = useState<"Veg" | "Non-veg">("Veg");
   const [extraQty, setExtraQty] = useState(1);
@@ -161,35 +165,6 @@ export default function FoodTokensClient() {
     );
     return list;
   }, [filtered, sortMode]);
-
-  // Hooks must run on every render, before any early return (Rules of Hooks).
-  // Real QR per serial, generated in-browser (offline OK once page loaded).
-  // Any phone camera scans it → shows the serial, e.g. "A07".
-  useEffect(() => {
-    let cancelled = false;
-    const missing = sorted.filter((r) => !qrMap[r.serial]).map((r) => r.serial);
-    if (missing.length === 0) return;
-    void (async () => {
-      const batch: Record<string, string> = {};
-      for (const serial of [...new Set(missing)]) {
-        try {
-          batch[serial] = await QRCode.toDataURL(serial, {
-            width: 220,
-            margin: 1,
-            errorCorrectionLevel: "M",
-          });
-        } catch {
-          // leave placeholder; serial text still printed
-        }
-        if (cancelled) return;
-      }
-      if (!cancelled) setQrMap((prev) => ({ ...prev, ...batch }));
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sorted]);
 
   if (authed === null) {
     return (
@@ -703,7 +678,7 @@ export default function FoodTokensClient() {
                       className="border border-dashed border-neutral-400 p-1.5"
                       style={{ height: `${cellMm}mm` }}
                     >
-                      <Token row={r} compact={compact} tiny={tiny} qr={qrMap[r.serial]} />
+                      <Token row={r} compact={compact} tiny={tiny} />
                     </div>
                   ))}
                 </div>
