@@ -42,14 +42,14 @@ function normFood(v: string): "Veg" | "Non-veg" {
 }
 
 /** Real scannable Code128 barcode of the serial — gate scanner reads it. */
-function Barcode({ code, height }: { code: string; height: number }) {
+function Barcode({ code, height, moduleWidth = 2 }: { code: string; height: number; moduleWidth?: number }) {
   const ref = useRef<SVGSVGElement>(null);
   useEffect(() => {
     if (!ref.current) return;
     try {
       JsBarcode(ref.current, code, {
         format: "CODE128",
-        width: 2,
+        width: moduleWidth,
         height,
         displayValue: false,
         margin: 0,
@@ -59,14 +59,15 @@ function Barcode({ code, height }: { code: string; height: number }) {
     } catch {
       // leave blank; big serial text still printed below
     }
-  }, [code, height]);
+  }, [code, height, moduleWidth]);
   return (
     <svg
       ref={ref}
       role="img"
       aria-label={`Barcode for ${code}`}
-      className="block h-auto w-auto max-w-full"
-      style={{ height }}
+      className="block max-h-full w-full"
+      style={{ shapeRendering: "crispEdges" }}
+      preserveAspectRatio="xMidYMid meet"
     />
   );
 }
@@ -87,15 +88,15 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
       style={{ border: "1.5px solid #111" }}
     >
       <div className={cn("w-full shrink-0", veg ? "bg-green-600" : "bg-red-600", tiny ? "h-1" : "h-1.5")} />
-      <div className={cn("flex items-start justify-between gap-2 px-2.5", tiny ? "pt-1" : "pt-1.5")}>
-        <div className="min-w-0 flex-1">
+      <div className={cn("flex min-h-0 items-start justify-between gap-2 px-2.5", tiny ? "pt-1" : "pt-1.5")}>
+        <div className="min-w-0 flex-1 overflow-hidden">
           {!tiny ? (
             <p className="text-[9px] font-bold tracking-[0.18em] text-neutral-500 uppercase">
               AWS Community Day · Food token
             </p>
           ) : null}
-          <p className={cn("font-bold leading-tight break-words text-black", tiny ? "truncate text-[12px]" : compact ? "text-[13px] line-clamp-2" : "text-[15px] line-clamp-2")}>{row.name}</p>
-          {!tiny && row.rollNo ? <p className="mt-0.5 text-[10px] text-neutral-600">{row.rollNo}</p> : null}
+          <p className={cn("font-bold leading-tight text-black", tiny ? "truncate text-[11px] whitespace-nowrap" : compact ? "text-[13px] break-words line-clamp-2" : "text-[15px] break-words line-clamp-2")}>{row.name}</p>
+          {!tiny && row.rollNo ? <p className="mt-0.5 truncate text-[10px] text-neutral-600">{row.rollNo}</p> : null}
         </div>
         <span className="flex shrink-0 flex-col items-end gap-1">
           <span
@@ -113,9 +114,9 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
           ) : null}
         </span>
       </div>
-      <div className={cn("flex items-center justify-between gap-3 px-3", tiny ? "py-1" : "py-2")}>
-        <div className="min-w-0">
-          <p className={cn("font-mono font-black leading-none tracking-tight text-black", tiny ? "text-[22px]" : compact ? "text-[30px]" : "text-[36px]")}>
+      <div className={cn("flex items-center justify-between px-3", tiny ? "gap-2 py-1" : "gap-3 py-2")}>
+        <div className="min-w-0 shrink-0">
+          <p className={cn("font-mono font-black leading-none tracking-tight whitespace-nowrap text-black", tiny ? "text-[20px]" : compact ? "text-[28px]" : "text-[32px]")}>
             {row.serial}
           </p>
           {row.extra ? (
@@ -128,8 +129,11 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
             </p>
           ) : null}
         </div>
-        <div className="shrink-0 overflow-hidden rounded-sm bg-white">
-          <Barcode code={row.serial} height={tiny ? 36 : compact ? 56 : 68} />
+        <div
+          className="flex min-w-0 flex-1 items-center justify-end overflow-hidden rounded-sm bg-white"
+          style={{ height: tiny ? 36 : compact ? 56 : 68 }}
+        >
+          <Barcode code={row.serial} height={tiny ? 36 : compact ? 56 : 68} moduleWidth={tiny ? 1.4 : 1.8} />
         </div>
       </div>
     </div>
