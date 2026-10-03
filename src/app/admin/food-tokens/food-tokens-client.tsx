@@ -96,9 +96,8 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
           </p>
           <p className={cn("font-bold leading-tight text-black", tiny ? "truncate text-[11px] whitespace-nowrap" : compact ? "text-[13px] break-words line-clamp-2" : "text-[15px] break-words line-clamp-2")}>
             {row.name}
-            {tiny && row.rollNo ? <span className="font-mono font-medium text-neutral-600"> · {row.rollNo}</span> : null}
+            {!tiny && row.rollNo ? <span className="mt-0.5 block truncate font-mono text-[10px] font-medium text-neutral-600">{row.rollNo}</span> : null}
           </p>
-          {!tiny && row.rollNo ? <p className="mt-0.5 truncate font-mono text-[10px] leading-none text-neutral-600">{row.rollNo}</p> : null}
         </div>
         <span className="flex shrink-0 flex-col items-end gap-1">
           <span
