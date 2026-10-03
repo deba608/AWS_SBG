@@ -117,14 +117,15 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
       </div>
       <div className={cn("mt-auto flex shrink-0 items-center justify-between px-3", tiny ? "gap-2 py-1" : "gap-3 py-2")}>
         <div className="shrink-0">
-          <p className={cn("font-mono font-black leading-none tracking-tight whitespace-nowrap text-black", tiny ? "text-[18px]" : compact ? "text-[28px]" : "text-[32px]")}>
+          <p className={cn("flex items-center gap-1.5 font-mono font-black leading-none tracking-tight whitespace-nowrap text-black", tiny ? "text-[18px]" : compact ? "text-[28px]" : "text-[32px]")}>
             {row.serial}
+            {row.extra ? (
+              <span className="rounded bg-amber-400 px-1.5 py-0.5 font-sans text-[9px] font-black tracking-wider text-black">
+                EXTRA
+              </span>
+            ) : null}
           </p>
-          {row.extra ? (
-            <span className="mt-1 inline-block rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black tracking-wider text-black">
-              EXTRA
-            </span>
-          ) : !tiny ? (
+          {!row.extra && !tiny ? (
             <p className="mt-1 text-[9px] leading-tight whitespace-nowrap text-neutral-500">
               Show at food counter
             </p>
