@@ -90,13 +90,11 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
       <div className={cn("w-full shrink-0", veg ? "bg-green-600" : "bg-red-600", tiny ? "h-1" : "h-1.5")} />
       <div className={cn("flex min-h-0 items-start justify-between gap-2 px-2.5", tiny ? "pt-1" : "pt-1.5")}>
         <div className="min-w-0 flex-1 overflow-hidden">
-          {!tiny ? (
-            <p className="text-[9px] font-bold tracking-[0.18em] text-neutral-500 uppercase">
-              AWS Community Day · Food token
-            </p>
-          ) : null}
+          <p className="truncate text-[9px] font-bold tracking-[0.18em] whitespace-nowrap text-neutral-500 uppercase">
+            {tiny ? "AWS SCD 26 · Food" : "AWS Community Day · Food token"}
+          </p>
           <p className={cn("font-bold leading-tight text-black", tiny ? "truncate text-[11px] whitespace-nowrap" : compact ? "text-[13px] break-words line-clamp-2" : "text-[15px] break-words line-clamp-2")}>{row.name}</p>
-          {!tiny && row.rollNo ? <p className="mt-0.5 truncate text-[10px] text-neutral-600">{row.rollNo}</p> : null}
+          {row.rollNo ? <p className={cn("truncate font-mono text-neutral-600", tiny ? "text-[8px]" : "mt-0.5 text-[10px]")}>{row.rollNo}</p> : null}
         </div>
         <span className="flex shrink-0 flex-col items-end gap-1">
           <span
@@ -131,9 +129,9 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
         </div>
         <div
           className="flex min-w-0 flex-1 items-center justify-end overflow-hidden rounded-sm bg-white"
-          style={{ height: tiny ? 36 : compact ? 56 : 68 }}
+          style={{ height: tiny ? 30 : compact ? 48 : 60 }}
         >
-          <Barcode code={row.serial} height={tiny ? 36 : compact ? 56 : 68} moduleWidth={tiny ? 1.4 : 1.8} />
+          <Barcode code={row.serial} height={tiny ? 30 : compact ? 48 : 60} moduleWidth={tiny ? 1.4 : 1.8} />
         </div>
       </div>
     </div>
