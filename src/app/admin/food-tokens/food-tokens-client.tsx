@@ -83,35 +83,26 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
   const veg = row.food === "Veg";
   return (
     <div
-      className={cn(
-        "relative flex h-full flex-col justify-between overflow-hidden rounded-md text-black",
-        veg ? "bg-green-50" : "bg-red-50",
-      )}
-      style={{
-        border: "1.5px solid #111",
-        borderLeft: `6px solid ${veg ? "#16a34a" : "#dc2626"}`,
-        WebkitPrintColorAdjust: "exact",
-        printColorAdjust: "exact",
-      }}
+      className="relative flex h-full flex-col justify-between overflow-hidden rounded-md bg-white text-black"
+      style={{ border: "1.5px solid #111" }}
     >
       <div className={cn("w-full shrink-0", veg ? "bg-green-600" : "bg-red-600", tiny ? "h-1" : "h-1.5")} />
       <div className={cn("flex items-start justify-between gap-2 px-2.5", tiny ? "pt-1" : "pt-1.5")}>
         <div className="min-w-0 flex-1">
           {!tiny ? (
-            <p className={cn("text-[9px] font-bold tracking-[0.18em] uppercase", veg ? "text-green-700" : "text-red-700")}>
+            <p className="text-[9px] font-bold tracking-[0.18em] text-neutral-500 uppercase">
               AWS Community Day · Food token
             </p>
           ) : null}
           <p className={cn("font-bold leading-tight break-words text-black", tiny ? "truncate text-[12px]" : compact ? "text-[13px] line-clamp-2" : "text-[15px] line-clamp-2")}>{row.name}</p>
-          {row.rollNo ? <p className={cn("mt-0.5 font-mono", tiny ? "text-[9px] text-neutral-700" : "text-[10px] text-neutral-600")}>{row.rollNo}</p> : null}
+          {!tiny && row.rollNo ? <p className="mt-0.5 text-[10px] text-neutral-600">{row.rollNo}</p> : null}
         </div>
         <span className="flex shrink-0 flex-col items-end gap-1">
           <span
             className={cn(
-              "rounded px-2 py-1 text-[11px] font-black tracking-wider whitespace-nowrap text-white",
-              veg ? "bg-green-600" : "bg-red-600",
+              "rounded border px-1.5 py-0.5 text-[10px] font-black tracking-wider whitespace-nowrap",
+              veg ? "border-green-700 text-green-700" : "border-red-700 text-red-700",
             )}
-            style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
           >
             {veg ? "VEG" : "NON-VEG"}
           </span>
