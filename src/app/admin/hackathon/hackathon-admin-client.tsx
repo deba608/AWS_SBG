@@ -506,13 +506,13 @@ export default function HackathonAdminClient() {
           {filtered.length} team{filtered.length === 1 ? "" : "s"} · newest first
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-[760px] text-left text-sm">
             <thead>
-              <tr className="text-xs text-faint uppercase">
-                <th className="px-4 py-2">Team</th>
-                <th className="px-4 py-2">Leader</th>
-                <th className="px-4 py-2">Members</th>
-                <th className="px-4 py-2">Registered</th>
+              <tr className="text-[11px] tracking-wider text-faint uppercase">
+                <th className="px-4 py-2.5">Team</th>
+                <th className="px-4 py-2.5">Leader</th>
+                <th className="px-4 py-2.5">Members</th>
+                <th className="px-4 py-2.5 text-right whitespace-nowrap">Registered</th>
               </tr>
             </thead>
             <tbody>
@@ -521,48 +521,68 @@ export default function HackathonAdminClient() {
                 const editing = editingId === t.id;
                 return (
                 <Fragment key={t.id}>
-                <tr className="border-t border-line align-top">
-                  <td className="px-4 py-2">
+                <tr key={t.id} className="border-t border-line align-top transition-colors hover:bg-white/[0.02]">
+                  <td className="px-4 py-3">
                     <button
                       type="button"
                       onClick={() => setOpenId(open ? null : t.id)}
                       aria-expanded={open}
-                      className="inline-flex min-h-[44px] items-center gap-1.5 text-left hover:text-brand"
+                      className="group inline-flex min-h-[44px] items-center gap-1.5 text-left hover:text-brand"
                     >
-                      <span className="font-semibold text-cream">{t.teamName}</span>
-                      <ChevronDown className={cn("h-4 w-4 text-faint transition-transform", open && "rotate-180")} aria-hidden />
+                      <span className="font-semibold text-cream group-hover:text-brand">{t.teamName}</span>
+                      <ChevronDown className={cn("h-4 w-4 shrink-0 text-faint transition-transform", open && "rotate-180")} aria-hidden />
                     </button>
-                    {t.preference ? (
-                      <span className="ml-2 inline-block rounded-full border border-brand/40 bg-brand/10 px-2 py-0.5 align-middle text-[11px] font-bold text-brand">{t.preference}</span>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-2 text-xs text-fog">
-                    <span className="font-medium text-cream">{t.leader.name}</span>
-                    <br />{t.leader.email}<br />{t.leader.mobile} · {t.leader.rollNo} · {t.leader.year} yr
-                    {t.leader.lunch ? (
-                      <span className={cn(
-                        "ml-1.5 inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold",
-                        t.leader.lunch === "Veg" ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300" : "border-red-400/40 bg-red-400/10 text-red-300",
-                      )}>
-                        {t.leader.lunch === "Veg" ? "VEG" : "NON-VEG"}
+                    <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      {t.preference ? (
+                        <span className={cn(
+                          "inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold whitespace-nowrap",
+                          t.preference === "Hardware"
+                            ? "border-amber-400/40 bg-amber-400/10 text-amber-300"
+                            : t.preference === "Both"
+                              ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-300"
+                              : "border-brand/40 bg-brand/10 text-brand",
+                        )}>{t.preference}</span>
+                      ) : null}
+                      <span className="inline-block rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium whitespace-nowrap text-fog">
+                        {1 + t.members.length} members
                       </span>
-                    ) : null}
-                    {t.leader.githubUrl ? (
-                      <><br /><a href={t.leader.githubUrl} target="_blank" rel="noopener noreferrer" className="break-all text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">GitHub</a></>
-                    ) : null}
+                    </span>
                   </td>
-                  <td className="px-4 py-2 text-xs text-fog">
-                    {t.members.length === 0 ? "—" : (
-                      <ul className="space-y-1">
+                  <td className="px-4 py-3 text-xs">
+                    <p className="font-medium text-cream">{t.leader.name}</p>
+                    <p className="mt-0.5 break-all text-fog">{t.leader.email}</p>
+                    <p className="mt-0.5 font-mono text-fog">{t.leader.mobile} · {t.leader.rollNo}</p>
+                    <p className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <span className="whitespace-nowrap text-fog">{t.leader.year} yr</span>
+                      {t.leader.lunch ? (
+                        <span className={cn(
+                          "inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold whitespace-nowrap",
+                          t.leader.lunch === "Veg" ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300" : "border-red-400/40 bg-red-400/10 text-red-300",
+                        )}>
+                          {t.leader.lunch === "Veg" ? "VEG" : "NON-VEG"}
+                        </span>
+                      ) : null}
+                      {t.leader.githubUrl ? (
+                        <a href={t.leader.githubUrl} target="_blank" rel="noopener noreferrer" className="whitespace-nowrap text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">GitHub ↗</a>
+                      ) : null}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3 text-xs">
+                    {t.members.length === 0 ? <span className="text-faint">—</span> : (
+                      <ul className="space-y-2">
                         {t.members.map((m) => (
-                          <li key={m.rollNo}>
-                            <span className="font-medium text-cream">{m.name}</span> · {m.rollNo} · {m.year} yr{m.lunch ? ` · ${m.lunch}` : ""}
+                          <li key={m.rollNo} className="leading-snug">
+                            <span className="font-medium text-cream">{m.name}</span>
+                            <span className="mt-0.5 block text-fog">
+                              <span className="font-mono">{m.rollNo}</span> · {m.year} yr ·{" "}
+                              <span className="whitespace-nowrap">{m.lunch ?? "—"}</span>
+                            </span>
                           </li>
                         ))}
                       </ul>
                     )}
                   </td>
-                  <td className="px-4 py-2 text-xs text-fog">
+                  <td className="px-4 py-3 text-right text-xs whitespace-nowrap text-fog">
                     {new Date(t.createdAt).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: true })}
                   </td>
                 </tr>
