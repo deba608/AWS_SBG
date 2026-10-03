@@ -55,11 +55,21 @@ function Barcode({ code, height }: { code: string; height: number }) {
         background: "#ffffff",
         lineColor: "#000000",
       });
+      ref.current.setAttribute("width", "100%");
+      ref.current.setAttribute("preserveAspectRatio", "xMidYMid meet");
     } catch {
       // leave blank; big serial text still printed below
     }
   }, [code, height]);
-  return <svg ref={ref} role="img" aria-label={`Barcode for ${code}`} className="h-auto max-w-full" />;
+  return (
+    <svg
+      ref={ref}
+      role="img"
+      aria-label={`Barcode for ${code}`}
+      className="block h-auto w-full"
+      style={{ height }}
+    />
+  );
 }
 
 /** Serial order that survives A100+: compare the numeric tail, not the string. */
@@ -77,48 +87,48 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
       className="relative flex h-full flex-col justify-between overflow-hidden rounded-md bg-white text-black"
       style={{ border: "1.5px solid #111" }}
     >
-      <div className={cn("w-full", veg ? "bg-green-600" : "bg-red-600", tiny ? "h-0.5" : compact ? "h-1" : "h-1.5")} />
+      <div className={cn("w-full shrink-0", veg ? "bg-green-600" : "bg-red-600", tiny ? "h-1" : "h-1.5")} />
       <div className={cn("flex items-start justify-between gap-2 px-2.5", tiny ? "pt-1" : "pt-1.5")}>
-        <div className="min-w-0">
-          <p className="text-[9px] font-bold tracking-[0.18em] text-neutral-500 uppercase">
-            AWS Community Day · Food token
-          </p>
-          <p className={cn("truncate font-bold leading-tight", tiny ? "text-[10px]" : compact ? "text-[11px]" : "text-[13px]")}>{row.name}</p>
-          {!tiny && row.rollNo ? <p className="text-[10px] text-neutral-600">{row.rollNo}</p> : null}
+        <div className="min-w-0 flex-1">
+          {!tiny ? (
+            <p className="text-[9px] font-bold tracking-[0.18em] text-neutral-500 uppercase">
+              AWS Community Day · Food token
+            </p>
+          ) : null}
+          <p className={cn("font-bold leading-tight break-words text-black", tiny ? "truncate text-[12px]" : compact ? "text-[13px] line-clamp-2" : "text-[15px] line-clamp-2")}>{row.name}</p>
+          {!tiny && row.rollNo ? <p className="mt-0.5 text-[10px] text-neutral-600">{row.rollNo}</p> : null}
         </div>
         <span className="flex shrink-0 flex-col items-end gap-1">
           <span
             className={cn(
-              "rounded border px-1.5 py-0.5 text-[10px] font-black tracking-wider",
+              "rounded border px-1.5 py-0.5 text-[10px] font-black tracking-wider whitespace-nowrap",
               veg ? "border-green-700 text-green-700" : "border-red-700 text-red-700",
             )}
           >
             {veg ? "VEG" : "NON-VEG"}
           </span>
           {row.extra && !tiny ? (
-            <span className="rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black tracking-wider text-black">
+            <span className="rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black tracking-wider whitespace-nowrap text-black">
               EXTRA
             </span>
           ) : null}
         </span>
       </div>
-      <div className={cn("flex items-end justify-between gap-2 px-2.5", tiny ? "pb-1" : "pb-2")}>
-        <div>
-          <p className={cn("font-mono font-black leading-none tracking-tight", tiny ? "text-[15px]" : compact ? "text-[20px]" : "text-[26px]")}>
-            {row.serial}
-            {row.extra && tiny ? <span className="ml-1 rounded bg-amber-400 px-1 align-middle font-sans text-[8px] text-black">X</span> : null}
+      <div className={cn("px-2.5", tiny ? "pt-0.5" : "pt-1")}>
+        <p className={cn("font-mono font-black leading-none tracking-tight text-black", tiny ? "text-[20px]" : compact ? "text-[24px]" : "text-[30px]")}>
+          {row.serial}
+          {row.extra && tiny ? <span className="ml-1 rounded bg-amber-400 px-1 align-middle font-sans text-[8px] text-black">X</span> : null}
+        </p>
+      </div>
+      <div className={cn("px-2.5", tiny ? "pt-0.5 pb-1" : "pt-1 pb-2")}>
+        <div className="w-full overflow-hidden rounded-sm bg-white">
+          <Barcode code={row.serial} height={tiny ? 30 : compact ? 52 : 64} />
+        </div>
+        {!tiny ? (
+          <p className="mt-1 text-center text-[9px] leading-tight text-neutral-500">
+            Show at food counter
           </p>
-          {!tiny ? (
-            <p className="mt-1 text-[9px] leading-tight text-neutral-500">
-              Show at
-              <br />
-              food counter
-            </p>
-          ) : null}
-        </div>
-        <div className="shrink-0 pb-0.5">
-          <Barcode code={row.serial} height={tiny ? 34 : compact ? 50 : 60} />
-        </div>
+        ) : null}
       </div>
     </div>
   );
