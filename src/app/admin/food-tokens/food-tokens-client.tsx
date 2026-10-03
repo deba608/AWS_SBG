@@ -11,6 +11,18 @@ interface TokenRow {
   serial: string;
   food: "Veg" | "Non-veg";
   rollNo: string;
+  /** Late-addition / buffer token printed after the main sheets. */
+  extra?: boolean;
+}
+
+/** Next free X-series serial (X01, X02…) — never collides with A-series passes. */
+function nextExtraSerial(rows: TokenRow[]): string {
+  let n = 0;
+  for (const r of rows) {
+    const m = /^X(\d+)$/i.exec(r.serial.trim());
+    if (m) n = Math.max(n, Number(m[1]));
+  }
+  return `X${String(n + 1).padStart(2, "0")}`;
 }
 
 const DENSITY: { label: string; perPage: number; cols: number }[] = [
@@ -47,13 +59,20 @@ function Token({ row, compact, qr }: { row: TokenRow; compact: boolean; qr?: str
           <p className={cn("truncate font-bold leading-tight", compact ? "text-[11px]" : "text-[13px]")}>{row.name}</p>
           {row.rollNo ? <p className="text-[10px] text-neutral-600">{row.rollNo}</p> : null}
         </div>
-        <span
-          className={cn(
-            "shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-black tracking-wider",
-            veg ? "border-green-700 text-green-700" : "border-red-700 text-red-700",
-          )}
-        >
-          {veg ? "VEG" : "NON-VEG"}
+        <span className="flex shrink-0 flex-col items-end gap-1">
+          <span
+            className={cn(
+              "rounded border px-1.5 py-0.5 text-[10px] font-black tracking-wider",
+              veg ? "border-green-700 text-green-700" : "border-red-700 text-red-700",
+            )}
+          >
+            {veg ? "VEG" : "NON-VEG"}
+          </span>
+          {row.extra ? (
+            <span className="rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black tracking-wider text-black">
+              EXTRA
+            </span>
+          ) : null}
         </span>
       </div>
       <div className="flex items-end justify-between gap-2 px-2.5 pb-2">
@@ -100,6 +119,9 @@ export default function FoodTokensClient() {
   const [scope, setScope] = useState<"together" | "veg" | "nonveg" | "split">("together");
   const [sortMode, setSortMode] = useState<"serial" | "name">("serial");
   const [qrMap, setQrMap] = useState<Record<string, string>>({});
+  const [extraName, setExtraName] = useState("");
+  const [extraFood, setExtraFood] = useState<"Veg" | "Non-veg">("Veg");
+  const [extraQty, setExtraQty] = useState(1);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -191,6 +213,46 @@ export default function FoodTokensClient() {
   const cellMm = Math.floor((281 - (rowsPerSheet - 1) * 2 - 10) / rowsPerSheet);
   const vegCount = filtered.filter((r) => r.food === "Veg").length;
 
+  /** Fresh roster from upload/live pull must not wipe hand-added extras. */
+  function mergeKeepExtras(fresh: TokenRow[], prev: TokenRow[]): TokenRow[] {
+    const extras = prev.filter((r) => r.extra);
+    if (extras.length === 0) return fresh;
+    const taken = new Set(fresh.map((r) => r.serial.toUpperCase()));
+    const kept: TokenRow[] = [];
+    for (const e of extras) {
+      if (!taken.has(e.serial.toUpperCase())) {
+        kept.push(e);
+        taken.add(e.serial.toUpperCase());
+      } else {
+        // serial clash with roster (e.g. re-upload) → re-issue next X serial
+        const serial = nextExtraSerial([...fresh, ...kept]);
+        kept.push({ ...e, serial });
+        taken.add(serial.toUpperCase());
+      }
+    }
+    return [...fresh, ...kept];
+  }
+
+  function addExtras() {
+    const qty = Math.min(Math.max(Math.floor(extraQty) || 1, 1), 50);
+    const label = extraName.trim() || "EXTRA";
+    setRows((prev) => {
+      const out = [...prev];
+      for (let i = 0; i < qty; i++) {
+        out.push({
+          name: qty > 1 ? `${label} ${i + 1}` : label,
+          serial: nextExtraSerial(out),
+          food: extraFood,
+          rollNo: "",
+          extra: true,
+        });
+      }
+      return out;
+    });
+    setExtraName("");
+    setMsg(`Added ${qty} extra ${extraFood} token${qty > 1 ? "s" : ""} — prints with the sheets below.`);
+  }
+
   async function uploadFile(f: File) {
     setBusy(true);
     setMsg("");
@@ -200,8 +262,8 @@ export default function FoodTokensClient() {
       const res = await fetch("/api/admin/food-tokens/parse", { method: "POST", body: fd });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error ?? "Parse failed.");
-      setRows(d.rows as TokenRow[]);
-      setMsg(`Loaded ${d.rows.length} tokens from ${f.name}.`);
+      setRows((prev) => mergeKeepExtras(d.rows as TokenRow[], prev));
+      setMsg(`Loaded ${d.rows.length} tokens from ${f.name}. Extras kept.`);
     } catch (err) {
       setMsg(err instanceof Error ? err.message : "Upload failed.");
     } finally {
@@ -230,8 +292,8 @@ export default function FoodTokensClient() {
           rollNo: r.rollNo === "—" ? "" : r.rollNo,
         }))
         .sort((a, b) => serialCmp(a.serial, b.serial));
-      setRows(mapped);
-      setMsg(`Pulled ${mapped.length} live registrations.`);
+      setRows((prev) => mergeKeepExtras(mapped, prev));
+      setMsg(`Pulled ${mapped.length} live registrations. Extras kept.`);
     } catch {
       setMsg("Live pull failed — check network, or upload Excel instead.");
     } finally {
@@ -317,6 +379,60 @@ export default function FoodTokensClient() {
           {msg ? <p role="status" className="text-xs text-fog">{msg}</p> : null}
         </div>
 
+        <div className="rank-card space-y-3 p-4 sm:p-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-bold text-cream">Late additions / extras</p>
+            <span className="rounded bg-amber-400/15 px-2 py-0.5 text-[11px] font-bold text-amber-200">
+              X-series · never collides with A-serials
+            </span>
+          </div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              addExtras();
+            }}
+            className="flex flex-col gap-2 sm:flex-row"
+          >
+            <input
+              value={extraName}
+              onChange={(e) => setExtraName(e.target.value)}
+              placeholder="Name — e.g. Volunteer, Guest, Buffer (blank = EXTRA)"
+              autoComplete="off"
+              maxLength={40}
+              className="w-full min-h-[44px] flex-1 rounded-xl border border-line bg-surface px-3 py-2 text-sm text-cream placeholder:text-faint focus:ring-2 focus:ring-brand"
+            />
+            <select
+              value={extraFood}
+              onChange={(e) => setExtraFood(e.target.value as typeof extraFood)}
+              aria-label="Extra food preference"
+              className="min-h-[44px] rounded-xl border border-line bg-surface px-3 py-2 text-sm text-cream focus:ring-2 focus:ring-brand"
+            >
+              <option value="Veg">VEG</option>
+              <option value="Non-veg">NON-VEG</option>
+            </select>
+            <input
+              type="number"
+              min={1}
+              max={50}
+              value={extraQty}
+              onChange={(e) => setExtraQty(Number(e.target.value))}
+              aria-label="How many extra tokens"
+              title="How many"
+              className="min-h-[44px] w-24 rounded-xl border border-line bg-surface px-3 py-2 text-sm text-cream focus:ring-2 focus:ring-brand"
+            />
+            <button
+              type="submit"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-amber-400 px-5 py-2 text-sm font-bold text-black hover:bg-amber-300"
+            >
+              Add extra
+            </button>
+          </form>
+          <p className="text-xs text-faint">
+            For walk-ins, volunteers, recount buffers. Extras print with amber EXTRA tag and survive
+            Excel re-uploads + live pulls.
+          </p>
+        </div>
+
         {rows.length > 0 ? (
           <div className="rank-card flex flex-col gap-2 p-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
@@ -389,8 +505,11 @@ export default function FoodTokensClient() {
         {rows.length > 0 ? (
           <div className="rank-card overflow-hidden">
             <div className="border-b border-line px-4 py-3 text-sm text-fog">
-              {filtered.length} tokens · {vegCount} veg · {filtered.length - vegCount} non-veg ·{" "}
-              {totalSheets} A4 page{totalSheets === 1 ? "" : "s"}
+              {filtered.length} tokens · {vegCount} veg · {filtered.length - vegCount} non-veg
+              {filtered.some((r) => r.extra) ? (
+                <> · <span className="font-bold text-amber-200">{filtered.filter((r) => r.extra).length} extra</span></>
+              ) : null}{" "}
+              · {totalSheets} A4 page{totalSheets === 1 ? "" : "s"}
             </div>
             <div className="flex flex-wrap gap-2 border-b border-line px-4 py-3 print:hidden" role="group" aria-label="Print scope">
               {(
@@ -430,7 +549,14 @@ export default function FoodTokensClient() {
                 <tbody>
                   {sorted.map((r) => (
                     <tr key={r.serial} className="border-t border-line">
-                      <td className="px-4 py-2 font-mono text-xs font-bold text-brand">{r.serial}</td>
+                      <td className="px-4 py-2 font-mono text-xs font-bold text-brand">
+                        {r.serial}
+                        {r.extra ? (
+                          <span className="ml-1.5 rounded bg-amber-400 px-1.5 py-0.5 align-middle font-sans text-[10px] font-black text-black">
+                            EXTRA
+                          </span>
+                        ) : null}
+                      </td>
                       <td className="px-4 py-2 text-cream">{r.name}</td>
                       <td className="px-4 py-2">
                         <button
