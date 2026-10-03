@@ -383,7 +383,7 @@ export default function CommunityDayRegisterModal({
             </div>
             {year && slots?.perYear?.[year] && !slots.perYear[year].open ? (
               <p role="alert" className="rounded-xl border border-amber-400/40 bg-amber-500/10 p-3 text-sm text-amber-200">
-                {year} year is full — pick another year or retrieve your pass below if already registered.
+                {year} year is full — registration closed for this year. Retrieve your pass below if already registered.
               </p>
             ) : null}
             {apiError ? (

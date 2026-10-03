@@ -116,7 +116,7 @@ export default function FoodTokensClient() {
   const [q, setQ] = useState("");
   const [foodFilter, setFoodFilter] = useState<"ALL" | "Veg" | "Non-veg">("ALL");
   const [density, setDensity] = useState(DENSITY[1]); // 12 / page default
-  const [scope, setScope] = useState<"together" | "veg" | "nonveg" | "split">("together");
+  const [scope, setScope] = useState<"together" | "veg" | "nonveg" | "split" | "extras">("together");
   const [sortMode, setSortMode] = useState<"serial" | "name">("serial");
   const [qrMap, setQrMap] = useState<Record<string, string>>({});
   const [extraName, setExtraName] = useState("");
@@ -204,7 +204,9 @@ export default function FoodTokensClient() {
               { label: "VEG", pages: chunk(sorted.filter((r) => r.food === "Veg")) },
               { label: "NON-VEG", pages: chunk(sorted.filter((r) => r.food === "Non-veg")) },
             ]
-          : [{ label: "", pages: chunk(sorted) }];
+          : scope === "extras"
+            ? [{ label: "EXTRA", pages: chunk(sorted.filter((r) => r.extra)) }]
+            : [{ label: "", pages: chunk(sorted) }];
   const pages: TokenRow[][] = printGroups.flatMap((g) => g.pages);
   const totalSheets = pages.length;
   const rowsPerSheet = density.perPage / density.cols;
@@ -236,21 +238,32 @@ export default function FoodTokensClient() {
   function addExtras() {
     const qty = Math.min(Math.max(Math.floor(extraQty) || 1, 1), 50);
     const label = extraName.trim() || "EXTRA";
+    pushExtras(label, extraFood, qty);
+    setExtraName("");
+    setMsg(`Added ${qty} extra ${extraFood} token${qty > 1 ? "s" : ""} — prints with the sheets below.`);
+  }
+
+  /** One-tap walk-in buffer: 5 blank tokens, no typing. */
+  function addBuffer(food: "Veg" | "Non-veg") {
+    pushExtras("EXTRA", food, 5);
+    setScope("extras");
+    setMsg(`Added 5 extra ${food} buffer tokens — print scope switched to extras only.`);
+  }
+
+  function pushExtras(label: string, food: "Veg" | "Non-veg", qty: number) {
     setRows((prev) => {
       const out = [...prev];
       for (let i = 0; i < qty; i++) {
         out.push({
           name: qty > 1 ? `${label} ${i + 1}` : label,
           serial: nextExtraSerial(out),
-          food: extraFood,
+          food,
           rollNo: "",
           extra: true,
         });
       }
       return out;
     });
-    setExtraName("");
-    setMsg(`Added ${qty} extra ${extraFood} token${qty > 1 ? "s" : ""} — prints with the sheets below.`);
   }
 
   async function uploadFile(f: File) {
@@ -431,6 +444,22 @@ export default function FoodTokensClient() {
             For walk-ins, volunteers, recount buffers. Extras print with amber EXTRA tag and survive
             Excel re-uploads + live pulls.
           </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => addBuffer("Veg")}
+              className="inline-flex min-h-[44px] items-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-400/20"
+            >
+              +5 VEG buffer, no typing
+            </button>
+            <button
+              type="button"
+              onClick={() => addBuffer("Non-veg")}
+              className="inline-flex min-h-[44px] items-center rounded-full border border-red-400/40 bg-red-400/10 px-4 py-2 text-xs font-bold text-red-300 hover:bg-red-400/20"
+            >
+              +5 NON-VEG buffer, no typing
+            </button>
+          </div>
         </div>
 
         {rows.length > 0 ? (
@@ -518,6 +547,7 @@ export default function FoodTokensClient() {
                   ["veg", "VEG only"],
                   ["nonveg", "NON-VEG only"],
                   ["split", "Veg + Non-veg split"],
+                  ["extras", "Extras only — walk-ins"],
                 ] as const
               ).map(([v, label]) => (
                 <button
