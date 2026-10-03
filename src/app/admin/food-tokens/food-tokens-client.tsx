@@ -93,8 +93,11 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
           <p className={cn("truncate font-bold tracking-[0.18em] whitespace-nowrap text-neutral-500 uppercase", tiny ? "text-[8px]" : "text-[9px]")}>
             {tiny ? "AWS SCD 26 · Food" : "AWS Community Day · Food token"}
           </p>
-          <p className={cn("font-bold leading-tight text-black", tiny ? "truncate text-[11px] whitespace-nowrap" : compact ? "text-[13px] break-words line-clamp-2" : "text-[15px] break-words line-clamp-2")}>{row.name}</p>
-          {row.rollNo ? <p className={cn("truncate font-mono text-neutral-600", tiny ? "text-[8px]" : "mt-0.5 text-[10px]")}>{row.rollNo}</p> : null}
+          <p className={cn("font-bold leading-tight text-black", tiny ? "truncate text-[11px] whitespace-nowrap" : compact ? "text-[13px] break-words line-clamp-2" : "text-[15px] break-words line-clamp-2")}>
+            {row.name}
+            {tiny && row.rollNo ? <span className="font-mono font-medium text-neutral-600"> · {row.rollNo}</span> : null}
+          </p>
+          {!tiny && row.rollNo ? <p className="mt-0.5 truncate font-mono text-[10px] leading-none text-neutral-600">{row.rollNo}</p> : null}
         </div>
         <span className="flex shrink-0 flex-col items-end gap-1">
           <span
