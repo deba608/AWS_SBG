@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import JsBarcode from "jsbarcode";
+import type { PDFDocument, PDFImage, PDFPage } from "pdf-lib";
 import { Download, Loader2, Printer, RefreshCw, Search, Trash2, Upload } from "lucide-react";
 import AdminLogin from "@/components/AdminLogin";
 import { cn } from "@/lib/utils";
@@ -82,26 +83,35 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
   const veg = row.food === "Veg";
   return (
     <div
-      className="relative flex h-full flex-col justify-between overflow-hidden rounded-md bg-white text-black"
-      style={{ border: "1.5px solid #111" }}
+      className={cn(
+        "relative flex h-full flex-col justify-between overflow-hidden rounded-md text-black",
+        veg ? "bg-green-50" : "bg-red-50",
+      )}
+      style={{
+        border: "1.5px solid #111",
+        borderLeft: `6px solid ${veg ? "#16a34a" : "#dc2626"}`,
+        WebkitPrintColorAdjust: "exact",
+        printColorAdjust: "exact",
+      }}
     >
       <div className={cn("w-full shrink-0", veg ? "bg-green-600" : "bg-red-600", tiny ? "h-1" : "h-1.5")} />
       <div className={cn("flex items-start justify-between gap-2 px-2.5", tiny ? "pt-1" : "pt-1.5")}>
         <div className="min-w-0 flex-1">
           {!tiny ? (
-            <p className="text-[9px] font-bold tracking-[0.18em] text-neutral-500 uppercase">
+            <p className={cn("text-[9px] font-bold tracking-[0.18em] uppercase", veg ? "text-green-700" : "text-red-700")}>
               AWS Community Day · Food token
             </p>
           ) : null}
           <p className={cn("font-bold leading-tight break-words text-black", tiny ? "truncate text-[12px]" : compact ? "text-[13px] line-clamp-2" : "text-[15px] line-clamp-2")}>{row.name}</p>
-          {!tiny && row.rollNo ? <p className="mt-0.5 text-[10px] text-neutral-600">{row.rollNo}</p> : null}
+          {row.rollNo ? <p className={cn("mt-0.5 font-mono", tiny ? "text-[9px] text-neutral-700" : "text-[10px] text-neutral-600")}>{row.rollNo}</p> : null}
         </div>
         <span className="flex shrink-0 flex-col items-end gap-1">
           <span
             className={cn(
-              "rounded border px-1.5 py-0.5 text-[10px] font-black tracking-wider whitespace-nowrap",
-              veg ? "border-green-700 text-green-700" : "border-red-700 text-red-700",
+              "rounded px-2 py-1 text-[11px] font-black tracking-wider whitespace-nowrap text-white",
+              veg ? "bg-green-600" : "bg-red-600",
             )}
+            style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
           >
             {veg ? "VEG" : "NON-VEG"}
           </span>
@@ -330,8 +340,127 @@ export default function FoodTokensClient() {
     }
   }
 
-  function downloadCsv() {
-    const head = "serial,name,roll_no,food";
+  /** One-file A4 PDF of the current print scope — same sheets as Print, no dialog. */
+  async function downloadPdf() {
+    if (pages.length === 0 || busy) return;
+    setBusy(true);
+    setMsg("Building PDF…");
+    try {
+      const { PDFDocument: Doc, rgb: RGB, StandardFonts: SF } = await import("pdf-lib");
+      const doc: PDFDocument = await Doc.create();
+      const font = await doc.embedFont(SF.Helvetica);
+      const bold = await doc.embedFont(SF.HelveticaBold);
+      const mono = await doc.embedFont(SF.CourierBold);
+      const PT = 2.83465; // 1mm in pt
+      const M = 8 * PT;
+      const PW = 210 * PT;
+      const PH = 297 * PT;
+      const W = PW - 2 * M;
+      const H = PH - 2 * M;
+      const cols = density.cols;
+      const perRow = density.perPage / density.cols;
+      const gap = 2 * PT;
+      const footerH = 12 * PT;
+      const cellW = (W - (cols - 1) * gap) / cols;
+      const cellH = (H - (perRow - 1) * gap - footerH) / perRow;
+      const barcodeCache = new Map<string, PDFImage>();
+
+      const barcodePng = async (serial: string) => {
+        const hit = barcodeCache.get(serial);
+        if (hit) return hit;
+        const canvas = document.createElement("canvas");
+        JsBarcode(canvas, serial, { format: "CODE128", width: 3, height: 90, displayValue: false, margin: 0 });
+        const img = await doc.embedPng(canvas.toDataURL("image/png"));
+        barcodeCache.set(serial, img);
+        return img;
+      };
+
+      const fitName = (name: string, maxW: number, start: number): { text: string; size: number } => {
+        let size = start;
+        let text = name;
+        while (size > 7) {
+          const w = bold.widthOfTextAtSize(text, size);
+          if (w <= maxW) break;
+          if (text.length > 24 && size === start) text = `${text.slice(0, 23)}…`;
+          else size -= 0.5;
+        }
+        return { text, size };
+      };
+
+      const drawToken = async (page: PDFPage, r: TokenRow, x: number, y: number) => {
+        const veg = r.food === "Veg";
+        const dark = veg ? RGB(0.08, 0.55, 0.25) : RGB(0.8, 0.15, 0.15);
+        const tint = veg ? RGB(0.93, 0.98, 0.93) : RGB(0.99, 0.93, 0.93);
+        const black = RGB(0, 0, 0);
+        const gray = RGB(0.35, 0.35, 0.35);
+        page.drawRectangle({ x, y, width: cellW, height: cellH, color: tint, borderColor: black, borderWidth: 1 });
+        page.drawRectangle({ x, y, width: 5, height: cellH, color: dark });
+        const pad = 6;
+        const innerX = x + 5 + pad;
+        const innerW = cellW - 5 - pad * 2;
+        let cy = y + cellH - pad - 9;
+        // food label (right) + kicker share the top line
+        const label = veg ? "VEG" : "NON-VEG";
+        const labelW = bold.widthOfTextAtSize(label, 10) + 10;
+        page.drawRectangle({ x: x + cellW - pad - labelW, y: cy - 3, width: labelW, height: 15, color: dark });
+        page.drawText(label, { x: x + cellW - pad - labelW + 5, y: cy + 1.5, size: 10, font: bold, color: RGB(1, 1, 1) });
+        page.drawText("FOOD TOKEN", { x: innerX, y: cy, size: 8, font: bold, color: dark });
+        cy -= 13;
+        const { text: name, size: nameSize } = fitName(r.name.toUpperCase(), innerW, 12);
+        page.drawText(name, { x: innerX, y: cy, size: nameSize, font: bold, color: black });
+        cy -= nameSize + 3;
+        if (r.rollNo) {
+          page.drawText(r.rollNo.toUpperCase(), { x: innerX, y: cy, size: 8, font, color: gray });
+          cy -= 11;
+        }
+        const serialSize = Math.min(22, cellH * 0.16);
+        page.drawText(r.serial.toUpperCase(), { x: innerX, y: cy - serialSize, size: serialSize, font: mono, color: black });
+        if (r.extra) {
+          const ex = "EXTRA";
+          const exW = bold.widthOfTextAtSize(ex, 8) + 8;
+          page.drawRectangle({ x: innerX, y: cy - serialSize - 13, width: exW, height: 11, color: RGB(1, 0.75, 0.25) });
+          page.drawText(ex, { x: innerX + 4, y: cy - serialSize - 10.5, size: 8, font: bold, color: black });
+        }
+        // barcode bottom-right
+        const img = await barcodePng(r.serial);
+        const bh = Math.min(44, cellH * 0.32);
+        const bw = Math.min(innerW * 0.62, (bh / img.height) * img.width);
+        page.drawImage(img, { x: x + cellW - pad - bw, y: y + pad, width: bw, height: bh });
+      };
+
+      for (const group of printGroups) {
+        for (let pi = 0; pi < group.pages.length; pi++) {
+          const page = doc.addPage([PW, PH]);
+          const list = group.pages[pi];
+          for (let i = 0; i < list.length; i++) {
+            const col = i % cols;
+            const rowI = Math.floor(i / cols);
+            const cx = M + col * (cellW + gap);
+            const cyTop = PH - M - rowI * (cellH + gap);
+            await drawToken(page, list[i], cx, cyTop - cellH);
+          }
+          page.drawText(
+            `${group.label ? `${group.label} · ` : ""}${pi + 1} / ${group.pages.length} · ${filtered.length} tokens`,
+            { x: M, y: M - 14, size: 8, font, color: RGB(0.4, 0.4, 0.4) },
+          );
+        }
+      }
+      const bytes = await doc.save();
+      const blob = new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "food-tokens.pdf";
+      a.click();
+      URL.revokeObjectURL(a.href);
+      setMsg(`PDF ready — ${totalSheets} page${totalSheets === 1 ? "" : "s"}, ${filtered.length} tokens.`);
+    } catch {
+      setMsg("PDF failed — use Print → Save as PDF instead.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function downloadCsv() {    const head = "serial,name,roll_no,food";
     const body = filtered
       .map((r) => [r.serial, `"${r.name.replace(/"/g, '""')}"`, r.rollNo, r.food].join(","))
       .join("\n");
@@ -352,7 +481,7 @@ export default function FoodTokensClient() {
           body * { visibility: hidden; }
           #food-print-area, #food-print-area * { visibility: visible; }
           #food-print-area { position: absolute; left: 0; right: 0; top: 0; }
-          .food-page { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; page-break-after: always; }
+          .food-page { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; max-width: none !important; height: 281mm !important; overflow: hidden !important; page-break-after: always; page-break-inside: avoid; }
           .food-page:last-child { page-break-after: auto; }
         }
       `}</style>
@@ -415,6 +544,15 @@ export default function FoodTokensClient() {
               />
             </label>
             <span className="flex-1" aria-hidden />
+            <button
+              type="button"
+              onClick={() => void downloadPdf()}
+              disabled={busy || filtered.length === 0}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-brand px-5 py-2 text-sm font-semibold text-black hover:bg-brandhover disabled:opacity-60"
+            >
+              <Download className="h-4 w-4" aria-hidden />
+              PDF file
+            </button>
             <button
               type="button"
               onClick={() => window.print()}
@@ -676,12 +814,13 @@ export default function FoodTokensClient() {
             group.pages.map((pageRows, pi) => (
               <section
                 key={`${group.label}-${pi}`}
-                className="food-page mx-auto w-full max-w-[820px] bg-white p-4 shadow-xl print:p-0 print:shadow-none"
+                className="food-page mx-auto flex w-full max-w-[820px] flex-col bg-white p-4 shadow-xl print:p-0 print:shadow-none"
+                style={{ height: "281mm" }}
                 aria-label={`Food token sheet ${group.label} ${pi + 1} of ${group.pages.length}`}
               >
                 <div
-                  className="grid gap-3"
-                  style={{ gridTemplateColumns: `repeat(${density.cols}, minmax(0, 1fr))` }}
+                  className="grid flex-1 gap-3"
+                  style={{ gridTemplateColumns: `repeat(${density.cols}, minmax(0, 1fr))`, alignContent: "start" }}
                 >
                   {pageRows.map((r) => (
                     <div
@@ -693,7 +832,7 @@ export default function FoodTokensClient() {
                     </div>
                   ))}
                 </div>
-                <p className="mt-2 text-center font-mono text-[10px] text-neutral-500 print:text-neutral-600">
+                <p className="mt-2 shrink-0 text-center font-mono text-[10px] text-neutral-500 print:text-neutral-600">
                   {pi + 1} / {group.pages.length}
                 </p>
               </section>
