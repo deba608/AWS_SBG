@@ -13,6 +13,8 @@ interface TokenRow {
   rollNo: string;
   /** Late-addition / buffer token printed after the main sheets. */
   extra?: boolean;
+  /** Auto buffer from live pull (rebuilt each pull) vs hand-typed extra (kept). */
+  auto?: boolean;
 }
 
 /** Next free X-series serial (X01, X02…) — never collides with A-series passes. */
@@ -131,6 +133,8 @@ export default function FoodTokensClient() {
   const [extraName, setExtraName] = useState("");
   const [extraFood, setExtraFood] = useState<"Veg" | "Non-veg">("Veg");
   const [extraQty, setExtraQty] = useState(1);
+  const [bufVeg, setBufVeg] = useState(5);
+  const [bufNonveg, setBufNonveg] = useState(5);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -225,9 +229,10 @@ export default function FoodTokensClient() {
   const cellMm = Math.floor((281 - (rowsPerSheet - 1) * 2 - 10) / rowsPerSheet);
   const vegCount = filtered.filter((r) => r.food === "Veg").length;
 
-  /** Fresh roster from upload/live pull must not wipe hand-added extras. */
+  /** Fresh roster from upload/live pull must not wipe hand-added extras.
+   * Auto buffers are rebuilt (not kept) so re-pulls don't stack duplicates. */
   function mergeKeepExtras(fresh: TokenRow[], prev: TokenRow[]): TokenRow[] {
-    const extras = prev.filter((r) => r.extra);
+    const extras = prev.filter((r) => r.extra && !r.auto);
     if (extras.length === 0) return fresh;
     const taken = new Set(fresh.map((r) => r.serial.toUpperCase()));
     const kept: TokenRow[] = [];
@@ -270,6 +275,7 @@ export default function FoodTokensClient() {
           food,
           rollNo: "",
           extra: true,
+          auto: false,
         });
       }
       return out;
@@ -315,8 +321,22 @@ export default function FoodTokensClient() {
           rollNo: r.rollNo === "—" ? "" : r.rollNo,
         }))
         .sort((a, b) => serialCmp(a.serial, b.serial));
-      setRows((prev) => mergeKeepExtras(mapped, prev));
-      setMsg(`Pulled ${mapped.length} live registrations. Extras kept.`);
+      // On-the-spot buffers ride in the same pull — one print covers roster + extras.
+      const v = Math.min(Math.max(Math.floor(bufVeg) || 0, 0), 50);
+      const n = Math.min(Math.max(Math.floor(bufNonveg) || 0, 0), 50);
+      const withBuffers = [...mapped];
+      for (let i = 0; i < v; i++) {
+        withBuffers.push({ name: `EXTRA ${i + 1}`, serial: nextExtraSerial(withBuffers), food: "Veg", rollNo: "", extra: true, auto: true });
+      }
+      for (let i = 0; i < n; i++) {
+        withBuffers.push({ name: `EXTRA ${i + 1}`, serial: nextExtraSerial(withBuffers), food: "Non-veg", rollNo: "", extra: true, auto: true });
+      }
+      setRows((prev) => mergeKeepExtras(withBuffers, prev));
+      setMsg(
+        `Pulled ${mapped.length} live registrations` +
+          (v + n > 0 ? ` + ${v + n} buffer extras (${v} veg / ${n} non-veg).` : ".") +
+          " Hand-added extras kept.",
+      );
     } catch {
       setMsg("Live pull failed — check network, or upload Excel instead.");
     } finally {
@@ -382,8 +402,32 @@ export default function FoodTokensClient() {
               className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line px-5 py-2 text-sm text-fog hover:text-cream disabled:opacity-60"
             >
               <RefreshCw className="h-4 w-4" aria-hidden />
-              Use live registrations
+              Live registrations + buffers
             </button>
+            <label className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-2 text-xs font-bold text-emerald-300">
+              +VEG
+              <input
+                type="number"
+                min={0}
+                max={50}
+                value={bufVeg}
+                onChange={(e) => setBufVeg(Number(e.target.value))}
+                aria-label="Extra veg buffer tokens"
+                className="w-14 rounded-lg border border-line bg-surface px-2 py-1 text-center text-sm text-cream"
+              />
+            </label>
+            <label className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-red-400/40 bg-red-400/10 px-3 py-2 text-xs font-bold text-red-300">
+              +NON-VEG
+              <input
+                type="number"
+                min={0}
+                max={50}
+                value={bufNonveg}
+                onChange={(e) => setBufNonveg(Number(e.target.value))}
+                aria-label="Extra non-veg buffer tokens"
+                className="w-14 rounded-lg border border-line bg-surface px-2 py-1 text-center text-sm text-cream"
+              />
+            </label>
             <span className="flex-1" aria-hidden />
             <button
               type="button"
