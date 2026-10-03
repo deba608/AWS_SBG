@@ -30,10 +30,7 @@ function nextExtraSerial(rows: TokenRow[]): string {
 
 const DENSITY: { label: string; perPage: number; cols: number }[] = [
   { label: "10 / page", perPage: 10, cols: 2 },
-  { label: "12 / page", perPage: 12, cols: 2 },
-  { label: "15 / page", perPage: 15, cols: 3 },
   { label: "20 / page", perPage: 20, cols: 2 },
-  { label: "24 / page", perPage: 24, cols: 3 },
   { label: "30 / page", perPage: 30, cols: 3 },
 ];
 
@@ -146,7 +143,7 @@ export default function FoodTokensClient() {
   const [busy, setBusy] = useState(false);
   const [q, setQ] = useState("");
   const [foodFilter, setFoodFilter] = useState<"ALL" | "Veg" | "Non-veg">("ALL");
-  const [density, setDensity] = useState(DENSITY[1]); // 12 / page default
+  const [density, setDensity] = useState(DENSITY[0]); // 10 / page default
   const [scope, setScope] = useState<"together" | "veg" | "nonveg" | "split" | "extras">("together");
   const [sortMode, setSortMode] = useState<"serial" | "name">("serial");
   const [extraName, setExtraName] = useState("");
