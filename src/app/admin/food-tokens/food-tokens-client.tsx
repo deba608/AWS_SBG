@@ -41,7 +41,9 @@ function normFood(v: string): "Veg" | "Non-veg" {
   return /non/i.test(v) ? "Non-veg" : "Veg";
 }
 
-/** Real scannable Code128 barcode of the serial — gate scanner reads it. */
+/** Real scannable Code128 barcode of the serial — gate scanner reads it.
+ * Fixed natural size (never CSS-scaled): fluid scaling broke aspect and
+ * overflowed into neighbouring lines on dense sheets. */
 function Barcode({ code, height, moduleWidth = 2 }: { code: string; height: number; moduleWidth?: number }) {
   const ref = useRef<SVGSVGElement>(null);
   useEffect(() => {
@@ -65,9 +67,8 @@ function Barcode({ code, height, moduleWidth = 2 }: { code: string; height: numb
       ref={ref}
       role="img"
       aria-label={`Barcode for ${code}`}
-      className="block max-h-full w-full"
+      className="block h-auto w-auto"
       style={{ shapeRendering: "crispEdges" }}
-      preserveAspectRatio="xMidYMid meet"
     />
   );
 }
@@ -115,8 +116,8 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
           ) : null}
         </span>
       </div>
-      <div className={cn("mt-auto flex shrink-0 items-center justify-between px-3", tiny ? "gap-2 py-0.5" : "gap-3 py-2")}>
-        <div className="min-w-0 shrink-0">
+      <div className={cn("mt-auto flex shrink-0 items-center justify-between px-3", tiny ? "gap-2 py-1" : "gap-3 py-2")}>
+        <div className="shrink-0">
           <p className={cn("font-mono font-black leading-none tracking-tight whitespace-nowrap text-black", tiny ? "text-[18px]" : compact ? "text-[28px]" : "text-[32px]")}>
             {row.serial}
           </p>
@@ -130,11 +131,8 @@ function Token({ row, compact, tiny }: { row: TokenRow; compact: boolean; tiny?:
             </p>
           ) : null}
         </div>
-        <div
-          className="flex min-w-0 flex-1 items-center justify-end overflow-hidden rounded-sm bg-white"
-          style={{ height: tiny ? 28 : compact ? 48 : 60 }}
-        >
-          <Barcode code={row.serial} height={tiny ? 28 : compact ? 48 : 60} moduleWidth={tiny ? 1.4 : 1.8} />
+        <div className="shrink-0 overflow-hidden rounded-sm bg-white">
+          <Barcode code={row.serial} height={tiny ? 26 : compact ? 48 : 60} moduleWidth={tiny ? 1.2 : 1.8} />
         </div>
       </div>
     </div>
