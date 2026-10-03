@@ -29,6 +29,9 @@ const DENSITY: { label: string; perPage: number; cols: number }[] = [
   { label: "10 / page", perPage: 10, cols: 2 },
   { label: "12 / page", perPage: 12, cols: 2 },
   { label: "15 / page", perPage: 15, cols: 3 },
+  { label: "20 / page", perPage: 20, cols: 2 },
+  { label: "24 / page", perPage: 24, cols: 3 },
+  { label: "30 / page", perPage: 30, cols: 3 },
 ];
 
 function normFood(v: string): "Veg" | "Non-veg" {
@@ -43,21 +46,22 @@ function serialCmp(a: string, b: string): number {
   return a.localeCompare(b);
 }
 
-function Token({ row, compact, qr }: { row: TokenRow; compact: boolean; qr?: string }) {
+function Token({ row, compact, tiny, qr }: { row: TokenRow; compact: boolean; tiny?: boolean; qr?: string }) {
   const veg = row.food === "Veg";
+  const qrSize = tiny ? 44 : compact ? 64 : 76;
   return (
     <div
       className="relative flex h-full flex-col justify-between overflow-hidden rounded-md bg-white text-black"
       style={{ border: "1.5px solid #111" }}
     >
-      <div className={cn("w-full", veg ? "bg-green-600" : "bg-red-600", compact ? "h-1" : "h-1.5")} />
-      <div className="flex items-start justify-between gap-2 px-2.5 pt-1.5">
+      <div className={cn("w-full", veg ? "bg-green-600" : "bg-red-600", tiny ? "h-0.5" : compact ? "h-1" : "h-1.5")} />
+      <div className={cn("flex items-start justify-between gap-2 px-2.5", tiny ? "pt-1" : "pt-1.5")}>
         <div className="min-w-0">
           <p className="text-[9px] font-bold tracking-[0.18em] text-neutral-500 uppercase">
             AWS Community Day · Food token
           </p>
-          <p className={cn("truncate font-bold leading-tight", compact ? "text-[11px]" : "text-[13px]")}>{row.name}</p>
-          {row.rollNo ? <p className="text-[10px] text-neutral-600">{row.rollNo}</p> : null}
+          <p className={cn("truncate font-bold leading-tight", tiny ? "text-[10px]" : compact ? "text-[11px]" : "text-[13px]")}>{row.name}</p>
+          {!tiny && row.rollNo ? <p className="text-[10px] text-neutral-600">{row.rollNo}</p> : null}
         </div>
         <span className="flex shrink-0 flex-col items-end gap-1">
           <span
@@ -68,21 +72,26 @@ function Token({ row, compact, qr }: { row: TokenRow; compact: boolean; qr?: str
           >
             {veg ? "VEG" : "NON-VEG"}
           </span>
-          {row.extra ? (
+          {row.extra && !tiny ? (
             <span className="rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black tracking-wider text-black">
               EXTRA
             </span>
           ) : null}
         </span>
       </div>
-      <div className="flex items-end justify-between gap-2 px-2.5 pb-2">
+      <div className={cn("flex items-end justify-between gap-2 px-2.5", tiny ? "pb-1" : "pb-2")}>
         <div>
-          <p className={cn("font-mono font-black leading-none tracking-tight", compact ? "text-[20px]" : "text-[26px]")}>{row.serial}</p>
-          <p className="mt-1 text-[9px] leading-tight text-neutral-500">
-            Show at
-            <br />
-            food counter
+          <p className={cn("font-mono font-black leading-none tracking-tight", tiny ? "text-[15px]" : compact ? "text-[20px]" : "text-[26px]")}>
+            {row.serial}
+            {row.extra && tiny ? <span className="ml-1 rounded bg-amber-400 px-1 align-middle font-sans text-[8px] text-black">X</span> : null}
           </p>
+          {!tiny ? (
+            <p className="mt-1 text-[9px] leading-tight text-neutral-500">
+              Show at
+              <br />
+              food counter
+            </p>
+          ) : null}
         </div>
         <div className="shrink-0 pb-0.5 text-center">
           {qr ? (
@@ -90,16 +99,16 @@ function Token({ row, compact, qr }: { row: TokenRow; compact: boolean; qr?: str
             <img
               src={qr}
               alt={`QR for ${row.serial}`}
-              width={compact ? 64 : 76}
-              height={compact ? 64 : 76}
+              width={qrSize}
+              height={qrSize}
               className="h-auto"
-              style={{ width: compact ? 64 : 76 }}
+              style={{ width: qrSize }}
             />
           ) : (
             <div
               aria-hidden
               className="animate-pulse bg-neutral-200"
-              style={{ width: compact ? 64 : 76, height: compact ? 64 : 76 }}
+              style={{ width: qrSize, height: qrSize }}
             />
           )}
         </div>
@@ -211,6 +220,7 @@ export default function FoodTokensClient() {
   const totalSheets = pages.length;
   const rowsPerSheet = density.perPage / density.cols;
   const compact = rowsPerSheet >= 6;
+  const tiny = rowsPerSheet >= 8;
   // 281mm usable height on A4 after 8mm margins; 2mm gaps + ~10mm footer
   const cellMm = Math.floor((281 - (rowsPerSheet - 1) * 2 - 10) / rowsPerSheet);
   const vegCount = filtered.filter((r) => r.food === "Veg").length;
@@ -543,7 +553,7 @@ export default function FoodTokensClient() {
             <div className="flex flex-wrap gap-2 border-b border-line px-4 py-3 print:hidden" role="group" aria-label="Print scope">
               {(
                 [
-                  ["together", "Print: all together"],
+                  ["together", "Print: main sheets (all incl. extras)"],
                   ["veg", "VEG only"],
                   ["nonveg", "NON-VEG only"],
                   ["split", "Veg + Non-veg split"],
@@ -649,7 +659,7 @@ export default function FoodTokensClient() {
                       className="border border-dashed border-neutral-400 p-1.5"
                       style={{ height: `${cellMm}mm` }}
                     >
-                      <Token row={r} compact={compact} qr={qrMap[r.serial]} />
+                      <Token row={r} compact={compact} tiny={tiny} qr={qrMap[r.serial]} />
                     </div>
                   ))}
                 </div>
