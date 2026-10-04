@@ -2,6 +2,7 @@ import { promises as fs } from "fs";
 import { randomUUID } from "crypto";
 import path from "path";
 import {
+  allMembers,
   coordinators,
   domainLeads,
   opsTeam,
@@ -42,8 +43,6 @@ const REDIS_LOCK = "sbg:team-submissions:lock";
 
 /** Max stored photo: 800x800 q0.85 JPEG ≈ 150-300KB → base64 ≈ 400KB. Cap at ~900KB chars. */
 export const MAX_PHOTO_DATAURL_CHARS = 1_200_000;
-
-const NAME_RE = /^[A-Za-z][A-Za-z.'\- ]*$/;
 
 function emptyStore(): TeamSubmissionStore {
   return { submissions: [] };
@@ -118,13 +117,15 @@ export interface SubmissionErrors {
   photo?: string;
 }
 
+export function rosterMember(name: string): TeamMember | null {
+  const norm = name.trim().toLowerCase();
+  return allMembers.find((m) => m.name.toLowerCase() === norm) ?? null;
+}
+
 export function validateSubmission(input: { name: string; role: string; photoDataUrl: string }): SubmissionErrors {
   const errors: SubmissionErrors = {};
-  const name = input.name.trim().replace(/\s+/g, " ");
-  if (!name) errors.name = "Full name is required.";
-  else if (name.length < 2) errors.name = "Please enter your full name.";
-  else if (name.length > 60) errors.name = "Name too long (max 60 characters).";
-  else if (!NAME_RE.test(name)) errors.name = "Letters, spaces ( . ' - ) only.";
+  const member = rosterMember(input.name);
+  if (!member) errors.name = "Select your name from the team list.";
   if (!sectionForRole(input.role)) errors.role = "Select your position from the list.";
   if (!input.photoDataUrl.startsWith("data:image/jpeg;base64,")) {
     errors.photo = "Photo must be a square JPG — use the on-page cropper.";
@@ -144,7 +145,8 @@ export class TeamSubmissionError extends Error {
 }
 
 export async function createSubmission(input: { name: string; role: string; photoDataUrl: string }): Promise<TeamSubmission> {
-  const name = input.name.trim().replace(/\s+/g, " ");
+  const member = rosterMember(input.name);
+  const name = member ? member.name : input.name.trim().replace(/\s+/g, " ");
   const errors = validateSubmission({ name, role: input.role, photoDataUrl: input.photoDataUrl });
   if (Object.keys(errors).length > 0) throw new TeamSubmissionError(errors);
   const section = sectionForRole(input.role) ?? "ops";

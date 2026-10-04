@@ -90,7 +90,8 @@ export default function JoinClient() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const fe: typeof errors = {};
-    if (name.trim().length < 2) fe.name = "Enter your full name as on the team list.";
+    if (!name) fe.name = "Select your name from the team list.";
+    else if (!roleForName(name)) fe.name = "Select your name from the team list.";
     if (!role) fe.role = "Select your position from the list.";
     if (!file || !preview) fe.photo = "Upload a clear front-facing photo.";
     setErrors(fe);
