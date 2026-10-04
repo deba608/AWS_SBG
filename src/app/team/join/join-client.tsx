@@ -1,0 +1,243 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { CheckCircle2, ImagePlus, Loader2 } from "lucide-react";
+import { coordinators, domainLeads, opsTeam, teamLeads } from "@/data/team";
+import { cn } from "@/lib/utils";
+
+const SECTIONS = [
+  { key: "leadership", title: "Leadership", roles: teamLeads.map((m) => m.role) },
+  { key: "domain", title: "Domain leads", roles: domainLeads.map((m) => m.role) },
+  { key: "ops", title: "Events, PR & media", roles: opsTeam.map((m) => m.role) },
+  { key: "coordinators", title: "Co-ordinators", roles: coordinators.map((m) => m.role) },
+];
+
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_BYTES = 5 * 1024 * 1024;
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Could not read that image."));
+    img.src = src;
+  });
+}
+
+function cropToSquareJpeg(img: HTMLImageElement): Promise<Blob> {
+  const side = Math.min(img.naturalWidth, img.naturalHeight);
+  const sx = (img.naturalWidth - side) / 2;
+  const sy = (img.naturalHeight - side) / 2;
+  const canvas = document.createElement("canvas");
+  canvas.width = 800;
+  canvas.height = 800;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas unavailable in this browser.");
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, 800, 800);
+  ctx.drawImage(img, sx, sy, side, side, 0, 0, 800, 800);
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Photo processing failed. Retry."))),
+      "image/jpeg",
+      0.85,
+    );
+  });
+}
+
+export default function JoinClient() {
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState("");
+  const [errors, setErrors] = useState<{ name?: string; role?: string; photo?: string }>({});
+  const [apiError, setApiError] = useState("");
+  const [status, setStatus] = useState<"form" | "busy" | "done">("form");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
+  function pickFile(f: File | null) {
+    setApiError("");
+    if (!f) {
+      setFile(null);
+      return;
+    }
+    if (!ACCEPTED_TYPES.includes(f.type)) {
+      setErrors((e) => ({ ...e, photo: "Use a JPG, PNG or WebP photo." }));
+      return;
+    }
+    if (f.size > MAX_BYTES) {
+      setErrors((e) => ({ ...e, photo: "Photo too large (max 5MB)." }));
+      return;
+    }
+    setErrors((e) => ({ ...e, photo: undefined }));
+    setFile(f);
+    setPreview((old) => {
+      if (old) URL.revokeObjectURL(old);
+      return URL.createObjectURL(f);
+    });
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const fe: typeof errors = {};
+    if (name.trim().length < 2) fe.name = "Enter your full name as on the team list.";
+    if (!role) fe.role = "Select your position from the list.";
+    if (!file || !preview) fe.photo = "Upload a clear front-facing photo.";
+    setErrors(fe);
+    if (Object.keys(fe).filter((k) => fe[k as keyof typeof fe]).length > 0) return;
+    setStatus("busy");
+    setApiError("");
+    try {
+      const img = await loadImage(preview);
+      const blob = await cropToSquareJpeg(img);
+      const form = new FormData();
+      form.set("name", name.trim());
+      form.set("role", role);
+      form.set("photo", new File([blob], "photo.jpg", { type: "image/jpeg" }));
+      const res = await fetch("/api/team/submit", { method: "POST", body: form });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (data.errors) setErrors(data.errors);
+        throw new Error(data.error ?? "Submit failed.");
+      }
+      setStatus("done");
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : "Submit failed.");
+      setStatus("form");
+    }
+  }
+
+  if (status === "done") {
+    return (
+      <div className="rank-card space-y-3 p-5 text-center sm:p-6">
+        <CheckCircle2 className="mx-auto h-10 w-10 text-green-400" aria-hidden />
+        <h2 className="text-lg font-bold text-cream">Submitted for review</h2>
+        <p className="mx-auto max-w-prose text-sm leading-relaxed text-fog">
+          Admin will approve your photo and it appears on the team page instantly after approval.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            setStatus("form");
+            setName("");
+            setRole("");
+            setFile(null);
+            setPreview("");
+            setErrors({});
+            setApiError("");
+          }}
+          className="inline-flex min-h-[44px] items-center rounded-full border border-line px-6 py-2 text-sm text-fog hover:text-cream"
+        >
+          Submit another
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form noValidate onSubmit={submit} className="rank-card space-y-4 p-5 sm:p-6">
+      <div>
+        <label htmlFor="team-name" className="mb-1.5 block text-sm font-medium text-cream">
+          Full name *
+        </label>
+        <input
+          id="team-name"
+          autoComplete="name"
+          maxLength={60}
+          placeholder="As listed on the team roster"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          aria-invalid={Boolean(errors.name)}
+          className={cn(
+            "min-h-[44px] w-full rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm",
+            errors.name ? "border-red-400/70" : "border-line",
+          )}
+        />
+        {errors.name ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.name}</p> : null}
+      </div>
+
+      <div>
+        <label htmlFor="team-role" className="mb-1.5 block text-sm font-medium text-cream">
+          Position *
+        </label>
+        <select
+          id="team-role"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          aria-invalid={Boolean(errors.role)}
+          className={cn(
+            "min-h-[44px] w-full rounded-xl border bg-surface px-3 py-3 text-base text-cream focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm",
+            errors.role ? "border-red-400/70" : "border-line",
+          )}
+        >
+          <option value="">Select your position…</option>
+          {SECTIONS.map((s) => (
+            <optgroup key={s.key} label={s.title}>
+              {s.roles.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+        {errors.role ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.role}</p> : null}
+      </div>
+
+      <div>
+        <span className="mb-1.5 block text-sm font-medium text-cream">Photo *</span>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="flex aspect-square w-full max-w-52 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-line bg-ink/60 hover:border-brand/60"
+            aria-label="Upload team photo"
+          >
+            {preview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={preview} alt="Photo preview, square crop" className="h-full w-full object-cover" />
+            ) : (
+              <span className="flex flex-col items-center gap-2 p-4 text-center text-xs text-faint">
+                <ImagePlus className="h-6 w-6" aria-hidden />
+                Tap to upload — square preview
+              </span>
+            )}
+          </button>
+          <div className="min-w-0 flex-1 text-xs leading-relaxed text-fog">
+            <p>Perfect format: <span className="font-semibold text-cream">square 800×800 JPG</span>.</p>
+            <p className="mt-1">Upload any clear front-facing photo — it auto-crops center-square on submit. Face centered works best. Max 5MB.</p>
+            {file ? <p className="mt-1 truncate text-cream">{file.name}</p> : null}
+          </div>
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="sr-only"
+          aria-label="Photo file"
+          onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+        />
+        {errors.photo ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.photo}</p> : null}
+      </div>
+
+      {apiError ? (
+        <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
+          {apiError}
+        </p>
+      ) : null}
+
+      <button
+        type="submit"
+        disabled={status === "busy"}
+        className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black hover:bg-brandhover disabled:opacity-70"
+      >
+        {status === "busy" ? (<><Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Processing photo…</>) : "Submit for approval"}
+      </button>
+      <p className="text-xs leading-relaxed text-faint">Admin reviews every submission. Approved photos show on the team page instantly.</p>
+    </form>
+  );
+}
