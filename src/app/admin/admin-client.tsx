@@ -460,6 +460,12 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
         >
           Hackathon teams
         </Link>
+        <Link
+          href="/admin/team"
+          className="inline-flex min-h-[44px] items-center rounded-full border border-line px-5 py-2 text-sm font-semibold text-fog hover:text-cream"
+        >
+          Team photos
+        </Link>
         {settings ? (
           <span
             className={cn(

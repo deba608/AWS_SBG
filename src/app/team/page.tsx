@@ -4,7 +4,8 @@ import Container from "@/components/Container";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import TeamCard from "@/components/TeamCard";
-import { teamLeads, domainLeads, opsTeam, coordinators } from "@/data/team";
+import type { TeamMember } from "@/data/team";
+import { getTeamLists } from "@/lib/team-store";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -32,7 +33,7 @@ function TeamSection({
 }: {
   id: string;
   title: string;
-  members: typeof teamLeads;
+  members: TeamMember[];
   cols?: 1 | 2;
   large?: boolean;
 }) {
@@ -63,7 +64,8 @@ function TeamSection({
   );
 }
 
-export default function TeamPage() {
+export default async function TeamPage() {
+  const { teamLeads, domainLeads, opsTeam, coordinators } = await getTeamLists();
   return (
     <div className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
       <Container>
@@ -113,13 +115,18 @@ export default function TeamPage() {
                 every semester.
               </p>
             </div>
-            <Button
-              href={SITE.links.join}
-              external
-              className="w-full shrink-0 sm:w-auto"
-            >
-              Get involved
-            </Button>
+            <div className="flex w-full flex-col gap-3 shrink-0 sm:w-auto sm:flex-row">
+              <Button href="/team/join" className="w-full sm:w-auto">
+                Submit team photo
+              </Button>
+              <Button
+                href={SITE.links.join}
+                external
+                className="w-full sm:w-auto"
+              >
+                Get involved
+              </Button>
+            </div>
           </div>
         </Reveal>
       </Container>

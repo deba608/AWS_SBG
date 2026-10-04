@@ -65,6 +65,8 @@ function tokenFromQRText(text: string): string {
 
 export default function ScanClient() {
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [role, setRole] = useState<"admin" | "subadmin" | null>(null);
+  const isSubAdmin = role === "subadmin";
   const [password, setPassword] = useState("");
   const [loginErr, setLoginErr] = useState("");
   const [token, setToken] = useState("");
@@ -112,8 +114,14 @@ export default function ScanClient() {
       const r = await fetch("/api/admin/me", { cache: "no-store" });
       const d = await r.json();
       setAuthed(Boolean(d.admin));
+      setRole(d.role === "subadmin" ? "subadmin" : d.admin ? "admin" : null);
+      if (d.role === "subadmin") {
+        setMode("entry");
+        modeRef.current = "entry";
+      }
     } catch {
       setAuthed(false);
+      setRole(null);
     }
   }, []);
 
@@ -163,6 +171,12 @@ export default function ScanClient() {
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? "Login failed.");
       setPassword("");
+      const loginRole = d.role === "subadmin" ? "subadmin" : "admin";
+      setRole(loginRole);
+      if (loginRole === "subadmin") {
+        setMode("entry");
+        modeRef.current = "entry";
+      }
       setAuthed(true);
     } catch (err) {
       setLoginErr(err instanceof Error ? err.message : "Login failed.");
@@ -174,11 +188,14 @@ export default function ScanClient() {
     if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
     stopCamera();
     setAuthed(false);
+    setRole(null);
     setState({ kind: "idle" });
     setToken("");
   }
 
   function switchMode(m: ScanMode) {
+    // Sub-admin locked to gate entry.
+    if (isSubAdmin) return;
     setMode(m);
     try {
       window.localStorage.setItem("awsScanMode", m);
@@ -337,7 +354,7 @@ export default function ScanClient() {
   async function burn() {
     const t = tokenFromQRText(token);
     if (!t || burning) return;
-    const kind: ScanMode = mode;
+    const kind: ScanMode = isSubAdmin ? "entry" : mode;
     setBurning(true);
     try {
       const r = await fetch("/api/passes/burn", {
@@ -665,6 +682,11 @@ export default function ScanClient() {
       </div>
 
       <div className="rank-card space-y-3 p-4 sm:p-5">
+        {isSubAdmin ? (
+          <div className="flex items-center justify-center gap-2 rounded-2xl border border-brand/40 bg-brand/10 px-4 py-3 text-sm font-bold text-cream">
+            Gate entry · Sub-admin — entry scans only
+          </div>
+        ) : (
         <div
           role="radiogroup"
           aria-label="Counter mode"
@@ -695,8 +717,9 @@ export default function ScanClient() {
             );
           })}
         </div>
+        )}
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-bold text-cream">Scan</h2>
+          <h2 className="text-lg font-bold text-cream">Scan{isSubAdmin ? " — entry" : ""}</h2>
           <button
             type="button"
             onClick={() => void startCamera()}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/admin-auth";
+import { hasScanAccess } from "@/lib/admin-auth";
 import { verifyPassByRaw, effectiveYearOf } from "@/lib/pass-store";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 
@@ -28,7 +28,7 @@ function extractToken(req: Request, bodyToken?: string): string {
 }
 
 export async function GET(req: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  if (!(await hasScanAccess())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   if (!rateOk(`scan:${clientIp(req)}`, SCAN_LIMIT, 60_000)) {
     return NextResponse.json({ error: "Too fast. Slow down." }, { status: 429 });
   }
@@ -56,7 +56,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  if (!(await hasScanAccess())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   if (!rateOk(`scan:${clientIp(req)}`, SCAN_LIMIT, 60_000)) {
     return NextResponse.json({ error: "Too fast. Slow down." }, { status: 429 });
   }

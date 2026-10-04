@@ -7,7 +7,7 @@ import {
   opsTeam,
   teamLeads,
   type TeamMember,
-} from "./team";
+} from "@/data/team";
 import { getRedis, withRedisLock } from "./pass-redis";
 
 export type SubmissionStatus = "pending" | "approved" | "rejected";

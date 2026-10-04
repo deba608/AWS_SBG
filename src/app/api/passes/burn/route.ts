@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/admin-auth";
+import { getAdminRole } from "@/lib/admin-auth";
 import { burnPassByRaw, effectiveYearOf } from "@/lib/pass-store";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 
@@ -10,7 +10,8 @@ export const revalidate = 0;
 const SCAN_LIMIT = 300;
 
 export async function POST(req: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  const role = await getAdminRole();
+  if (!role) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   if (!rateOk(`scan:${clientIp(req)}`, SCAN_LIMIT, 60_000)) {
     return NextResponse.json({ error: "Too fast. Slow down." }, { status: 429 });
   }
@@ -23,6 +24,10 @@ export async function POST(req: Request) {
   const raw = String((body as Record<string, unknown>).token ?? "").trim();
   const scannedBy = String((body as Record<string, unknown>).scannedBy ?? "admin").slice(0, 60);
   const kind = String((body as Record<string, unknown>).kind ?? "entry") === "food" ? "food" : "entry";
+  // Sub-admin = entry gate only. Food burns blocked server-side.
+  if (role === "subadmin" && kind === "food") {
+    return NextResponse.json({ error: "Sub-admin: entry scans only." }, { status: 403 });
+  }
   if (!raw) return NextResponse.json({ error: "token required." }, { status: 400 });
   const r = await burnPassByRaw(raw, scannedBy, kind);
   if (!r.ok) {

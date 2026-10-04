@@ -8,30 +8,63 @@ function secret(): string {
   return process.env.PASS_SECRET ?? "dev-only-secret-change-me";
 }
 
+export type AdminRole = "admin" | "subadmin";
+
 export function adminPassword(): string {
   return process.env.ADMIN_PASS ?? "admin123";
 }
 
-export function signAdmin(expiry: number): string {
-  return createHmac("sha256", secret()).update(`admin.${expiry}`).digest("hex").slice(0, 32);
+/** Entry-gate only password. Set SUB_ADMIN_PASS (alias GATE_PASS) in env. */
+export function subAdminPassword(): string | null {
+  const v = process.env.SUB_ADMIN_PASS ?? process.env.GATE_PASS ?? "gate123";
+  if (!v) return null;
+  return v;
 }
 
-export function makeAdminCookie(): { value: string; expires: Date } {
+export function signAdmin(expiry: number, role: AdminRole = "admin"): string {
+  return createHmac("sha256", secret()).update(`${role}.${expiry}`).digest("hex").slice(0, 32);
+}
+
+export function makeAdminCookie(role: AdminRole = "admin"): { value: string; expires: Date } {
   const expiry = Date.now() + TTL_MS;
-  const sig = signAdmin(expiry);
-  return { value: `admin.${expiry}.${sig}`, expires: new Date(expiry) };
+  const sig = signAdmin(expiry, role);
+  return { value: `${role}.${expiry}.${sig}`, expires: new Date(expiry) };
 }
 
-export async function isAdmin(): Promise<boolean> {
+/** Back-compat alias: full-admin cookie. */
+export function makeSubAdminCookie(): { value: string; expires: Date } {
+  return makeAdminCookie("subadmin");
+}
+
+export async function getAdminRole(): Promise<AdminRole | null> {
   try {
     const jar = await cookies();
     const v = jar.get(ADMIN_COOKIE)?.value ?? "";
     const parts = v.split(".");
-    if (parts.length !== 3 || parts[0] !== "admin") return false;
+    if (parts.length !== 3) return null;
     const expiry = Number(parts[1]);
-    if (!Number.isFinite(expiry) || expiry < Date.now()) return false;
-    return signAdmin(expiry) === parts[2];
+    if (!Number.isFinite(expiry) || expiry < Date.now()) return null;
+    // Current format: <role>.<expiry>.<sig>
+    if (parts[0] === "admin" || parts[0] === "subadmin") {
+      const role = parts[0] as AdminRole;
+      return signAdmin(expiry, role) === parts[2] ? role : null;
+    }
+    return null;
   } catch {
-    return false;
+    return null;
   }
+}
+
+export async function isAdmin(): Promise<boolean> {
+  return (await getAdminRole()) === "admin";
+}
+
+/** Sub-admin (entry-gate) session. No dashboard / export / settings access. */
+export async function isSubAdmin(): Promise<boolean> {
+  return (await getAdminRole()) === "subadmin";
+}
+
+/** Entry scanning allowed for full admin + sub-admin. */
+export async function hasScanAccess(): Promise<boolean> {
+  return (await getAdminRole()) !== null;
 }
