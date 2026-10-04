@@ -96,11 +96,14 @@ export default function PhotoCropper({
   const [zoom, setZoom] = useState(1);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [nat, setNat] = useState<{ w: number; h: number } | null>(null);
-  const [dragging, setDragging] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const boxRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const backdropDownRef = useRef(false);
+  const lastDragEndRef = useRef(0);
   const dragRef = useRef({ startX: 0, startY: 0, origX: 0, origY: 0 });
+  const dragActiveRef = useRef(false);
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef = useRef<{
     initDist: number;
@@ -167,16 +170,16 @@ export default function PhotoCropper({
         origX: posRef.current.x,
         origY: posRef.current.y,
       };
-      setDragging(false);
+      dragActiveRef.current = false;
       return;
     }
     dragRef.current = { startX: e.clientX, startY: e.clientY, origX: posRef.current.x, origY: posRef.current.y };
-    setDragging(true);
+    dragActiveRef.current = true;
   }
 
-  // Moves tracked on window so drags never drop when fingers slide fast.
+  // Gesture listeners stay mounted for the popup lifetime — moves tracked on
+  // window so fast swipes and 2-finger pinches never drop mid-gesture.
   useEffect(() => {
-    if (!dragging) return;
     function onMove(e: PointerEvent) {
       if (!pointersRef.current.has(e.pointerId)) return;
       pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -201,8 +204,10 @@ export default function PhotoCropper({
         );
         return;
       }
+      if (!dragActiveRef.current) return;
       const dx = e.clientX - dragRef.current.startX;
       const dy = e.clientY - dragRef.current.startY;
+      if (dx !== 0 || dy !== 0) lastDragEndRef.current = Date.now();
       setPos(
         clampPos(
           dragRef.current.origX + dx,
@@ -214,14 +219,16 @@ export default function PhotoCropper({
       );
     }
     function onUp(e: PointerEvent) {
+      if (!pointersRef.current.has(e.pointerId)) return;
       pointersRef.current.delete(e.pointerId);
       if (pointersRef.current.size < 2) pinchRef.current = null;
       if (pointersRef.current.size === 1) {
         // One finger left — hand drag over to it so motion stays smooth.
         const [p] = [...pointersRef.current.values()];
         dragRef.current = { startX: p.x, startY: p.y, origX: posRef.current.x, origY: posRef.current.y };
+        dragActiveRef.current = true;
       } else {
-        setDragging(false);
+        dragActiveRef.current = false;
       }
     }
     window.addEventListener("pointermove", onMove);
@@ -232,7 +239,7 @@ export default function PhotoCropper({
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
     };
-  }, [dragging]);
+  }, []);
 
   function nudge(dx: number, dy: number) {
     setPos((p) => clampPos(p.x + dx, p.y + dy, zoomRef.current, natRef.current, boxSize()));
@@ -254,10 +261,19 @@ export default function PhotoCropper({
 
   return (
     <div
+      ref={backdropRef}
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      onClick={onClose}
+      onPointerDown={(e) => {
+        backdropDownRef.current = e.target === e.currentTarget;
+      }}
+      onClick={() => {
+        // Never close from a drag that ends off-frame — only a clean backdrop tap.
+        if (!backdropDownRef.current) return;
+        if (Date.now() - lastDragEndRef.current < 400) return;
+        onClose();
+      }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
     >
       <div
