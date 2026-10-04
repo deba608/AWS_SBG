@@ -181,7 +181,7 @@ export default function TeamAdminClient() {
       )}
       {cropFor ? (
         <PhotoCropper
-          src={cropFor.photoDataUrl}
+          src={cropFor.originalDataUrl ?? cropFor.photoDataUrl}
           title={`Crop — ${cropFor.name}`}
           onClose={() => setCropFor(null)}
           onSave={saveCrop}

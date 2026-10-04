@@ -88,12 +88,28 @@ export default function JoinClient() {
     setErrors((e) => ({ ...e, photo: undefined }));
     if (preview) URL.revokeObjectURL(preview);
     if (originalUrl) URL.revokeObjectURL(originalUrl);
-    const url = URL.createObjectURL(f);
-    setOriginalUrl(url);
     setFile(null);
     setPreview("");
-    // Crop editor popup opens at once — position + zoom there.
-    setEditorOpen(true);
+    setOriginalFile(null);
+    setOriginalUrl("");
+    // Build bounded full original first — editor opens on THAT, so full
+    // photo (head included) comes before any crop.
+    setPreparing(true);
+    const rawUrl = URL.createObjectURL(f);
+    void loadImage(rawUrl)
+      .then((img) => boundOriginal(img))
+      .then((blob) => {
+        URL.revokeObjectURL(rawUrl);
+        const bounded = new File([blob], "original.jpg", { type: "image/jpeg" });
+        setOriginalFile(bounded);
+        setOriginalUrl(URL.createObjectURL(bounded));
+        setEditorOpen(true);
+      })
+      .catch((err) => {
+        URL.revokeObjectURL(rawUrl);
+        setErrors((e) => ({ ...e, photo: err instanceof Error ? err.message : "Could not read that image." }));
+      })
+      .finally(() => setPreparing(false));
   }
 
   function onCropSave(blob: Blob) {
@@ -112,6 +128,7 @@ export default function JoinClient() {
     else if (!roleForName(name)) fe.name = "Select your name from the team list.";
     if (!role) fe.role = "Select your position from the list.";
     const photoFile = file;
+    const fullFile = originalFile;
     if (!photoFile || !preview) fe.photo = "Upload a photo and finish cropping.";
     setErrors(fe);
     if (Object.keys(fe).filter((k) => fe[k as keyof typeof fe]).length > 0) return;
@@ -123,6 +140,7 @@ export default function JoinClient() {
       form.set("name", name.trim());
       form.set("role", role);
       form.set("photo", photoFile, "photo.jpg");
+      if (fullFile) form.set("original", fullFile, "original.jpg");
       const res = await fetch("/api/team/submit", { method: "POST", body: form });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -153,6 +171,7 @@ export default function JoinClient() {
             setFile(null);
             setPreview("");
             setOriginalUrl("");
+            setOriginalFile(null);
             setEditorOpen(false);
             setErrors({});
             setApiError("");
@@ -232,6 +251,11 @@ export default function JoinClient() {
               {preview ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={preview} alt="Cropped square photo" className="h-full w-full object-cover" />
+              ) : preparing ? (
+                <span className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center text-xs text-faint">
+                  <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
+                  Loading full photo…
+                </span>
               ) : (
                 <button
                   type="button"
@@ -239,7 +263,7 @@ export default function JoinClient() {
                   className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center text-xs text-faint hover:text-cream"
                 >
                   <ImagePlus className="h-6 w-6" aria-hidden />
-                  Tap to upload — crop popup opens
+                  Tap to upload — full photo opens first
                 </button>
               )}
             </div>
