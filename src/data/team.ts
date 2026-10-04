@@ -33,7 +33,7 @@ export const teamLeads: TeamMember[] = [
     role: "Secretary",
     bio: "Manages club operations, communications and documentation to keep everything running smoothly.",
     lead: true,
-    photo: "/team/debashish-pradhan.jpeg",
+    photo: "/team/debashish-pradhan.jpg",
   },
   {
     id: "abhash-dash",
@@ -189,6 +189,7 @@ export const opsTeam: TeamMember[] = [
     name: "Bibhuprasad Samal",
     role: "Social Media Lead",
     bio: "Manages the club's social presence across Instagram, LinkedIn and WhatsApp.",
+    photo: "/team/bibhuprasad-samal.png",
   },
   {
     id: "samparna-rout",
