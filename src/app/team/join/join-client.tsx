@@ -2,15 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, ImagePlus, Loader2 } from "lucide-react";
-import { coordinators, domainLeads, opsTeam, teamLeads } from "@/data/team";
+import { allMembers, coordinators, domainLeads, opsTeam, teamLeads } from "@/data/team";
 import { cn } from "@/lib/utils";
 
 const SECTIONS = [
-  { key: "leadership", title: "Leadership", roles: teamLeads.map((m) => m.role) },
-  { key: "domain", title: "Domain leads", roles: domainLeads.map((m) => m.role) },
-  { key: "ops", title: "Events, PR & media", roles: opsTeam.map((m) => m.role) },
-  { key: "coordinators", title: "Co-ordinators", roles: coordinators.map((m) => m.role) },
+  { key: "leadership", title: "Leadership", roles: [...new Set(teamLeads.map((m) => m.role))], names: teamLeads.map((m) => m.name) },
+  { key: "domain", title: "Domain leads", roles: [...new Set(domainLeads.map((m) => m.role))], names: domainLeads.map((m) => m.name) },
+  { key: "ops", title: "Events, PR & media", roles: [...new Set(opsTeam.map((m) => m.role))], names: opsTeam.map((m) => m.name) },
+  { key: "coordinators", title: "Co-ordinators", roles: [...new Set(coordinators.map((m) => m.role))], names: coordinators.map((m) => m.name) },
 ];
+
+function roleForName(name: string): string {
+  return allMembers.find((m) => m.name === name)?.role ?? "";
+}
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -144,21 +148,32 @@ export default function JoinClient() {
     <form noValidate onSubmit={submit} className="rank-card space-y-4 p-5 sm:p-6">
       <div>
         <label htmlFor="team-name" className="mb-1.5 block text-sm font-medium text-cream">
-          Full name *
+          Your name *
         </label>
-        <input
+        <select
           id="team-name"
-          autoComplete="name"
-          maxLength={60}
-          placeholder="As listed on the team roster"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            const v = e.target.value;
+            setName(v);
+            const r = roleForName(v);
+            if (r) setRole(r);
+          }}
           aria-invalid={Boolean(errors.name)}
           className={cn(
-            "min-h-[44px] w-full rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm",
+            "min-h-[44px] w-full rounded-xl border bg-surface px-3 py-3 text-base text-cream focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm",
             errors.name ? "border-red-400/70" : "border-line",
           )}
-        />
+        >
+          <option value="">Select your name…</option>
+          {SECTIONS.map((s) => (
+            <optgroup key={s.key} label={s.title}>
+              {s.names.map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
         {errors.name ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.name}</p> : null}
       </div>
 
