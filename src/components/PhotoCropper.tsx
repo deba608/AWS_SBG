@@ -12,7 +12,11 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-function clampPos(
+/** Min zoom that fits the whole photo inside the square (1 for square photos). */
+function fitZoom(nat: { w: number; h: number } | null): number {
+  if (!nat || nat.w <= 0 || nat.h <= 0) return 1;
+  return Math.min(1, Math.min(nat.w, nat.h) / Math.max(nat.w, nat.h));
+}
   x: number,
   y: number,
   zoom: number,
@@ -34,11 +38,12 @@ async function exportSquareJpeg(
   const iw = img.naturalWidth;
   const ih = img.naturalHeight;
   const S = crop.box > 0 ? crop.box : 300;
-  const coverW = S * Math.max(1, iw / ih);
-  const unit = iw / (coverW * crop.zoom);
-  const vis = S * unit;
-  const cx = iw / 2 - crop.x * unit;
-  const cy = ih / 2 - crop.y * unit;
+  // Must mirror preview CSS: object-cover base + translate(x,y) then scale about center,
+  // so effective on-screen shift is exactly (x, y) px at any zoom.
+  const base = Math.max(S / iw, S / ih); // screen px per natural px at zoom 1
+  const vis = S / (base * crop.zoom);
+  const cx = iw / 2 - crop.x / base;
+  const cy = ih / 2 - crop.y / base;
   const sx = Math.min(Math.max(cx - vis / 2, 0), Math.max(iw - vis, 0));
   const sy = Math.min(Math.max(cy - vis / 2, 0), Math.max(ih - vis, 0));
   const canvas = document.createElement("canvas");
