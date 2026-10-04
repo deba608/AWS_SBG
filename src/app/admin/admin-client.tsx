@@ -112,6 +112,7 @@ function Section({ label, children }: { label: string; children: ReactNode }) {
 }
 
 export default function AdminClient() {  const [authed, setAuthed] = useState<boolean | null>(null);
+  const [role, setRole] = useState<"admin" | "subadmin" | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [rows, setRows] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
@@ -148,9 +149,12 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
   const check = useCallback(async () => {
     try {
       const r = await fetch("/api/admin/me", { cache: "no-store" });
-      setAuthed(Boolean((await r.json()).admin));
+      const d = await r.json();
+      setAuthed(Boolean(d.admin));
+      setRole(d.role === "subadmin" ? "subadmin" : d.admin ? "admin" : null);
     } catch {
       setAuthed(false);
+      setRole(null);
     }
   }, []);
 
@@ -424,7 +428,21 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
       </div>
     );
   }
-  if (!authed) return <AdminLogin onDone={() => setAuthed(true)} />;
+  if (!authed) return <AdminLogin onDone={() => void check()} />;
+  if (role === "subadmin") {
+    return (
+      <div className="rank-card space-y-3 p-6 text-center">
+        <p className="text-lg font-bold text-cream">Sub-admin: entry scanning only</p>
+        <p className="text-sm text-fog">Dashboard, exports and settings need full admin. Use gate scanner.</p>
+        <Link
+          href="/admin/scan"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-brand px-6 py-2 text-sm font-semibold text-black hover:bg-brandhover"
+        >
+          Open gate scanner
+        </Link>
+      </div>
+    );
+  }
 
   const cards = stats
     ? [

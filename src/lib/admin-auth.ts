@@ -31,7 +31,7 @@ export function makeAdminCookie(role: AdminRole = "admin"): { value: string; exp
   return { value: `${role}.${expiry}.${sig}`, expires: new Date(expiry) };
 }
 
-/** Back-compat alias: full-admin cookie. */
+/** Sub-admin (gate entry-only) cookie. */
 export function makeSubAdminCookie(): { value: string; expires: Date } {
   return makeAdminCookie("subadmin");
 }

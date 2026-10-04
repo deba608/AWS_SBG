@@ -15,8 +15,9 @@ export default function AdminScanPage() {
       </p>
       <h1 className="mt-2 text-3xl font-bold sm:text-4xl">Gate scanner</h1>
       <p className="measure mt-3 text-sm leading-relaxed text-fog sm:text-base">
-        Admin only. Scan QR → GREEN = valid, Confirm burn → RED blocks reuse.
-        ENTRY and FOOD tracked separately.
+        Admin or sub-admin (gate) login. Sub-admin gets entry scans only — no food
+        counter, dashboard, or exports. Scan QR → GREEN = valid, Confirm burn →
+        RED blocks reuse.
       </p>
       <div className="mt-8">
         <ScanClient />

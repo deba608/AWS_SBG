@@ -363,7 +363,9 @@ export default function ScanClient() {
         body: JSON.stringify({ token: t, scannedBy: `admin-scan-${kind}`, kind }),
       });
       const d = await r.json();
-      if (r.status === 410 || d.status === "EXPIRED") {
+      if (r.status === 403) {
+        setState({ kind: "error", message: d.error ?? "Sub-admin: entry scans only." });
+      } else if (r.status === 410 || d.status === "EXPIRED") {
         setState({ kind: "result", status: "EXPIRED", type: d.type });
       } else if (r.status === 409 || d.status === "USED" || d.status === "FOOD_USED") {
         pauseDecoding();
@@ -615,14 +617,14 @@ export default function ScanClient() {
   if (!authed) {
     return (
       <form onSubmit={login} className="rank-card space-y-4 p-5 sm:p-6">
-        <h2 className="text-lg font-bold text-cream">Admin login</h2>
+        <h2 className="text-lg font-bold text-cream">Gate login</h2>
         <p className="text-sm text-fog">
-          Enter gate password to continue.
+          Full admin or sub-admin (gate) password both work here. Sub-admin gets entry scans only.
         </p>
         <input
           type="password"
           autoComplete="current-password"
-          placeholder="Admin password"
+          placeholder="Admin or gate password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full min-h-[44px] rounded-xl border border-line bg-surface px-3 py-3 text-base text-cream focus:ring-2 focus:ring-brand sm:text-sm"
@@ -657,11 +659,11 @@ export default function ScanClient() {
     <div className="space-y-4">
       <div className="rank-card flex items-center gap-3 px-5 py-3">
         <p className="text-3xl font-bold tabular-nums text-green-400">
-          {mode === "food" ? (stats?.foodUsed ?? "–") : (stats?.entryUsed ?? "–")}
+          {isSubAdmin ? (stats?.entryUsed ?? "–") : mode === "food" ? (stats?.foodUsed ?? "–") : (stats?.entryUsed ?? "–")}
         </p>
         <div className="min-w-0 text-xs leading-tight text-fog">
-          <p>{mode === "food" ? "lunches served" : "in gate"}{stats ? ` · ${stats.users} reg` : ""}</p>
-          {stats ? <p>Veg {stats.veg} · Non-veg {stats.nonveg}</p> : null}
+          <p>{!isSubAdmin && mode === "food" ? "lunches served" : "in gate"}{stats ? ` · ${stats.users} reg` : ""}{isSubAdmin ? " · entry only" : ""}</p>
+          {!isSubAdmin && stats ? <p>Veg {stats.veg} · Non-veg {stats.nonveg}</p> : null}
         </div>
         <span className="flex-1" aria-hidden />
         {scanning ? (
