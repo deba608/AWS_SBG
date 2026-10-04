@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  MAX_ORIGINAL_DATAURL_CHARS,
   MAX_PHOTO_DATAURL_CHARS,
   TeamSubmissionError,
   createSubmission,
@@ -65,8 +66,37 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
+  // Bounded full original for admin re-crop (optional, client sends it).
+  let originalDataUrl: string | null = null;
+  const original = form.get("original");
+  if (original instanceof File && original.size > 0) {
+    if (original.type !== "image/jpeg" || original.size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json(
+        { error: "Validation failed.", errors: { photo: "Original photo must be a JPG under 5MB." } },
+        { status: 400 },
+      );
+    }
+    const obytes = new Uint8Array(await original.arrayBuffer());
+    if (!isJpeg(obytes)) {
+      return NextResponse.json(
+        { error: "Validation failed.", errors: { photo: "Original photo must be a JPG." } },
+        { status: 400 },
+      );
+    }
+    let obinary = "";
+    for (let i = 0; i < obytes.length; i += CHUNK) {
+      obinary += String.fromCharCode(...obytes.subarray(i, i + CHUNK));
+    }
+    originalDataUrl = `data:image/jpeg;base64,${btoa(obinary)}`;
+    if (originalDataUrl.length > MAX_ORIGINAL_DATAURL_CHARS) {
+      return NextResponse.json(
+        { error: "Validation failed.", errors: { photo: "Original photo too large. Re-upload." } },
+        { status: 400 },
+      );
+    }
+  }
   try {
-    const sub = await createSubmission({ name, role, photoDataUrl });
+    const sub = await createSubmission({ name, role, photoDataUrl, originalDataUrl });
     return NextResponse.json({ id: sub.id, status: sub.status }, { status: 201 });
   } catch (err) {
     if (err instanceof TeamSubmissionError) {

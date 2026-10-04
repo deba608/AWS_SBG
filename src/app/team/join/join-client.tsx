@@ -19,6 +19,36 @@ function roleForName(name: string): string {
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 5 * 1024 * 1024;
+/** Downscale full photo to ~1280px JPEG so admin can re-crop from scratch later. */
+const ORIGINAL_MAX_SIDE = 1280;
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Could not read that image."));
+    img.src = src;
+  });
+}
+
+function boundOriginal(img: HTMLImageElement): Promise<Blob> {
+  const scale = Math.min(1, ORIGINAL_MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.max(1, Math.round(img.naturalWidth * scale));
+  const h = Math.max(1, Math.round(img.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas unavailable in this browser.");
+  ctx.drawImage(img, 0, 0, w, h);
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Photo processing failed. Retry."))),
+      "image/jpeg",
+      0.82,
+    );
+  });
+}
 
 export default function JoinClient() {
   const [name, setName] = useState("");
@@ -26,6 +56,8 @@ export default function JoinClient() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [originalUrl, setOriginalUrl] = useState("");
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [preparing, setPreparing] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; role?: string; photo?: string }>({});
   const [apiError, setApiError] = useState("");

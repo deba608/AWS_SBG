@@ -19,6 +19,8 @@ export interface TeamSubmission {
   role: string;
   section: string;
   photoDataUrl: string;
+  /** Full pre-crop photo (bounded ~1280px) so admin can re-crop from scratch. */
+  originalDataUrl?: string | null;
   status: SubmissionStatus;
   createdAt: string;
   reviewedAt: string | null;
@@ -43,6 +45,8 @@ const REDIS_LOCK = "sbg:team-submissions:lock";
 
 /** Max stored photo: 800x800 q0.85 JPEG ≈ 150-300KB → base64 ≈ 400KB. Cap at ~900KB chars. */
 export const MAX_PHOTO_DATAURL_CHARS = 1_200_000;
+/** Bounded original (~1280px q0.82) for admin re-crop. */
+export const MAX_ORIGINAL_DATAURL_CHARS = 1_600_000;
 
 function emptyStore(): TeamSubmissionStore {
   return { submissions: [] };
@@ -122,7 +126,7 @@ export function rosterMember(name: string): TeamMember | null {
   return allMembers.find((m) => m.name.toLowerCase() === norm) ?? null;
 }
 
-export function validateSubmission(input: { name: string; role: string; photoDataUrl: string }): SubmissionErrors {
+export function validateSubmission(input: { name: string; role: string; photoDataUrl: string; originalDataUrl?: string | null }): SubmissionErrors {
   const errors: SubmissionErrors = {};
   const member = rosterMember(input.name);
   if (!member) errors.name = "Select your name from the team list.";
@@ -131,6 +135,13 @@ export function validateSubmission(input: { name: string; role: string; photoDat
     errors.photo = "Photo must be a square JPG — use the on-page cropper.";
   } else if (input.photoDataUrl.length > MAX_PHOTO_DATAURL_CHARS) {
     errors.photo = "Photo too large after processing. Retry.";
+  }
+  if (input.originalDataUrl != null && input.originalDataUrl !== "") {
+    if (!input.originalDataUrl.startsWith("data:image/jpeg;base64,")) {
+      errors.photo = "Original photo must be a JPG — re-upload.";
+    } else if (input.originalDataUrl.length > MAX_ORIGINAL_DATAURL_CHARS) {
+      errors.photo = "Original photo too large. Re-upload.";
+    }
   }
   return errors;
 }
@@ -144,10 +155,10 @@ export class TeamSubmissionError extends Error {
   }
 }
 
-export async function createSubmission(input: { name: string; role: string; photoDataUrl: string }): Promise<TeamSubmission> {
+export async function createSubmission(input: { name: string; role: string; photoDataUrl: string; originalDataUrl?: string | null }): Promise<TeamSubmission> {
   const member = rosterMember(input.name);
   const name = member ? member.name : input.name.trim().replace(/\s+/g, " ");
-  const errors = validateSubmission({ name, role: input.role, photoDataUrl: input.photoDataUrl });
+  const errors = validateSubmission({ name, role: input.role, photoDataUrl: input.photoDataUrl, originalDataUrl: input.originalDataUrl ?? null });
   if (Object.keys(errors).length > 0) throw new TeamSubmissionError(errors);
   const section = sectionForRole(input.role) ?? "ops";
   return withWriteLock(async () => {
@@ -158,6 +169,7 @@ export async function createSubmission(input: { name: string; role: string; phot
       role: input.role,
       section,
       photoDataUrl: input.photoDataUrl,
+      originalDataUrl: input.originalDataUrl ?? null,
       status: "pending",
       createdAt: new Date().toISOString(),
       reviewedAt: null,
