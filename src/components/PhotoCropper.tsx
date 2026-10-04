@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Loader2, X, ZoomIn } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Loader2, X, ZoomIn } from "lucide-react";
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -78,8 +78,8 @@ async function exportSquareJpeg(
 }
 
 /**
- * Reusable square-crop editor popup. Drag to move, slider to zoom.
- * onSave receives the processed 800x800 JPEG blob.
+ * Reusable square-crop editor popup. Drag / 2-finger pinch / arrows to move,
+ * slider / pinch to zoom. onSave receives the processed 800x800 JPEG blob.
  */
 export default function PhotoCropper({
   src,
@@ -109,19 +109,26 @@ export default function PhotoCropper({
     origX: number;
     origY: number;
   } | null>(null);
-  // Refs mirror state for use inside pinch math without stale closures.
+  // Refs mirror state for gesture handlers on window (no stale closures).
   const zoomRef = useRef(zoom);
   const natRef = useRef(nat);
+  const posRef = useRef(pos);
   useEffect(() => {
     zoomRef.current = zoom;
     natRef.current = nat;
-  }, [zoom, nat]);
+    posRef.current = pos;
+  }, [zoom, nat, pos]);
 
   useEffect(() => {
     let live = true;
     void loadImage(src)
       .then((img) => {
-        if (live) setNat({ w: img.naturalWidth, h: img.naturalHeight });
+        if (!live) return;
+        const size = { w: img.naturalWidth, h: img.naturalHeight };
+        setNat(size);
+        // Open showing the FULL photo so head/edges never start cut off.
+        setZoom(fitZoom(size));
+        setPos({ x: 0, y: 0 });
       })
       .catch(() => {
         if (live) setError("Could not read that image.");
@@ -147,9 +154,8 @@ export default function PhotoCropper({
     return boxRef.current?.clientWidth ?? 0;
   }
 
-  function onDragStart(e: React.PointerEvent) {
+  function onPointerDown(e: React.PointerEvent) {
     pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
     if (pointersRef.current.size === 2) {
       // Second finger down — switch to pinch mode.
       const [a, b] = [...pointersRef.current.values()];
@@ -158,57 +164,78 @@ export default function PhotoCropper({
         initZoom: zoomRef.current,
         initMidX: (a.x + b.x) / 2,
         initMidY: (a.y + b.y) / 2,
-        origX: pos.x,
-        origY: pos.y,
+        origX: posRef.current.x,
+        origY: posRef.current.y,
       };
       setDragging(false);
       return;
     }
-    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y };
+    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: posRef.current.x, origY: posRef.current.y };
     setDragging(true);
   }
 
-  function onDragMove(e: React.PointerEvent) {
-    if (!pointersRef.current.has(e.pointerId)) return;
-    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (pointersRef.current.size === 2) {
-      // Pinch: spread = zoom, midpoint shift = move.
-      const pinch = pinchRef.current;
-      if (!pinch || pinch.initDist <= 0) return;
-      const [a, b] = [...pointersRef.current.values()];
-      const dist = Math.hypot(a.x - b.x, a.y - b.y);
-      const midX = (a.x + b.x) / 2;
-      const midY = (a.y + b.y) / 2;
-      const z = Math.min(Math.max(pinch.initZoom * (dist / pinch.initDist), fitZoom(natRef.current)), 3);
-      setZoom(z);
+  // Moves tracked on window so drags never drop when fingers slide fast.
+  useEffect(() => {
+    if (!dragging) return;
+    function onMove(e: PointerEvent) {
+      if (!pointersRef.current.has(e.pointerId)) return;
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointersRef.current.size === 2) {
+        // Pinch: spread = zoom, midpoint shift = move.
+        const pinch = pinchRef.current;
+        if (!pinch || pinch.initDist <= 0) return;
+        const [a, b] = [...pointersRef.current.values()];
+        const dist = Math.hypot(a.x - b.x, a.y - b.y);
+        const midX = (a.x + b.x) / 2;
+        const midY = (a.y + b.y) / 2;
+        const z = Math.min(Math.max(pinch.initZoom * (dist / pinch.initDist), fitZoom(natRef.current)), 3);
+        setZoom(z);
+        setPos(
+          clampPos(
+            pinch.origX + (midX - pinch.initMidX),
+            pinch.origY + (midY - pinch.initMidY),
+            z,
+            natRef.current,
+            boxRef.current?.clientWidth ?? 0,
+          ),
+        );
+        return;
+      }
+      const dx = e.clientX - dragRef.current.startX;
+      const dy = e.clientY - dragRef.current.startY;
       setPos(
         clampPos(
-          pinch.origX + (midX - pinch.initMidX),
-          pinch.origY + (midY - pinch.initMidY),
-          z,
+          dragRef.current.origX + dx,
+          dragRef.current.origY + dy,
+          zoomRef.current,
           natRef.current,
-          boxSize(),
+          boxRef.current?.clientWidth ?? 0,
         ),
       );
-      return;
     }
-    if (!dragging) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
-    setPos(clampPos(dragRef.current.origX + dx, dragRef.current.origY + dy, zoom, nat, boxSize()));
-  }
+    function onUp(e: PointerEvent) {
+      pointersRef.current.delete(e.pointerId);
+      if (pointersRef.current.size < 2) pinchRef.current = null;
+      if (pointersRef.current.size === 1) {
+        // One finger left — hand drag over to it so motion stays smooth.
+        const [p] = [...pointersRef.current.values()];
+        dragRef.current = { startX: p.x, startY: p.y, origX: posRef.current.x, origY: posRef.current.y };
+      } else {
+        setDragging(false);
+      }
+    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+  }, [dragging]);
 
-  function onDragEnd(e: React.PointerEvent) {
-    pointersRef.current.delete(e.pointerId);
-    if (pointersRef.current.size < 2) pinchRef.current = null;
-    if (pointersRef.current.size === 1) {
-      // One finger left — hand drag over to it so motion stays smooth.
-      const [p] = [...pointersRef.current.values()];
-      dragRef.current = { startX: p.x, startY: p.y, origX: pos.x, origY: pos.y };
-      setDragging(true);
-    } else {
-      setDragging(false);
-    }
+  function nudge(dx: number, dy: number) {
+    setPos((p) => clampPos(p.x + dx, p.y + dy, zoomRef.current, natRef.current, boxSize()));
   }
 
   async function save() {
@@ -249,14 +276,11 @@ export default function PhotoCropper({
           </button>
         </div>
         <p className="mt-1 text-xs leading-relaxed text-fog">
-          Drag to move · pinch with 2 fingers to zoom & move · zoom out to fit full head · square 800×800 output.
+          Full photo shown first. Drag or arrows to move · pinch/slider to zoom · square 800×800 output.
         </p>
         <div
           ref={boxRef}
-          onPointerDown={onDragStart}
-          onPointerMove={onDragMove}
-          onPointerUp={onDragEnd}
-          onPointerCancel={onDragEnd}
+          onPointerDown={onPointerDown}
           className="relative mt-3 aspect-square w-full cursor-grab touch-none overflow-hidden rounded-xl border border-line bg-ink/60 active:cursor-grabbing"
           aria-label="Crop area: drag to reposition photo"
         >
@@ -287,6 +311,20 @@ export default function PhotoCropper({
             className="min-h-[44px] w-full accent-purple-500"
           />
           <span className="w-10 shrink-0 text-right font-mono text-xs text-fog">{zoom.toFixed(1)}x</span>
+        </div>
+        <div className="mt-1 flex items-center justify-center gap-2" aria-label="Move photo with buttons">
+          <button type="button" onClick={() => nudge(-12, 0)} aria-label="Move left" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+          </button>
+          <button type="button" onClick={() => nudge(0, -12)} aria-label="Move up" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
+            <ArrowUp className="h-4 w-4" aria-hidden />
+          </button>
+          <button type="button" onClick={() => nudge(0, 12)} aria-label="Move down" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
+            <ArrowDown className="h-4 w-4" aria-hidden />
+          </button>
+          <button type="button" onClick={() => nudge(12, 0)} aria-label="Move right" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </button>
         </div>
         {error ? (
           <p role="alert" className="mt-2 text-xs text-red-300">{error}</p>
