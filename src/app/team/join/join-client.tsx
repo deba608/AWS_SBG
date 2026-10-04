@@ -79,16 +79,18 @@ export default function JoinClient() {
     if (!name) fe.name = "Select your name from the team list.";
     else if (!roleForName(name)) fe.name = "Select your name from the team list.";
     if (!role) fe.role = "Select your position from the list.";
-    if (!file || !preview) fe.photo = "Upload a photo and finish cropping.";
+    const photoFile = file;
+    if (!photoFile || !preview) fe.photo = "Upload a photo and finish cropping.";
     setErrors(fe);
     if (Object.keys(fe).filter((k) => fe[k as keyof typeof fe]).length > 0) return;
+    if (!photoFile) return;
     setStatus("busy");
     setApiError("");
     try {
       const form = new FormData();
       form.set("name", name.trim());
       form.set("role", role);
-      form.set("photo", file, "photo.jpg");
+      form.set("photo", photoFile, "photo.jpg");
       const res = await fetch("/api/team/submit", { method: "POST", body: form });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
