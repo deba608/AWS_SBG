@@ -12,11 +12,11 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-/** Min zoom that fits the whole photo inside the square (1 for square photos). */
-function fitZoom(nat: { w: number; h: number } | null): number {
-  if (!nat || nat.w <= 0 || nat.h <= 0) return 1;
-  return Math.min(1, Math.min(nat.w, nat.h) / Math.max(nat.w, nat.h));
-}
+/**
+ * Reusable square-crop editor popup. Google-Photos style: the frame is always
+ * fully filled (cover) — drag/arrows to reposition, pinch/slider to zoom.
+ * onSave receives the processed 800x800 JPEG blob.
+ */
 
 function clampPos(
   x: number,
@@ -28,9 +28,9 @@ function clampPos(
   if (!nat || box <= 0) return { x: 0, y: 0 };
   const coverW = box * Math.max(1, nat.w / nat.h);
   const coverH = box * Math.max(1, nat.h / nat.w);
-  // abs(): zoomed-out fit may slide the photo inside the frame (letterbox follows).
-  const maxX = Math.abs(coverW * zoom - box) / 2;
-  const maxY = Math.abs(coverH * zoom - box) / 2;
+  // Cover always fills frame — clamp keeps photo edges at/over frame edges.
+  const maxX = Math.max(0, (coverW * zoom - box) / 2);
+  const maxY = Math.max(0, (coverH * zoom - box) / 2);
   return { x: Math.min(Math.max(x, -maxX), maxX), y: Math.min(Math.max(y, -maxY), maxY) };
 }
 
@@ -47,9 +47,9 @@ async function exportSquareJpeg(
   const vis = S / (base * crop.zoom);
   const cx = iw / 2 - crop.x / base;
   const cy = ih / 2 - crop.y / base;
-  // Zoomed-out fit can leave empty bands — intersect with photo, letterbox rest.
-  const sx = cx - vis / 2;
-  const sy = cy - vis / 2;
+  // Cover always fills frame — window stays inside photo, no letterbox.
+  const sx = Math.min(Math.max(cx - vis / 2, 0), Math.max(iw - vis, 0));
+  const sy = Math.min(Math.max(cy - vis / 2, 0), Math.max(ih - vis, 0));
   const ix0 = Math.max(sx, 0);
   const iy0 = Math.max(sy, 0);
   const ix1 = Math.min(sx + vis, iw);
