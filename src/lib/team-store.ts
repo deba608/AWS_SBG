@@ -185,6 +185,20 @@ export async function setSubmissionStatus(id: string, status: SubmissionStatus):
   });
 }
 
+/** Admin re-crop: replace the stored square JPG photo. */
+export async function updateSubmissionPhoto(id: string, photoDataUrl: string): Promise<TeamSubmission> {
+  if (!photoDataUrl.startsWith("data:image/jpeg;base64,")) throw new Error("Photo must be a square JPG.");
+  if (photoDataUrl.length > MAX_PHOTO_DATAURL_CHARS) throw new Error("Photo too large.");
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const sub = store.submissions.find((s) => s.id === id);
+    if (!sub) throw new Error("Submission not found.");
+    sub.photoDataUrl = photoDataUrl;
+    await writeStore(store);
+    return { ...sub };
+  });
+}
+
 export async function listApproved(): Promise<TeamSubmission[]> {
   const store = await readStore();
   return store.submissions.filter((s) => s.status === "approved");

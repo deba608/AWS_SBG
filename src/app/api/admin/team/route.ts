@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { listSubmissions, setSubmissionStatus, type SubmissionStatus } from "@/lib/team-store";
+import { listSubmissions, setSubmissionStatus, updateSubmissionPhoto, type SubmissionStatus } from "@/lib/team-store";
 
 /** Admin: list all photo submissions, newest first. */
 export async function GET() {
@@ -25,6 +25,19 @@ export async function PATCH(req: Request) {
   }
   const b = (body ?? {}) as Record<string, unknown>;
   const id = String(b.id ?? "");
+  if (!id) return NextResponse.json({ error: "id required." }, { status: 400 });
+  // Admin re-crop: PATCH { id, photoDataUrl } replaces the square JPG.
+  if (typeof b.photoDataUrl === "string") {
+    try {
+      const submission = await updateSubmissionPhoto(id, b.photoDataUrl);
+      return NextResponse.json({ submission });
+    } catch (err) {
+      if (err instanceof Error && err.message === "Submission not found.") {
+        return NextResponse.json({ error: "Submission not found." }, { status: 404 });
+      }
+      return NextResponse.json({ error: err instanceof Error ? err.message : "Update failed." }, { status: 400 });
+    }
+  }
   const status = String(b.status ?? "") as SubmissionStatus;
   if (!id || !["pending", "approved", "rejected"].includes(status)) {
     return NextResponse.json({ error: "id and valid status required." }, { status: 400 });
