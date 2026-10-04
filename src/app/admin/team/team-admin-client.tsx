@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Check, Loader2, X } from "lucide-react";
+import { ArrowLeft, Check, Crop, Loader2, X } from "lucide-react";
 import AdminLogin from "@/components/AdminLogin";
+import PhotoCropper from "@/components/PhotoCropper";
 import type { TeamSubmission } from "@/lib/team-store";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,7 @@ export default function TeamAdminClient() {
   const [filter, setFilter] = useState<Filter>("pending");
   const [loading, setLoading] = useState(false);
   const [actingId, setActingId] = useState<string | null>(null);
+  const [cropFor, setCropFor] = useState<TeamSubmission | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/me", { cache: "no-store" })
@@ -55,6 +57,29 @@ export default function TeamAdminClient() {
   }
   if (!authed) return <AdminLogin onDone={() => setAuthed(true)} />;
 
+  async function saveCrop(blob: Blob) {
+    if (!cropFor) return;
+    setActingId(cropFor.id);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Could not read cropped photo."));
+        reader.readAsDataURL(blob);
+      });
+      const res = await fetch("/api/admin/team", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: cropFor.id, photoDataUrl: dataUrl }),
+      });
+      if (res.ok) {
+        setCropFor(null);
+        await load();
+      }
+    } finally {
+      setActingId(null);
+    }
+  }
   async function act(id: string, status: "approved" | "rejected") {
     setActingId(id);
     try {
@@ -119,6 +144,14 @@ export default function TeamAdminClient() {
                 <p className="font-semibold text-cream">{s.name}</p>
                 <p className="text-sm text-brand">{s.role}</p>
                 <p className="text-xs text-faint">{new Date(s.createdAt).toLocaleString()} · {s.status}</p>
+                <button
+                  type="button"
+                  disabled={actingId === s.id}
+                  onClick={() => setCropFor(s)}
+                  className="mt-2 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-brand/60 bg-brand/10 px-4 py-2 text-xs font-semibold text-cream hover:bg-brand/20 disabled:opacity-60"
+                >
+                  <Crop className="h-3.5 w-3.5" aria-hidden /> Adjust crop / move
+                </button>
                 {s.status === "pending" ? (
                   <div className="flex gap-2 pt-2">
                     <button
