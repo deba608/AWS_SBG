@@ -17,6 +17,8 @@ function fitZoom(nat: { w: number; h: number } | null): number {
   if (!nat || nat.w <= 0 || nat.h <= 0) return 1;
   return Math.min(1, Math.min(nat.w, nat.h) / Math.max(nat.w, nat.h));
 }
+
+function clampPos(
   x: number,
   y: number,
   zoom: number,
@@ -44,8 +46,13 @@ async function exportSquareJpeg(
   const vis = S / (base * crop.zoom);
   const cx = iw / 2 - crop.x / base;
   const cy = ih / 2 - crop.y / base;
-  const sx = Math.min(Math.max(cx - vis / 2, 0), Math.max(iw - vis, 0));
-  const sy = Math.min(Math.max(cy - vis / 2, 0), Math.max(ih - vis, 0));
+  // Zoomed-out fit can leave empty bands — intersect with photo, letterbox rest.
+  const sx = cx - vis / 2;
+  const sy = cy - vis / 2;
+  const ix0 = Math.max(sx, 0);
+  const iy0 = Math.max(sy, 0);
+  const ix1 = Math.min(sx + vis, iw);
+  const iy1 = Math.min(sy + vis, ih);
   const canvas = document.createElement("canvas");
   canvas.width = 800;
   canvas.height = 800;
@@ -53,7 +60,14 @@ async function exportSquareJpeg(
   if (!ctx) throw new Error("Canvas unavailable in this browser.");
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, 800, 800);
-  ctx.drawImage(img, sx, sy, vis, vis, 0, 0, 800, 800);
+  if (ix1 > ix0 && iy1 > iy0) {
+    ctx.drawImage(
+      img,
+      ix0, iy0, ix1 - ix0, iy1 - iy0,
+      ((ix0 - sx) / vis) * 800, ((iy0 - sy) / vis) * 800,
+      ((ix1 - ix0) / vis) * 800, ((iy1 - iy0) / vis) * 800,
+    );
+  }
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error("Photo processing failed. Retry."))),
