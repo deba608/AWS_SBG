@@ -125,10 +125,9 @@ export default function PhotoCropper({
     void loadImage(src)
       .then((img) => {
         if (!live) return;
-        const size = { w: img.naturalWidth, h: img.naturalHeight };
-        setNat(size);
-        // Open showing the FULL photo so head/edges never start cut off.
-        setZoom(fitZoom(size));
+        setNat({ w: img.naturalWidth, h: img.naturalHeight });
+        // Google-style: open frame-filling (cover), centered. Drag to frame face.
+        setZoom(1);
         setPos({ x: 0, y: 0 });
       })
       .catch(() => {
@@ -189,7 +188,7 @@ export default function PhotoCropper({
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
         const midX = (a.x + b.x) / 2;
         const midY = (a.y + b.y) / 2;
-        const z = Math.min(Math.max(pinch.initZoom * (dist / pinch.initDist), fitZoom(natRef.current)), 3);
+        const z = Math.min(Math.max(pinch.initZoom * (dist / pinch.initDist), 1), 3);
         setZoom(z);
         setPos(
           clampPos(
@@ -277,7 +276,7 @@ export default function PhotoCropper({
           </button>
         </div>
         <p className="mt-1 text-xs leading-relaxed text-fog">
-          Full photo shown first. Drag or arrows to move · pinch/slider to zoom · square 800×800 output.
+          Drag with finger to move · pinch with 2 fingers to zoom · arrows nudge · frame stays full, square 800×800 output.
         </p>
         <div
           ref={boxRef}
@@ -300,10 +299,10 @@ export default function PhotoCropper({
           <input
             id="crop-zoom"
             type="range"
-            min={fitZoom(nat)}
+            min={1}
             max={3}
             step={0.05}
-            value={Math.max(zoom, fitZoom(nat))}
+            value={zoom}
             onChange={(e) => {
               const z = Number(e.target.value);
               setZoom(z);
@@ -334,22 +333,12 @@ export default function PhotoCropper({
           <button
             type="button"
             onClick={() => {
-              const fz = fitZoom(nat);
-              setZoom(fz);
-              setPos({ x: 0, y: 0 });
-            }}
-            className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-full border border-brand/60 bg-brand/10 px-4 py-2 text-sm font-semibold text-cream hover:bg-brand/20"
-          >
-            Fit full photo
-          </button>
-          <button
-            type="button"
-            onClick={() => {
+              setZoom(1);
               setPos({ x: 0, y: 0 });
             }}
             className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-full border border-line px-4 py-2 text-sm text-fog hover:text-cream"
           >
-            Center
+            Reset
           </button>
           <button
             type="button"
