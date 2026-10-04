@@ -28,18 +28,29 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-function cropToSquareJpeg(img: HTMLImageElement): Promise<Blob> {
-  const side = Math.min(img.naturalWidth, img.naturalHeight);
-  const sx = (img.naturalWidth - side) / 2;
-  const sy = (img.naturalHeight - side) / 2;
+function cropToSquareJpeg(
+  img: HTMLImageElement,
+  crop: { zoom: number; x: number; y: number; box: number },
+): Promise<Blob> {
+  const iw = img.naturalWidth;
+  const ih = img.naturalHeight;
+  const S = crop.box > 0 ? crop.box : 300;
+  const coverW = S * Math.max(1, iw / ih);
   const canvas = document.createElement("canvas");
   canvas.width = 800;
   canvas.height = 800;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas unavailable in this browser.");
+  // Visible window in natural px: cover-fit base, then zoom + pan (x/y in screen px).
+  const unit = iw / (coverW * crop.zoom); // natural px per screen px
+  const vis = S * unit;
+  const cx = iw / 2 - crop.x * unit;
+  const cy = ih / 2 - crop.y * unit;
+  const sx = Math.min(Math.max(cx - vis / 2, 0), Math.max(iw - vis, 0));
+  const sy = Math.min(Math.max(cy - vis / 2, 0), Math.max(ih - vis, 0));
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, 800, 800);
-  ctx.drawImage(img, sx, sy, side, side, 0, 0, 800, 800);
+  ctx.drawImage(img, sx, sy, vis, vis, 0, 0, 800, 800);
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error("Photo processing failed. Retry."))),
@@ -49,15 +60,36 @@ function cropToSquareJpeg(img: HTMLImageElement): Promise<Blob> {
   });
 }
 
+function clampPos(
+  x: number,
+  y: number,
+  zoom: number,
+  nat: { w: number; h: number } | null,
+  box: number,
+): { x: number; y: number } {
+  if (!nat || box <= 0) return { x: 0, y: 0 };
+  const coverW = box * Math.max(1, nat.w / nat.h);
+  const coverH = box * Math.max(1, nat.h / nat.w);
+  const maxX = Math.max(0, (coverW * zoom - box) / 2);
+  const maxY = Math.max(0, (coverH * zoom - box) / 2);
+  return { x: Math.min(Math.max(x, -maxX), maxX), y: Math.min(Math.max(y, -maxY), maxY) };
+}
+
 export default function JoinClient() {
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
+  const [zoom, setZoom] = useState(1);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [nat, setNat] = useState<{ w: number; h: number } | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; role?: string; photo?: string }>({});
   const [apiError, setApiError] = useState("");
   const [status, setStatus] = useState<"form" | "busy" | "done">("form");
   const inputRef = useRef<HTMLInputElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef({ startX: 0, startY: 0, origX: 0, origY: 0 });
 
   useEffect(() => {
     return () => {
