@@ -81,6 +81,20 @@ export default function PhotoCropper({
   const [error, setError] = useState("");
   const boxRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef({ startX: 0, startY: 0, origX: 0, origY: 0 });
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{
+    initDist: number;
+    initZoom: number;
+    initMidX: number;
+    initMidY: number;
+    origX: number;
+    origY: number;
+  } | null>(null);
+  // Refs mirror state for use inside pinch math without stale closures.
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+  const natRef = useRef(nat);
+  natRef.current = nat;
 
   useEffect(() => {
     let live = true;
@@ -113,16 +127,67 @@ export default function PhotoCropper({
   }
 
   function onDragStart(e: React.PointerEvent) {
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    if (pointersRef.current.size === 2) {
+      // Second finger down — switch to pinch mode.
+      const [a, b] = [...pointersRef.current.values()];
+      pinchRef.current = {
+        initDist: Math.hypot(a.x - b.x, a.y - b.y),
+        initZoom: zoomRef.current,
+        initMidX: (a.x + b.x) / 2,
+        initMidY: (a.y + b.y) / 2,
+        origX: pos.x,
+        origY: pos.y,
+      };
+      setDragging(false);
+      return;
+    }
     dragRef.current = { startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y };
     setDragging(true);
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
   }
 
   function onDragMove(e: React.PointerEvent) {
+    if (!pointersRef.current.has(e.pointerId)) return;
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointersRef.current.size === 2) {
+      // Pinch: spread = zoom, midpoint shift = move.
+      const pinch = pinchRef.current;
+      if (!pinch || pinch.initDist <= 0) return;
+      const [a, b] = [...pointersRef.current.values()];
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      const midX = (a.x + b.x) / 2;
+      const midY = (a.y + b.y) / 2;
+      const z = Math.min(Math.max(pinch.initZoom * (dist / pinch.initDist), 1), 3);
+      setZoom(z);
+      setPos(
+        clampPos(
+          pinch.origX + (midX - pinch.initMidX),
+          pinch.origY + (midY - pinch.initMidY),
+          z,
+          natRef.current,
+          boxSize(),
+        ),
+      );
+      return;
+    }
     if (!dragging) return;
     const dx = e.clientX - dragRef.current.startX;
     const dy = e.clientY - dragRef.current.startY;
     setPos(clampPos(dragRef.current.origX + dx, dragRef.current.origY + dy, zoom, nat, boxSize()));
+  }
+
+  function onDragEnd(e: React.PointerEvent) {
+    pointersRef.current.delete(e.pointerId);
+    if (pointersRef.current.size < 2) pinchRef.current = null;
+    if (pointersRef.current.size === 1) {
+      // One finger left — hand drag over to it so motion stays smooth.
+      const [p] = [...pointersRef.current.values()];
+      dragRef.current = { startX: p.x, startY: p.y, origX: pos.x, origY: pos.y };
+      setDragging(true);
+    } else {
+      setDragging(false);
+    }
   }
 
   async function save() {
@@ -163,14 +228,14 @@ export default function PhotoCropper({
           </button>
         </div>
         <p className="mt-1 text-xs leading-relaxed text-fog">
-          Drag to move position · slider to zoom · square 800×800 output.
+          Drag to move · pinch with 2 fingers to zoom & move · slider also zooms · square 800×800 output.
         </p>
         <div
           ref={boxRef}
           onPointerDown={onDragStart}
           onPointerMove={onDragMove}
-          onPointerUp={() => setDragging(false)}
-          onPointerCancel={() => setDragging(false)}
+          onPointerUp={onDragEnd}
+          onPointerCancel={onDragEnd}
           className="relative mt-3 aspect-square w-full cursor-grab touch-none overflow-hidden rounded-xl border border-line bg-ink/60 active:cursor-grabbing"
           aria-label="Crop area: drag to reposition photo"
         >
