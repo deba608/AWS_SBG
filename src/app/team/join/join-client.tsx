@@ -64,12 +64,18 @@ export default function JoinClient() {
   const [status, setStatus] = useState<"form" | "busy" | "done">("form");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Revoke each object URL independently so changing one doesn't revoke the other.
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
+  useEffect(() => {
+    return () => {
       if (originalUrl) URL.revokeObjectURL(originalUrl);
     };
-  }, [preview, originalUrl]);
+  }, [originalUrl]);
 
   function pickFile(f: File | null) {
     setApiError("");
