@@ -92,9 +92,11 @@ export default function PhotoCropper({
   } | null>(null);
   // Refs mirror state for use inside pinch math without stale closures.
   const zoomRef = useRef(zoom);
-  zoomRef.current = zoom;
   const natRef = useRef(nat);
-  natRef.current = nat;
+  useEffect(() => {
+    zoomRef.current = zoom;
+    natRef.current = nat;
+  }, [zoom, nat]);
 
   useEffect(() => {
     let live = true;
