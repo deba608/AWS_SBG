@@ -28,8 +28,9 @@ function clampPos(
   if (!nat || box <= 0) return { x: 0, y: 0 };
   const coverW = box * Math.max(1, nat.w / nat.h);
   const coverH = box * Math.max(1, nat.h / nat.w);
-  const maxX = Math.max(0, (coverW * zoom - box) / 2);
-  const maxY = Math.max(0, (coverH * zoom - box) / 2);
+  // abs(): zoomed-out fit may slide the photo inside the frame (letterbox follows).
+  const maxX = Math.abs(coverW * zoom - box) / 2;
+  const maxY = Math.abs(coverH * zoom - box) / 2;
   return { x: Math.min(Math.max(x, -maxX), maxX), y: Math.min(Math.max(y, -maxY), maxY) };
 }
 
@@ -281,7 +282,7 @@ export default function PhotoCropper({
         <div
           ref={boxRef}
           onPointerDown={onPointerDown}
-          className="relative mt-3 aspect-square w-full cursor-grab touch-none overflow-hidden rounded-xl border border-line bg-ink/60 active:cursor-grabbing"
+          className="relative mt-3 aspect-square w-full cursor-grab touch-none overflow-hidden rounded-xl border border-line bg-black active:cursor-grabbing"
           aria-label="Crop area: drag to reposition photo"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -344,12 +345,11 @@ export default function PhotoCropper({
           <button
             type="button"
             onClick={() => {
-              setZoom(1);
               setPos({ x: 0, y: 0 });
             }}
             className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-full border border-line px-4 py-2 text-sm text-fog hover:text-cream"
           >
-            Reset
+            Center
           </button>
           <button
             type="button"
