@@ -179,6 +179,14 @@ export default function TeamAdminClient() {
           ))}
         </ul>
       )}
+      {cropFor ? (
+        <PhotoCropper
+          src={cropFor.photoDataUrl}
+          title={`Crop — ${cropFor.name}`}
+          onClose={() => setCropFor(null)}
+          onSave={saveCrop}
+        />
+      ) : null}
     </div>
   );
 }
