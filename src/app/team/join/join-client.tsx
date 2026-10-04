@@ -113,10 +113,39 @@ export default function JoinClient() {
     }
     setErrors((e) => ({ ...e, photo: undefined }));
     setFile(f);
+    setZoom(1);
+    setPos({ x: 0, y: 0 });
+    setNat(null);
     setPreview((old) => {
       if (old) URL.revokeObjectURL(old);
-      return URL.createObjectURL(f);
+      const url = URL.createObjectURL(f);
+      void loadImage(url)
+        .then((img) => setNat({ w: img.naturalWidth, h: img.naturalHeight }))
+        .catch(() => {});
+      return url;
     });
+  }
+
+  function boxSize(): number {
+    return boxRef.current?.clientWidth ?? 0;
+  }
+
+  function onDragStart(e: React.PointerEvent) {
+    if (!preview) return;
+    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y };
+    setDragging(true);
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+  }
+
+  function onDragMove(e: React.PointerEvent) {
+    if (!dragging) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    setPos(clampPos(dragRef.current.origX + dx, dragRef.current.origY + dy, zoom, nat, boxSize()));
+  }
+
+  function onDragEnd() {
+    setDragging(false);
   }
 
   async function submit(e: React.FormEvent) {
@@ -132,7 +161,7 @@ export default function JoinClient() {
     setApiError("");
     try {
       const img = await loadImage(preview);
-      const blob = await cropToSquareJpeg(img);
+      const blob = await cropToSquareJpeg(img, { zoom, x: pos.x, y: pos.y, box: boxSize() });
       const form = new FormData();
       form.set("name", name.trim());
       form.set("role", role);
@@ -166,6 +195,9 @@ export default function JoinClient() {
             setRole("");
             setFile(null);
             setPreview("");
+            setZoom(1);
+            setPos({ x: 0, y: 0 });
+            setNat(null);
             setErrors({});
             setApiError("");
           }}
@@ -237,27 +269,87 @@ export default function JoinClient() {
       </div>
 
       <div>
-        <span className="mb-1.5 block text-sm font-medium text-cream">Photo *</span>
+        <span className="mb-1.5 block text-sm font-medium text-cream">Photo * — drag to crop, slider to zoom</span>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="flex aspect-square w-full max-w-52 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-line bg-ink/60 hover:border-brand/60"
-            aria-label="Upload team photo"
-          >
+          <div className="w-full max-w-52 shrink-0">
+            <div
+              ref={boxRef}
+              onPointerDown={onDragStart}
+              onPointerMove={onDragMove}
+              onPointerUp={onDragEnd}
+              onPointerCancel={onDragEnd}
+              className={cn(
+                "relative aspect-square w-full overflow-hidden rounded-xl border border-dashed border-line bg-ink/60",
+                preview ? "cursor-grab touch-none active:cursor-grabbing" : "hover:border-brand/60",
+              )}
+              role={preview ? "slider" : undefined}
+              aria-label={preview ? "Crop photo: drag to reposition" : "Upload team photo"}
+              aria-valuetext={preview ? `Zoom ${zoom.toFixed(1)}x` : undefined}
+            >
+              {preview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={preview}
+                  alt="Crop preview — drag to reposition"
+                  draggable={false}
+                  className="h-full w-full object-cover select-none"
+                  style={{ transform: `translate(${pos.x / zoom}px, ${pos.y / zoom}px) scale(${zoom})` }}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.click()}
+                  className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center text-xs text-faint"
+                >
+                  <ImagePlus className="h-6 w-6" aria-hidden />
+                  Tap to upload — then crop square
+                </button>
+              )}
+            </div>
             {preview ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={preview} alt="Photo preview, square crop" className="h-full w-full object-cover" />
-            ) : (
-              <span className="flex flex-col items-center gap-2 p-4 text-center text-xs text-faint">
-                <ImagePlus className="h-6 w-6" aria-hidden />
-                Tap to upload — square preview
-              </span>
-            )}
-          </button>
+              <div className="mt-2 flex items-center gap-2">
+                <label htmlFor="team-zoom" className="text-xs text-faint">Zoom</label>
+                <input
+                  id="team-zoom"
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  value={zoom}
+                  onChange={(e) => {
+                    const z = Number(e.target.value);
+                    setZoom(z);
+                    setPos((p) => clampPos(p.x, p.y, z, nat, boxSize()));
+                  }}
+                  className="min-h-[44px] w-full accent-purple-500"
+                />
+              </div>
+            ) : null}
+          </div>
           <div className="min-w-0 flex-1 text-xs leading-relaxed text-fog">
             <p>Perfect format: <span className="font-semibold text-cream">square 800×800 JPG</span>.</p>
-            <p className="mt-1">Upload any clear front-facing photo — it auto-crops center-square on submit. Face centered works best. Max 5MB.</p>
+            <p className="mt-1">Drag photo to position face in square, slider zooms. What you frame is what submits. Max 5MB.</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="inline-flex min-h-[44px] items-center rounded-full border border-line px-4 py-2 text-xs font-semibold text-fog hover:text-cream"
+              >
+                {preview ? "Change photo" : "Upload photo"}
+              </button>
+              {preview ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setZoom(1);
+                    setPos({ x: 0, y: 0 });
+                  }}
+                  className="inline-flex min-h-[44px] items-center rounded-full border border-line px-4 py-2 text-xs text-fog hover:text-cream"
+                >
+                  Reset crop
+                </button>
+              ) : null}
+            </div>
             {file ? <p className="mt-1 truncate text-cream">{file.name}</p> : null}
           </div>
         </div>
