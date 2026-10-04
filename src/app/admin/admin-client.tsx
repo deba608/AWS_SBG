@@ -433,12 +433,12 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
     return (
       <div className="rank-card space-y-3 p-6 text-center">
         <p className="text-lg font-bold text-cream">Sub-admin: entry scanning only</p>
-        <p className="text-sm text-fog">Dashboard, exports and settings need full admin. Use gate scanner.</p>
+        <p className="text-sm text-fog">Dashboard, exports and settings need full admin. Use gate check.</p>
         <Link
-          href="/admin/scan"
+          href="/check"
           className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-brand px-6 py-2 text-sm font-semibold text-black hover:bg-brandhover"
         >
-          Open gate scanner
+          Open gate check
         </Link>
       </div>
     );

@@ -63,10 +63,11 @@ function tokenFromQRText(text: string): string {
   return t;
 }
 
-export default function ScanClient() {
+export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean }) {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [role, setRole] = useState<"admin" | "subadmin" | null>(null);
   const isSubAdmin = role === "subadmin";
+  const entryLocked = isSubAdmin || lockEntry;
   const [password, setPassword] = useState("");
   const [loginErr, setLoginErr] = useState("");
   const [token, setToken] = useState("");
@@ -194,8 +195,8 @@ export default function ScanClient() {
   }
 
   function switchMode(m: ScanMode) {
-    // Sub-admin locked to gate entry.
-    if (isSubAdmin) return;
+    // Sub-admin + /check locked to gate entry.
+    if (entryLocked) return;
     setMode(m);
     try {
       window.localStorage.setItem("awsScanMode", m);
@@ -354,7 +355,7 @@ export default function ScanClient() {
   async function burn() {
     const t = tokenFromQRText(token);
     if (!t || burning) return;
-    const kind: ScanMode = isSubAdmin ? "entry" : mode;
+    const kind: ScanMode = entryLocked ? "entry" : mode;
     setBurning(true);
     try {
       const r = await fetch("/api/passes/burn", {
@@ -617,9 +618,11 @@ export default function ScanClient() {
   if (!authed) {
     return (
       <form onSubmit={login} className="rank-card space-y-4 p-5 sm:p-6">
-        <h2 className="text-lg font-bold text-cream">Gate login</h2>
+        <h2 className="text-lg font-bold text-cream">{lockEntry ? "Gate check login" : "Gate login"}</h2>
         <p className="text-sm text-fog">
-          Full admin or sub-admin (gate) password both work here. Sub-admin gets entry scans only.
+          {lockEntry
+            ? "Entry verification only. Use gate password."
+            : "Full admin or sub-admin (gate) password both work here. Sub-admin gets entry scans only."}
         </p>
         <input
           type="password"
@@ -659,11 +662,11 @@ export default function ScanClient() {
     <div className="space-y-4">
       <div className="rank-card flex items-center gap-3 px-5 py-3">
         <p className="text-3xl font-bold tabular-nums text-green-400">
-          {isSubAdmin ? (stats?.entryUsed ?? "–") : mode === "food" ? (stats?.foodUsed ?? "–") : (stats?.entryUsed ?? "–")}
+          {entryLocked ? (stats?.entryUsed ?? "–") : mode === "food" ? (stats?.foodUsed ?? "–") : (stats?.entryUsed ?? "–")}
         </p>
         <div className="min-w-0 text-xs leading-tight text-fog">
-          <p>{!isSubAdmin && mode === "food" ? "lunches served" : "in gate"}{stats ? ` · ${stats.users} reg` : ""}{isSubAdmin ? " · entry only" : ""}</p>
-          {!isSubAdmin && stats ? <p>Veg {stats.veg} · Non-veg {stats.nonveg}</p> : null}
+          <p>{!entryLocked && mode === "food" ? "lunches served" : "in gate"}{stats ? ` · ${stats.users} reg` : ""}{entryLocked ? " · entry only" : ""}</p>
+          {!entryLocked && stats ? <p>Veg {stats.veg} · Non-veg {stats.nonveg}</p> : null}
         </div>
         <span className="flex-1" aria-hidden />
         {scanning ? (
@@ -684,9 +687,9 @@ export default function ScanClient() {
       </div>
 
       <div className="rank-card space-y-3 p-4 sm:p-5">
-        {isSubAdmin ? (
+        {entryLocked ? (
           <div className="flex items-center justify-center gap-2 rounded-2xl border border-brand/40 bg-brand/10 px-4 py-3 text-sm font-bold text-cream">
-            Gate entry · Sub-admin — entry scans only
+            Gate entry — entry scans only
           </div>
         ) : (
         <div
@@ -721,7 +724,7 @@ export default function ScanClient() {
         </div>
         )}
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-bold text-cream">Scan{isSubAdmin ? " — entry" : ""}</h2>
+          <h2 className="text-lg font-bold text-cream">Scan{entryLocked ? " — entry" : ""}</h2>
           <button
             type="button"
             onClick={() => void startCamera()}
