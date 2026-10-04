@@ -104,6 +104,12 @@ export const domainLeads: TeamMember[] = [
     role: "Cybersecurity Co-Lead",
     bio: "Helps organize security-focused events and educational content.",
   },
+  {
+    id: "bhukesh-barik",
+    name: "Bhukesh Barik",
+    role: "Cybersecurity Co-Lead",
+    bio: "Supports security workshops, CTFs and community awareness sessions.",
+  },
   // Android
   {
     id: "debashis-sahoo",
