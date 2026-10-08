@@ -593,6 +593,7 @@ export async function verifyPassByRaw(raw: string): Promise<VerifyResult> {
       : undefined;
     if (!pass || !user) return { ok: false, reason: "INVALID" };
     t = pass.token;
+    if (!verifyPassToken(t)) return { ok: false, reason: "INVALID" };
     if (isExpired()) return { ok: false, reason: "EXPIRED" };
     return { ok: true, user, pass, alreadyUsed: pass.status === "USED", foodUsed: foodStatusOf(pass) === "USED" };
   }
@@ -742,18 +743,43 @@ export async function passStats(): Promise<{
   years: Record<Year, number>;
 }> {
   const store = await readStore();
-  const years = countByYear(store.users);
+  const years = { "1st": 0, "2nd": 0, "3rd": 0, "4th": 0 } as Record<Year, number>;
+  let entryActive = 0;
+  let entryUsed = 0;
+  let veg = 0;
+  let nonveg = 0;
+  let male = 0;
+  let female = 0;
+  let foodUsed = 0;
+  let foodActive = 0;
+  // Single pass over both arrays — was 7 full iterations (6 filters + years).
+  for (const u of store.users) {
+    if (u.food === "Veg") veg += 1;
+    else if (u.food === "Non-veg") nonveg += 1;
+    if (u.gender === "Male") male += 1;
+    else if (u.gender === "Female") female += 1;
+    const y = effectiveYearOf(u);
+    if (y) years[y] += 1;
+  }
+  for (const p of store.passes) {
+    if (p.type === "ENTRY") {
+      if (p.status === "ACTIVE") entryActive += 1;
+      else if (p.status === "USED") entryUsed += 1;
+    }
+    if (foodStatusOf(p) === "USED") foodUsed += 1;
+    else foodActive += 1;
+  }
   return {
     issued: store.passes.length,
     users: store.users.length,
-    entryActive: store.passes.filter((p) => p.type === "ENTRY" && p.status === "ACTIVE").length,
-    entryUsed: store.passes.filter((p) => p.type === "ENTRY" && p.status === "USED").length,
-    veg: store.users.filter((u) => u.food === "Veg").length,
-    nonveg: store.users.filter((u) => u.food === "Non-veg").length,
-    male: store.users.filter((u) => u.gender === "Male").length,
-    female: store.users.filter((u) => u.gender === "Female").length,
-    foodUsed: store.passes.filter((p) => foodStatusOf(p) === "USED").length,
-    foodActive: store.passes.filter((p) => foodStatusOf(p) === "ACTIVE").length,
+    entryActive,
+    entryUsed,
+    veg,
+    nonveg,
+    male,
+    female,
+    foodUsed,
+    foodActive,
     years,
   };
 }

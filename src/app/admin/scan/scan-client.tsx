@@ -216,6 +216,9 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
   function unpauseDecoding() {
     decodePausedRef.current = false;
     lastScanRef.current = "";
+    // Next person must scan instantly — otherwise the 250ms throttle eats
+    // the first frame after every resume and the gate feels sluggish.
+    lastDecodeAtRef.current = 0;
   }
 
   /** Reset to idle + resume decoding (no camera re-init when stream alive). */
@@ -241,6 +244,32 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
     }, ms);
   }
 
+  /** Instant gate feedback: buzz + beep fire before eyes read the screen. */
+  function signalResult(ok: boolean) {
+    try {
+      navigator.vibrate?.(ok ? 30 : [60, 40, 60]);
+    } catch {
+      // ignore
+    }
+    try {
+      const AC = (window as unknown as { AudioContext?: new () => AudioContext }).AudioContext;
+      if (!AC) return;
+      const ctx = new AC();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = ok ? 880 : 220;
+      gain.gain.value = 0.08;
+      osc.start();
+      const stopAt = ctx.currentTime + (ok ? 0.08 : 0.18);
+      osc.stop(stopAt);
+      osc.onended = () => void ctx.close().catch(() => undefined);
+    } catch {
+      // audio unavailable — vibration already fired
+    }
+  }
+
   function applyVerifyBody(d: unknown) {
     const body = d as {
       status?: string;
@@ -251,6 +280,15 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
       error?: string;
     };
     if (body.status === "ACTIVE" || body.status === "USED" || body.status === "EXPIRED") {
+      const liveMode = modeRef.current;
+      const claimed = body.foodStatus === "FOOD_USED";
+      const good =
+        body.status === "EXPIRED"
+          ? false
+          : liveMode === "food"
+            ? !claimed
+            : body.status === "ACTIVE";
+      signalResult(good);
       setState({
         kind: "result",
         status: body.status,
@@ -267,8 +305,10 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
       });
     } else if (body.error === "Too fast. Slow down.") {
       setState({ kind: "error", message: "Too fast — wait a moment, then retry." });
+      signalResult(false);
     } else {
       setState({ kind: "result", status: "INVALID" });
+      signalResult(false);
     }
     return body;
   }
@@ -289,7 +329,7 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
           liveMode === "food"
             ? body.foodStatus === "FOOD_USED" || body.status === "EXPIRED"
             : body.status !== "ACTIVE";
-        if (consumed) scheduleResume(900);
+        if (consumed) scheduleResume(600);
       }
       return;
     }
@@ -315,19 +355,23 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
           const oldest = verifyCacheRef.current.keys().next().value;
           if (oldest) verifyCacheRef.current.delete(oldest);
         }
+        const liveMode = modeRef.current;
         if (auto) {
           // freeze decode, keep video: decision made, stop decode spam
           pauseDecoding();
           // Food counter scans the same ENTRY QR: entry USED is the normal
           // case there. Only auto-dismiss when lunch is claimed (or pass
           // expired); otherwise hold the screen for Confirm lunch.
-          const liveMode = modeRef.current;
           const consumed =
             liveMode === "food"
               ? d.foodStatus === "FOOD_USED" || d.status === "EXPIRED"
               : d.status !== "ACTIVE";
-          if (consumed) scheduleResume(900);
+          if (consumed) scheduleResume(600);
         }
+        const claimed = d.foodStatus === "FOOD_USED";
+        signalResult(
+          d.status === "EXPIRED" ? false : liveMode === "food" ? !claimed : d.status === "ACTIVE",
+        );
         setState({
           kind: "result",
           status: d.status,
@@ -371,7 +415,8 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
         setState({ kind: "result", status: "EXPIRED", type: d.type });
       } else if (r.status === 409 || d.status === "USED" || d.status === "FOOD_USED") {
         pauseDecoding();
-        scheduleResume(900);
+        scheduleResume(600);
+        signalResult(false);
         verifyCacheRef.current.delete(t);
         setState({
           kind: "result",
@@ -389,7 +434,8 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
         });
       } else if (d.ok) {
         pauseDecoding();
-        scheduleResume(700);
+        scheduleResume(500);
+        signalResult(true);
         verifyCacheRef.current.delete(t);
         setState({
           kind: "result",
@@ -499,7 +545,9 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
     // eslint-disable-next-line react-hooks/purity -- camera callback, not render
     const now = Date.now();
     // Throttle decode callbacks: camera fires ~10-30x/sec on same QR.
-    if (now - lastDecodeAtRef.current < 400) return;
+    // 250ms keeps repeats cached while the next person starts instantly
+    // (unpauseDecoding zeroes this, so resume has no dead window).
+    if (now - lastDecodeAtRef.current < 250) return;
     if (!text || text === lastScanRef.current) return;
     lastDecodeAtRef.current = now;
     lastScanRef.current = text;
@@ -522,8 +570,8 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
         // single-frame miss — keep looping
       }
       rafRef.current = requestAnimationFrame(() => {
-        // ~12fps is plenty for QR + saves battery on gate phones
-        window.setTimeout(() => void tick(), 80);
+        // ~16fps: first-frame detect wins gates; still light on battery.
+        window.setTimeout(() => void tick(), 50);
       });
     };
     void tick();
@@ -595,15 +643,24 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
       if (!video) return;
       // Low-res = faster decode + faster autofocus on budget gate phones.
       // 640x480 @ ~15fps decodes QR in ~100ms vs ~500ms at 1080p.
+      // Continuous focus (where supported) locks faster on close-up QRs.
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: "environment",
           width: { ideal: 640 },
           height: { ideal: 480 },
           frameRate: { ideal: 15 },
+          // @ts-expect-error focusMode not in TS DOM lib yet
+          focusMode: "continuous",
         },
         audio: false,
       });
+      try {
+        const track = stream.getVideoTracks()[0];
+        await track?.applyConstraints({ advanced: [{ focusMode: "continuous" }] } as unknown as MediaTrackConstraints).catch(() => undefined);
+      } catch {
+        // unsupported — default focus is fine
+      }
       streamRef.current = stream;
       video.srcObject = stream;
       video.setAttribute("playsinline", "true");
