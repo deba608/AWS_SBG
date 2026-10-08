@@ -8,6 +8,23 @@ function csvCell(v: string | null | undefined): string {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
+/** Serial A01…A100 → numeric rank. Non-serial rows sink to bottom. */
+function serialRank(s: string | null | undefined): number {
+  const m = /^A(\d+)$/i.exec(String(s ?? "").trim());
+  return m ? Number(m[1]) : Number.MAX_SAFE_INTEGER;
+}
+
+/** 1-based column index → Excel letter (1=A … 14=N … 27=AA). */
+function colLetter(n: number): string {
+  let s = "";
+  while (n > 0) {
+    const m = (n - 1) % 26;
+    s = String.fromCharCode(65 + m) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
+
 export async function GET(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   const { searchParams } = new URL(req.url);
@@ -56,6 +73,9 @@ export async function GET(req: Request) {
     ]);
   }
 
+  // Serial order A01, A02… (numeric — A100 after A99). Applies to xlsx + csv.
+  lines.sort((a, b) => serialRank(a[0]) - serialRank(b[0]) || String(a[1]).localeCompare(String(b[1])));
+
   if (format === "xlsx") {
     const stats = await passStats();
     const wb = new ExcelJS.Workbook();
@@ -64,6 +84,8 @@ export async function GET(req: Request) {
     const main = wb.addWorksheet(scope === "USERS" ? "Registrations" : "Passes");
     main.columns = header.map((h) => ({ header: h, key: h, width: 22 }));
     main.getRow(1).font = { bold: true };
+    main.views = [{ state: "frozen", ySplit: 1 }];
+    main.autoFilter = { from: "A1", to: `${colLetter(header.length)}1` };
     for (const line of lines) main.addRow(line);
     const lunch = wb.addWorksheet("Lunch summary");
     lunch.columns = [
