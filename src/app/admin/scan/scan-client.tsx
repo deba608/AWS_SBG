@@ -73,6 +73,7 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
   const [token, setToken] = useState("");
   const [state, setState] = useState<VerifyState>({ kind: "idle" });
   const [burning, setBurning] = useState(false);
+  const [resetting, setResetting] = useState<null | "entry" | "food">(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [scanning, setScanning] = useState(false);
   const [camErr, setCamErr] = useState("");
@@ -414,6 +415,55 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
       setState({ kind: "error", message: "Network failed during burn. Verify status before retry — pass may already be burned." });
     } finally {
       setBurning(false);
+    }
+  }
+
+  /** Per-person check-in reset: USED → ACTIVE. Full admin only. */
+  async function resetBurn(scope: "entry" | "food") {
+    const t = tokenFromQRText(token);
+    if (!t || resetting || role !== "admin") return;
+    const label = scope === "food" ? "lunch" : "entry";
+    const who = state.kind === "result" && state.name ? ` for ${state.name}${state.serial ? ` (${state.serial})` : ""}` : "";
+    if (!window.confirm(`Reset ${label}${who}? Pass becomes ACTIVE again and can re-enter.`)) return;
+    setResetting(scope);
+    try {
+      const r = await fetch("/api/admin/passes/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: t, scope }),
+      });
+      const d = await r.json();
+      if (!r.ok && d.error === "Unauthorized.") {
+        setAuthed(false);
+        setState({ kind: "idle" });
+        return;
+      }
+      if (r.status === 404 || d.status === "INVALID") {
+        setState({ kind: "result", status: "INVALID" });
+        return;
+      }
+      if (d.ok) {
+        verifyCacheRef.current.delete(t);
+        setState((prev) => {
+          if (prev.kind !== "result") return prev;
+          return {
+            ...prev,
+            status: scope === "entry" ? "ACTIVE" : prev.status,
+            foodStatus: scope === "food" ? "FOOD_ACTIVE" : prev.foodStatus,
+            usedAt: scope === "entry" ? null : prev.usedAt,
+            justBurned: false,
+          };
+        });
+        // re-verify for fresh server state (clears stale USED view)
+        await verify(t);
+      } else {
+        setState({ kind: "error", message: d.error ?? "Reset failed. Retry." });
+      }
+      void refreshStats(true);
+    } catch {
+      setState({ kind: "error", message: "Network failed during reset. Verify status before retry." });
+    } finally {
+      setResetting(null);
     }
   }
 
@@ -913,6 +963,38 @@ export default function ScanClient({ lockEntry = false }: { lockEntry?: boolean 
                     "Confirm entry — burn now"
                   )}
                 </button>
+              ) : null}
+              {role === "admin" && (result.status === "USED" || (!entryLocked && lunchClaimed)) ? (
+                <div className="mt-3 flex flex-col gap-2 border-t border-line pt-3 sm:flex-row">
+                  {result.status === "USED" ? (
+                    <button
+                      type="button"
+                      onClick={() => void resetBurn("entry")}
+                      disabled={resetting !== null}
+                      className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-full border border-amber-400/50 px-4 py-2 text-sm font-semibold text-amber-300 hover:bg-amber-400/10 disabled:opacity-60"
+                    >
+                      {resetting === "entry" ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> Resetting…</>
+                      ) : (
+                        "Reset entry — mark ACTIVE"
+                      )}
+                    </button>
+                  ) : null}
+                  {!entryLocked && lunchClaimed ? (
+                    <button
+                      type="button"
+                      onClick={() => void resetBurn("food")}
+                      disabled={resetting !== null}
+                      className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-full border border-amber-400/50 px-4 py-2 text-sm font-semibold text-amber-300 hover:bg-amber-400/10 disabled:opacity-60"
+                    >
+                      {resetting === "food" ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> Resetting…</>
+                      ) : (
+                        "Reset lunch — mark FOOD_ACTIVE"
+                      )}
+                    </button>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           ) : result.status === "EXPIRED" ? (

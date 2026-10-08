@@ -674,6 +674,60 @@ export async function burnPassByRaw(raw: string, scannedBy: string, kind: BurnKi
   });
 }
 
+export type ResetScope = "entry" | "food" | "both";
+
+export type ResetResult =
+  | { ok: false; reason: "INVALID"; scope: ResetScope }
+  | { ok: true; scope: ResetScope; user: StoredUser; pass: StoredPass; resetEntry: boolean; resetFood: boolean };
+
+/**
+ * Per-person check-in reset: flips USED back to ACTIVE (entry and/or lunch).
+ * Full-admin undo for wrong burns. Idempotent — already-ACTIVE stays ok
+ * with resetEntry/resetFood false. Serial-or-token input, same as burn path.
+ */
+export async function resetPassByRaw(raw: string, scope: ResetScope = "entry"): Promise<ResetResult> {
+  return withWriteLock(async () => {
+    let t = raw.trim();
+    // Fresh read under lock — never trust the scan cache for a state change.
+    const store = await readStore(false);
+    if (/^A\d+$/i.test(t)) {
+      const serial = t.toUpperCase();
+      const user = store.users.find((u) => (u.serial ?? "").toUpperCase() === serial);
+      const pass = user
+        ? (store.passes.find((p) => p.userId === user.id && p.type === "ENTRY") ??
+          store.passes.find((p) => p.userId === user.id))
+        : undefined;
+      if (!pass || !user) return { ok: false, reason: "INVALID", scope };
+      t = pass.token;
+    }
+    if (!verifyPassToken(t)) return { ok: false, reason: "INVALID", scope };
+    const pass = store.passes.find((p) => p.token === t);
+    if (!pass) return { ok: false, reason: "INVALID", scope };
+    const user = store.users.find((u) => u.id === pass.userId);
+    if (!user) return { ok: false, reason: "INVALID", scope };
+    let resetEntry = false;
+    let resetFood = false;
+    if (scope === "entry" || scope === "both") {
+      if (pass.status === "USED") {
+        pass.status = "ACTIVE";
+        pass.usedAt = null;
+        pass.scannedBy = null;
+        resetEntry = true;
+      }
+    }
+    if (scope === "food" || scope === "both") {
+      if (foodStatusOf(pass) === "USED") {
+        pass.food = "ACTIVE";
+        pass.foodUsedAt = null;
+        pass.foodScannedBy = null;
+        resetFood = true;
+      }
+    }
+    await writeStore(store);
+    return { ok: true, scope, user, pass, resetEntry, resetFood };
+  });
+}
+
 export async function passStats(): Promise<{
   issued: number;
   users: number;
