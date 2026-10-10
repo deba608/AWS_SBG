@@ -218,12 +218,23 @@ export function validatePayout(input: PayoutInput): PayoutErrors {
 
   if (input.method === "UPI") {
     const upi = String(input.upiId ?? "").trim();
-    if (!upi) errors.upiId = "UPI ID required (name@bank).";
-    else if (upi.length > 100) errors.upiId = "UPI ID too long.";
-    else if (!UPI_RE.test(upi)) errors.upiId = "Enter a valid UPI ID (name@bank).";
     const upiMobile = normalizeMobile(String(input.upiMobile ?? ""));
-    if (!upiMobile) errors.upiMobile = "UPI-linked mobile required.";
-    else if (!/^[6-9]\d{9}$/.test(upiMobile)) errors.upiMobile = "Enter the 10-digit UPI-linked mobile.";
+    if (!upi && !upiMobile) {
+      errors.upiId = "Enter UPI ID or UPI-linked mobile (at least one).";
+    } else {
+      if (upi) {
+        if (upi.length > 100) errors.upiId = "UPI ID too long.";
+        else if (!UPI_RE.test(upi)) errors.upiId = "Enter a valid UPI ID (name@bank).";
+      }
+      if (upiMobile && !/^[6-9]\d{9}$/.test(upiMobile)) {
+        errors.upiMobile = "Enter the 10-digit UPI-linked mobile.";
+      }
+    }
+    const bankName = collapseSpaces(input.bankName ?? "");
+    if (!bankName) errors.bankName = "Banking name required for verification (e.g. SBI).";
+    else if (bankName.length < 2) errors.bankName = "Enter full banking name.";
+    else if (bankName.length > 60) errors.bankName = "Banking name too long (max 60).";
+    else if (!BANK_NAME_RE.test(bankName)) errors.bankName = "Letters, numbers, spaces ( . & ' / - ) only.";
   } else if (input.method === "Bank") {
     const bankName = collapseSpaces(input.bankName ?? "");
     if (!bankName) errors.bankName = "Bank name required (e.g. SBI).";
@@ -265,7 +276,7 @@ function normalizeInput(input: PayoutInput): Omit<PayoutRecord, "id" | "status" 
     method,
     upiId: method === "UPI" ? String(input.upiId ?? "").trim() : "",
     upiMobile: method === "UPI" ? normalizeMobile(String(input.upiMobile ?? "")) : "",
-    bankName: method === "Bank" ? collapseSpaces(input.bankName ?? "") : "",
+    bankName: collapseSpaces(input.bankName ?? ""),
     accountHolder: method === "Bank" ? collapseSpaces(input.accountHolder ?? "") : "",
     accountNumber: method === "Bank" ? String(input.accountNumber ?? "").replace(/\s/g, "") : "",
     ifsc: method === "Bank" ? String(input.ifsc ?? "").trim().toUpperCase() : "",

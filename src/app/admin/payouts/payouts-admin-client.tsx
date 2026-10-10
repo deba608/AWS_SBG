@@ -261,7 +261,9 @@ export default function PayoutsAdminClient() {
                         <p className="mt-0.5 text-fog">{p.position}{p.teamName ? ` · ${p.teamName}` : ""}</p>
                       </td>
                       <td className="px-4 py-3 font-mono text-xs text-fog">
-                        {p.method === "UPI" ? `${p.upiId}${p.upiMobile ? ` · ${p.upiMobile}` : ""}` : `${p.bankName ? `${p.bankName} · ` : ""}${p.accountNumber} · ${p.ifsc}`}
+                        {p.method === "UPI"
+                          ? `${p.upiId || p.upiMobile || "—"}${p.bankName ? ` · ${p.bankName}` : ""}`
+                          : `${p.bankName ? `${p.bankName} · ` : ""}${p.accountNumber} · ${p.ifsc}`}
                       </td>
                       <td className="px-4 py-3">
                         <span className={cn("inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold whitespace-nowrap", statusTone(p.status))}>
@@ -278,8 +280,9 @@ export default function PayoutsAdminClient() {
                               <div className="flex gap-2"><dt className="shrink-0 text-faint">Method</dt><dd className="text-cream">{p.method}</dd></div>
                               {p.method === "UPI" ? (
                                 <>
-                                  <div className="flex gap-2"><dt className="shrink-0 text-faint">UPI ID</dt><dd className="font-mono break-all text-cream">{p.upiId}</dd></div>
-                                  <div className="flex gap-2"><dt className="shrink-0 text-faint">UPI mobile</dt><dd className="font-mono text-cream">{p.upiMobile || "—"}</dd></div>
+                                  {p.upiId ? <div className="flex gap-2"><dt className="shrink-0 text-faint">UPI ID</dt><dd className="font-mono break-all text-cream">{p.upiId}</dd></div> : null}
+                                  {p.upiMobile ? <div className="flex gap-2"><dt className="shrink-0 text-faint">UPI mobile</dt><dd className="font-mono text-cream">{p.upiMobile}</dd></div> : null}
+                                  <div className="flex gap-2"><dt className="shrink-0 text-faint">Banking name</dt><dd className="text-cream">{p.bankName || "—"}</dd></div>
                                 </>
                               ) : (
                                 <>
