@@ -190,12 +190,12 @@ export default function PayoutsClient() {
         {form.method === "UPI" ? (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-cream">UPI ID <span className="font-normal text-faint">(or mobile below)</span></label>
+              <label className="mb-1.5 block text-sm font-medium text-cream">UPI ID *</label>
               <input value={form.upiId} onChange={(e) => set("upiId")(e.target.value)} placeholder="name@okhdfcbank" maxLength={100} autoComplete="off" aria-invalid={Boolean(errors.upiId)} className={inputCls(Boolean(errors.upiId))} />
               {errors.upiId ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.upiId}</p> : null}
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-cream">UPI-linked mobile <span className="font-normal text-faint">(or ID above)</span></label>
+              <label className="mb-1.5 block text-sm font-medium text-cream">UPI-linked mobile <span className="font-normal text-faint">(optional)</span></label>
               <input value={form.upiMobile} onChange={(e) => set("upiMobile")(e.target.value)} placeholder="9437100001" type="tel" maxLength={13} autoComplete="tel-national" aria-invalid={Boolean(errors.upiMobile)} className={inputCls(Boolean(errors.upiMobile))} />
               {errors.upiMobile ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.upiMobile}</p> : null}
             </div>
@@ -205,7 +205,7 @@ export default function PayoutsClient() {
               {errors.bankName ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.bankName}</p> : null}
               <p className="mt-1 text-xs text-faint">Bank behind the UPI — used to verify before transfer.</p>
             </div>
-            <p className="text-xs text-faint sm:col-span-2">Give UPI ID or mobile (either works). Double-check — money sent here cannot be reversed.</p>
+            <p className="text-xs text-faint sm:col-span-2">Double-check UPI ID — money sent here cannot be reversed.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

@@ -219,16 +219,12 @@ export function validatePayout(input: PayoutInput): PayoutErrors {
   if (input.method === "UPI") {
     const upi = String(input.upiId ?? "").trim();
     const upiMobile = normalizeMobile(String(input.upiMobile ?? ""));
-    if (!upi && !upiMobile) {
-      errors.upiId = "Enter UPI ID or UPI-linked mobile (at least one).";
-    } else {
-      if (upi) {
-        if (upi.length > 100) errors.upiId = "UPI ID too long.";
-        else if (!UPI_RE.test(upi)) errors.upiId = "Enter a valid UPI ID (name@bank).";
-      }
-      if (upiMobile && !/^[6-9]\d{9}$/.test(upiMobile)) {
-        errors.upiMobile = "Enter the 10-digit UPI-linked mobile.";
-      }
+    if (!upi) {
+      errors.upiId = "UPI ID required (e.g. name@okhdfcbank).";
+    } else if (upi.length > 100) errors.upiId = "UPI ID too long.";
+    else if (!UPI_RE.test(upi)) errors.upiId = "Enter a valid UPI ID (name@bank).";
+    if (upiMobile && !/^[6-9]\d{9}$/.test(upiMobile)) {
+      errors.upiMobile = "Enter the 10-digit UPI-linked mobile.";
     }
     const bankName = collapseSpaces(input.bankName ?? "");
     if (!bankName) errors.bankName = "Banking name required for verification (e.g. SBI).";
