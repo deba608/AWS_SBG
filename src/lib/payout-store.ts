@@ -11,19 +11,10 @@ export const PAYOUT_EVENTS = [
   "DecodeX Hackathon",
   "Tech Parliament",
   "Make-A-Bot",
-  "Community Day",
-  "Other",
 ] as const;
 export type PayoutEvent = (typeof PAYOUT_EVENTS)[number];
 
-export const PAYOUT_POSITIONS = [
-  "1st",
-  "2nd",
-  "3rd",
-  "Winner",
-  "Runner-up",
-  "Special prize",
-] as const;
+export const PAYOUT_POSITIONS = ["1st", "2nd", "3rd"] as const;
 export type PayoutPosition = (typeof PAYOUT_POSITIONS)[number];
 
 export const PAYOUT_METHODS = ["UPI", "Bank"] as const;
@@ -42,8 +33,11 @@ export interface PayoutInput {
   teamName: string;
   method: string;
   upiId: string;
+  upiMobile: string;
+  bankName: string;
   accountHolder: string;
   accountNumber: string;
+  confirmAccountNumber: string;
   ifsc: string;
   consent: boolean;
 }
@@ -54,11 +48,13 @@ export interface PayoutRecord {
   rollNo: string;
   email: string;
   mobile: string;
-  event: PayoutEvent;
-  position: PayoutPosition;
+  event: string;
+  position: string;
   teamName: string;
   method: PayoutMethod;
   upiId: string;
+  upiMobile: string;
+  bankName: string;
   accountHolder: string;
   accountNumber: string;
   ifsc: string;
@@ -80,8 +76,11 @@ export type PayoutErrors = Partial<
     | "teamName"
     | "method"
     | "upiId"
+    | "upiMobile"
+    | "bankName"
     | "accountHolder"
     | "accountNumber"
+    | "confirmAccountNumber"
     | "ifsc"
     | "consent"
     | "form",
@@ -102,23 +101,42 @@ const ROLL_RE = /^[A-Za-z0-9][A-Za-z0-9/.\- ]{2,19}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const UPI_RE = /^[a-zA-Z0-9._-]{2,256}@[a-zA-Z]{2,64}$/;
 const IFSC_RE = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+const BANK_NAME_RE = /^[A-Za-z][A-Za-z0-9 .&'/-]*$/;
 
 function emptyStore(): PayoutStoreShape {
   return { payouts: [] };
 }
 
+/** Backfill new fields so old records never break the admin table/CSV. */
+function backfill(p: PayoutRecord): PayoutRecord {
+  return {
+    ...p,
+    upiMobile: typeof p.upiMobile === "string" ? p.upiMobile : "",
+    bankName: typeof p.bankName === "string" ? p.bankName : "",
+    upiId: typeof p.upiId === "string" ? p.upiId : "",
+    accountHolder: typeof p.accountHolder === "string" ? p.accountHolder : "",
+    accountNumber: typeof p.accountNumber === "string" ? p.accountNumber : "",
+    ifsc: typeof p.ifsc === "string" ? p.ifsc : "",
+    teamName: typeof p.teamName === "string" ? p.teamName : "",
+  };
+}
+
 function parseStore(raw: unknown): PayoutStoreShape {
+  const coerce = (teams: unknown): PayoutStoreShape => {
+    if (!Array.isArray(teams)) return emptyStore();
+    return { payouts: (teams as PayoutRecord[]).map(backfill) };
+  };
   if (typeof raw === "string") {
     try {
       const parsed = JSON.parse(raw) as PayoutStoreShape;
-      if (Array.isArray(parsed.payouts)) return parsed;
+      if (Array.isArray(parsed.payouts)) return coerce(parsed.payouts);
     } catch {
       // fall through
     }
     return emptyStore();
   }
   if (typeof raw === "object" && raw !== null && Array.isArray((raw as PayoutStoreShape).payouts)) {
-    return raw as PayoutStoreShape;
+    return coerce((raw as PayoutStoreShape).payouts);
   }
   return emptyStore();
 }
@@ -203,7 +221,15 @@ export function validatePayout(input: PayoutInput): PayoutErrors {
     if (!upi) errors.upiId = "UPI ID required (name@bank).";
     else if (upi.length > 100) errors.upiId = "UPI ID too long.";
     else if (!UPI_RE.test(upi)) errors.upiId = "Enter a valid UPI ID (name@bank).";
+    const upiMobile = normalizeMobile(String(input.upiMobile ?? ""));
+    if (!upiMobile) errors.upiMobile = "UPI-linked mobile required.";
+    else if (!/^[6-9]\d{9}$/.test(upiMobile)) errors.upiMobile = "Enter the 10-digit UPI-linked mobile.";
   } else if (input.method === "Bank") {
+    const bankName = collapseSpaces(input.bankName ?? "");
+    if (!bankName) errors.bankName = "Bank name required (e.g. SBI).";
+    else if (bankName.length < 2) errors.bankName = "Enter full bank name.";
+    else if (bankName.length > 60) errors.bankName = "Bank name too long (max 60).";
+    else if (!BANK_NAME_RE.test(bankName)) errors.bankName = "Letters, numbers, spaces ( . & ' / - ) only.";
     const holder = collapseSpaces(input.accountHolder ?? "");
     if (!holder) errors.accountHolder = "Account holder name required.";
     else if (holder.length < 2) errors.accountHolder = "Enter full holder name.";
@@ -212,6 +238,9 @@ export function validatePayout(input: PayoutInput): PayoutErrors {
     const acct = String(input.accountNumber ?? "").replace(/\s/g, "");
     if (!acct) errors.accountNumber = "Account number required.";
     else if (!/^\d{9,18}$/.test(acct)) errors.accountNumber = "Account number must be 9–18 digits.";
+    const confirm = String(input.confirmAccountNumber ?? "").replace(/\s/g, "");
+    if (!confirm) errors.confirmAccountNumber = "Re-enter account number to confirm.";
+    else if (confirm !== acct) errors.confirmAccountNumber = "Account numbers do not match.";
     const ifsc = String(input.ifsc ?? "").trim().toUpperCase();
     if (!ifsc) errors.ifsc = "IFSC required.";
     else if (!IFSC_RE.test(ifsc)) errors.ifsc = "Enter a valid IFSC (ABCD0123456).";
@@ -228,13 +257,15 @@ function normalizeInput(input: PayoutInput): Omit<PayoutRecord, "id" | "status" 
     rollNo: String(input.rollNo ?? "").trim().toUpperCase(),
     email: normalizeEmail(String(input.email ?? "")),
     mobile: normalizeMobile(String(input.mobile ?? "")),
-    event: (PAYOUT_EVENTS.includes(input.event as PayoutEvent) ? input.event : "Other") as PayoutEvent,
+    event: (PAYOUT_EVENTS.includes(input.event as PayoutEvent) ? input.event : "DecodeX Hackathon") as PayoutRecord["event"],
     position: (PAYOUT_POSITIONS.includes(input.position as PayoutPosition)
       ? input.position
-      : "Winner") as PayoutPosition,
+      : "1st") as PayoutRecord["position"],
     teamName: collapseSpaces(input.teamName ?? ""),
     method,
     upiId: method === "UPI" ? String(input.upiId ?? "").trim() : "",
+    upiMobile: method === "UPI" ? normalizeMobile(String(input.upiMobile ?? "")) : "",
+    bankName: method === "Bank" ? collapseSpaces(input.bankName ?? "") : "",
     accountHolder: method === "Bank" ? collapseSpaces(input.accountHolder ?? "") : "",
     accountNumber: method === "Bank" ? String(input.accountNumber ?? "").replace(/\s/g, "") : "",
     ifsc: method === "Bank" ? String(input.ifsc ?? "").trim().toUpperCase() : "",

@@ -19,12 +19,12 @@ export async function GET(req: Request) {
   if (searchParams.get("format") === "csv") {
     const header = [
       "name", "roll_no", "email", "mobile", "event", "position", "team",
-      "method", "upi_id", "account_holder", "account_number", "ifsc",
+      "method", "upi_id", "upi_mobile", "bank_name", "account_holder", "account_number", "ifsc",
       "status", "amount", "note", "submitted_at", "updated_at",
     ];
     const lines = payouts.map((p) => [
       p.name, p.rollNo, p.email, p.mobile, p.event, p.position, p.teamName,
-      p.method, p.upiId, p.accountHolder, p.accountNumber, p.ifsc,
+      p.method, p.upiId, p.upiMobile, p.bankName, p.accountHolder, p.accountNumber, p.ifsc,
       p.status, p.amount ?? "", p.note, p.createdAt, p.updatedAt,
     ]);
     const csv = [header, ...lines].map((r) => r.map(csvCell).join(",")).join("\n");

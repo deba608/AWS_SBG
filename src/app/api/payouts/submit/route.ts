@@ -18,8 +18,11 @@ function asInput(b: Record<string, unknown>): PayoutInput {
     teamName: String(b.teamName ?? ""),
     method: String(b.method ?? ""),
     upiId: String(b.upiId ?? ""),
+    upiMobile: String(b.upiMobile ?? ""),
+    bankName: String(b.bankName ?? ""),
     accountHolder: String(b.accountHolder ?? ""),
     accountNumber: String(b.accountNumber ?? ""),
+    confirmAccountNumber: String(b.confirmAccountNumber ?? ""),
     ifsc: String(b.ifsc ?? ""),
     consent: b.consent === true,
   };

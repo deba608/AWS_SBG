@@ -7,7 +7,7 @@ import AdminLogin from "@/components/AdminLogin";
 import { cn } from "@/lib/utils";
 
 const STATUSES = ["submitted", "verified", "paid", "rejected"] as const;
-const EVENTS = ["DecodeX Hackathon", "Tech Parliament", "Make-A-Bot", "Community Day", "Other"] as const;
+const EVENTS = ["DecodeX Hackathon", "Tech Parliament", "Make-A-Bot"] as const;
 
 interface Payout {
   id: string;
@@ -20,6 +20,8 @@ interface Payout {
   teamName: string;
   method: "UPI" | "Bank";
   upiId: string;
+  upiMobile: string;
+  bankName: string;
   accountHolder: string;
   accountNumber: string;
   ifsc: string;
@@ -108,7 +110,7 @@ export default function PayoutsAdminClient() {
     if (statusFilter !== "ALL" && p.status !== statusFilter) return false;
     if (eventFilter !== "ALL" && p.event !== eventFilter) return false;
     if (!needle) return true;
-    return [p.name, p.email, p.mobile, p.rollNo, p.teamName, p.upiId, p.accountHolder, p.id]
+    return [p.name, p.email, p.mobile, p.rollNo, p.teamName, p.upiId, p.upiMobile, p.bankName, p.accountHolder, p.id]
       .join(" ")
       .toLowerCase()
       .includes(needle);
@@ -259,7 +261,7 @@ export default function PayoutsAdminClient() {
                         <p className="mt-0.5 text-fog">{p.position}{p.teamName ? ` · ${p.teamName}` : ""}</p>
                       </td>
                       <td className="px-4 py-3 font-mono text-xs text-fog">
-                        {p.method === "UPI" ? p.upiId : `${p.accountNumber} · ${p.ifsc}`}
+                        {p.method === "UPI" ? `${p.upiId}${p.upiMobile ? ` · ${p.upiMobile}` : ""}` : `${p.bankName ? `${p.bankName} · ` : ""}${p.accountNumber} · ${p.ifsc}`}
                       </td>
                       <td className="px-4 py-3">
                         <span className={cn("inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold whitespace-nowrap", statusTone(p.status))}>
@@ -275,9 +277,13 @@ export default function PayoutsAdminClient() {
                             <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-xs sm:grid-cols-2">
                               <div className="flex gap-2"><dt className="shrink-0 text-faint">Method</dt><dd className="text-cream">{p.method}</dd></div>
                               {p.method === "UPI" ? (
-                                <div className="flex gap-2"><dt className="shrink-0 text-faint">UPI ID</dt><dd className="font-mono break-all text-cream">{p.upiId}</dd></div>
+                                <>
+                                  <div className="flex gap-2"><dt className="shrink-0 text-faint">UPI ID</dt><dd className="font-mono break-all text-cream">{p.upiId}</dd></div>
+                                  <div className="flex gap-2"><dt className="shrink-0 text-faint">UPI mobile</dt><dd className="font-mono text-cream">{p.upiMobile || "—"}</dd></div>
+                                </>
                               ) : (
                                 <>
+                                  <div className="flex gap-2"><dt className="shrink-0 text-faint">Bank</dt><dd className="text-cream">{p.bankName || "—"}</dd></div>
                                   <div className="flex gap-2"><dt className="shrink-0 text-faint">Holder</dt><dd className="text-cream">{p.accountHolder}</dd></div>
                                   <div className="flex gap-2"><dt className="shrink-0 text-faint">Account</dt><dd className="font-mono text-cream">{p.accountNumber}</dd></div>
                                   <div className="flex gap-2"><dt className="shrink-0 text-faint">IFSC</dt><dd className="font-mono text-cream">{p.ifsc}</dd></div>

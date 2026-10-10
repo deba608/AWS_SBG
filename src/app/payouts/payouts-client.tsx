@@ -5,8 +5,8 @@ import { ArrowRight, BadgeIndianRupee, Loader2, ShieldCheck } from "lucide-react
 import Container from "@/components/Container";
 import { cn } from "@/lib/utils";
 
-const EVENTS = ["DecodeX Hackathon", "Tech Parliament", "Make-A-Bot", "Community Day", "Other"] as const;
-const POSITIONS = ["1st", "2nd", "3rd", "Winner", "Runner-up", "Special prize"] as const;
+const EVENTS = ["DecodeX Hackathon", "Tech Parliament", "Make-A-Bot"] as const;
+const POSITIONS = ["1st", "2nd", "3rd"] as const;
 
 type Errors = Partial<Record<string, string>>;
 
@@ -26,8 +26,11 @@ export default function PayoutsClient() {
     teamName: "",
     method: "UPI",
     upiId: "",
+    upiMobile: "",
+    bankName: "",
     accountHolder: "",
     accountNumber: "",
+    confirmAccountNumber: "",
     ifsc: "",
     consent: false,
   });
@@ -42,11 +45,14 @@ export default function PayoutsClient() {
       // switching method clears the other branch so stale data never submits
       if (k === "method") {
         if (v === "UPI") {
+          next.bankName = "";
           next.accountHolder = "";
           next.accountNumber = "";
+          next.confirmAccountNumber = "";
           next.ifsc = "";
         } else {
           next.upiId = "";
+          next.upiMobile = "";
         }
       }
       return next;
@@ -119,7 +125,7 @@ export default function PayoutsClient() {
             {errors.email ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.email}</p> : null}
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-cream">Mobile (UPI-linked preferred) *</label>
+            <label className="mb-1.5 block text-sm font-medium text-cream">Mobile *</label>
             <input value={form.mobile} onChange={(e) => set("mobile")(e.target.value)} placeholder="9437100001" type="tel" maxLength={13} autoComplete="tel-national" aria-invalid={Boolean(errors.mobile)} className={inputCls(Boolean(errors.mobile))} />
             {errors.mobile ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.mobile}</p> : null}
           </div>
@@ -183,15 +189,27 @@ export default function PayoutsClient() {
         </div>
 
         {form.method === "UPI" ? (
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-cream">UPI ID *</label>
-            <input value={form.upiId} onChange={(e) => set("upiId")(e.target.value)} placeholder="name@okhdfcbank" maxLength={100} autoComplete="off" aria-invalid={Boolean(errors.upiId)} className={inputCls(Boolean(errors.upiId))} />
-            {errors.upiId ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.upiId}</p> : null}
-            <p className="mt-1 text-xs text-faint">Double-check — money sent here cannot be reversed.</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-cream">UPI ID *</label>
+              <input value={form.upiId} onChange={(e) => set("upiId")(e.target.value)} placeholder="name@okhdfcbank" maxLength={100} autoComplete="off" aria-invalid={Boolean(errors.upiId)} className={inputCls(Boolean(errors.upiId))} />
+              {errors.upiId ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.upiId}</p> : null}
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-cream">UPI-linked mobile number *</label>
+              <input value={form.upiMobile} onChange={(e) => set("upiMobile")(e.target.value)} placeholder="9437100001" type="tel" maxLength={13} autoComplete="tel-national" aria-invalid={Boolean(errors.upiMobile)} className={inputCls(Boolean(errors.upiMobile))} />
+              {errors.upiMobile ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.upiMobile}</p> : null}
+            </div>
+            <p className="text-xs text-faint sm:col-span-2">Double-check both — money sent here cannot be reversed.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="sm:col-span-2">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-cream">Bank name *</label>
+              <input value={form.bankName} onChange={(e) => set("bankName")(e.target.value)} placeholder="State Bank of India" maxLength={60} autoComplete="off" aria-invalid={Boolean(errors.bankName)} className={inputCls(Boolean(errors.bankName))} />
+              {errors.bankName ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.bankName}</p> : null}
+            </div>
+            <div>
               <label className="mb-1.5 block text-sm font-medium text-cream">Account holder name *</label>
               <input value={form.accountHolder} onChange={(e) => set("accountHolder")(e.target.value)} placeholder="As per bank records" maxLength={60} autoComplete="off" aria-invalid={Boolean(errors.accountHolder)} className={inputCls(Boolean(errors.accountHolder))} />
               {errors.accountHolder ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.accountHolder}</p> : null}
@@ -202,6 +220,17 @@ export default function PayoutsClient() {
               {errors.accountNumber ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.accountNumber}</p> : null}
             </div>
             <div>
+              <label className="mb-1.5 block text-sm font-medium text-cream">Confirm account number *</label>
+              <input value={form.confirmAccountNumber} onChange={(e) => set("confirmAccountNumber")(e.target.value)} placeholder="Re-enter account number" inputMode="numeric" maxLength={18} autoComplete="off" aria-invalid={Boolean(errors.confirmAccountNumber)} className={inputCls(Boolean(errors.confirmAccountNumber))} />
+              {errors.confirmAccountNumber ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.confirmAccountNumber}</p> : null}
+              {!errors.confirmAccountNumber && form.accountNumber && form.confirmAccountNumber && form.accountNumber.replace(/\s/g, "") !== form.confirmAccountNumber.replace(/\s/g, "") ? (
+                <p role="alert" className="mt-1.5 text-xs text-red-300">Account numbers do not match.</p>
+              ) : null}
+              {!errors.confirmAccountNumber && form.accountNumber && form.confirmAccountNumber && form.accountNumber.replace(/\s/g, "") === form.confirmAccountNumber.replace(/\s/g, "") ? (
+                <p className="mt-1.5 text-xs text-green-300">Account numbers match.</p>
+              ) : null}
+            </div>
+            <div className="sm:col-span-2">
               <label className="mb-1.5 block text-sm font-medium text-cream">IFSC *</label>
               <input value={form.ifsc} onChange={(e) => set("ifsc")(e.target.value.toUpperCase())} placeholder="SBIN0062015" maxLength={11} autoComplete="off" aria-invalid={Boolean(errors.ifsc)} className={cn(inputCls(Boolean(errors.ifsc)), "uppercase font-mono")} />
               {errors.ifsc ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.ifsc}</p> : null}
