@@ -125,18 +125,6 @@ export const domainLeads: TeamMember[] = [
   },
   // Data Analysis
   {
-    id: "somesh-sahoo",
-    name: "Somesh Sahoo",
-    role: "Data Analysis Lead",
-    bio: "Heads data analysis workshops and teaches data-driven decision making.",
-  },
-  {
-    id: "balaji-laxmi-pati",
-    name: "Balaji Laxmi Pati",
-    role: "Data Analysis Co-Lead",
-    bio: "Supports data analysis sessions and mentors members in analytics tools.",
-  },
-  {
     id: "jayprakash-muduli",
     name: "Jayprakash Muduli",
     role: "Data Analysis Co-Lead",
