@@ -9,12 +9,12 @@ export interface TeamMember {
   photo?: string;
 }
 
-/** Leadership — Captain, President, Secretary */
+/** Leadership — SBG Leader, President, Secretary */
 export const teamLeads: TeamMember[] = [
   {
     id: "pratik-samal",
     name: "Pratik Samal",
-    role: "Captain",
+    role: "SBG Leader",
     bio: "Leads the AWS Student Builder Group, steering community direction and fostering a culture of cloud-first building.",
     lead: true,
     photo: "/team/pratik-samal.png",
