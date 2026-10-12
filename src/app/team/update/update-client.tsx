@@ -114,6 +114,7 @@ export default function UpdateClient() {
   const [status, setStatus] = useState<"form" | "busy" | "done">("form");
   const [wasUpdated, setWasUpdated] = useState(false);
   const [linksSameNote, setLinksSameNote] = useState(false);
+  const [sentPhoto, setSentPhoto] = useState(true);
   const [live, setLive] = useState<LiveMember | null>(null);
   const [livePending, setLivePending] = useState(false);
   const [liveLoading, setLiveLoading] = useState(false);
@@ -123,10 +124,14 @@ export default function UpdateClient() {
   const role = roleForName(name);
 
   // Progress checklist — same order as the form: name → photo → links → submit.
+  // Photo required only for first-timers (no live photo yet); members with a
+  // live photo can send a links-only update.
   const stepName = Boolean(name && role);
   const stepPhoto = Boolean(file && preview);
+  const photoOptional = Boolean(live?.photo);
+  const photoDone = stepPhoto || photoOptional;
   const stepLinks = [linkedin.trim(), github.trim(), email.trim()].filter(Boolean).length;
-  const doneCount = (stepName ? 1 : 0) + (stepPhoto ? 1 : 0);
+  const doneCount = (stepName ? 1 : 0) + (photoDone ? 1 : 0);
 
   // Links identical to what's already live → only the photo changes.
   const linksSameAsLive =
@@ -243,17 +248,22 @@ export default function UpdateClient() {
     if (!name || !role) fe.name = "Select your name from the team list.";
     const photoFile = file;
     const fullFile = originalFile;
-    if (!photoFile || !preview) fe.photo = "Upload a photo and finish cropping.";
+    const hasNewPhoto = Boolean(photoFile && preview);
+    if (!hasNewPhoto && !live?.photo) fe.photo = "Upload a photo and finish cropping.";
     Object.assign(fe, validateLinkFields(linkedin, github, email));
     setErrors(fe);
     if (Object.keys(fe).filter((k) => fe[k as keyof typeof fe]).length > 0) return;
-    if (!photoFile) return;
+    // Nothing new at all → stop early instead of a no-op review row.
+    if (!hasNewPhoto && live && linksSameAsLive) {
+      setApiError("Nothing new — upload a photo or change a link, then submit.");
+      return;
+    }
     setStatus("busy");
     setApiError("");
     try {
       const form = new FormData();
       form.set("name", name.trim());
-      form.set("photo", photoFile, "photo.jpg");
+      if (photoFile) form.set("photo", photoFile, "photo.jpg");
       if (fullFile) form.set("original", fullFile, "original.jpg");
       // Links optional — same approval flow as photo. Server normalizes + validates.
       if (linkedin.trim()) form.set("linkedin", withHttps(linkedin));
@@ -267,6 +277,7 @@ export default function UpdateClient() {
       }
       setWasUpdated(Boolean(data.updated));
       setLinksSameNote(Boolean(data.linksUnchanged));
+      setSentPhoto(hasNewPhoto);
       setStatus("done");
     } catch (err) {
       setApiError(err instanceof Error ? err.message : "Submit failed.");
@@ -286,6 +297,7 @@ export default function UpdateClient() {
     setApiError("");
     setWasUpdated(false);
     setLinksSameNote(false);
+    setSentPhoto(true);
   }
 
   if (status === "done") {
@@ -296,7 +308,9 @@ export default function UpdateClient() {
         <p className="mx-auto max-w-prose text-sm leading-relaxed text-fog">
           {wasUpdated
             ? "Your earlier pending request was replaced with this one — admin reviews a single row per member."
-            : "Admin will approve your photo and it appears on the team page instantly after approval."}
+            : sentPhoto
+              ? "Admin will approve your photo and it appears on the team page instantly after approval."
+              : "Admin will approve your links and they appear on the team page instantly after approval."}
           {linksSameNote ? " Links match what's already live, so only the photo changes." : null}
         </p>
         <button
@@ -312,13 +326,13 @@ export default function UpdateClient() {
 
   return (
     <form noValidate onSubmit={submit} className="rank-card space-y-4 p-5 sm:p-6">
-      {/* Progress: name → photo → links. Links optional, photo required. */}
+      {/* Progress: name → photo → links. Photo optional when live photo exists. */}
       <ol aria-label="Progress" className="flex flex-wrap items-center gap-2 text-xs font-semibold">
         <li className={cn("rounded-full border px-3 py-1", stepName ? "border-green-400/60 text-green-300" : "border-line text-fog")}>
           {stepName ? "✓ " : "1 "} Name
         </li>
-        <li className={cn("rounded-full border px-3 py-1", stepPhoto ? "border-green-400/60 text-green-300" : "border-line text-fog")}>
-          {stepPhoto ? "✓ " : "2 "} Photo
+        <li className={cn("rounded-full border px-3 py-1", photoDone ? "border-green-400/60 text-green-300" : "border-line text-fog")}>
+          {photoDone ? "✓ " : "2 "} Photo{photoOptional ? " (optional)" : ""}
         </li>
         <li className={cn("rounded-full border px-3 py-1", stepLinks > 0 ? "border-brand/60 text-cream" : "border-line text-fog")}>
           3 Links{stepLinks > 0 ? ` · ${stepLinks}` : " (optional)"}
@@ -393,7 +407,9 @@ export default function UpdateClient() {
       ) : null}
 
       <div>
-        <span className="mb-1.5 block text-sm font-medium text-cream">Photo * — crop popup opens on upload</span>
+        <span className="mb-1.5 block text-sm font-medium text-cream">
+          Photo{photoOptional ? "" : " *"} — {photoOptional ? "keep live photo or upload new" : "crop popup opens on upload"}
+        </span>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
           <div className="w-full max-w-52 shrink-0">
             <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-dashed border-line bg-ink/60">
@@ -420,6 +436,9 @@ export default function UpdateClient() {
           <div className="min-w-0 flex-1 text-xs leading-relaxed text-fog">
             <p>Perfect format: <span className="font-semibold text-cream">square 800×800 JPG</span>.</p>
             <p className="mt-1">Upload opens crop popup — drag to move position, slider to zoom, then Use this crop.</p>
+            {photoOptional ? (
+              <p className="mt-1 text-brand">You have a live photo — skip upload to keep it, or upload to replace it.</p>
+            ) : null}
             <div className="mt-2 flex flex-wrap gap-2">
               <button
                 type="button"
@@ -538,7 +557,9 @@ export default function UpdateClient() {
       >
         {status === "busy" ? (<><Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Submitting…</>) : livePending ? "Update pending request" : "Submit for approval"}
       </button>
-      <p className="text-xs leading-relaxed text-faint">Admin reviews every submission. Approved photo{stepLinks > 0 ? " + links" : ""} show on the team page instantly.</p>
+      <p className="text-xs leading-relaxed text-faint">
+        Admin reviews every submission. Approved {[stepPhoto ? "photo" : null, stepLinks > 0 ? "links" : null].filter(Boolean).join(" + ") || "changes"} show on the team page instantly.
+      </p>
       {editorOpen && originalUrl ? (
         <PhotoCropper
           src={originalUrl}

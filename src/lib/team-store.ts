@@ -185,10 +185,14 @@ export function validateSubmission(input: { name: string; role: string; photoDat
   const member = rosterMember(input.name);
   if (!member) errors.name = "Select your name from the team list.";
   if (!sectionForRole(input.role)) errors.role = "Select your position from the list.";
-  if (!input.photoDataUrl.startsWith("data:image/jpeg;base64,")) {
-    errors.photo = "Photo must be a square JPG — use the on-page cropper.";
-  } else if (input.photoDataUrl.length > MAX_PHOTO_DATAURL_CHARS) {
-    errors.photo = "Photo too large after processing. Retry.";
+  // Empty photo is allowed here — createSubmission reuses the live photo for
+  // links-only updates, or rejects when no live photo exists.
+  if (input.photoDataUrl) {
+    if (!input.photoDataUrl.startsWith("data:image/jpeg;base64,")) {
+      errors.photo = "Photo must be a square JPG — use the on-page cropper.";
+    } else if (input.photoDataUrl.length > MAX_PHOTO_DATAURL_CHARS) {
+      errors.photo = "Photo too large after processing. Retry.";
+    }
   }
   if (input.originalDataUrl != null && input.originalDataUrl !== "") {
     if (!input.originalDataUrl.startsWith("data:image/jpeg;base64,")) {
@@ -216,6 +220,14 @@ export async function createSubmission(input: { name: string; role: string; phot
   const errors = validateSubmission({ name, role: input.role, photoDataUrl: input.photoDataUrl, originalDataUrl: input.originalDataUrl ?? null, linkedin: input.linkedin, github: input.github, email: input.email });
   if (Object.keys(errors).length > 0) throw new TeamSubmissionError(errors);
   const section = sectionForRole(input.role) ?? "ops";
+  // Links-only update: no new upload → reuse the live photo. Reject when the
+  // member has no live photo yet (first submission must include one).
+  let livePhoto: string | null = null;
+  if (!input.photoDataUrl) {
+    const { member: live } = await getMemberProfile(name);
+    if (!live?.photo) throw new TeamSubmissionError({ photo: "Upload a photo and finish cropping." });
+    livePhoto = live.photo;
+  }
   const norm = (v: string) => v.trim().toLowerCase();
   return withWriteLock(async () => {
     const store = await readStore();
@@ -225,8 +237,10 @@ export async function createSubmission(input: { name: string; role: string; phot
     if (existing) {
       existing.role = input.role;
       existing.section = section;
-      existing.photoDataUrl = input.photoDataUrl;
-      existing.originalDataUrl = input.originalDataUrl ?? null;
+      if (input.photoDataUrl) {
+        existing.photoDataUrl = input.photoDataUrl;
+        existing.originalDataUrl = input.originalDataUrl ?? null;
+      }
       existing.linkedin = normalizeUrl(input.linkedin);
       existing.github = normalizeUrl(input.github);
       existing.email = normalizeEmail(input.email);
@@ -240,8 +254,8 @@ export async function createSubmission(input: { name: string; role: string; phot
       name,
       role: input.role,
       section,
-      photoDataUrl: input.photoDataUrl,
-      originalDataUrl: input.originalDataUrl ?? null,
+      photoDataUrl: input.photoDataUrl || (livePhoto as string),
+      originalDataUrl: input.photoDataUrl ? (input.originalDataUrl ?? null) : null,
       linkedin: normalizeUrl(input.linkedin),
       github: normalizeUrl(input.github),
       email: normalizeEmail(input.email),

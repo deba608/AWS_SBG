@@ -40,44 +40,48 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Validation failed.", errors: { name: "Select your name from the team list." } }, { status: 400 });
   }
   const role = roster.role;
-  if (!(photo instanceof File)) {
-    return NextResponse.json({ error: "Validation failed.", errors: { photo: "Photo is required." } }, { status: 400 });
-  }
-  if (!ALLOWED_TYPES.has(photo.type) || photo.type !== "image/jpeg") {
-    return NextResponse.json(
-      { error: "Validation failed.", errors: { photo: "Photo must be a square JPG — use the on-page cropper." } },
-      { status: 400 },
-    );
-  }
-  if (photo.size <= 0 || photo.size > MAX_UPLOAD_BYTES) {
-    return NextResponse.json(
-      { error: "Validation failed.", errors: { photo: "Photo too large (max 5MB before processing)." } },
-      { status: 400 },
-    );
-  }
-  const bytes = new Uint8Array(await photo.arrayBuffer());
-  if (!isJpeg(bytes)) {
-    return NextResponse.json(
-      { error: "Validation failed.", errors: { photo: "Photo must be a square JPG — use the on-page cropper." } },
-      { status: 400 },
-    );
-  }
-  let binary = "";
+
+  // Photo optional when the member already has a live photo (links-only
+  // update). createSubmission reuses it, or rejects if none exists.
+  let photoDataUrl = "";
+  const hasPhoto = photo instanceof File && photo.size > 0;
   const CHUNK = 0x8000;
-  for (let i = 0; i < bytes.length; i += CHUNK) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
-  }
-  const photoDataUrl = `data:image/jpeg;base64,${btoa(binary)}`;
-  if (photoDataUrl.length > MAX_PHOTO_DATAURL_CHARS) {
-    return NextResponse.json(
-      { error: "Validation failed.", errors: { photo: "Photo too large after processing. Retry." } },
-      { status: 400 },
-    );
+  if (hasPhoto) {
+    if (!ALLOWED_TYPES.has(photo.type) || photo.type !== "image/jpeg") {
+      return NextResponse.json(
+        { error: "Validation failed.", errors: { photo: "Photo must be a square JPG — use the on-page cropper." } },
+        { status: 400 },
+      );
+    }
+    if (photo.size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json(
+        { error: "Validation failed.", errors: { photo: "Photo too large (max 5MB before processing)." } },
+        { status: 400 },
+      );
+    }
+    const bytes = new Uint8Array(await photo.arrayBuffer());
+    if (!isJpeg(bytes)) {
+      return NextResponse.json(
+        { error: "Validation failed.", errors: { photo: "Photo must be a square JPG — use the on-page cropper." } },
+        { status: 400 },
+      );
+    }
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+    }
+    photoDataUrl = `data:image/jpeg;base64,${btoa(binary)}`;
+    if (photoDataUrl.length > MAX_PHOTO_DATAURL_CHARS) {
+      return NextResponse.json(
+        { error: "Validation failed.", errors: { photo: "Photo too large after processing. Retry." } },
+        { status: 400 },
+      );
+    }
   }
   // Bounded full original for admin re-crop (optional, client sends it).
   let originalDataUrl: string | null = null;
   const original = form.get("original");
-  if (original instanceof File && original.size > 0) {
+  if (hasPhoto && original instanceof File && original.size > 0) {
     if (original.type !== "image/jpeg" || original.size > MAX_UPLOAD_BYTES) {
       return NextResponse.json(
         { error: "Validation failed.", errors: { photo: "Original photo must be a JPG under 5MB." } },
