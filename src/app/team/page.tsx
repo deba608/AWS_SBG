@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
 import Reveal from "@/components/Reveal";
-import SectionHeading from "@/components/SectionHeading";
-import TeamCard from "@/components/TeamCard";
-import type { TeamMember } from "@/data/team";
+import TeamExplorer from "@/components/TeamExplorer";
 import { getTeamLists } from "@/lib/team-store";
 import { SITE } from "@/lib/constants";
+import { Users, Layers, Sparkles, Terminal } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Team — AWS SBG SUIIT Student Builders",
@@ -15,117 +14,153 @@ export const metadata: Metadata = {
   openGraph: {
     url: "/team",
     title: `Team · ${SITE.shortName}`,
-    description: `36 students across 12 domains — organizing workshops, mentoring newcomers and keeping the projects shipping.`,
+    description: `Meet the student builders running AWS SBG — the ${SITE.name} at ${SITE.collegeName}.`,
   },
   twitter: {
     card: "summary_large_image",
     title: `Team · ${SITE.shortName}`,
-    description: `36 students across 12 domains — organizing workshops, mentoring newcomers and keeping the projects shipping.`,
+    description: `Meet the student builders running AWS SBG — the ${SITE.name} at ${SITE.collegeName}.`,
   },
 };
 
-function TeamSection({
-  id,
-  title,
-  members,
-  cols = 2,
-  large = false,
-}: {
-  id: string;
-  title: string;
-  members: TeamMember[];
-  cols?: 1 | 2;
-  large?: boolean;
-}) {
-  return (
-    <section aria-labelledby={id}>
-      <h2
-        id={id}
-        className="text-xl font-bold text-cream md:text-2xl"
-      >
-        {title}
-      </h2>
-      <ul
-        className={
-          cols === 2
-            ? "mt-4 grid grid-cols-1 gap-x-5 gap-y-2 border-t border-line sm:grid-cols-2 sm:gap-x-8"
-            : "mt-4 border-t border-line"
-        }
-      >
-        {members.map((member, i) => (
-          <li key={member.id} className="min-w-0 border-b border-line">
-            <Reveal delay={Math.min(i * 0.05, 0.25)}>
-              <TeamCard member={member} large={large} />
-            </Reveal>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
 export default async function TeamPage() {
   const { teamLeads, domainLeads, opsTeam, coordinators } = await getTeamLists();
+  const totalBuilders =
+    teamLeads.length + domainLeads.length + opsTeam.length + coordinators.length;
+
   return (
-    <div className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
+    <div className="relative pb-16 pt-24 sm:pb-20 md:pb-28 md:pt-32">
+      {/* Ambient background glows */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[500px] w-full max-w-6xl -translate-x-1/2 overflow-hidden opacity-40 blur-3xl"
+      >
+        <div className="h-full w-full bg-[radial-gradient(ellipse_at_top,_rgba(173,92,255,0.18)_0%,_rgba(15,19,23,0)_70%)]" />
+      </div>
+
       <Container>
-        <h1 className="sr-only">Team — AWS Student Builder Group at SUIIT</h1>
-        <SectionHeading
-          eyebrow="AWS Student Builder Group Team 2025–26"
-          title="Meet the builders behind the community."
-          description="36 students across 12 domains — organizing workshops, mentoring newcomers and keeping the projects shipping."
-        />
+        {/* Hero Section */}
+        <div className="relative mb-12 sm:mb-16">
+          <Reveal>
+            <div className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-mono font-medium text-brand">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+              </span>
+              <span>AWS SBG · COHORT 2025–26</span>
+            </div>
 
-        <div className="space-y-12 sm:space-y-14 md:space-y-20">
-          <TeamSection
-            id="leadership"
-            title="Leadership"
-            members={teamLeads}
-            cols={1}
-            large
-          />
+            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-cream sm:text-4xl md:text-5xl lg:text-6xl">
+              Meet the builders behind the community.
+            </h1>
+          </Reveal>
 
-          <TeamSection
-            id="domain-leads"
-            title="Domain leads"
-            members={domainLeads}
-          />
+          {/* Quick Metrics Bar */}
+          <Reveal delay={0.1} className="mt-8">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-brand">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="text-xs font-mono font-semibold uppercase text-faint">
+                    Leadership
+                  </span>
+                </div>
+                <p className="mt-1.5 text-2xl font-bold font-mono text-cream">
+                  {teamLeads.length}
+                </p>
+                <p className="text-xs text-fog">Executive leaders</p>
+              </div>
 
-          <TeamSection
-            id="ops-team"
-            title="Events, PR & media"
-            members={opsTeam}
-          />
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-brand">
+                  <Layers className="h-4 w-4" />
+                  <span className="text-xs font-mono font-semibold uppercase text-faint">
+                    Domains
+                  </span>
+                </div>
+                <p className="mt-1.5 text-2xl font-bold font-mono text-cream">
+                  8+
+                </p>
+                <p className="text-xs text-fog">Tech specializations</p>
+              </div>
 
-          <TeamSection
-            id="coordinators"
-            title="Co-ordinators"
-            members={coordinators}
-          />
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-brand">
+                  <Users className="h-4 w-4" />
+                  <span className="text-xs font-mono font-semibold uppercase text-faint">
+                    Builders
+                  </span>
+                </div>
+                <p className="mt-1.5 text-2xl font-bold font-mono text-cream">
+                  {totalBuilders}
+                </p>
+                <p className="text-xs text-fog">Active core members</p>
+              </div>
+
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-brand">
+                  <Terminal className="h-4 w-4" />
+                  <span className="text-xs font-mono font-semibold uppercase text-faint">
+                    Initiative
+                  </span>
+                </div>
+                <p className="mt-1.5 text-2xl font-bold font-mono text-cream">
+                  100%
+                </p>
+                <p className="text-xs text-fog">Student-led group</p>
+              </div>
+            </div>
+          </Reveal>
         </div>
 
-        <Reveal className="mt-12 sm:mt-14">
-          <div className="flex flex-col gap-4 border-y border-line py-8 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-cream">
-                Get involved
-              </h2>
-              <p className="mt-1 max-w-prose text-sm leading-relaxed text-fog">
-                Want to help run the community? Core team applications open
-                every semester.
-              </p>
-            </div>
-            <div className="flex w-full flex-col gap-3 shrink-0 sm:w-auto sm:flex-row">
-              <Button href="/team/update" className="w-full sm:w-auto">
-                Request profile update
-              </Button>
-              <Button
-                href={SITE.links.join}
-                external
-                className="w-full sm:w-auto"
-              >
-                Get involved
-              </Button>
+        {/* Dynamic Interactive Team Explorer */}
+        <Reveal delay={0.15}>
+          <TeamExplorer
+            teamLeads={teamLeads}
+            domainLeads={domainLeads}
+            opsTeam={opsTeam}
+            coordinators={coordinators}
+          />
+        </Reveal>
+
+        {/* Elevated Bottom Command Card: Get Involved */}
+        <Reveal delay={0.2} className="mt-16 sm:mt-20">
+          <div className="relative overflow-hidden rounded-3xl border border-line/80 bg-gradient-to-b from-surface/90 via-coal/90 to-surface/90 p-8 sm:p-10 md:p-12 shadow-[0_16px_50px_rgba(0,0,0,0.5)]">
+            {/* Mesh grid & purple ambient flare */}
+            <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full bg-brand/15 blur-3xl" />
+            <div className="pointer-events-none absolute -left-12 -bottom-12 h-64 w-64 rounded-full bg-brand/10 blur-3xl" />
+
+            <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-2xl">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/15 px-3 py-1 text-xs font-mono font-medium text-brand border border-brand/30">
+                  <Terminal className="h-3 w-3" /> Join the Cohort
+                </span>
+                <h2 className="mt-3 text-2xl font-bold tracking-tight text-cream sm:text-3xl">
+                  Want to build with AWS SBG?
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-fog sm:text-base">
+                  Core team applications and domain openings happen every semester.
+                  Already a team member? You can request a profile and photo update anytime.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 shrink-0 sm:flex-row">
+                <Button
+                  href="/team/update"
+                  variant="secondary"
+                  className="w-full sm:w-auto"
+                >
+                  Request profile update
+                </Button>
+                <Button
+                  href={SITE.links.join}
+                  external
+                  variant="primary"
+                  className="w-full sm:w-auto"
+                >
+                  Get involved
+                </Button>
+              </div>
             </div>
           </div>
         </Reveal>
