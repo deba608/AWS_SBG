@@ -22,6 +22,41 @@ const MAX_BYTES = 5 * 1024 * 1024;
 /** Downscale full photo to ~1280px JPEG so admin can re-crop from scratch later. */
 const ORIGINAL_MAX_SIDE = 1280;
 
+function withHttps(v: string): string {
+  const t = v.trim();
+  if (!t) return "";
+  return /^https?:\/\//i.test(t) ? t : `https://${t}`;
+}
+
+function validateLinkFields(linkedin: string, github: string, email: string): { linkedin?: string; github?: string; email?: string } {
+  const fe: { linkedin?: string; github?: string; email?: string } = {};
+  const li = linkedin.trim();
+  const gh = github.trim();
+  const em = email.trim().toLowerCase();
+  if (li) {
+    const full = withHttps(li);
+    try {
+      const u = new URL(full);
+      if (u.protocol !== "http:" && u.protocol !== "https:") fe.linkedin = "Enter a valid LinkedIn URL.";
+      else if (!/linkedin\.com|lnkd\.in/i.test(full)) fe.linkedin = "That doesn't look like a LinkedIn URL.";
+    } catch {
+      fe.linkedin = "Enter a valid LinkedIn URL.";
+    }
+  }
+  if (gh) {
+    const full = withHttps(gh);
+    try {
+      const u = new URL(full);
+      if (u.protocol !== "http:" && u.protocol !== "https:") fe.github = "Enter a valid GitHub URL.";
+      else if (!/github\.com/i.test(full)) fe.github = "That doesn't look like a GitHub URL.";
+    } catch {
+      fe.github = "Enter a valid GitHub URL.";
+    }
+  }
+  if (em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) fe.email = "Enter a valid email address.";
+  return fe;
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -53,16 +88,25 @@ function boundOriginal(img: HTMLImageElement): Promise<Blob> {
 export default function JoinClient() {
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
+  const [linkedin, setLinkedin] = useState("");
+  const [github, setGithub] = useState("");
+  const [email, setEmail] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [originalUrl, setOriginalUrl] = useState("");
   const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [preparing, setPreparing] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; role?: string; photo?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; role?: string; photo?: string; linkedin?: string; github?: string; email?: string }>({});
   const [apiError, setApiError] = useState("");
   const [status, setStatus] = useState<"form" | "busy" | "done">("form");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Progress checklist — same order as the form: details → photo → links → submit.
+  const stepName = Boolean(name && role);
+  const stepPhoto = Boolean(file && preview);
+  const stepLinks = [linkedin.trim(), github.trim(), email.trim()].filter(Boolean).length;
+  const doneCount = (stepName ? 1 : 0) + (stepPhoto ? 1 : 0);
 
   // Revoke each object URL independently so changing one doesn't revoke the other.
   useEffect(() => {
@@ -136,6 +180,7 @@ export default function JoinClient() {
     const photoFile = file;
     const fullFile = originalFile;
     if (!photoFile || !preview) fe.photo = "Upload a photo and finish cropping.";
+    Object.assign(fe, validateLinkFields(linkedin, github, email));
     setErrors(fe);
     if (Object.keys(fe).filter((k) => fe[k as keyof typeof fe]).length > 0) return;
     if (!photoFile) return;
@@ -147,6 +192,10 @@ export default function JoinClient() {
       form.set("role", role);
       form.set("photo", photoFile, "photo.jpg");
       if (fullFile) form.set("original", fullFile, "original.jpg");
+      // Links optional — same approval flow as photo. Server normalizes + validates.
+      if (linkedin.trim()) form.set("linkedin", withHttps(linkedin));
+      if (github.trim()) form.set("github", withHttps(github));
+      if (email.trim()) form.set("email", email.trim().toLowerCase());
       const res = await fetch("/api/team/submit", { method: "POST", body: form });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -160,28 +209,34 @@ export default function JoinClient() {
     }
   }
 
+  function resetAll() {
+    setStatus("form");
+    setName("");
+    setRole("");
+    setLinkedin("");
+    setGithub("");
+    setEmail("");
+    setFile(null);
+    setPreview("");
+    setOriginalUrl("");
+    setOriginalFile(null);
+    setEditorOpen(false);
+    setErrors({});
+    setApiError("");
+  }
+
   if (status === "done") {
     return (
       <div className="rank-card space-y-3 p-5 text-center sm:p-6">
         <CheckCircle2 className="mx-auto h-10 w-10 text-green-400" aria-hidden />
         <h2 className="text-lg font-bold text-cream">Submitted for review</h2>
         <p className="mx-auto max-w-prose text-sm leading-relaxed text-fog">
-          Admin will approve your photo and it appears on the team page instantly after approval.
+          Admin will approve your photo{[linkedin.trim(), github.trim(), email.trim()].filter(Boolean).length > 0 ? " and links" : ""} and{" "}
+          {([linkedin.trim(), github.trim(), email.trim()].filter(Boolean).length > 0 ? "they appear" : "it appears")} on the team page instantly after approval.
         </p>
         <button
           type="button"
-          onClick={() => {
-            setStatus("form");
-            setName("");
-            setRole("");
-            setFile(null);
-            setPreview("");
-            setOriginalUrl("");
-            setOriginalFile(null);
-            setEditorOpen(false);
-            setErrors({});
-            setApiError("");
-          }}
+          onClick={resetAll}
           className="inline-flex min-h-[44px] items-center rounded-full border border-line px-6 py-2 text-sm text-fog hover:text-cream"
         >
           Submit another
@@ -192,6 +247,19 @@ export default function JoinClient() {
 
   return (
     <form noValidate onSubmit={submit} className="rank-card space-y-4 p-5 sm:p-6">
+      {/* Progress: details → photo → links. Links optional, photo required. */}
+      <ol aria-label="Progress" className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+        <li className={cn("rounded-full border px-3 py-1", stepName ? "border-green-400/60 text-green-300" : "border-line text-fog")}>
+          {stepName ? "✓ " : "1 "} Details
+        </li>
+        <li className={cn("rounded-full border px-3 py-1", stepPhoto ? "border-green-400/60 text-green-300" : "border-line text-fog")}>
+          {stepPhoto ? "✓ " : "2 "} Photo
+        </li>
+        <li className={cn("rounded-full border px-3 py-1", stepLinks > 0 ? "border-brand/60 text-cream" : "border-line text-fog")}>
+          3 Links{stepLinks > 0 ? ` · ${stepLinks}` : " (optional)"}
+        </li>
+        <li className="ml-auto text-faint">{doneCount}/2 required done</li>
+      </ol>
       <div>
         <label htmlFor="team-name" className="mb-1.5 block text-sm font-medium text-cream">
           Your name *
@@ -310,6 +378,75 @@ export default function JoinClient() {
         {errors.photo ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.photo}</p> : null}
       </div>
 
+      <fieldset className="rounded-xl border border-line p-4">
+        <legend className="px-2 text-sm font-medium text-cream">Links — optional, same approval as photo</legend>
+        <div className="space-y-3">
+          <div>
+            <label htmlFor="team-linkedin" className="mb-1.5 block text-sm font-medium text-cream">
+              LinkedIn
+            </label>
+            <input
+              id="team-linkedin"
+              type="url"
+              inputMode="url"
+              autoComplete="url"
+              placeholder="linkedin.com/in/your-name"
+              value={linkedin}
+              onChange={(e) => setLinkedin(e.target.value)}
+              aria-invalid={Boolean(errors.linkedin)}
+              className={cn(
+                "min-h-[44px] w-full rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm",
+                errors.linkedin ? "border-red-400/70" : "border-line",
+              )}
+            />
+            {errors.linkedin ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.linkedin}</p> : null}
+          </div>
+          <div>
+            <label htmlFor="team-github" className="mb-1.5 block text-sm font-medium text-cream">
+              GitHub
+            </label>
+            <input
+              id="team-github"
+              type="url"
+              inputMode="url"
+              autoComplete="url"
+              placeholder="github.com/your-name"
+              value={github}
+              onChange={(e) => setGithub(e.target.value)}
+              aria-invalid={Boolean(errors.github)}
+              className={cn(
+                "min-h-[44px] w-full rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm",
+                errors.github ? "border-red-400/70" : "border-line",
+              )}
+            />
+            {errors.github ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.github}</p> : null}
+          </div>
+          <div>
+            <label htmlFor="team-email" className="mb-1.5 block text-sm font-medium text-cream">
+              Email
+            </label>
+            <input
+              id="team-email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={Boolean(errors.email)}
+              className={cn(
+                "min-h-[44px] w-full rounded-xl border bg-surface px-3 py-3 text-base text-cream placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm",
+                errors.email ? "border-red-400/70" : "border-line",
+              )}
+            />
+            {errors.email ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.email}</p> : null}
+          </div>
+          <p className="text-xs leading-relaxed text-faint">
+            Tip: paste full URL or just <span className="font-mono text-cream">linkedin.com/in/…</span> — https:// added for you. Leave blank to skip.
+          </p>
+        </div>
+      </fieldset>
+
       {apiError ? (
         <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
           {apiError}
@@ -318,12 +455,12 @@ export default function JoinClient() {
 
       <button
         type="submit"
-        disabled={status === "busy"}
+        disabled={status === "busy" || preparing}
         className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-black hover:bg-brandhover disabled:opacity-70"
       >
         {status === "busy" ? (<><Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Submitting…</>) : "Submit for approval"}
       </button>
-      <p className="text-xs leading-relaxed text-faint">Admin reviews every submission. Approved photos show on the team page instantly.</p>
+      <p className="text-xs leading-relaxed text-faint">Admin reviews every submission. Approved photo{stepLinks > 0 ? " + links" : ""} show on the team page instantly.</p>
       {editorOpen && originalUrl ? (
         <PhotoCropper
           src={originalUrl}

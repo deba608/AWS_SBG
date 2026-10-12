@@ -21,6 +21,9 @@ export interface TeamSubmission {
   photoDataUrl: string;
   /** Full pre-crop photo (bounded ~1280px) so admin can re-crop from scratch. */
   originalDataUrl?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+  email?: string | null;
   status: SubmissionStatus;
   createdAt: string;
   reviewedAt: string | null;
@@ -119,6 +122,57 @@ export interface SubmissionErrors {
   name?: string;
   role?: string;
   photo?: string;
+  linkedin?: string;
+  github?: string;
+  email?: string;
+}
+
+export function normalizeUrl(value: string | null | undefined): string | null {
+  const v = (value ?? "").trim();
+  if (!v) return null;
+  if (/^https?:\/\//i.test(v)) return v;
+  return `https://${v}`;
+}
+
+export function normalizeEmail(value: string | null | undefined): string | null {
+  const v = (value ?? "").trim().toLowerCase();
+  return v ? v : null;
+}
+
+function isValidHttpUrl(value: string): boolean {
+  try {
+    const u = new URL(value);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export function validateLinks(input: { linkedin?: string | null; github?: string | null; email?: string | null }): SubmissionErrors {
+  const errors: SubmissionErrors = {};
+  const linkedin = normalizeUrl(input.linkedin);
+  const github = normalizeUrl(input.github);
+  const email = normalizeEmail(input.email);
+  if (linkedin) {
+    if (!isValidHttpUrl(linkedin) || linkedin.length > 300) {
+      errors.linkedin = "Enter a valid LinkedIn URL.";
+    } else if (!/linkedin\.com|lnkd\.in/i.test(linkedin)) {
+      errors.linkedin = "That doesn't look like a LinkedIn URL.";
+    }
+  }
+  if (github) {
+    if (!isValidHttpUrl(github) || github.length > 300) {
+      errors.github = "Enter a valid GitHub URL.";
+    } else if (!/github\.com/i.test(github)) {
+      errors.github = "That doesn't look like a GitHub URL.";
+    }
+  }
+  if (email) {
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = "Enter a valid email address.";
+    }
+  }
+  return errors;
 }
 
 export function rosterMember(name: string): TeamMember | null {
@@ -126,7 +180,7 @@ export function rosterMember(name: string): TeamMember | null {
   return allMembers.find((m) => m.name.toLowerCase() === norm) ?? null;
 }
 
-export function validateSubmission(input: { name: string; role: string; photoDataUrl: string; originalDataUrl?: string | null }): SubmissionErrors {
+export function validateSubmission(input: { name: string; role: string; photoDataUrl: string; originalDataUrl?: string | null; linkedin?: string | null; github?: string | null; email?: string | null }): SubmissionErrors {
   const errors: SubmissionErrors = {};
   const member = rosterMember(input.name);
   if (!member) errors.name = "Select your name from the team list.";
@@ -143,6 +197,7 @@ export function validateSubmission(input: { name: string; role: string; photoDat
       errors.photo = "Original photo too large. Re-upload.";
     }
   }
+  Object.assign(errors, validateLinks(input));
   return errors;
 }
 
@@ -155,10 +210,10 @@ export class TeamSubmissionError extends Error {
   }
 }
 
-export async function createSubmission(input: { name: string; role: string; photoDataUrl: string; originalDataUrl?: string | null }): Promise<TeamSubmission> {
+export async function createSubmission(input: { name: string; role: string; photoDataUrl: string; originalDataUrl?: string | null; linkedin?: string | null; github?: string | null; email?: string | null }): Promise<TeamSubmission> {
   const member = rosterMember(input.name);
   const name = member ? member.name : input.name.trim().replace(/\s+/g, " ");
-  const errors = validateSubmission({ name, role: input.role, photoDataUrl: input.photoDataUrl, originalDataUrl: input.originalDataUrl ?? null });
+  const errors = validateSubmission({ name, role: input.role, photoDataUrl: input.photoDataUrl, originalDataUrl: input.originalDataUrl ?? null, linkedin: input.linkedin, github: input.github, email: input.email });
   if (Object.keys(errors).length > 0) throw new TeamSubmissionError(errors);
   const section = sectionForRole(input.role) ?? "ops";
   return withWriteLock(async () => {
@@ -170,6 +225,9 @@ export async function createSubmission(input: { name: string; role: string; phot
       section,
       photoDataUrl: input.photoDataUrl,
       originalDataUrl: input.originalDataUrl ?? null,
+      linkedin: normalizeUrl(input.linkedin),
+      github: normalizeUrl(input.github),
+      email: normalizeEmail(input.email),
       status: "pending",
       createdAt: new Date().toISOString(),
       reviewedAt: null,
@@ -211,6 +269,24 @@ export async function updateSubmissionPhoto(id: string, photoDataUrl: string): P
   });
 }
 
+/** Admin edit links on a submission. Null/empty clears. Throws on invalid. */
+export async function updateSubmissionLinks(id: string, links: { linkedin?: string | null; github?: string | null; email?: string | null }): Promise<TeamSubmission> {
+  const errors = validateLinks(links);
+  if (Object.keys(errors).length > 0) {
+    throw new Error(errors.linkedin ?? errors.github ?? errors.email ?? "Invalid links.");
+  }
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const sub = store.submissions.find((s) => s.id === id);
+    if (!sub) throw new Error("Submission not found.");
+    if (links.linkedin !== undefined) sub.linkedin = normalizeUrl(links.linkedin);
+    if (links.github !== undefined) sub.github = normalizeUrl(links.github);
+    if (links.email !== undefined) sub.email = normalizeEmail(links.email);
+    await writeStore(store);
+    return { ...sub };
+  });
+}
+
 export async function listApproved(): Promise<TeamSubmission[]> {
   const store = await readStore();
   return store.submissions.filter((s) => s.status === "approved");
@@ -223,12 +299,15 @@ function toMember(s: TeamSubmission): TeamMember {
     role: s.role,
     bio: "",
     photo: s.photoDataUrl,
+    linkedin: s.linkedin ?? undefined,
+    github: s.github ?? undefined,
+    email: s.email ?? undefined,
   };
 }
 
 /**
  * Static team.ts lists merged with admin-approved submissions.
- * Name match (case-insensitive) overrides the static photo; otherwise appended to its section.
+ * Name match (case-insensitive) overrides static photo + role + links; otherwise appended to its section.
  */
 export async function getTeamLists(): Promise<{
   teamLeads: TeamMember[];
@@ -255,6 +334,9 @@ export async function getTeamLists(): Promise<{
     if (existing) {
       existing.photo = s.photoDataUrl;
       existing.role = s.role;
+      if (s.linkedin) existing.linkedin = s.linkedin;
+      if (s.github) existing.github = s.github;
+      if (s.email) existing.email = s.email;
       continue;
     }
     bySection[s.section]?.push(toMember(s));

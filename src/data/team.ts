@@ -6,6 +6,7 @@ export interface TeamMember {
   lead?: boolean;
   email?: string;
   linkedin?: string;
+  github?: string;
   photo?: string;
 }
 

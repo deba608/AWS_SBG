@@ -2,13 +2,20 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Check, Crop, Loader2, X } from "lucide-react";
+import { ArrowLeft, Check, Crop, Link2, Loader2, Pencil, X } from "lucide-react";
 import AdminLogin from "@/components/AdminLogin";
 import PhotoCropper from "@/components/PhotoCropper";
 import type { TeamSubmission } from "@/lib/team-store";
 import { cn } from "@/lib/utils";
 
 type Filter = "pending" | "approved" | "rejected" | "all";
+
+interface LinksDraft {
+  id: string;
+  linkedin: string;
+  github: string;
+  email: string;
+}
 
 export default function TeamAdminClient() {
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -17,6 +24,8 @@ export default function TeamAdminClient() {
   const [loading, setLoading] = useState(false);
   const [actingId, setActingId] = useState<string | null>(null);
   const [cropFor, setCropFor] = useState<TeamSubmission | null>(null);
+  const [linksDraft, setLinksDraft] = useState<LinksDraft | null>(null);
+  const [linksError, setLinksError] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/me", { cache: "no-store" })
@@ -94,6 +103,33 @@ export default function TeamAdminClient() {
     }
   }
 
+  async function saveLinks() {
+    if (!linksDraft) return;
+    setActingId(linksDraft.id);
+    setLinksError("");
+    try {
+      const res = await fetch("/api/admin/team", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: linksDraft.id,
+          linkedin: linksDraft.linkedin.trim(),
+          github: linksDraft.github.trim(),
+          email: linksDraft.email.trim(),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setLinksError(data.error ?? "Could not save links.");
+        return;
+      }
+      setLinksDraft(null);
+      await load();
+    } finally {
+      setActingId(null);
+    }
+  }
+
   const counts = {
     pending: subs.filter((s) => s.status === "pending").length,
     approved: subs.filter((s) => s.status === "approved").length,
@@ -132,7 +168,7 @@ export default function TeamAdminClient() {
         </div>
       ) : shown.length === 0 ? (
         <div className="rank-card p-6 text-center text-sm text-fog">
-          No {filter} submissions. Share <span className="font-mono text-cream">/team/join</span> with members.
+          No {filter} submissions. Share <span className="font-mono text-cream">/team/update</span> with members.
         </div>
       ) : (
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -144,6 +180,88 @@ export default function TeamAdminClient() {
                 <p className="font-semibold text-cream">{s.name}</p>
                 <p className="text-sm text-brand">{s.role}</p>
                 <p className="text-xs text-faint">{new Date(s.createdAt).toLocaleString()} · {s.status}</p>
+                {/* Links submitted with photo — verify before approve */}
+                <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1 text-xs">
+                  {s.linkedin ? (
+                    <a href={s.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-fog underline hover:text-cream">
+                      <Link2 className="h-3 w-3" aria-hidden /> LinkedIn
+                    </a>
+                  ) : null}
+                  {s.github ? (
+                    <a href={s.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-fog underline hover:text-cream">
+                      <Link2 className="h-3 w-3" aria-hidden /> GitHub
+                    </a>
+                  ) : null}
+                  {s.email ? (
+                    <a href={`mailto:${s.email}`} className="inline-flex items-center gap-1 text-fog underline hover:text-cream">
+                      {s.email}
+                    </a>
+                  ) : null}
+                  {!s.linkedin && !s.github && !s.email ? (
+                    <span className="text-faint">No links submitted.</span>
+                  ) : null}
+                </div>
+                {linksDraft?.id === s.id ? (
+                  <div className="space-y-2 rounded-xl border border-line p-3">
+                    <label className="block text-xs text-fog">
+                      LinkedIn
+                      <input
+                        type="url"
+                        value={linksDraft.linkedin}
+                        onChange={(e) => setLinksDraft({ ...linksDraft, linkedin: e.target.value })}
+                        placeholder="linkedin.com/in/…"
+                        className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-cream"
+                      />
+                    </label>
+                    <label className="block text-xs text-fog">
+                      GitHub
+                      <input
+                        type="url"
+                        value={linksDraft.github}
+                        onChange={(e) => setLinksDraft({ ...linksDraft, github: e.target.value })}
+                        placeholder="github.com/…"
+                        className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-cream"
+                      />
+                    </label>
+                    <label className="block text-xs text-fog">
+                      Email
+                      <input
+                        type="email"
+                        value={linksDraft.email}
+                        onChange={(e) => setLinksDraft({ ...linksDraft, email: e.target.value })}
+                        placeholder="you@example.com"
+                        className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-cream"
+                      />
+                    </label>
+                    {linksError ? <p role="alert" className="text-xs text-red-300">{linksError}</p> : null}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        disabled={actingId === s.id}
+                        onClick={() => void saveLinks()}
+                        className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1 rounded-full bg-brand px-4 py-2 text-xs font-bold text-black hover:bg-brandhover disabled:opacity-60"
+                      >
+                        Save links
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setLinksDraft(null); setLinksError(""); }}
+                        className="inline-flex min-h-[44px] items-center rounded-full border border-line px-4 py-2 text-xs text-fog hover:text-cream"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={actingId === s.id}
+                    onClick={() => setLinksDraft({ id: s.id, linkedin: s.linkedin ?? "", github: s.github ?? "", email: s.email ?? "" })}
+                    className="mt-2 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-line px-4 py-2 text-xs font-semibold text-fog hover:text-cream disabled:opacity-60"
+                  >
+                    <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit links
+                  </button>
+                )}
                 <button
                   type="button"
                   disabled={actingId === s.id}

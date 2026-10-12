@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
-import { listSubmissions, setSubmissionStatus, updateSubmissionPhoto, type SubmissionStatus } from "@/lib/team-store";
+import { listSubmissions, setSubmissionStatus, updateSubmissionLinks, updateSubmissionPhoto, type SubmissionStatus } from "@/lib/team-store";
 
 /** Admin: list all photo submissions, newest first. */
 export async function GET() {
@@ -30,6 +30,22 @@ export async function PATCH(req: Request) {
   if (typeof b.photoDataUrl === "string") {
     try {
       const submission = await updateSubmissionPhoto(id, b.photoDataUrl);
+      return NextResponse.json({ submission });
+    } catch (err) {
+      if (err instanceof Error && err.message === "Submission not found.") {
+        return NextResponse.json({ error: "Submission not found." }, { status: 404 });
+      }
+      return NextResponse.json({ error: err instanceof Error ? err.message : "Update failed." }, { status: 400 });
+    }
+  }
+  // Admin edit links: PATCH { id, linkedin?, github?, email? } — same shape as member submit.
+  if ("linkedin" in b || "github" in b || "email" in b) {
+    try {
+      const links: { linkedin?: string | null; github?: string | null; email?: string | null } = {};
+      if ("linkedin" in b) links.linkedin = typeof b.linkedin === "string" ? b.linkedin : null;
+      if ("github" in b) links.github = typeof b.github === "string" ? b.github : null;
+      if ("email" in b) links.email = typeof b.email === "string" ? b.email : null;
+      const submission = await updateSubmissionLinks(id, links);
       return NextResponse.json({ submission });
     } catch (err) {
       if (err instanceof Error && err.message === "Submission not found.") {

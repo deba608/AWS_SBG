@@ -28,6 +28,9 @@ export async function POST(req: Request) {
   const name = String(form.get("name") ?? "");
   const role = String(form.get("role") ?? "");
   const photo = form.get("photo");
+  const linkedin = String(form.get("linkedin") ?? "").trim() || null;
+  const github = String(form.get("github") ?? "").trim() || null;
+  const email = String(form.get("email") ?? "").trim() || null;
 
   if (!sectionForRole(role)) {
     return NextResponse.json({ error: "Validation failed.", errors: { role: "Select your position from the list." } }, { status: 400 });
@@ -96,7 +99,7 @@ export async function POST(req: Request) {
     }
   }
   try {
-    const sub = await createSubmission({ name, role, photoDataUrl, originalDataUrl });
+    const sub = await createSubmission({ name, role, photoDataUrl, originalDataUrl, linkedin, github, email });
     return NextResponse.json({ id: sub.id, status: sub.status }, { status: 201 });
   } catch (err) {
     if (err instanceof TeamSubmissionError) {
