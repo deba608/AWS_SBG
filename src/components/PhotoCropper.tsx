@@ -125,13 +125,17 @@ export default function PhotoCropper({
 
   useEffect(() => {
     let live = true;
+    // New photo → drop stale size/pos at once so clamp can't use old aspect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNat(null);
+    setZoom(1);
+    setPos({ x: 0, y: 0 });
+    setError("");
     void loadImage(src)
       .then((img) => {
         if (!live) return;
         setNat({ w: img.naturalWidth, h: img.naturalHeight });
         // Google-style: open frame-filling (cover), centered. Drag to frame face.
-        setZoom(1);
-        setPos({ x: 0, y: 0 });
       })
       .catch(() => {
         if (live) setError("Could not read that image.");
@@ -306,7 +310,7 @@ export default function PhotoCropper({
             alt="Crop preview"
             draggable={false}
             className="h-full w-full object-cover select-none"
-            style={{ transform: `translate(${pos.x / zoom}px, ${pos.y / zoom}px) scale(${zoom})` }}
+            style={{ transform: `translate(${pos.x}px, ${pos.y}px) scale(${zoom})` }}
           />
         </div>
         <div className="mt-3 flex items-center gap-2">

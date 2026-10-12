@@ -117,7 +117,7 @@ export default async function TeamPage() {
             </div>
             <div className="flex w-full flex-col gap-3 shrink-0 sm:w-auto sm:flex-row">
               <Button href="/team/update" className="w-full sm:w-auto">
-                Update team profile
+                Request profile update
               </Button>
               <Button
                 href={SITE.links.join}
