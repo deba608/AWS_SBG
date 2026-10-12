@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { SITE } from "@/lib/constants";
 import "./globals.css";
+import "@/components/CursorGrid.css";
 
 const plexSans = IBM_Plex_Sans({
   variable: "--font-plex-sans",
