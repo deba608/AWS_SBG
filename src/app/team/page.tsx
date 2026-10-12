@@ -42,15 +42,7 @@ export default async function TeamPage() {
         {/* Hero Section */}
         <div className="relative mb-12 sm:mb-16">
           <Reveal>
-            <div className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-mono font-medium text-brand">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
-              </span>
-              <span>AWS SBG · COHORT 2025–26</span>
-            </div>
-
-            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-cream sm:text-4xl md:text-5xl lg:text-6xl">
+            <h1 className="text-3xl font-extrabold tracking-tight text-cream sm:text-4xl md:text-5xl lg:text-6xl">
               Meet the builders behind the community.
             </h1>
           </Reveal>

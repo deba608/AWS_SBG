@@ -7,7 +7,6 @@ import {
   X,
   Sparkles,
   Compass,
-  ZoomIn,
   Filter,
 } from "lucide-react";
 import type { TeamMember } from "@/data/team";
@@ -535,134 +534,124 @@ function BuilderCard({
   onPhotoClick: () => void;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
+  // Touch devices have no hover: first tap reveals color + info, second opens photo.
+  const [peek, setPeek] = useState(false);
   const showPhoto = Boolean(member.photo) && !imgFailed;
-  const domainCategory = getDomainCategory(member.role);
+  const hasLinks = Boolean(member.linkedin || member.github || member.email);
+
+  function handleActivate(e: React.SyntheticEvent) {
+    if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches && !peek) {
+      e.preventDefault();
+      setPeek(true);
+      return;
+    }
+    onPhotoClick();
+  }
 
   return (
     <article
+      data-peek={peek}
       className={cn(
-        "group relative flex flex-col justify-between overflow-hidden rounded-2xl border p-5 transition-all duration-300",
+        "group relative aspect-square min-w-0 cursor-pointer overflow-hidden rounded-2xl border transition-all duration-300",
         isLead
-          ? "border-brand/40 bg-gradient-to-b from-surface/90 to-coal/90 hover:border-brand hover:shadow-[0_8px_32px_rgba(173,92,255,0.2)]"
-          : "border-line/70 bg-coal/60 hover:border-brand/50 hover:bg-surface/80 hover:shadow-[0_8px_24px_rgba(173,92,255,0.1)]",
-        "hover:-translate-y-1"
+          ? "border-brand/40 hover:border-brand hover:shadow-[0_8px_32px_rgba(173,92,255,0.25)]"
+          : "border-line/70 hover:border-brand/50 hover:shadow-[0_8px_24px_rgba(173,92,255,0.12)]",
+        "hover:-translate-y-1 focus-within:-translate-y-1"
       )}
     >
-      {/* Subtle iridescent glow on card hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-brand/[0.08] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
-
-      <div>
-        {/* Card Header: Avatar & Domain Tag */}
-        <div className="flex items-start justify-between gap-3">
-          {showPhoto ? (
-            <button
-              type="button"
-              onClick={onPhotoClick}
-              aria-label={`View photo of ${member.name}`}
-              className={cn(
-                "group/avatar relative shrink-0 overflow-hidden rounded-xl border border-line/80 bg-coal transition-all",
-                "hover:border-brand/80 cursor-zoom-in",
-                isLead ? "h-16 w-16 sm:h-20 sm:w-20 ring-2 ring-brand/30" : "h-14 w-14"
-              )}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={member.photo}
-                alt={member.name}
-                loading="lazy"
-                onError={() => setImgFailed(true)}
-                className="h-full w-full object-cover transition-transform duration-300 group-hover/avatar:scale-105"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover/avatar:opacity-100">
-                <ZoomIn className="h-4 w-4 text-cream" />
-              </div>
-            </button>
-          ) : (
-            <div
+      {/* Photo: B&W at rest, color + slight zoom on hover / focus / tap */}
+      <button
+        type="button"
+        onClick={handleActivate}
+        aria-label={`View photo of ${member.name}`}
+        className="absolute inset-0 block h-full w-full cursor-pointer"
+      >
+        {showPhoto ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={member.photo}
+              alt=""
               aria-hidden
-              className={cn(
-                "flex shrink-0 items-center justify-center rounded-xl border border-line/80 font-mono font-bold text-cream select-none shadow-inner",
-                isLead
-                  ? "h-16 w-16 sm:h-20 sm:w-20 text-xl bg-gradient-to-br from-brand/25 to-surface ring-2 ring-brand/30"
-                  : "h-14 w-14 text-sm bg-surface/90"
-              )}
-            >
-              {initials(member.name)}
-            </div>
-          )}
+              loading="lazy"
+              onError={() => setImgFailed(true)}
+              className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:scale-[1.04] group-hover:grayscale-0 group-focus-within:scale-[1.04] group-focus-within:grayscale-0 group-data-[peek=true]:scale-[1.04] group-data-[peek=true]:grayscale-0"
+            />
+          </>
+        ) : (
+          <span
+            aria-hidden
+            className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand/25 via-coal to-surface text-4xl font-bold text-cream"
+          >
+            {initials(member.name)}
+          </span>
+        )}
+      </button>
 
-          {/* Role / Domain Chip */}
-          <div className="flex flex-col items-end gap-1 text-right">
-            {isLead ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-brand/15 px-2.5 py-0.5 text-[10px] font-semibold text-brand border border-brand/30 uppercase tracking-wider">
-                <Sparkles className="h-2.5 w-2.5" /> Core Lead
-              </span>
-            ) : (
-              <span className="inline-flex items-center rounded-md bg-surface/80 px-2 py-0.5 text-[11px] font-mono text-faint border border-line/50">
-                {domainCategory}
-              </span>
-            )}
+      {/* Bottom shade for readable text */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/95 via-black/50 to-transparent"
+      />
+
+      {isLead ? (
+        <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full border border-brand/30 bg-black/60 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand backdrop-blur-sm">
+          <Sparkles className="h-2.5 w-2.5" /> Core Lead
+        </span>
+      ) : null}
+
+      {/* Info: name always visible, role + links slide up from bottom */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3 sm:p-4">
+        <h3 className="truncate text-sm font-bold tracking-tight text-cream sm:text-base">
+          {member.name}
+        </h3>
+        <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-within:grid-rows-[1fr] group-focus-within:opacity-100 group-data-[peek=true]:grid-rows-[1fr] group-data-[peek=true]:opacity-100">
+          <div className="min-h-0 overflow-hidden">
+            <p className="mt-0.5 truncate text-xs font-semibold text-brand">{member.role}</p>
+            {hasLinks ? (
+              <div className="pointer-events-auto mt-1.5 flex items-center gap-1">
+                {member.linkedin ? (
+                  <a
+                    href={member.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${member.name} on LinkedIn`}
+                    title="LinkedIn"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors hover:bg-brand hover:text-black"
+                  >
+                    <LinkedinIcon className="h-4 w-4" />
+                  </a>
+                ) : null}
+                {member.github ? (
+                  <a
+                    href={member.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${member.name} on GitHub`}
+                    title="GitHub"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors hover:bg-brand hover:text-black"
+                  >
+                    <GithubIcon className="h-4 w-4" />
+                  </a>
+                ) : null}
+                {member.email ? (
+                  <a
+                    href={`mailto:${member.email}`}
+                    aria-label={`Email ${member.name}`}
+                    title="Email"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors hover:bg-brand hover:text-black"
+                  >
+                    <MailIcon className="h-4 w-4" />
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
-
-        {/* Member Details */}
-        <div className="mt-4">
-          <h3
-            className={cn(
-              "font-bold text-cream tracking-tight transition-colors group-hover:text-white [overflow-wrap:anywhere]",
-              isLead ? "text-lg sm:text-xl" : "text-base"
-            )}
-          >
-            {member.name}
-          </h3>
-          <p className="mt-0.5 text-xs sm:text-sm font-semibold text-brand">
-            {member.role}
-          </p>
-          <p className="mt-2.5 text-xs sm:text-sm text-fog/90 leading-relaxed line-clamp-3 [overflow-wrap:anywhere]">
-            {member.bio}
-          </p>
-        </div>
       </div>
-
-      {/* Social Links Footer */}
-      {(member.linkedin || member.github || member.email) && (
-        <div className="mt-4 pt-3 border-t border-line/50 flex flex-wrap items-center gap-2">
-          {member.linkedin && (
-            <a
-              href={member.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${member.name} on LinkedIn`}
-              className="inline-flex items-center gap-1 rounded-lg border border-line/60 bg-coal/70 px-2.5 py-1 text-[11px] text-faint transition-all hover:border-brand/60 hover:text-cream hover:bg-brand/10"
-            >
-              <LinkedinIcon className="h-3 w-3 text-brand" />
-              <span>LinkedIn</span>
-            </a>
-          )}
-          {member.github && (
-            <a
-              href={member.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${member.name} on GitHub`}
-              className="inline-flex items-center gap-1 rounded-lg border border-line/60 bg-coal/70 px-2.5 py-1 text-[11px] text-faint transition-all hover:border-brand/60 hover:text-cream hover:bg-brand/10"
-            >
-              <GithubIcon className="h-3 w-3 text-fog" />
-              <span>GitHub</span>
-            </a>
-          )}
-          {member.email && (
-            <a
-              href={`mailto:${member.email}`}
-              aria-label={`Email ${member.name}`}
-              className="inline-flex items-center gap-1 rounded-lg border border-line/60 bg-coal/70 px-2.5 py-1 text-[11px] text-faint transition-all hover:border-brand/60 hover:text-cream hover:bg-brand/10"
-            >
-              <MailIcon className="h-3 w-3 text-brand" />
-              <span>Email</span>
-            </a>
-          )}
-        </div>
-      )}
     </article>
   );
 }
