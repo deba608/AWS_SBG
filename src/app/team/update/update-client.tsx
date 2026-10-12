@@ -374,7 +374,14 @@ export default function UpdateClient() {
           <div className="min-w-0 text-xs leading-relaxed text-fog">
             <p className="font-semibold text-cream">Currently live</p>
             <p className="truncate">
-              {[live.linkedin && "LinkedIn", live.github && "GitHub", live.email && "Email"].filter(Boolean).join(" · ") || "No photo or links yet"}
+              {[
+                live.photo && "Photo",
+                live.linkedin && "LinkedIn",
+                live.github && "GitHub",
+                live.email && "Email",
+              ]
+                .filter(Boolean)
+                .join(" · ") || "No photo or links yet"}
             </p>
             {livePending ? (
               <p className="mt-0.5 text-brand">Pending request exists — submitting replaces it.</p>
