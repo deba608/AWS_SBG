@@ -39,24 +39,24 @@ export default function TeamExplorer({
   return (
     <div className="w-full">
       {/* Main Content Area */}
-      <div className="space-y-16 sm:space-y-20">
+      <div className="space-y-10 sm:space-y-20">
           
           <section aria-labelledby="section-leadership">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-2 sm:mb-6">
+              <div className="min-w-0">
                 <h2
                   id="section-leadership"
-                  className="text-2xl font-bold tracking-tight text-cream sm:text-3xl"
+                  className="text-xl font-bold tracking-tight text-cream sm:text-3xl"
                 >
                   Leadership Team
                 </h2>
               </div>
-              <span className="text-xs font-mono text-faint">
+              <span className="shrink-0 text-xs font-mono text-faint">
                 {teamLeads.length} Leaders
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
               {teamLeads.map((member) => (
                 <BuilderCard
                   key={member.id}
@@ -70,24 +70,24 @@ export default function TeamExplorer({
 
           {/* 2. Technical Domain Leads */}
           <section aria-labelledby="section-domain">
-            <div className="mb-6 flex items-center justify-between border-t border-line/60 pt-10 sm:pt-14">
-              <div>
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-2 border-t border-line/60 pt-8 sm:mb-6 sm:pt-14">
+              <div className="min-w-0">
                 <span className="text-[11px] font-mono tracking-wider uppercase text-brand">
                   {"// Specializations & Labs"}
                 </span>
                 <h2
                   id="section-domain"
-                  className="mt-1 text-2xl font-bold tracking-tight text-cream sm:text-3xl"
+                  className="mt-1 text-xl font-bold tracking-tight text-cream sm:text-3xl"
                 >
                   Technical Domain Leads
                 </h2>
               </div>
-              <span className="text-xs font-mono text-faint">
+              <span className="shrink-0 text-xs font-mono text-faint">
                 {domainLeads.length} Leads
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
               {domainLeads.map((member) => (
                 <BuilderCard
                   key={member.id}
@@ -100,24 +100,24 @@ export default function TeamExplorer({
 
           {/* 3. Operations, PR & Media */}
           <section aria-labelledby="section-ops">
-            <div className="mb-6 flex items-center justify-between border-t border-line/60 pt-10 sm:pt-14">
-              <div>
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-2 border-t border-line/60 pt-8 sm:mb-6 sm:pt-14">
+              <div className="min-w-0">
                 <span className="text-[11px] font-mono tracking-wider uppercase text-brand">
                   {"// Community Engine"}
                 </span>
                 <h2
                   id="section-ops"
-                  className="mt-1 text-2xl font-bold tracking-tight text-cream sm:text-3xl"
+                  className="mt-1 text-xl font-bold tracking-tight text-cream sm:text-3xl"
                 >
                   Events, PR & Media
                 </h2>
               </div>
-              <span className="text-xs font-mono text-faint">
+              <span className="shrink-0 text-xs font-mono text-faint">
                 {opsTeam.length} Members
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
               {opsTeam.map((member) => (
                 <BuilderCard
                   key={member.id}
@@ -130,24 +130,24 @@ export default function TeamExplorer({
 
           {/* 4. Coordinators */}
           <section aria-labelledby="section-coordinators">
-            <div className="mb-6 flex items-center justify-between border-t border-line/60 pt-10 sm:pt-14">
-              <div>
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-2 border-t border-line/60 pt-8 sm:mb-6 sm:pt-14">
+              <div className="min-w-0">
                 <span className="text-[11px] font-mono tracking-wider uppercase text-brand">
                   {"// Execution & Support"}
                 </span>
                 <h2
                   id="section-coordinators"
-                  className="mt-1 text-2xl font-bold tracking-tight text-cream sm:text-3xl"
+                  className="mt-1 text-xl font-bold tracking-tight text-cream sm:text-3xl"
                 >
                   Coordinators
                 </h2>
               </div>
-              <span className="text-xs font-mono text-faint">
+              <span className="shrink-0 text-xs font-mono text-faint">
                 {coordinators.length} Coordinators
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               {coordinators.map((member) => (
                 <BuilderCard
                   key={member.id}
@@ -170,14 +170,14 @@ export default function TeamExplorer({
             aria-modal="true"
             aria-label={`Photo of ${previewMember.name}`}
             onClick={() => setPreviewMember(null)}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/85 p-4 backdrop-blur-md"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative max-h-[90dvh] w-full max-w-md overflow-hidden rounded-2xl border border-line/80 bg-surface p-6 shadow-[0_24px_70px_rgba(0,0,0,0.8)]"
+              className="relative my-auto max-h-[90dvh] w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-line/80 bg-surface p-4 shadow-[0_24px_70px_rgba(0,0,0,0.8)] sm:p-6"
             >
               <button
                 type="button"
@@ -209,7 +209,7 @@ export default function TeamExplorer({
                 </p>
 
                 {(previewMember.linkedin || previewMember.github || previewMember.email) && (
-                  <div className="mt-4 flex items-center justify-center gap-3 border-t border-line/50 pt-4">
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2 border-t border-line/50 pt-4">
                     {previewMember.linkedin && (
                       <a
                         href={previewMember.linkedin}
@@ -281,11 +281,11 @@ function BuilderCard({
     <article
       data-peek={peek}
       className={cn(
-        "group relative aspect-square min-w-0 cursor-pointer overflow-hidden rounded-2xl border transition-all duration-300",
+        "group relative aspect-[3/4] min-w-0 touch-manipulation cursor-pointer overflow-hidden rounded-2xl border transition-all duration-300 sm:aspect-square",
         isLead
-          ? "border-brand/40 hover:border-brand hover:shadow-[0_8px_32px_rgba(173,92,255,0.25)]"
-          : "border-line/70 hover:border-brand/50 hover:shadow-[0_8px_24px_rgba(173,92,255,0.12)]",
-        "hover:-translate-y-1 focus-within:-translate-y-1"
+          ? "border-brand/40 sm:hover:border-brand sm:hover:shadow-[0_8px_32px_rgba(173,92,255,0.25)]"
+          : "border-line/70 sm:hover:border-brand/50 sm:hover:shadow-[0_8px_24px_rgba(173,92,255,0.12)]",
+        "sm:hover:-translate-y-1 sm:focus-within:-translate-y-1"
       )}
     >
       {/* Photo: B&W at rest, color + slight zoom on hover / focus / tap */}
@@ -304,7 +304,7 @@ function BuilderCard({
               aria-hidden
               loading="lazy"
               onError={() => setImgFailed(true)}
-              className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:scale-[1.04] group-hover:grayscale-0 group-focus-within:scale-[1.04] group-focus-within:grayscale-0 group-data-[peek=true]:scale-[1.04] group-data-[peek=true]:grayscale-0"
+              className="h-full w-full object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0 sm:group-data-[peek=true]:scale-[1.04] sm:group-data-[peek=true]:grayscale-0"
             />
           </>
         ) : (
@@ -323,16 +323,16 @@ function BuilderCard({
         className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/95 via-black/50 to-transparent"
       />
 
-      {/* Info: name always visible, role + links slide up from bottom */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3 sm:p-4">
-        <h3 className="truncate text-sm font-bold tracking-tight text-cream sm:text-base">
+      {/* Info: name + role always visible; links expand on hover (desktop) or tap (touch) */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 p-2.5 sm:p-4">
+        <h3 className="truncate text-[13px] font-bold tracking-tight text-cream sm:text-base">
           {member.name}
         </h3>
-        <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-within:grid-rows-[1fr] group-focus-within:opacity-100 group-data-[peek=true]:grid-rows-[1fr] group-data-[peek=true]:opacity-100">
+        <p className="mt-0.5 truncate text-[11px] font-semibold text-brand sm:text-xs">{member.role}</p>
+        <div className="grid grid-rows-[1fr] opacity-100 transition-all duration-300 sm:grid-rows-[0fr] sm:opacity-0 sm:group-hover:grid-rows-[1fr] sm:group-hover:opacity-100 sm:group-focus-within:grid-rows-[1fr] sm:group-focus-within:opacity-100 sm:group-data-[peek=true]:grid-rows-[1fr] sm:group-data-[peek=true]:opacity-100 group-data-[peek=true]:grid-rows-[1fr]">
           <div className="min-h-0 overflow-hidden">
-            <p className="mt-0.5 truncate text-xs font-semibold text-brand">{member.role}</p>
             {hasLinks ? (
-              <div className="pointer-events-auto mt-1.5 flex items-center gap-1">
+              <div className="pointer-events-auto mt-1.5 flex items-center gap-1.5">
                 {member.linkedin ? (
                   <a
                     href={member.linkedin}
@@ -341,9 +341,9 @@ function BuilderCard({
                     aria-label={`${member.name} on LinkedIn`}
                     title="LinkedIn"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors hover:bg-brand hover:text-black"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-10 sm:w-10"
                   >
-                    <LinkedinIcon className="h-4 w-4" />
+                    <LinkedinIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </a>
                 ) : null}
                 {member.github ? (
@@ -354,9 +354,9 @@ function BuilderCard({
                     aria-label={`${member.name} on GitHub`}
                     title="GitHub"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors hover:bg-brand hover:text-black"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-10 sm:w-10"
                   >
-                    <GithubIcon className="h-4 w-4" />
+                    <GithubIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </a>
                 ) : null}
                 {member.email ? (
@@ -365,9 +365,9 @@ function BuilderCard({
                     aria-label={`Email ${member.name}`}
                     title="Email"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors hover:bg-brand hover:text-black"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-10 sm:w-10"
                   >
-                    <MailIcon className="h-4 w-4" />
+                    <MailIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </a>
                 ) : null}
               </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
+import CursorGrid, { SUBTLE_GRID } from "@/components/CursorGrid";
 import EventCard from "@/components/EventCard";
 import EventGroup from "@/components/EventGroup";
 import HeroVisual from "@/components/HeroVisual";
@@ -130,7 +131,8 @@ export default function HomePage() {
       />
       {/* HERO */}
       <section aria-labelledby="hero-heading">
-        <Container className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
+        <CursorGrid {...SUBTLE_GRID}>
+          <Container className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
           <div className="grid items-center gap-10 sm:gap-12 lg:grid-cols-[1.05fr_0.95fr] [&>*]:min-w-0">
             <div className="min-w-0">
               <p className="text-sm text-faint">
@@ -157,7 +159,8 @@ export default function HomePage() {
             </div>
             <HeroVisual />
           </div>
-        </Container>
+          </Container>
+        </CursorGrid>
       </section>
 
       {/* ABOUT */}

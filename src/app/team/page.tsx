@@ -30,7 +30,7 @@ export default async function TeamPage() {
     teamLeads.length + domainLeads.length + opsTeam.length + coordinators.length;
 
   return (
-    <div className="relative pb-16 pt-24 sm:pb-20 md:pb-28 md:pt-32">
+    <div className="relative overflow-x-clip pb-16 pt-20 sm:pb-20 sm:pt-24 md:pb-28 md:pt-32">
       {/* Ambient background glows */}
       <div
         aria-hidden
@@ -42,7 +42,7 @@ export default async function TeamPage() {
       <Container>
         {/* Hero Section with cursor-reactive grid backdrop */}
         <CursorGrid
-          className="mb-12 sm:mb-16"
+          className="mb-8 sm:mb-16"
           cellSize={72}
           color="#ad5cff"
           radius={130}
@@ -50,69 +50,69 @@ export default async function TeamPage() {
           holdTime={250}
           fadeDuration={900}
           lineWidth={1}
-          maxOpacity={0.22}
+          maxOpacity={0.12}
           fillOpacity={0}
-          gridOpacity={0.025}
+          gridOpacity={0.012}
           cellRadius={6}
           clickPulse
           pulseSpeed={520}
         >
           <Reveal>
-            <h1 className="text-3xl font-extrabold tracking-tight text-cream sm:text-4xl md:text-5xl lg:text-6xl">
+            <h1 className="text-balance text-3xl font-extrabold tracking-tight text-cream sm:text-4xl md:text-5xl lg:text-6xl">
               Meet the builders behind the community.
             </h1>
           </Reveal>
 
           {/* Quick Metrics Bar */}
-          <Reveal delay={0.1} className="mt-8">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-              <div className="rounded-xl border border-line/70 bg-coal/70 p-4 backdrop-blur-sm">
+          <Reveal delay={0.1} className="mt-6 sm:mt-8">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm sm:p-4">
                 <div className="flex items-center gap-2 text-brand">
-                  <Sparkles className="h-4 w-4" />
-                  <span className="text-xs font-mono font-semibold uppercase text-faint">
+                  <Sparkles className="h-4 w-4 shrink-0" />
+                  <span className="truncate text-[11px] font-mono font-semibold uppercase text-faint sm:text-xs">
                     Leadership
                   </span>
                 </div>
-                <p className="mt-1.5 text-2xl font-bold font-mono text-cream">
+                <p className="mt-1.5 text-xl font-bold font-mono text-cream sm:text-2xl">
                   {teamLeads.length}
                 </p>
                 <p className="text-xs text-fog">Executive leaders</p>
               </div>
 
-              <div className="rounded-xl border border-line/70 bg-coal/70 p-4 backdrop-blur-sm">
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm sm:p-4">
                 <div className="flex items-center gap-2 text-brand">
-                  <Layers className="h-4 w-4" />
-                  <span className="text-xs font-mono font-semibold uppercase text-faint">
+                  <Layers className="h-4 w-4 shrink-0" />
+                  <span className="truncate text-[11px] font-mono font-semibold uppercase text-faint sm:text-xs">
                     Domains
                   </span>
                 </div>
-                <p className="mt-1.5 text-2xl font-bold font-mono text-cream">
+                <p className="mt-1.5 text-xl font-bold font-mono text-cream sm:text-2xl">
                   8+
                 </p>
                 <p className="text-xs text-fog">Tech specializations</p>
               </div>
 
-              <div className="rounded-xl border border-line/70 bg-coal/70 p-4 backdrop-blur-sm">
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm sm:p-4">
                 <div className="flex items-center gap-2 text-brand">
-                  <Users className="h-4 w-4" />
-                  <span className="text-xs font-mono font-semibold uppercase text-faint">
+                  <Users className="h-4 w-4 shrink-0" />
+                  <span className="truncate text-[11px] font-mono font-semibold uppercase text-faint sm:text-xs">
                     Builders
                   </span>
                 </div>
-                <p className="mt-1.5 text-2xl font-bold font-mono text-cream">
+                <p className="mt-1.5 text-xl font-bold font-mono text-cream sm:text-2xl">
                   {totalBuilders}
                 </p>
                 <p className="text-xs text-fog">Active core members</p>
               </div>
 
-              <div className="rounded-xl border border-line/70 bg-coal/70 p-4 backdrop-blur-sm">
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm sm:p-4">
                 <div className="flex items-center gap-2 text-brand">
-                  <Terminal className="h-4 w-4" />
-                  <span className="text-xs font-mono font-semibold uppercase text-faint">
+                  <Terminal className="h-4 w-4 shrink-0" />
+                  <span className="truncate text-[11px] font-mono font-semibold uppercase text-faint sm:text-xs">
                     Initiative
                   </span>
                 </div>
-                <p className="mt-1.5 text-2xl font-bold font-mono text-cream">
+                <p className="mt-1.5 text-xl font-bold font-mono text-cream sm:text-2xl">
                   100%
                 </p>
                 <p className="text-xs text-fog">Student-led group</p>
@@ -132,8 +132,8 @@ export default async function TeamPage() {
         </Reveal>
 
         {/* Elevated Bottom Command Card: Get Involved */}
-        <Reveal delay={0.2} className="mt-16 sm:mt-20">
-          <div className="relative overflow-hidden rounded-3xl border border-line/80 bg-gradient-to-b from-surface/90 via-coal/90 to-surface/90 p-8 sm:p-10 md:p-12 shadow-[0_16px_50px_rgba(0,0,0,0.5)]">
+        <Reveal delay={0.2} className="mt-12 sm:mt-20">
+          <div className="relative overflow-hidden rounded-2xl border border-line/80 bg-gradient-to-b from-surface/90 via-coal/90 to-surface/90 p-6 shadow-[0_16px_50px_rgba(0,0,0,0.5)] sm:rounded-3xl sm:p-10 md:p-12">
             {/* Mesh grid & purple ambient flare */}
             <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full bg-brand/15 blur-3xl" />
             <div className="pointer-events-none absolute -left-12 -bottom-12 h-64 w-64 rounded-full bg-brand/10 blur-3xl" />

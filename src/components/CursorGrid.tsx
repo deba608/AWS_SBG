@@ -2,8 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-export interface CursorGridProps {
-  cellSize?: number;
+export interface CursorGridProps {  cellSize?: number;
   color?: string;
   radius?: number;
   falloff?: "linear" | "smooth" | "sharp";
@@ -54,6 +53,23 @@ interface Pulse {
   y: number;
   t0: number;
 }
+
+/** Whisper-quiet backdrop preset — negligible beneath text, brand-tinted. */
+export const SUBTLE_GRID: Omit<CursorGridProps, "children" | "className"> = {
+  cellSize: 72,
+  color: "#ad5cff",
+  radius: 130,
+  falloff: "smooth",
+  holdTime: 250,
+  fadeDuration: 900,
+  lineWidth: 1,
+  maxOpacity: 0.12,
+  fillOpacity: 0,
+  gridOpacity: 0.012,
+  cellRadius: 6,
+  clickPulse: true,
+  pulseSpeed: 520,
+};
 
 export function CursorGrid({
   cellSize = 70,

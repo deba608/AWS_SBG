@@ -1,5 +1,6 @@
 import Button from "./Button";
 import Container from "./Container";
+import CursorGrid, { SUBTLE_GRID } from "./CursorGrid";
 import { SITE } from "@/lib/constants";
 
 const channels = [
@@ -11,7 +12,8 @@ const channels = [
 export default function JoinCTA() {
   return (
     <section aria-labelledby="join-heading" className="border-t border-line">
-      <Container className="py-12 sm:py-16 lg:py-24">
+      <CursorGrid {...SUBTLE_GRID}>
+        <Container className="py-12 sm:py-16 lg:py-24">
         <div className="max-w-2xl">
           <h2
             id="join-heading"
@@ -52,7 +54,8 @@ export default function JoinCTA() {
             .
           </p>
         </div>
-      </Container>
+        </Container>
+      </CursorGrid>
     </section>
   );
 }
