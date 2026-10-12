@@ -210,14 +210,31 @@ export class TeamSubmissionError extends Error {
   }
 }
 
-export async function createSubmission(input: { name: string; role: string; photoDataUrl: string; originalDataUrl?: string | null; linkedin?: string | null; github?: string | null; email?: string | null }): Promise<TeamSubmission> {
+export async function createSubmission(input: { name: string; role: string; photoDataUrl: string; originalDataUrl?: string | null; linkedin?: string | null; github?: string | null; email?: string | null }): Promise<{ submission: TeamSubmission; updated: boolean }> {
   const member = rosterMember(input.name);
   const name = member ? member.name : input.name.trim().replace(/\s+/g, " ");
   const errors = validateSubmission({ name, role: input.role, photoDataUrl: input.photoDataUrl, originalDataUrl: input.originalDataUrl ?? null, linkedin: input.linkedin, github: input.github, email: input.email });
   if (Object.keys(errors).length > 0) throw new TeamSubmissionError(errors);
   const section = sectionForRole(input.role) ?? "ops";
+  const norm = (v: string) => v.trim().toLowerCase();
   return withWriteLock(async () => {
     const store = await readStore();
+    // Same person resubmits while a request is still pending → update it in
+    // place instead of stacking duplicates. Admin reviews one row per member.
+    const existing = store.submissions.find((s) => s.status === "pending" && norm(s.name) === norm(name));
+    if (existing) {
+      existing.role = input.role;
+      existing.section = section;
+      existing.photoDataUrl = input.photoDataUrl;
+      existing.originalDataUrl = input.originalDataUrl ?? null;
+      existing.linkedin = normalizeUrl(input.linkedin);
+      existing.github = normalizeUrl(input.github);
+      existing.email = normalizeEmail(input.email);
+      existing.createdAt = new Date().toISOString();
+      existing.reviewedAt = null;
+      await writeStore(store);
+      return { submission: { ...existing }, updated: true };
+    }
     const sub: TeamSubmission = {
       id: randomUUID(),
       name,
@@ -234,7 +251,7 @@ export async function createSubmission(input: { name: string; role: string; phot
     };
     store.submissions.unshift(sub);
     await writeStore(store);
-    return sub;
+    return { submission: sub, updated: false };
   });
 }
 
@@ -342,4 +359,18 @@ export async function getTeamLists(): Promise<{
     bySection[s.section]?.push(toMember(s));
   }
   return { teamLeads: leads, domainLeads: domain, opsTeam: ops, coordinators: coords };
+}
+
+/**
+ * Live profile for one member: static roster merged with approved submissions,
+ * plus whether they already have a pending request (resubmit updates it).
+ */
+export async function getMemberProfile(name: string): Promise<{ member: TeamMember | null; hasPending: boolean }> {
+  const norm = (v: string) => v.trim().toLowerCase();
+  const lists = await getTeamLists();
+  const all = [...lists.teamLeads, ...lists.domainLeads, ...lists.opsTeam, ...lists.coordinators];
+  const member = all.find((m) => norm(m.name) === norm(name)) ?? rosterMember(name);
+  const store = await readStore();
+  const hasPending = store.submissions.some((s) => s.status === "pending" && norm(s.name) === norm(name));
+  return { member: member ? { ...member } : null, hasPending };
 }

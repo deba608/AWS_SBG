@@ -4,7 +4,10 @@ import {
   MAX_PHOTO_DATAURL_CHARS,
   TeamSubmissionError,
   createSubmission,
-  sectionForRole,
+  getMemberProfile,
+  normalizeEmail,
+  normalizeUrl,
+  rosterMember,
 } from "@/lib/team-store";
 import { clientIp, rateOk } from "@/lib/rate-limit";
 
@@ -26,15 +29,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid form data." }, { status: 400 });
   }
   const name = String(form.get("name") ?? "");
-  const role = String(form.get("role") ?? "");
   const photo = form.get("photo");
   const linkedin = String(form.get("linkedin") ?? "").trim() || null;
   const github = String(form.get("github") ?? "").trim() || null;
   const email = String(form.get("email") ?? "").trim() || null;
 
-  if (!sectionForRole(role)) {
-    return NextResponse.json({ error: "Validation failed.", errors: { role: "Select your position from the list." } }, { status: 400 });
+  // Position is derived from the roster — client sends name only.
+  const roster = rosterMember(name);
+  if (!roster) {
+    return NextResponse.json({ error: "Validation failed.", errors: { name: "Select your name from the team list." } }, { status: 400 });
   }
+  const role = roster.role;
   if (!(photo instanceof File)) {
     return NextResponse.json({ error: "Validation failed.", errors: { photo: "Photo is required." } }, { status: 400 });
   }
@@ -99,8 +104,21 @@ export async function POST(req: Request) {
     }
   }
   try {
-    const sub = await createSubmission({ name, role, photoDataUrl, originalDataUrl, linkedin, github, email });
-    return NextResponse.json({ id: sub.id, status: sub.status }, { status: 201 });
+    const { submission: sub, updated } = await createSubmission({ name, role, photoDataUrl, originalDataUrl, linkedin, github, email });
+    // Tell the client if links match what's already live — only the photo changes.
+    let linksUnchanged = false;
+    try {
+      const { member } = await getMemberProfile(name);
+      if (member) {
+        linksUnchanged =
+          (member.linkedin ?? null) === normalizeUrl(linkedin) &&
+          (member.github ?? null) === normalizeUrl(github) &&
+          (member.email ?? null) === normalizeEmail(email);
+      }
+    } catch {
+      // non-fatal — submit already succeeded
+    }
+    return NextResponse.json({ id: sub.id, status: sub.status, updated, linksUnchanged }, { status: updated ? 200 : 201 });
   } catch (err) {
     if (err instanceof TeamSubmissionError) {
       return NextResponse.json({ error: "Validation failed.", errors: err.errors }, { status: 400 });
