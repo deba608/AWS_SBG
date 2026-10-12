@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Pencil, ChevronUp } from "lucide-react";
+import { X, Pencil } from "lucide-react";
 import type { TeamMember } from "@/data/team";
 import type { TeamSubmission } from "@/lib/team-store";
 import { cn, initials } from "@/lib/utils";
@@ -408,29 +408,12 @@ function BuilderCard({
         {/* Detail sheet — slides up from bottom, no box, text over photo shade */}
         <div className="absolute inset-x-0 bottom-0">
           <div className="p-2.5 sm:p-3.5">
-            <div className="flex min-w-0 items-center gap-2">
-              <h3
-                title={member.name}
-                className="min-w-0 flex-1 truncate text-[13px] font-semibold leading-snug text-cream drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-sm"
-              >
-                {member.name}
-              </h3>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPeek((v) => !v);
-                }}
-                aria-expanded={peek}
-                aria-label={peek ? `Hide details for ${member.name}` : `Show details for ${member.name}`}
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-cream touch-manipulation hover:border-brand/60 hover:bg-brand hover:text-black"
-              >
-                <ChevronUp
-                  className={cn("h-4 w-4 transition-transform duration-300", peek && "rotate-180")}
-                  aria-hidden
-                />
-              </button>
-            </div>
+            <h3
+              title={member.name}
+              className="truncate text-[13px] font-semibold leading-snug text-cream drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-sm"
+            >
+              {member.name}
+            </h3>
 
             {/* Rising detail: role + links + view photo */}
             <div
