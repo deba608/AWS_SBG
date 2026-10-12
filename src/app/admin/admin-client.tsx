@@ -482,7 +482,7 @@ export default function AdminClient() {  const [authed, setAuthed] = useState<bo
           href="/admin/team"
           className="inline-flex min-h-[44px] items-center rounded-full border border-line px-5 py-2 text-sm font-semibold text-fog hover:text-cream"
         >
-          Team photos
+          Team update
         </Link>
         <Link
           href="/admin/payouts"

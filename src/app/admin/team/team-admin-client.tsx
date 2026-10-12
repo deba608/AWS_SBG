@@ -8,7 +8,7 @@ import PhotoCropper from "@/components/PhotoCropper";
 import type { TeamSubmission } from "@/lib/team-store";
 import { cn } from "@/lib/utils";
 
-type Filter = "pending" | "approved" | "rejected" | "all";
+type Filter = "approved" | "rejected" | "all";
 
 interface DetailsDraft {
   id: string;
@@ -34,7 +34,7 @@ const SECTION_TITLES: Record<string, string> = {
 export default function TeamAdminClient() {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [subs, setSubs] = useState<TeamSubmission[]>([]);
-  const [filter, setFilter] = useState<Filter>("pending");
+  const [filter, setFilter] = useState<Filter>("approved");
   const [loading, setLoading] = useState(false);
   const [actingId, setActingId] = useState<string | null>(null);
   const [cropFor, setCropFor] = useState<TeamSubmission | null>(null);
@@ -170,55 +170,18 @@ export default function TeamAdminClient() {
   }
 
   const counts = {
-    pending: subs.filter((s) => s.status === "pending").length,
     approved: subs.filter((s) => s.status === "approved").length,
     rejected: subs.filter((s) => s.status === "rejected").length,
   };
-  const shown = subs.filter((s) => (filter === "all" ? true : s.status === filter));
+  // Requests: member update queue (pending) — always its own section.
+  const requests = subs.filter((s) => s.status === "pending");
+  // Members: decided records for profile management.
+  const members = subs.filter((s) => (filter === "all" ? s.status !== "pending" : s.status === filter));
 
-  return (
-    <div className="space-y-5">
-      <datalist id="team-roster-names">
-        {rosterNames.map((n) => (
-          <option key={n} value={n} />
-        ))}
-      </datalist>
-      <div className="flex flex-wrap items-center gap-2">
-        <Link
-          href="/admin"
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line px-5 py-2 text-sm text-fog hover:text-cream"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Dashboard
-        </Link>
-        <span className="flex-1" aria-hidden />
-        {(["pending", "approved", "rejected", "all"] as Filter[]).map((f) => (
-          <button
-            key={f}
-            type="button"
-            onClick={() => setFilter(f)}
-            className={cn(
-              "inline-flex min-h-[44px] items-center rounded-full border px-4 py-2 text-xs font-bold capitalize",
-              filter === f ? "border-brand/60 bg-brand/10 text-cream" : "border-line text-fog hover:text-cream",
-            )}
-          >
-            {f} · {f === "all" ? subs.length : counts[f as keyof typeof counts]}
-          </button>
-        ))}
-      </div>
-
-      {loading && subs.length === 0 ? (
-        <div className="rank-card flex items-center gap-3 p-6 text-sm text-fog">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Loading submissions…
-        </div>
-      ) : shown.length === 0 ? (
-        <div className="rank-card p-6 text-center text-sm text-fog">
-          No {filter} submissions. Share <span className="font-mono text-cream">/team/update</span> with members.
-        </div>
-      ) : (
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {shown.map((s) => (
-            <li key={s.id} className="rank-card overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+  function SubmissionCard({ s }: { s: TeamSubmission }) {
+    return (
+      <li className="rank-card overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={s.photoDataUrl} alt={s.name} className="aspect-square w-full object-cover" loading="lazy" />
               <div className="space-y-1 p-4">
                 <p className="font-semibold text-cream">{s.name}</p>
@@ -378,9 +341,80 @@ export default function TeamAdminClient() {
                   <p className="pt-1 text-xs text-green-300">Live on /team.</p>
                 ) : null}
               </div>
-            </li>
-          ))}
-        </ul>
+      </li>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <datalist id="team-roster-names">
+        {rosterNames.map((n) => (
+          <option key={n} value={n} />
+        ))}
+      </datalist>
+      <div className="flex flex-wrap items-center gap-2">
+        <Link
+          href="/admin"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-line px-5 py-2 text-sm text-fog hover:text-cream"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden /> Dashboard
+        </Link>
+        <span className="flex-1" aria-hidden />
+        <span className="text-xs font-mono text-faint">{requests.length} open requests · {counts.approved} live</span>
+      </div>
+
+      {loading && subs.length === 0 ? (
+        <div className="rank-card flex items-center gap-3 p-6 text-sm text-fog">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Loading team updates…
+        </div>
+      ) : (
+        <>
+          <section aria-labelledby="team-requests">
+            <h2 id="team-requests" className="font-mono text-xs uppercase tracking-widest text-brand">{"// requests"}</h2>
+            {requests.length === 0 ? (
+              <div className="rank-card mt-2 p-6 text-center text-sm text-fog">
+                No open requests. Share <span className="font-mono text-cream">/team/update</span> with members.
+              </div>
+            ) : (
+              <ul className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {requests.map((s) => (
+                  <SubmissionCard key={s.id} s={s} />
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section aria-labelledby="team-members">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 id="team-members" className="font-mono text-xs uppercase tracking-widest text-brand">{"// members"}</h2>
+              <span className="flex-1" aria-hidden />
+              {(["approved", "rejected", "all"] as Filter[]).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFilter(f)}
+                  className={cn(
+                    "inline-flex min-h-[44px] items-center rounded-full border px-4 py-2 text-xs font-bold capitalize",
+                    filter === f ? "border-brand/60 bg-brand/10 text-cream" : "border-line text-fog hover:text-cream",
+                  )}
+                >
+                  {f} · {f === "all" ? counts.approved + counts.rejected : counts[f]}
+                </button>
+              ))}
+            </div>
+            {members.length === 0 ? (
+              <div className="rank-card mt-2 p-6 text-center text-sm text-fog">
+                No {filter === "all" ? "decided" : filter} records yet.
+              </div>
+            ) : (
+              <ul className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {members.map((s) => (
+                  <SubmissionCard key={s.id} s={s} />
+                ))}
+              </ul>
+            )}
+          </section>
+        </>
       )}
       {cropFor ? (
         <PhotoCropper
