@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Loader2, X, ZoomIn } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Loader2, Minus, Plus, X, ZoomIn } from "lucide-react";
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -37,6 +37,15 @@ function viewGeometry(
   const rw = cw * zoom;
   const rh = ch * zoom;
   return { rw, rh, left: (box - rw) / 2 + x, top: (box - rh) / 2 + y };
+}
+
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 3;
+const ZOOM_STEP = 0.25;
+
+function clampZoom(z: number): number {
+  if (!Number.isFinite(z)) return MIN_ZOOM;
+  return Math.min(Math.max(z, MIN_ZOOM), MAX_ZOOM);
 }
 
 function clampPos(
@@ -127,11 +136,15 @@ export default function PhotoCropper({
   const zoomRef = useRef(zoom);
   const natRef = useRef(nat);
   const posRef = useRef(pos);
+  const boxWRef = useRef(0);
   useEffect(() => {
     zoomRef.current = zoom;
     natRef.current = nat;
     posRef.current = pos;
   }, [zoom, nat, pos]);
+  useEffect(() => {
+    boxWRef.current = boxW;
+  }, [boxW]);
 
   useEffect(() => {
     let live = true;
@@ -168,7 +181,25 @@ export default function PhotoCropper({
   }, [onClose]);
 
   function boxSize(): number {
-    return boxW > 0 ? boxW : (boxRef.current?.clientWidth ?? 0);
+    if (boxW > 0) return boxW;
+    if (boxWRef.current > 0) return boxWRef.current;
+    return boxRef.current?.clientWidth ?? 0;
+  }
+
+  function currentBox(): number {
+    return boxWRef.current > 0 ? boxWRef.current : (boxRef.current?.clientWidth ?? 0);
+  }
+
+  // Single zoom path for slider, +/- buttons and pinch — clamp zoom first,
+  // then re-clamp pan so frame stays full. Rounds to kill float drift
+  // between pinch (continuous) and slider/buttons (stepped).
+  function applyZoom(raw: number) {
+    const z = clampZoom(Math.round(raw * 1000) / 1000);
+    zoomRef.current = z;
+    setZoom(z);
+    const box = currentBox();
+    const natNow = natRef.current;
+    setPos((p) => clampPos(p.x, p.y, z, natNow, box));
   }
 
   // Track frame width so preview geometry uses the real laid-out size.
@@ -224,15 +255,17 @@ export default function PhotoCropper({
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
         const midX = (a.x + b.x) / 2;
         const midY = (a.y + b.y) / 2;
-        const z = Math.min(Math.max(pinch.initZoom * (dist / pinch.initDist), 1), 3);
+        const z = clampZoom(pinch.initZoom * (dist / pinch.initDist));
+        zoomRef.current = z;
         setZoom(z);
+        const box = boxWRef.current > 0 ? boxWRef.current : (boxRef.current?.clientWidth ?? 0);
         setPos(
           clampPos(
             pinch.origX + (midX - pinch.initMidX),
             pinch.origY + (midY - pinch.initMidY),
             z,
             natRef.current,
-            boxRef.current?.clientWidth ?? 0,
+            box,
           ),
         );
         return;
@@ -247,7 +280,7 @@ export default function PhotoCropper({
           dragRef.current.origY + dy,
           zoomRef.current,
           natRef.current,
-          boxRef.current?.clientWidth ?? 0,
+          boxWRef.current > 0 ? boxWRef.current : (boxRef.current?.clientWidth ?? 0),
         ),
       );
     }
@@ -274,8 +307,12 @@ export default function PhotoCropper({
     };
   }, []);
 
-  function nudge(dx: number, dy: number) {
-    setPos((p) => clampPos(p.x + dx, p.y + dy, zoomRef.current, natRef.current, boxSize()));
+  function nudge(dirX: number, dirY: number) {
+    // Adaptive step: fixed 12px felt dead on large frames, jumpy on small.
+    // One frame-width / 20, bounded so arrows always move visibly.
+    const box = boxSize();
+    const step = Math.min(Math.max(box > 0 ? box / 20 : 12, 8), 32);
+    setPos((p) => clampPos(p.x + dirX * step, p.y + dirY * step, zoomRef.current, natRef.current, box));
   }
 
   async function save() {
@@ -356,34 +393,48 @@ export default function PhotoCropper({
         </div>
         <div className="mt-3 flex items-center gap-2">
           <ZoomIn className="h-4 w-4 shrink-0 text-faint" aria-hidden />
+          <button
+            type="button"
+            onClick={() => applyZoom(zoomRef.current - ZOOM_STEP)}
+            disabled={zoom <= MIN_ZOOM + 1e-6}
+            aria-label="Zoom out"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line text-fog hover:text-cream disabled:opacity-40"
+          >
+            <Minus className="h-4 w-4" aria-hidden />
+          </button>
           <label htmlFor="crop-zoom" className="sr-only">Zoom</label>
           <input
             id="crop-zoom"
             type="range"
-            min={1}
-            max={3}
+            min={MIN_ZOOM}
+            max={MAX_ZOOM}
             step={0.05}
             value={zoom}
-            onChange={(e) => {
-              const z = Number(e.target.value);
-              setZoom(z);
-              setPos((p) => clampPos(p.x, p.y, z, nat, boxSize()));
-            }}
+            onChange={(e) => applyZoom(Number(e.target.value))}
             className="min-h-[44px] w-full accent-purple-500"
           />
+          <button
+            type="button"
+            onClick={() => applyZoom(zoomRef.current + ZOOM_STEP)}
+            disabled={zoom >= MAX_ZOOM - 1e-6}
+            aria-label="Zoom in"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line text-fog hover:text-cream disabled:opacity-40"
+          >
+            <Plus className="h-4 w-4" aria-hidden />
+          </button>
           <span className="w-10 shrink-0 text-right font-mono text-xs text-fog">{zoom.toFixed(1)}x</span>
         </div>
         <div className="mt-1 flex items-center justify-center gap-2" aria-label="Move photo with buttons">
-          <button type="button" onClick={() => nudge(-12, 0)} aria-label="Move left" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
+          <button type="button" onClick={() => nudge(-1, 0)} aria-label="Move left" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
             <ArrowLeft className="h-4 w-4" aria-hidden />
           </button>
-          <button type="button" onClick={() => nudge(0, -12)} aria-label="Move up" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
+          <button type="button" onClick={() => nudge(0, -1)} aria-label="Move up" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
             <ArrowUp className="h-4 w-4" aria-hidden />
           </button>
-          <button type="button" onClick={() => nudge(0, 12)} aria-label="Move down" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
+          <button type="button" onClick={() => nudge(0, 1)} aria-label="Move down" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
             <ArrowDown className="h-4 w-4" aria-hidden />
           </button>
-          <button type="button" onClick={() => nudge(12, 0)} aria-label="Move right" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
+          <button type="button" onClick={() => nudge(1, 0)} aria-label="Move right" className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-fog hover:text-cream">
             <ArrowRight className="h-4 w-4" aria-hidden />
           </button>
         </div>
