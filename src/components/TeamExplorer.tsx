@@ -252,7 +252,9 @@ export default function TeamExplorer({
   );
 }
 
-/** Individual Builder Card Component */
+/** Individual Builder Card Component — follows rank-card language:
+ *  14px radius, hairline line border, surface bg, neutral lift shadow.
+ *  Leads get a pill badge, not a whole mismatched brand border. */
 function BuilderCard({
   member,
   isLead = false,
@@ -263,117 +265,96 @@ function BuilderCard({
   onPhotoClick: () => void;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
-  // Touch devices have no hover: first tap reveals color + info, second opens photo.
-  const [peek, setPeek] = useState(false);
   const showPhoto = Boolean(member.photo) && !imgFailed;
   const hasLinks = Boolean(member.linkedin || member.github || member.email);
 
-  function handleActivate(e: React.SyntheticEvent) {
-    if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches && !peek) {
-      e.preventDefault();
-      setPeek(true);
-      return;
-    }
-    onPhotoClick();
-  }
-
   return (
     <article
-      data-peek={peek}
       className={cn(
-        "group relative aspect-[3/4] min-w-0 touch-manipulation cursor-pointer overflow-hidden rounded-2xl border transition-all duration-300 sm:aspect-square",
-        isLead
-          ? "border-brand/40 sm:hover:border-brand sm:hover:shadow-[0_8px_32px_rgba(173,92,255,0.25)]"
-          : "border-line/70 sm:hover:border-brand/50 sm:hover:shadow-[0_8px_24px_rgba(173,92,255,0.12)]",
-        "sm:hover:-translate-y-1 sm:focus-within:-translate-y-1"
+        "rank-card group min-w-0 touch-manipulation overflow-hidden transition-all duration-300",
+        "sm:hover:-translate-y-1 sm:hover:border-brand/50 sm:hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)] sm:focus-within:-translate-y-1 sm:focus-within:border-brand/50"
       )}
     >
-      {/* Photo: B&W at rest, color + slight zoom on hover / focus / tap */}
-      <button
-        type="button"
-        onClick={handleActivate}
-        aria-label={`View photo of ${member.name}`}
-        className="absolute inset-0 block h-full w-full cursor-pointer"
-      >
+      {/* Photo */}
+      <div className="relative aspect-square w-full overflow-hidden bg-coal">
         {showPhoto ? (
-          <>
+          <button
+            type="button"
+            onClick={onPhotoClick}
+            aria-label={`View photo of ${member.name}`}
+            className="block h-full w-full cursor-zoom-in"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={member.photo}
-              alt=""
-              aria-hidden
+              alt={member.name}
               loading="lazy"
               onError={() => setImgFailed(true)}
-              className="h-full w-full object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0 sm:group-data-[peek=true]:scale-[1.04] sm:group-data-[peek=true]:grayscale-0"
+              className="h-full w-full object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.03] sm:group-hover:grayscale-0"
             />
-          </>
+          </button>
         ) : (
-          <span
+          <div
             aria-hidden
-            className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand/25 via-coal to-surface text-4xl font-bold text-cream"
+            className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand/20 via-coal to-surface text-3xl font-bold text-cream sm:text-4xl"
           >
             {initials(member.name)}
-          </span>
+          </div>
         )}
-      </button>
+        {isLead ? (
+          <span className="absolute left-2.5 top-2.5 rounded-full border border-brand/30 bg-black/60 px-2 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-brand backdrop-blur-sm">
+            Lead
+          </span>
+        ) : null}
+      </div>
 
-      {/* Bottom shade for readable text */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/95 via-black/50 to-transparent"
-      />
-
-      {/* Info: name + role always visible; links expand on hover (desktop) or tap (touch) */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 p-2.5 sm:p-4">
-        <h3 className="truncate text-[13px] font-bold tracking-tight text-cream sm:text-base">
+      {/* Body — always visible, no hover-gated text */}
+      <div className="border-t border-line/60 p-3 sm:p-4">
+        <h3
+          title={member.name}
+          className="truncate text-sm font-semibold leading-snug text-cream"
+        >
           {member.name}
         </h3>
-        <p className="mt-0.5 truncate text-[11px] font-semibold text-brand sm:text-xs">{member.role}</p>
-        <div className="grid grid-rows-[1fr] opacity-100 transition-all duration-300 sm:grid-rows-[0fr] sm:opacity-0 sm:group-hover:grid-rows-[1fr] sm:group-hover:opacity-100 sm:group-focus-within:grid-rows-[1fr] sm:group-focus-within:opacity-100 sm:group-data-[peek=true]:grid-rows-[1fr] sm:group-data-[peek=true]:opacity-100 group-data-[peek=true]:grid-rows-[1fr]">
-          <div className="min-h-0 overflow-hidden">
-            {hasLinks ? (
-              <div className="pointer-events-auto mt-1.5 flex items-center gap-1.5">
-                {member.linkedin ? (
-                  <a
-                    href={member.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${member.name} on LinkedIn`}
-                    title="LinkedIn"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-10 sm:w-10"
-                  >
-                    <LinkedinIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  </a>
-                ) : null}
-                {member.github ? (
-                  <a
-                    href={member.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${member.name} on GitHub`}
-                    title="GitHub"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-10 sm:w-10"
-                  >
-                    <GithubIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  </a>
-                ) : null}
-                {member.email ? (
-                  <a
-                    href={`mailto:${member.email}`}
-                    aria-label={`Email ${member.name}`}
-                    title="Email"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream backdrop-blur-sm transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-10 sm:w-10"
-                  >
-                    <MailIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  </a>
-                ) : null}
-              </div>
+        <p className="mt-0.5 truncate text-xs font-medium text-brand">{member.role}</p>
+        {hasLinks ? (
+          <div className="mt-2 flex items-center gap-1">
+            {member.linkedin ? (
+              <a
+                href={member.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${member.name} on LinkedIn`}
+                title="LinkedIn"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-transparent text-faint transition-colors touch-manipulation hover:border-brand/50 hover:bg-white/5 hover:text-cream"
+              >
+                <LinkedinIcon className="h-4 w-4" />
+              </a>
+            ) : null}
+            {member.github ? (
+              <a
+                href={member.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${member.name} on GitHub`}
+                title="GitHub"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-transparent text-faint transition-colors touch-manipulation hover:border-brand/50 hover:bg-white/5 hover:text-cream"
+              >
+                <GithubIcon className="h-4 w-4" />
+              </a>
+            ) : null}
+            {member.email ? (
+              <a
+                href={`mailto:${member.email}`}
+                aria-label={`Email ${member.name}`}
+                title="Email"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-transparent text-faint transition-colors touch-manipulation hover:border-brand/50 hover:bg-white/5 hover:text-cream"
+              >
+                <MailIcon className="h-4 w-4" />
+              </a>
             ) : null}
           </div>
-        </div>
+        ) : null}
       </div>
     </article>
   );
