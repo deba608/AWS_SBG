@@ -387,7 +387,7 @@ export default function PhotoCropper({
               alt="Crop preview"
               draggable={false}
               className="absolute top-0 left-0 max-w-none select-none"
-              style={{ width: `${geo.rw}px`, height: `${geo.rh}px`, transform: `translate(${geo.left}px, ${geo.top}px)` }}
+              style={{ width: `${geo.rw}px`, height: `${geo.rh}px`, maxWidth: "none", maxHeight: "none", transform: `translate(${geo.left}px, ${geo.top}px)` }}
             />
           ) : null}
         </div>
