@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Check, Crop, Link2, Loader2, Pencil, X } from "lucide-react";
+import { ArrowLeft, Check, Crop, Link2, Loader2, Pencil, Trash2, X } from "lucide-react";
 import AdminLogin from "@/components/AdminLogin";
 import PhotoCropper from "@/components/PhotoCropper";
 import type { TeamSubmission } from "@/lib/team-store";
@@ -10,12 +10,26 @@ import { cn } from "@/lib/utils";
 
 type Filter = "pending" | "approved" | "rejected" | "all";
 
-interface LinksDraft {
+interface DetailsDraft {
   id: string;
+  name: string;
+  role: string;
   linkedin: string;
   github: string;
   email: string;
 }
+
+interface RoleOption {
+  role: string;
+  section: string;
+}
+
+const SECTION_TITLES: Record<string, string> = {
+  leadership: "Leadership",
+  domain: "Domain leads",
+  ops: "Events, PR & media",
+  coordinators: "Co-ordinators",
+};
 
 export default function TeamAdminClient() {
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -24,8 +38,10 @@ export default function TeamAdminClient() {
   const [loading, setLoading] = useState(false);
   const [actingId, setActingId] = useState<string | null>(null);
   const [cropFor, setCropFor] = useState<TeamSubmission | null>(null);
-  const [linksDraft, setLinksDraft] = useState<LinksDraft | null>(null);
-  const [linksError, setLinksError] = useState("");
+  const [detailsDraft, setDetailsDraft] = useState<DetailsDraft | null>(null);
+  const [detailsError, setDetailsError] = useState("");
+  const [rosterNames, setRosterNames] = useState<string[]>([]);
+  const [roleOptions, setRoleOptions] = useState<RoleOption[]>([]);
 
   useEffect(() => {
     fetch("/api/admin/me", { cache: "no-store" })
@@ -45,6 +61,8 @@ export default function TeamAdminClient() {
       if (r.ok) {
         const d = await r.json();
         setSubs(d.submissions as TeamSubmission[]);
+        if (Array.isArray(d.meta?.members)) setRosterNames(d.meta.members as string[]);
+        if (Array.isArray(d.meta?.roles)) setRoleOptions(d.meta.roles as RoleOption[]);
       }
     } finally {
       setLoading(false);
@@ -103,28 +121,49 @@ export default function TeamAdminClient() {
     }
   }
 
-  async function saveLinks() {
-    if (!linksDraft) return;
-    setActingId(linksDraft.id);
-    setLinksError("");
+  async function saveDetails() {
+    if (!detailsDraft) return;
+    setActingId(detailsDraft.id);
+    setDetailsError("");
     try {
       const res = await fetch("/api/admin/team", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id: linksDraft.id,
-          linkedin: linksDraft.linkedin.trim(),
-          github: linksDraft.github.trim(),
-          email: linksDraft.email.trim(),
+          id: detailsDraft.id,
+          name: detailsDraft.name.trim(),
+          role: detailsDraft.role,
+          linkedin: detailsDraft.linkedin.trim(),
+          github: detailsDraft.github.trim(),
+          email: detailsDraft.email.trim(),
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setLinksError(data.error ?? "Could not save links.");
+        setDetailsError(data.error ?? "Could not save details.");
         return;
       }
-      setLinksDraft(null);
+      setDetailsDraft(null);
       await load();
+    } finally {
+      setActingId(null);
+    }
+  }
+
+  async function removeSubmission(s: TeamSubmission) {
+    if (!window.confirm(`Delete submission for ${s.name}? Approved photos go off /team. This cannot be undone.`)) return;
+    setActingId(s.id);
+    try {
+      const res = await fetch("/api/admin/team", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: s.id }),
+      });
+      if (res.ok) {
+        if (detailsDraft?.id === s.id) setDetailsDraft(null);
+        if (cropFor?.id === s.id) setCropFor(null);
+        await load();
+      }
     } finally {
       setActingId(null);
     }
@@ -139,6 +178,11 @@ export default function TeamAdminClient() {
 
   return (
     <div className="space-y-5">
+      <datalist id="team-roster-names">
+        {rosterNames.map((n) => (
+          <option key={n} value={n} />
+        ))}
+      </datalist>
       <div className="flex flex-wrap items-center gap-2">
         <Link
           href="/admin"
@@ -201,14 +245,47 @@ export default function TeamAdminClient() {
                     <span className="text-faint">No links submitted.</span>
                   ) : null}
                 </div>
-                {linksDraft?.id === s.id ? (
+                {detailsDraft?.id === s.id ? (
                   <div className="space-y-2 rounded-xl border border-line p-3">
+                    <p className="text-xs text-faint">Edits on approved rows go live on /team instantly.</p>
+                    <label className="block text-xs text-fog">
+                      Name
+                      <input
+                        type="text"
+                        value={detailsDraft.name}
+                        onChange={(e) => setDetailsDraft({ ...detailsDraft, name: e.target.value })}
+                        placeholder="Member name"
+                        list="team-roster-names"
+                        className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-cream"
+                      />
+                    </label>
+                    <label className="block text-xs text-fog">
+                      Position
+                      <select
+                        value={detailsDraft.role}
+                        onChange={(e) => setDetailsDraft({ ...detailsDraft, role: e.target.value })}
+                        className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-cream"
+                      >
+                        {roleOptions.length === 0 ? <option value={detailsDraft.role}>{detailsDraft.role}</option> : null}
+                        {Object.keys(SECTION_TITLES)
+                          .filter((sec) => roleOptions.some((o) => o.section === sec))
+                          .map((sec) => (
+                            <optgroup key={sec} label={SECTION_TITLES[sec]}>
+                              {roleOptions
+                                .filter((o) => o.section === sec)
+                                .map((o) => (
+                                  <option key={o.role} value={o.role}>{o.role}</option>
+                                ))}
+                            </optgroup>
+                          ))}
+                      </select>
+                    </label>
                     <label className="block text-xs text-fog">
                       LinkedIn
                       <input
                         type="url"
-                        value={linksDraft.linkedin}
-                        onChange={(e) => setLinksDraft({ ...linksDraft, linkedin: e.target.value })}
+                        value={detailsDraft.linkedin}
+                        onChange={(e) => setDetailsDraft({ ...detailsDraft, linkedin: e.target.value })}
                         placeholder="linkedin.com/in/…"
                         className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-cream"
                       />
@@ -217,8 +294,8 @@ export default function TeamAdminClient() {
                       GitHub
                       <input
                         type="url"
-                        value={linksDraft.github}
-                        onChange={(e) => setLinksDraft({ ...linksDraft, github: e.target.value })}
+                        value={detailsDraft.github}
+                        onChange={(e) => setDetailsDraft({ ...detailsDraft, github: e.target.value })}
                         placeholder="github.com/…"
                         className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-cream"
                       />
@@ -227,25 +304,25 @@ export default function TeamAdminClient() {
                       Email
                       <input
                         type="email"
-                        value={linksDraft.email}
-                        onChange={(e) => setLinksDraft({ ...linksDraft, email: e.target.value })}
+                        value={detailsDraft.email}
+                        onChange={(e) => setDetailsDraft({ ...detailsDraft, email: e.target.value })}
                         placeholder="you@example.com"
                         className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-cream"
                       />
                     </label>
-                    {linksError ? <p role="alert" className="text-xs text-red-300">{linksError}</p> : null}
+                    {detailsError ? <p role="alert" className="text-xs text-red-300">{detailsError}</p> : null}
                     <div className="flex gap-2">
                       <button
                         type="button"
                         disabled={actingId === s.id}
-                        onClick={() => void saveLinks()}
+                        onClick={() => void saveDetails()}
                         className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1 rounded-full bg-brand px-4 py-2 text-xs font-bold text-black hover:bg-brandhover disabled:opacity-60"
                       >
-                        Save links
+                        Save details
                       </button>
                       <button
                         type="button"
-                        onClick={() => { setLinksDraft(null); setLinksError(""); }}
+                        onClick={() => { setDetailsDraft(null); setDetailsError(""); }}
                         className="inline-flex min-h-[44px] items-center rounded-full border border-line px-4 py-2 text-xs text-fog hover:text-cream"
                       >
                         Cancel
@@ -256,10 +333,10 @@ export default function TeamAdminClient() {
                   <button
                     type="button"
                     disabled={actingId === s.id}
-                    onClick={() => setLinksDraft({ id: s.id, linkedin: s.linkedin ?? "", github: s.github ?? "", email: s.email ?? "" })}
+                    onClick={() => setDetailsDraft({ id: s.id, name: s.name, role: s.role, linkedin: s.linkedin ?? "", github: s.github ?? "", email: s.email ?? "" })}
                     className="mt-2 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-line px-4 py-2 text-xs font-semibold text-fog hover:text-cream disabled:opacity-60"
                   >
-                    <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit links
+                    <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit name / role / links
                   </button>
                 )}
                 <button
@@ -269,6 +346,14 @@ export default function TeamAdminClient() {
                   className="mt-2 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-brand/60 bg-brand/10 px-4 py-2 text-xs font-semibold text-cream hover:bg-brand/20 disabled:opacity-60"
                 >
                   <Crop className="h-3.5 w-3.5" aria-hidden /> Adjust crop / move
+                </button>
+                <button
+                  type="button"
+                  disabled={actingId === s.id}
+                  onClick={() => void removeSubmission(s)}
+                  className="mt-2 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-red-400/30 px-4 py-2 text-xs font-semibold text-red-300/80 hover:bg-red-500/10 hover:text-red-200 disabled:opacity-60"
+                >
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden /> Delete submission
                 </button>
                 {s.status === "pending" ? (
                   <div className="flex gap-2 pt-2">

@@ -5,6 +5,7 @@ import CursorGrid from "@/components/CursorGrid";
 import Reveal from "@/components/Reveal";
 import TeamExplorer from "@/components/TeamExplorer";
 import { getTeamLists } from "@/lib/team-store";
+import { isAdmin } from "@/lib/admin-auth";
 import { SITE } from "@/lib/constants";
 import { Users, Layers, Sparkles, Terminal } from "lucide-react";
 
@@ -25,7 +26,10 @@ export const metadata: Metadata = {
 };
 
 export default async function TeamPage() {
-  const { teamLeads, domainLeads, opsTeam, coordinators } = await getTeamLists();
+  const [{ teamLeads, domainLeads, opsTeam, coordinators }, adminMode] = await Promise.all([
+    getTeamLists(),
+    isAdmin(),
+  ]);
   const totalBuilders =
     teamLeads.length + domainLeads.length + opsTeam.length + coordinators.length;
 
@@ -128,6 +132,7 @@ export default async function TeamPage() {
             domainLeads={domainLeads}
             opsTeam={opsTeam}
             coordinators={coordinators}
+            adminMode={adminMode}
           />
         </Reveal>
 

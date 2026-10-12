@@ -1,17 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Pencil } from "lucide-react";
 import type { TeamMember } from "@/data/team";
+import type { TeamSubmission } from "@/lib/team-store";
 import { cn, initials } from "@/lib/utils";
 import { LinkedinIcon, GithubIcon, MailIcon } from "./icons";
+import TeamQuickEdit, { type QuickEditMeta } from "./TeamQuickEdit";
 
 interface TeamExplorerProps {
   teamLeads: TeamMember[];
   domainLeads: TeamMember[];
   opsTeam: TeamMember[];
   coordinators: TeamMember[];
+  /** Full-admin session (server-checked) — shows inline edit buttons on cards. */
+  adminMode?: boolean;
+}
+
+interface AdminList {
+  subs: TeamSubmission[];
+  meta: QuickEditMeta;
 }
 
 export default function TeamExplorer({
@@ -19,8 +28,48 @@ export default function TeamExplorer({
   domainLeads,
   opsTeam,
   coordinators,
+  adminMode = false,
 }: TeamExplorerProps) {
   const [previewMember, setPreviewMember] = useState<TeamMember | null>(null);
+  const [adminList, setAdminList] = useState<AdminList | null>(null);
+  const [editing, setEditing] = useState<TeamMember | null>(null);
+
+  const loadAdminList = useCallback(async () => {
+    try {
+      const r = await fetch("/api/admin/team", { cache: "no-store" });
+      if (!r.ok) return;
+      const d = await r.json();
+      setAdminList({
+        subs: (d.submissions ?? []) as TeamSubmission[],
+        meta: {
+          members: Array.isArray(d.meta?.members) ? d.meta.members : [],
+          roles: Array.isArray(d.meta?.roles) ? d.meta.roles : [],
+        },
+      });
+    } catch {
+      // Not authed or offline — cards simply render without edit buttons.
+    }
+  }, []);
+
+  useEffect(() => {
+    // Admin session pulls the submissions map once for inline editing.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (adminMode) void loadAdminList();
+  }, [adminMode, loadAdminList]);
+
+  // Latest submission for a live card (approved first) — pre-fills quick edit.
+  function subFor(member: TeamMember): TeamSubmission | null {
+    if (!adminList) return null;
+    const norm = member.name.trim().toLowerCase();
+    const matches = adminList.subs.filter((s) => s.name.trim().toLowerCase() === norm);
+    if (matches.length === 0) return null;
+    const approved = matches.filter((s) => s.status === "approved");
+    const pool = approved.length > 0 ? approved : matches;
+    return [...pool].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0] ?? null;
+  }
+
+  const editFor = (member: TeamMember) =>
+    adminList ? () => setEditing(member) : undefined;
 
   // Close lightbox on Escape
   useEffect(() => {
@@ -38,6 +87,11 @@ export default function TeamExplorer({
 
   return (
     <div className="w-full">
+      {adminMode && adminList ? (
+        <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand/10 px-4 py-1.5 text-xs font-semibold text-brand">
+          <Pencil className="h-3.5 w-3.5" aria-hidden /> Admin mode — tap the pencil on any card to edit inline
+        </p>
+      ) : null}
       {/* Main Content Area */}
       <div className="space-y-10 sm:space-y-20">
           
@@ -63,6 +117,7 @@ export default function TeamExplorer({
                   member={member}
                   isLead
                   onPhotoClick={() => member.photo && setPreviewMember(member)}
+                  onEdit={editFor(member)}
                 />
               ))}
             </div>
@@ -93,6 +148,7 @@ export default function TeamExplorer({
                   key={member.id}
                   member={member}
                   onPhotoClick={() => member.photo && setPreviewMember(member)}
+                  onEdit={editFor(member)}
                 />
               ))}
             </div>
@@ -123,6 +179,7 @@ export default function TeamExplorer({
                   key={member.id}
                   member={member}
                   onPhotoClick={() => member.photo && setPreviewMember(member)}
+                  onEdit={editFor(member)}
                 />
               ))}
             </div>
@@ -153,6 +210,7 @@ export default function TeamExplorer({
                   key={member.id}
                   member={member}
                   onPhotoClick={() => member.photo && setPreviewMember(member)}
+                  onEdit={editFor(member)}
                 />
               ))}
             </div>
@@ -248,41 +306,68 @@ export default function TeamExplorer({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Admin quick edit — direct modification from /team */}
+      {editing && adminList ? (
+        <TeamQuickEdit
+          member={editing}
+          submission={subFor(editing)}
+          meta={adminList.meta}
+          onClose={() => setEditing(null)}
+          onSaved={() => void loadAdminList()}
+        />
+      ) : null}
     </div>
   );
 }
 
-/** Individual Builder Card Component — follows rank-card language:
- *  14px radius, hairline line border, surface bg, neutral lift shadow.
- *  Leads get a pill badge, not a whole mismatched brand border. */
+/** Individual Builder Card — rank-card border + slide-up detail sheet.
+ *  Name/role always visible; bio + links + view-photo rise from bottom
+ *  on hover (desktop), focus, or tap (touch). */
 function BuilderCard({
   member,
   isLead = false,
   onPhotoClick,
+  onEdit,
 }: {
   member: TeamMember;
   isLead?: boolean;
   onPhotoClick: () => void;
+  onEdit?: () => void;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
+  const [peek, setPeek] = useState(false);
+  void isLead;
   const showPhoto = Boolean(member.photo) && !imgFailed;
   const hasLinks = Boolean(member.linkedin || member.github || member.email);
+  const expanded = "group-data-[peek=true]:grid-rows-[1fr] group-data-[peek=true]:opacity-100";
+
+  function handlePhotoActivate(e: React.SyntheticEvent) {
+    if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches && !peek) {
+      e.preventDefault();
+      setPeek(true);
+      return;
+    }
+    onPhotoClick();
+  }
 
   return (
     <article
+      data-peek={peek}
       className={cn(
-        "rank-card group min-w-0 touch-manipulation overflow-hidden transition-all duration-300",
+        "rank-card group relative min-w-0 touch-manipulation overflow-hidden transition-all duration-300",
         "sm:hover:-translate-y-1 sm:hover:border-brand/50 sm:hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)] sm:focus-within:-translate-y-1 sm:focus-within:border-brand/50"
       )}
     >
       {/* Photo */}
-      <div className="relative aspect-square w-full overflow-hidden bg-coal">
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-coal sm:aspect-square">
         {showPhoto ? (
           <button
             type="button"
-            onClick={onPhotoClick}
+            onClick={handlePhotoActivate}
             aria-label={`View photo of ${member.name}`}
-            className="block h-full w-full cursor-zoom-in"
+            aria-expanded={peek}
+            className="block h-full w-full cursor-pointer"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -290,7 +375,7 @@ function BuilderCard({
               alt={member.name}
               loading="lazy"
               onError={() => setImgFailed(true)}
-              className="h-full w-full object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.03] sm:group-hover:grayscale-0"
+              className="h-full w-full object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0 sm:group-data-[peek=true]:scale-[1.04] sm:group-data-[peek=true]:grayscale-0 group-data-[peek=true]:scale-[1.02]"
             />
           </button>
         ) : (
@@ -301,60 +386,106 @@ function BuilderCard({
             {initials(member.name)}
           </div>
         )}
-        {isLead ? (
-          <span className="absolute left-2.5 top-2.5 rounded-full border border-brand/30 bg-black/60 px-2 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-brand backdrop-blur-sm">
-            Lead
-          </span>
+        {onEdit ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            aria-label={`Edit ${member.name}`}
+            title="Edit member (admin)"
+            className="absolute right-2.5 top-2.5 inline-flex h-9 w-9 items-center justify-center rounded-full border border-brand/50 bg-black/70 text-brand backdrop-blur-sm transition-colors hover:bg-brand hover:text-black"
+          >
+            <Pencil className="h-4 w-4" aria-hidden />
+          </button>
         ) : null}
-      </div>
+        {/* Readability shade */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/95 via-black/55 to-transparent"
+        />
 
-      {/* Body — always visible, no hover-gated text */}
-      <div className="border-t border-line/60 p-3 sm:p-4">
-        <h3
-          title={member.name}
-          className="truncate text-sm font-semibold leading-snug text-cream"
-        >
-          {member.name}
-        </h3>
-        <p className="mt-0.5 truncate text-xs font-medium text-brand">{member.role}</p>
-        {hasLinks ? (
-          <div className="mt-2 flex items-center gap-1">
-            {member.linkedin ? (
-              <a
-                href={member.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${member.name} on LinkedIn`}
-                title="LinkedIn"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-transparent text-faint transition-colors touch-manipulation hover:border-brand/50 hover:bg-white/5 hover:text-cream"
-              >
-                <LinkedinIcon className="h-4 w-4" />
-              </a>
-            ) : null}
-            {member.github ? (
-              <a
-                href={member.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${member.name} on GitHub`}
-                title="GitHub"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-transparent text-faint transition-colors touch-manipulation hover:border-brand/50 hover:bg-white/5 hover:text-cream"
-              >
-                <GithubIcon className="h-4 w-4" />
-              </a>
-            ) : null}
-            {member.email ? (
-              <a
-                href={`mailto:${member.email}`}
-                aria-label={`Email ${member.name}`}
-                title="Email"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-transparent text-faint transition-colors touch-manipulation hover:border-brand/50 hover:bg-white/5 hover:text-cream"
-              >
-                <MailIcon className="h-4 w-4" />
-              </a>
-            ) : null}
+        {/* Detail sheet — slides up from bottom, no box, text over photo shade */}
+        <div className="absolute inset-x-0 bottom-0">
+          <div className="p-2.5 sm:p-3.5">
+            <h3
+              title={member.name}
+              className="truncate text-[13px] font-semibold leading-snug text-cream drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-sm"
+            >
+              {member.name}
+            </h3>
+
+            {/* Rising detail: role + links + view photo */}
+            <div
+              className={cn(
+                "grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out",
+                "sm:group-hover:grid-rows-[1fr] sm:group-hover:opacity-100 sm:group-focus-within:grid-rows-[1fr] sm:group-focus-within:opacity-100",
+                expanded
+              )}
+            >
+              <div className="min-h-0 overflow-hidden">
+                <div className="translate-y-3 transition-transform duration-300 ease-out sm:group-hover:translate-y-0 sm:group-focus-within:translate-y-0 sm:group-data-[peek=true]:translate-y-0 group-data-[peek=true]:translate-y-0">
+                  <p className="mt-0.5 truncate text-[11px] font-medium text-brand drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-xs">
+                    {member.role}
+                  </p>
+                  <div className="mt-2 flex items-center gap-1">
+                    {hasLinks ? (
+                      <div className="flex items-center gap-1">
+                        {member.linkedin ? (
+                          <a
+                            href={member.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`${member.name} on LinkedIn`}
+                            title="LinkedIn"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-9 sm:w-9"
+                          >
+                            <LinkedinIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          </a>
+                        ) : null}
+                        {member.github ? (
+                          <a
+                            href={member.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`${member.name} on GitHub`}
+                            title="GitHub"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-9 sm:w-9"
+                          >
+                            <GithubIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          </a>
+                        ) : null}
+                        {member.email ? (
+                          <a
+                            href={`mailto:${member.email}`}
+                            aria-label={`Email ${member.name}`}
+                            title="Email"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-9 sm:w-9"
+                          >
+                            <MailIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          </a>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        ) : null}
+          {/* Progress hairline — fills on expand */}
+          <div
+            aria-hidden
+            className={cn(
+              "h-0.5 w-full origin-left scale-x-0 bg-brand transition-transform duration-300",
+              "sm:group-hover:scale-x-100 sm:group-focus-within:scale-x-100",
+              peek && "scale-x-100"
+            )}
+          />
+        </div>
       </div>
     </article>
   );

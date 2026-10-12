@@ -301,8 +301,7 @@ export async function updateSubmissionPhoto(id: string, photoDataUrl: string): P
 }
 
 /** Admin edit links on a submission. Null/empty clears. Throws on invalid. */
-export async function updateSubmissionLinks(id: string, links: { linkedin?: string | null; github?: string | null; email?: string | null }): Promise<TeamSubmission> {
-  const errors = validateLinks(links);
+export async function updateSubmissionLinks(id: string, links: { linkedin?: string | null; github?: string | null; email?: string | null }): Promise<TeamSubmission> {  const errors = validateLinks(links);
   if (Object.keys(errors).length > 0) {
     throw new Error(errors.linkedin ?? errors.github ?? errors.email ?? "Invalid links.");
   }
@@ -318,6 +317,166 @@ export async function updateSubmissionLinks(id: string, links: { linkedin?: stri
   });
 }
 
+export interface SubmissionDetailsInput {
+  name?: string;
+  role?: string;
+  linkedin?: string | null;
+  github?: string | null;
+  email?: string | null;
+}
+
+/**
+ * Admin full edit: rename member, change role (section derived), edit links.
+ * Approved edits go live on /team instantly via name-matched override.
+ * Throws Error with human message on invalid input, "Submission not found."
+ * when the id is unknown.
+ */
+export async function updateSubmissionDetails(id: string, input: SubmissionDetailsInput): Promise<TeamSubmission> {
+  const errors: SubmissionErrors = {};
+  let name: string | undefined;
+  if (input.name !== undefined) {
+    const cleaned = input.name.trim().replace(/\s+/g, " ");
+    if (!cleaned) errors.name = "Name cannot be empty.";
+    else if (cleaned.length > 80) errors.name = "Name too long.";
+    else name = rosterMember(cleaned)?.name ?? cleaned;
+  }
+  let role: string | undefined;
+  let section: TeamSectionKey | undefined;
+  if (input.role !== undefined) {
+    const found = sectionForRole(input.role);
+    if (!found) errors.role = "Select a valid position from the list.";
+    else {
+      role = input.role;
+      section = found;
+    }
+  }
+  const hasLinks = input.linkedin !== undefined || input.github !== undefined || input.email !== undefined;
+  if (hasLinks) {
+    Object.assign(
+      errors,
+      validateLinks({ linkedin: input.linkedin, github: input.github, email: input.email }),
+    );
+  }
+  if (Object.keys(errors).length > 0) {
+    throw new TeamSubmissionError(errors);
+  }
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const sub = store.submissions.find((s) => s.id === id);
+    if (!sub) throw new Error("Submission not found.");
+    if (name !== undefined) sub.name = name;
+    if (role !== undefined && section !== undefined) {
+      sub.role = role;
+      sub.section = section;
+    }
+    if (input.linkedin !== undefined) sub.linkedin = normalizeUrl(input.linkedin);
+    if (input.github !== undefined) sub.github = normalizeUrl(input.github);
+    if (input.email !== undefined) sub.email = normalizeEmail(input.email);
+    await writeStore(store);
+    return { ...sub };
+  });
+}
+
+/** Admin delete: removes a submission entirely (e.g. spam, duplicate, ex-member). */
+export async function deleteSubmission(id: string): Promise<void> {
+  return withWriteLock(async () => {
+    const store = await readStore();
+    const idx = store.submissions.findIndex((s) => s.id === id);
+    if (idx === -1) throw new Error("Submission not found.");
+    store.submissions.splice(idx, 1);
+    await writeStore(store);
+  });
+}
+
+export interface AdminUpsertInput {
+  /** Original name on /team — when renamed, old records are retired. */
+  previousName?: string;
+  name: string;
+  role: string;
+  /** Cropped square JPG. Omit/empty = keep live photo. */
+  photoDataUrl?: string;
+  /** Bounded pre-crop JPG for later re-crop. Omit = keep. */
+  originalDataUrl?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+  email?: string | null;
+}
+
+/**
+ * Admin direct edit from /team: creates or updates the approved record for a
+ * member in one call. Static-only members (no submission yet) get a new
+ * approved record; photo stays untouched unless a fresh crop is supplied.
+ */
+export async function adminUpsertMember(input: AdminUpsertInput): Promise<TeamSubmission> {
+  const norm = (v: string) => v.trim().toLowerCase();
+  const cleaned = input.name.trim().replace(/\s+/g, " ");
+  const errors: SubmissionErrors = {};
+  if (!cleaned) errors.name = "Name cannot be empty.";
+  else if (cleaned.length > 80) errors.name = "Name too long.";
+  const section = sectionForRole(input.role);
+  if (!section) errors.role = "Select a valid position from the list.";
+  if (input.photoDataUrl) {
+    if (!input.photoDataUrl.startsWith("data:image/jpeg;base64,")) {
+      errors.photo = "Photo must be a square JPG — use the cropper.";
+    } else if (input.photoDataUrl.length > MAX_PHOTO_DATAURL_CHARS) {
+      errors.photo = "Photo too large after processing. Retry.";
+    }
+  }
+  if (input.originalDataUrl != null && input.originalDataUrl !== "") {
+    if (!input.originalDataUrl.startsWith("data:image/jpeg;base64,")) {
+      errors.photo = "Original photo must be a JPG — re-upload.";
+    } else if (input.originalDataUrl.length > MAX_ORIGINAL_DATAURL_CHARS) {
+      errors.photo = "Original photo too large. Re-upload.";
+    }
+  }
+  Object.assign(
+    errors,
+    validateLinks({ linkedin: input.linkedin, github: input.github, email: input.email }),
+  );
+  if (Object.keys(errors).length > 0) throw new TeamSubmissionError(errors);
+  const name = rosterMember(cleaned)?.name ?? cleaned;
+  return withWriteLock(async () => {
+    const store = await readStore();
+    // Rename: retire every record under the old name so the old profile
+    // stops overriding the roster (no ghost duplicates on /team).
+    if (input.previousName && norm(input.previousName) !== norm(name)) {
+      store.submissions = store.submissions.filter((s) => norm(s.name) !== norm(input.previousName as string));
+    }
+    const existing = store.submissions
+      .filter((s) => norm(s.name) === norm(name))
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];
+    if (existing) {
+      existing.role = input.role;
+      existing.section = section as TeamSectionKey;
+      if (input.photoDataUrl) existing.photoDataUrl = input.photoDataUrl;
+      if (input.originalDataUrl !== undefined) existing.originalDataUrl = input.originalDataUrl;
+      existing.linkedin = normalizeUrl(input.linkedin);
+      existing.github = normalizeUrl(input.github);
+      existing.email = normalizeEmail(input.email);
+      existing.status = "approved";
+      existing.reviewedAt = new Date().toISOString();
+      await writeStore(store);
+      return { ...existing };
+    }
+    const sub: TeamSubmission = {
+      id: randomUUID(),
+      name,
+      role: input.role,
+      section: section as TeamSectionKey,
+      photoDataUrl: input.photoDataUrl ?? "",
+      originalDataUrl: input.originalDataUrl ?? null,
+      linkedin: normalizeUrl(input.linkedin),
+      github: normalizeUrl(input.github),
+      email: normalizeEmail(input.email),
+      status: "approved",
+      createdAt: new Date().toISOString(),
+      reviewedAt: new Date().toISOString(),
+    };
+    store.submissions.unshift(sub);
+    await writeStore(store);
+    return { ...sub };
+  });
+}
 export async function listApproved(): Promise<TeamSubmission[]> {
   const store = await readStore();
   return store.submissions.filter((s) => s.status === "approved");
@@ -363,7 +522,9 @@ export async function getTeamLists(): Promise<{
     const all = [...leads, ...domain, ...ops, ...coords];
     const existing = all.find((m) => norm(m.name) === norm(s.name));
     if (existing) {
-      existing.photo = s.photoDataUrl;
+      // Empty photoDataUrl = "no photo change" (static-only member edited
+      // without a fresh crop) — never blank the live/static photo.
+      if (s.photoDataUrl) existing.photo = s.photoDataUrl;
       existing.role = s.role;
       if (s.linkedin) existing.linkedin = s.linkedin;
       if (s.github) existing.github = s.github;
