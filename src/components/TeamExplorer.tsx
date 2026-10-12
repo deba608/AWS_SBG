@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Pencil } from "lucide-react";
+import { X, Pencil, ChevronUp } from "lucide-react";
 import type { TeamMember } from "@/data/team";
 import type { TeamSubmission } from "@/lib/team-store";
 import { cn, initials } from "@/lib/utils";
@@ -340,7 +340,6 @@ function BuilderCard({
   void isLead;
   const showPhoto = Boolean(member.photo) && !imgFailed;
   const hasLinks = Boolean(member.linkedin || member.github || member.email);
-  const expanded = "group-data-[peek=true]:grid-rows-[1fr] group-data-[peek=true]:opacity-100";
 
   function handlePhotoActivate(e: React.SyntheticEvent) {
     if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches && !peek) {
@@ -375,7 +374,7 @@ function BuilderCard({
               alt={member.name}
               loading="lazy"
               onError={() => setImgFailed(true)}
-              className="h-full w-full object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0 sm:group-data-[peek=true]:scale-[1.04] sm:group-data-[peek=true]:grayscale-0 group-data-[peek=true]:scale-[1.02]"
+              className={cn("h-full w-full object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0", peek && "scale-[1.02] grayscale-0 sm:scale-[1.04]")}
             />
           </button>
         ) : (
@@ -409,23 +408,40 @@ function BuilderCard({
         {/* Detail sheet — slides up from bottom, no box, text over photo shade */}
         <div className="absolute inset-x-0 bottom-0">
           <div className="p-2.5 sm:p-3.5">
-            <h3
-              title={member.name}
-              className="truncate text-[13px] font-semibold leading-snug text-cream drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-sm"
-            >
-              {member.name}
-            </h3>
+            <div className="flex min-w-0 items-center gap-2">
+              <h3
+                title={member.name}
+                className="min-w-0 flex-1 truncate text-[13px] font-semibold leading-snug text-cream drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-sm"
+              >
+                {member.name}
+              </h3>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPeek((v) => !v);
+                }}
+                aria-expanded={peek}
+                aria-label={peek ? `Hide details for ${member.name}` : `Show details for ${member.name}`}
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-cream touch-manipulation hover:border-brand/60 hover:bg-brand hover:text-black"
+              >
+                <ChevronUp
+                  className={cn("h-4 w-4 transition-transform duration-300", peek && "rotate-180")}
+                  aria-hidden
+                />
+              </button>
+            </div>
 
             {/* Rising detail: role + links + view photo */}
             <div
               className={cn(
                 "grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out",
                 "sm:group-hover:grid-rows-[1fr] sm:group-hover:opacity-100 sm:group-focus-within:grid-rows-[1fr] sm:group-focus-within:opacity-100",
-                expanded
+                peek && "grid-rows-[1fr] opacity-100"
               )}
             >
               <div className="min-h-0 overflow-hidden">
-                <div className="translate-y-3 transition-transform duration-300 ease-out sm:group-hover:translate-y-0 sm:group-focus-within:translate-y-0 sm:group-data-[peek=true]:translate-y-0 group-data-[peek=true]:translate-y-0">
+                <div className={cn("translate-y-3 transition-transform duration-300 ease-out sm:group-hover:translate-y-0 sm:group-focus-within:translate-y-0", peek && "translate-y-0")}>
                   <p className="mt-0.5 truncate text-[11px] font-medium text-brand drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-xs">
                     {member.role}
                   </p>
