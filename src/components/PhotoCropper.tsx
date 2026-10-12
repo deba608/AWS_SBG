@@ -18,6 +18,27 @@ function loadImage(src: string): Promise<HTMLImageElement> {
  * onSave receives the processed 800x800 JPEG blob.
  */
 
+/**
+ * Single source of truth for all crop geometry. Rendered photo size and offset
+ * are computed in plain pixels — no object-fit, no transform-origin — so the
+ * preview, the drag clamp and the JPEG export can never disagree (that
+ * disagreement is what exposed the black background when dragging).
+ */
+function viewGeometry(
+  nat: { w: number; h: number },
+  box: number,
+  zoom: number,
+  x: number,
+  y: number,
+): { rw: number; rh: number; left: number; top: number } {
+  const r = nat.w / nat.h;
+  const cw = box * Math.max(1, r);
+  const ch = box * Math.max(1, 1 / r);
+  const rw = cw * zoom;
+  const rh = ch * zoom;
+  return { rw, rh, left: (box - rw) / 2 + x, top: (box - rh) / 2 + y };
+}
+
 function clampPos(
   x: number,
   y: number,
@@ -26,34 +47,29 @@ function clampPos(
   box: number,
 ): { x: number; y: number } {
   if (!nat || box <= 0) return { x: 0, y: 0 };
-  const coverW = box * Math.max(1, nat.w / nat.h);
-  const coverH = box * Math.max(1, nat.h / nat.w);
-  // Cover always fills frame — clamp keeps photo edges at/over frame edges.
-  const maxX = Math.max(0, (coverW * zoom - box) / 2);
-  const maxY = Math.max(0, (coverH * zoom - box) / 2);
+  const { rw, rh } = viewGeometry(nat, box, zoom, 0, 0);
+  // Offset range that keeps every frame edge covered by photo — drag stops
+  // dead at the edge, background can never show through.
+  const maxX = Math.max(0, (rw - box) / 2);
+  const maxY = Math.max(0, (rh - box) / 2);
   return { x: Math.min(Math.max(x, -maxX), maxX), y: Math.min(Math.max(y, -maxY), maxY) };
 }
 
 async function exportSquareJpeg(
   img: HTMLImageElement,
-  crop: { zoom: number; x: number; y: number; box: number },
+  view: { natW: number; natH: number; box: number; zoom: number; x: number; y: number },
 ): Promise<Blob> {
   const iw = img.naturalWidth;
   const ih = img.naturalHeight;
-  const S = crop.box > 0 ? crop.box : 300;
-  // Must mirror preview CSS: object-cover base + translate(x,y) then scale about center,
-  // so effective on-screen shift is exactly (x, y) px at any zoom.
-  const base = Math.max(S / iw, S / ih); // screen px per natural px at zoom 1
-  const vis = S / (base * crop.zoom);
-  const cx = iw / 2 - crop.x / base;
-  const cy = ih / 2 - crop.y / base;
-  // Cover always fills frame — window stays inside photo, no letterbox.
-  const sx = Math.min(Math.max(cx - vis / 2, 0), Math.max(iw - vis, 0));
-  const sy = Math.min(Math.max(cy - vis / 2, 0), Math.max(ih - vis, 0));
-  const ix0 = Math.max(sx, 0);
-  const iy0 = Math.max(sy, 0);
-  const ix1 = Math.min(sx + vis, iw);
-  const iy1 = Math.min(sy + vis, ih);
+  const S = view.box > 0 ? view.box : 300;
+  // Same geometry as preview: rendered photo rect → visible window in natural px.
+  const { rw, rh, left, top } = viewGeometry({ w: view.natW, h: view.natH }, S, view.zoom, view.x, view.y);
+  const kx = rw / iw;
+  const ky = rh / ih;
+  const visW = S / kx;
+  const visH = S / ky;
+  const sx = Math.min(Math.max(-left / kx, 0), Math.max(iw - visW, 0));
+  const sy = Math.min(Math.max(-top / ky, 0), Math.max(ih - visH, 0));
   const canvas = document.createElement("canvas");
   canvas.width = 800;
   canvas.height = 800;
@@ -61,14 +77,7 @@ async function exportSquareJpeg(
   if (!ctx) throw new Error("Canvas unavailable in this browser.");
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, 800, 800);
-  if (ix1 > ix0 && iy1 > iy0) {
-    ctx.drawImage(
-      img,
-      ix0, iy0, ix1 - ix0, iy1 - iy0,
-      ((ix0 - sx) / vis) * 800, ((iy0 - sy) / vis) * 800,
-      ((ix1 - ix0) / vis) * 800, ((iy1 - iy0) / vis) * 800,
-    );
-  }
+  ctx.drawImage(img, sx, sy, visW, visH, 0, 0, 800, 800);
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error("Photo processing failed. Retry."))),
@@ -96,6 +105,7 @@ export default function PhotoCropper({
   const [zoom, setZoom] = useState(1);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [nat, setNat] = useState<{ w: number; h: number } | null>(null);
+  const [boxW, setBoxW] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const boxRef = useRef<HTMLDivElement>(null);
@@ -158,8 +168,27 @@ export default function PhotoCropper({
   }, [onClose]);
 
   function boxSize(): number {
-    return boxRef.current?.clientWidth ?? 0;
+    return boxW > 0 ? boxW : (boxRef.current?.clientWidth ?? 0);
   }
+
+  // Track frame width so preview geometry uses the real laid-out size.
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const measure = () => setBoxW(el.clientWidth);
+    measure();
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(measure);
+      ro.observe(el);
+    } else {
+      window.addEventListener("resize", measure);
+    }
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
 
   function onPointerDown(e: React.PointerEvent) {
     pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -254,7 +283,14 @@ export default function PhotoCropper({
     setError("");
     try {
       const img = await loadImage(src);
-      const blob = await exportSquareJpeg(img, { zoom, x: pos.x, y: pos.y, box: boxSize() });
+      const blob = await exportSquareJpeg(img, {
+        natW: img.naturalWidth,
+        natH: img.naturalHeight,
+        box: boxSize(),
+        zoom,
+        x: pos.x,
+        y: pos.y,
+      });
       onSave(blob);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Crop failed.");
@@ -262,6 +298,9 @@ export default function PhotoCropper({
       setSaving(false);
     }
   }
+
+  const S = boxW;
+  const geo = nat && S > 0 ? viewGeometry(nat, S, zoom, pos.x, pos.y) : null;
 
   return (
     <div
@@ -304,14 +343,16 @@ export default function PhotoCropper({
           className="relative mt-3 aspect-square w-full cursor-grab touch-none overflow-hidden rounded-xl border border-line bg-black active:cursor-grabbing"
           aria-label="Crop area: drag to reposition photo"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={src}
-            alt="Crop preview"
-            draggable={false}
-            className="h-full w-full object-cover select-none"
-            style={{ transform: `translate(${pos.x}px, ${pos.y}px) scale(${zoom})` }}
-          />
+          {geo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={src}
+              alt="Crop preview"
+              draggable={false}
+              className="absolute top-0 left-0 max-w-none select-none"
+              style={{ width: `${geo.rw}px`, height: `${geo.rh}px`, transform: `translate(${geo.left}px, ${geo.top}px)` }}
+            />
+          ) : null}
         </div>
         <div className="mt-3 flex items-center gap-2">
           <ZoomIn className="h-4 w-4 shrink-0 text-faint" aria-hidden />
