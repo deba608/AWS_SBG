@@ -5,9 +5,12 @@ import CursorGrid from "@/components/CursorGrid";
 import Reveal from "@/components/Reveal";
 import TeamExplorer from "@/components/TeamExplorer";
 import { getTeamLists } from "@/lib/team-store";
-import { isAdmin } from "@/lib/admin-auth";
 import { SITE } from "@/lib/constants";
 import { Users, Layers, Sparkles, Terminal } from "lucide-react";
+
+// Static + ISR: page pre-renders, admin session detected client-side.
+// Cuts TTFB vs per-request SSR.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Team — AWS SBG SUIIT Student Builders",
@@ -26,10 +29,8 @@ export const metadata: Metadata = {
 };
 
 export default async function TeamPage() {
-  const [{ teamLeads, domainLeads, opsTeam, coordinators }, adminMode] = await Promise.all([
-    getTeamLists(),
-    isAdmin(),
-  ]);
+  const { teamLeads, domainLeads, opsTeam, coordinators } = await getTeamLists();
+  const adminMode = false;
   const totalBuilders =
     teamLeads.length + domainLeads.length + opsTeam.length + coordinators.length;
 
@@ -70,7 +71,7 @@ export default async function TeamPage() {
           {/* Quick Metrics Bar */}
           <Reveal delay={0.1} className="mt-6 sm:mt-8">
             <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
-              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm sm:p-4">
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm transition-colors duration-300 hover:border-brand/40 sm:p-4">
                 <div className="flex items-center gap-2 text-brand">
                   <Sparkles className="h-4 w-4 shrink-0" />
                   <span className="truncate text-[11px] font-mono font-semibold uppercase text-faint sm:text-xs">
@@ -83,7 +84,7 @@ export default async function TeamPage() {
                 <p className="text-xs text-fog">Executive leaders</p>
               </div>
 
-              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm sm:p-4">
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm transition-colors duration-300 hover:border-brand/40 sm:p-4">
                 <div className="flex items-center gap-2 text-brand">
                   <Layers className="h-4 w-4 shrink-0" />
                   <span className="truncate text-[11px] font-mono font-semibold uppercase text-faint sm:text-xs">
@@ -96,7 +97,7 @@ export default async function TeamPage() {
                 <p className="text-xs text-fog">Tech specializations</p>
               </div>
 
-              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm sm:p-4">
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm transition-colors duration-300 hover:border-brand/40 sm:p-4">
                 <div className="flex items-center gap-2 text-brand">
                   <Users className="h-4 w-4 shrink-0" />
                   <span className="truncate text-[11px] font-mono font-semibold uppercase text-faint sm:text-xs">
@@ -109,7 +110,7 @@ export default async function TeamPage() {
                 <p className="text-xs text-fog">Active core members</p>
               </div>
 
-              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm sm:p-4">
+              <div className="rounded-xl border border-line/70 bg-coal/70 p-3 backdrop-blur-sm transition-colors duration-300 hover:border-brand/40 sm:p-4">
                 <div className="flex items-center gap-2 text-brand">
                   <Terminal className="h-4 w-4 shrink-0" />
                   <span className="truncate text-[11px] font-mono font-semibold uppercase text-faint sm:text-xs">

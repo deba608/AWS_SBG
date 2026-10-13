@@ -18,7 +18,7 @@ export const teamLeads: TeamMember[] = [
     role: "SBG Leader",
     bio: "Leads the AWS Student Builder Group, steering community direction and fostering a culture of cloud-first building.",
     lead: true,
-    photo: "/team/pratik-samal.png",
+    photo: "/team/pratik-samal.webp",
   },
   {
     id: "manas-ranjan-dikshit",
@@ -26,7 +26,7 @@ export const teamLeads: TeamMember[] = [
     role: "President",
     bio: "Drives overall club strategy, partnerships and community growth across campus.",
     lead: true,
-    photo: "/team/manas-ranjan-dikshit.jpg",
+    photo: "/team/manas-ranjan-dikshit.webp",
   },
   {
     id: "debashish-pradhan",
@@ -34,7 +34,7 @@ export const teamLeads: TeamMember[] = [
     role: "Secretary",
     bio: "Manages club operations, communications and documentation to keep everything running smoothly.",
     lead: true,
-    photo: "/team/debashish-pradhan.jpg",
+    photo: "/team/debashish-pradhan.webp",
   },
 ];
 
@@ -183,7 +183,7 @@ export const opsTeam: TeamMember[] = [
     name: "Bibhuprasad Samal",
     role: "Social Media Lead",
     bio: "Manages the club's social presence across Instagram, LinkedIn and WhatsApp.",
-    photo: "/team/bibhuprasad-samal.png",
+    photo: "/team/bibhuprasad-samal.webp",
   },
   {
     id: "samparna-rout",

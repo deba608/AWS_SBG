@@ -1,13 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Pencil } from "lucide-react";
 import type { TeamMember } from "@/data/team";
 import type { TeamSubmission } from "@/lib/team-store";
 import { cn, initials } from "@/lib/utils";
 import { LinkedinIcon, GithubIcon, MailIcon } from "./icons";
-import TeamQuickEdit, { type QuickEditMeta } from "./TeamQuickEdit";
+import type { QuickEditMeta } from "./TeamQuickEdit";
+
+// Admin editor is heavy (cropper/canvas) — load only when an admin taps edit.
+const TeamQuickEdit = dynamic(() => import("./TeamQuickEdit"), { ssr: false });
 
 interface TeamExplorerProps {
   teamLeads: TeamMember[];
@@ -33,6 +38,7 @@ export default function TeamExplorer({
   const [previewMember, setPreviewMember] = useState<TeamMember | null>(null);
   const [adminList, setAdminList] = useState<AdminList | null>(null);
   const [editing, setEditing] = useState<TeamMember | null>(null);
+  const [isAdmin, setIsAdmin] = useState(adminMode);
 
   const loadAdminList = useCallback(async () => {
     try {
@@ -46,16 +52,17 @@ export default function TeamExplorer({
           roles: Array.isArray(d.meta?.roles) ? d.meta.roles : [],
         },
       });
+      setIsAdmin(true);
     } catch {
       // Not authed or offline — cards simply render without edit buttons.
     }
   }, []);
 
   useEffect(() => {
-    // Admin session pulls the submissions map once for inline editing.
+    // Static page: detect admin session client-side (one cheap probe).
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (adminMode) void loadAdminList();
-  }, [adminMode, loadAdminList]);
+    void loadAdminList();
+  }, [loadAdminList]);
 
   // Latest submission for a live card (approved first) — pre-fills quick edit.
   function subFor(member: TeamMember): TeamSubmission | null {
@@ -87,7 +94,7 @@ export default function TeamExplorer({
 
   return (
     <div className="w-full">
-      {adminMode && adminList ? (
+      {isAdmin && adminList ? (
         <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand/10 px-4 py-1.5 text-xs font-semibold text-brand">
           <Pencil className="h-3.5 w-3.5" aria-hidden /> Admin mode — tap the pencil on any card to edit inline
         </p>
@@ -111,11 +118,12 @@ export default function TeamExplorer({
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-              {teamLeads.map((member) => (
+              {teamLeads.map((member, i) => (
                 <BuilderCard
                   key={member.id}
                   member={member}
                   isLead
+                  priority={i < 4}
                   onPhotoClick={() => member.photo && setPreviewMember(member)}
                   onEdit={editFor(member)}
                 />
@@ -124,7 +132,7 @@ export default function TeamExplorer({
           </section>
 
           {/* 2. Technical Domain Leads */}
-          <section aria-labelledby="section-domain">
+          <section aria-labelledby="section-domain" style={{ contentVisibility: "auto", containIntrinsicSize: "800px" }}>
             <div className="mb-4 flex flex-wrap items-end justify-between gap-2 border-t border-line/60 pt-8 sm:mb-6 sm:pt-14">
               <div className="min-w-0">
                 <span className="text-[11px] font-mono tracking-wider uppercase text-brand">
@@ -155,7 +163,7 @@ export default function TeamExplorer({
           </section>
 
           {/* 3. Operations, PR & Media */}
-          <section aria-labelledby="section-ops">
+          <section aria-labelledby="section-ops" style={{ contentVisibility: "auto", containIntrinsicSize: "800px" }}>
             <div className="mb-4 flex flex-wrap items-end justify-between gap-2 border-t border-line/60 pt-8 sm:mb-6 sm:pt-14">
               <div className="min-w-0">
                 <span className="text-[11px] font-mono tracking-wider uppercase text-brand">
@@ -186,7 +194,7 @@ export default function TeamExplorer({
           </section>
 
           {/* 4. Coordinators */}
-          <section aria-labelledby="section-coordinators">
+          <section aria-labelledby="section-coordinators" style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}>
             <div className="mb-4 flex flex-wrap items-end justify-between gap-2 border-t border-line/60 pt-8 sm:mb-6 sm:pt-14">
               <div className="min-w-0">
                 <span className="text-[11px] font-mono tracking-wider uppercase text-brand">
@@ -246,13 +254,24 @@ export default function TeamExplorer({
                 <X className="h-4 w-4" />
               </button>
 
-              <div className="aspect-square w-full overflow-hidden rounded-xl border border-line/60 bg-coal">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={previewMember.photo}
-                  alt={previewMember.name}
-                  className="h-full w-full object-cover"
-                />
+              <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-line/60 bg-coal">
+                {previewMember.photo.startsWith("data:") ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previewMember.photo}
+                    alt={previewMember.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={previewMember.photo}
+                    alt={previewMember.name}
+                    width={800}
+                    height={800}
+                    sizes="(max-width: 640px) 90vw, 448px"
+                    className="h-full w-full object-cover"
+                  />
+                )}
               </div>
 
               <div className="mt-4 text-center">
@@ -322,23 +341,25 @@ export default function TeamExplorer({
 }
 
 /** Individual Builder Card — rank-card border + slide-up detail sheet.
- *  Name/role always visible; bio + links + view-photo rise from bottom
- *  on hover (desktop), focus, or tap (touch). */
+ *  Name/role always visible; links rise from bottom on hover (desktop),
+ *  focus, or tap (touch). Photos served via next/image (WebP/AVIF). */
 function BuilderCard({
   member,
   isLead = false,
+  priority = false,
   onPhotoClick,
   onEdit,
 }: {
   member: TeamMember;
   isLead?: boolean;
+  priority?: boolean;
   onPhotoClick: () => void;
   onEdit?: () => void;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
   const [peek, setPeek] = useState(false);
-  void isLead;
   const showPhoto = Boolean(member.photo) && !imgFailed;
+  const isDataUrl = member.photo?.startsWith("data:") ?? false;
   const hasLinks = Boolean(member.linkedin || member.github || member.email);
 
   function handlePhotoActivate(e: React.SyntheticEvent) {
@@ -355,9 +376,15 @@ function BuilderCard({
       data-peek={peek}
       className={cn(
         "rank-card group relative min-w-0 touch-manipulation overflow-hidden transition-all duration-300",
-        "sm:hover:-translate-y-1 sm:hover:border-brand/50 sm:hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)] sm:focus-within:-translate-y-1 sm:focus-within:border-brand/50"
+        "focus-within:border-brand/60 focus-within:shadow-[0_0_0_1px_rgba(173,92,255,0.4),0_12px_32px_rgba(0,0,0,0.35)]",
+        "sm:hover:-translate-y-1 sm:hover:border-brand/50 sm:hover:shadow-[0_12px_32px_rgba(0,0,0,0.35),0_0_24px_rgba(173,92,255,0.15)] sm:focus-within:-translate-y-1",
+        isLead && "border-brand/25 bg-gradient-to-b from-brand/[0.07] to-transparent"
       )}
     >
+      {/* Lead accent hairline */}
+      {isLead ? (
+        <div aria-hidden className="absolute inset-x-0 top-0 z-10 h-[2px] bg-gradient-to-r from-transparent via-brand/70 to-transparent" />
+      ) : null}
       {/* Photo */}
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-coal sm:aspect-square">
         {showPhoto ? (
@@ -366,21 +393,36 @@ function BuilderCard({
             onClick={handlePhotoActivate}
             aria-label={`View photo of ${member.name}`}
             aria-expanded={peek}
-            className="block h-full w-full cursor-pointer"
+            className="relative block h-full w-full cursor-pointer"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={member.photo}
-              alt={member.name}
-              loading="lazy"
-              onError={() => setImgFailed(true)}
-              className={cn("h-full w-full object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0", peek && "scale-[1.02] grayscale-0 sm:scale-[1.04]")}
-            />
+            {isDataUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={member.photo}
+                alt={member.name}
+                loading={priority ? "eager" : "lazy"}
+                decoding="async"
+                onError={() => setImgFailed(true)}
+                className={cn("h-full w-full object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0", peek && "scale-[1.02] grayscale-0 sm:scale-[1.04]")}
+              />
+            ) : (
+              <Image
+                src={member.photo as string}
+                alt={member.name}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                priority={priority}
+                loading={priority ? "eager" : "lazy"}
+                fetchPriority={priority ? "high" : "low"}
+                onError={() => setImgFailed(true)}
+                className={cn("object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0", peek && "scale-[1.02] grayscale-0 sm:scale-[1.04]")}
+              />
+            )}
           </button>
         ) : (
           <div
             aria-hidden
-            className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand/20 via-coal to-surface text-3xl font-bold text-cream sm:text-4xl"
+            className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand/25 via-coal to-surface text-3xl font-bold text-cream sm:text-4xl"
           >
             {initials(member.name)}
           </div>
@@ -405,7 +447,7 @@ function BuilderCard({
           className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/95 via-black/55 to-transparent"
         />
 
-        {/* Detail sheet — slides up from bottom, no box, text over photo shade */}
+        {/* Detail sheet — name + role always visible, links rise on hover */}
         <div className="absolute inset-x-0 bottom-0">
           <div className="p-2.5 sm:p-3.5">
             <h3
@@ -414,8 +456,11 @@ function BuilderCard({
             >
               {member.name}
             </h3>
+            <p className="mt-0.5 truncate text-[11px] font-medium text-brand drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-xs">
+              {member.role}
+            </p>
 
-            {/* Rising detail: role + links + view photo */}
+            {/* Rising detail: links only */}
             <div
               className={cn(
                 "grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out",
@@ -425,9 +470,6 @@ function BuilderCard({
             >
               <div className="min-h-0 overflow-hidden">
                 <div className={cn("translate-y-3 transition-transform duration-300 ease-out sm:group-hover:translate-y-0 sm:group-focus-within:translate-y-0", peek && "translate-y-0")}>
-                  <p className="mt-0.5 truncate text-[11px] font-medium text-brand drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-xs">
-                    {member.role}
-                  </p>
                   <div className="mt-2 flex items-center gap-1">
                     {hasLinks ? (
                       <div className="flex items-center gap-1">
