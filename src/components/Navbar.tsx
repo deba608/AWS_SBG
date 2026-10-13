@@ -255,7 +255,7 @@ export default function Navbar() {
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="overflow-hidden border-t border-white/[0.06] bg-ink/95 backdrop-blur-2xl lg:hidden"
             >
-              <div className="px-5 py-4">
+              <div className="max-h-[calc(100dvh_-_4rem)] overflow-y-auto px-5 py-4">
                 <ul className="space-y-1">
                   {NAV_LINKS.map((link, i) => {
                     const active = isLinkActive(link.href);
@@ -302,15 +302,11 @@ export default function Navbar() {
                   className="mt-4 space-y-3 border-t border-white/[0.06] pt-4"
                 >
                   <Link
-                    href="/events/awsscd26"
+                    href="/events"
                     onClick={close}
-                    className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-brand/10 to-purple-500/5 px-4 py-3 text-sm font-medium text-cream shadow-[inset_0_0_0_1px_rgba(173,92,255,0.15)] transition-all hover:from-brand/15 hover:to-purple-500/10"
+                    className="flex min-h-[44px] items-center gap-2.5 rounded-xl bg-gradient-to-r from-brand/10 to-purple-500/5 px-4 py-3 text-sm font-medium text-cream shadow-[inset_0_0_0_1px_rgba(173,92,255,0.15)] transition-all hover:from-brand/15 hover:to-purple-500/10"
                   >
-                    <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
-                    </span>
-                    Community Day — Oct 6–8
+                    Explore events
                   </Link>
 
                   <motion.a

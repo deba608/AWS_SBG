@@ -129,7 +129,7 @@ export default function HomePage() {
             <div className="min-w-0">
               <h1
                 id="hero-heading"
-                className="mx-auto max-w-3xl text-[2.75rem] font-bold leading-[0.98] tracking-[-0.03em] text-cream sm:text-6xl md:text-7xl"
+                className="mx-auto max-w-3xl text-[2.5rem] font-bold leading-[0.98] tracking-[-0.03em] text-cream sm:text-6xl md:text-7xl"
               >
                 <span className="sr-only">AWS SBG SUIIT — AWS Student Builder Group: </span>
                 <span className="block overflow-hidden pb-1" aria-hidden>
@@ -161,7 +161,7 @@ export default function HomePage() {
             <p className="shrink-0 text-[11px] uppercase tracking-[0.2em] text-faint">
               From a recent build session
             </p>
-            <p className="min-w-0 flex-1 truncate text-fog">
+            <p className="min-w-0 flex-1 break-words text-fog sm:truncate">
               <span className="text-faint">$</span>{" "}
               <span className="text-cream">sam deploy --region ap-south-1</span>
               {"  "}→ campusconnect-prod live in 42s

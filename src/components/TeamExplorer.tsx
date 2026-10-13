@@ -481,7 +481,7 @@ function BuilderCard({
                             aria-label={`${member.name} on LinkedIn`}
                             title="LinkedIn"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-9 sm:w-9"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-cream transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-9 sm:w-9"
                           >
                             <LinkedinIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           </a>
@@ -494,7 +494,7 @@ function BuilderCard({
                             aria-label={`${member.name} on GitHub`}
                             title="GitHub"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-9 sm:w-9"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-cream transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-9 sm:w-9"
                           >
                             <GithubIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           </a>
@@ -505,7 +505,7 @@ function BuilderCard({
                             aria-label={`Email ${member.name}`}
                             title="Email"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-cream transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-9 sm:w-9"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-cream transition-colors touch-manipulation hover:bg-brand hover:text-black sm:h-9 sm:w-9"
                           >
                             <MailIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           </a>
