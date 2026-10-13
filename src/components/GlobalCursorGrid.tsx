@@ -1,7 +1,22 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { SUBTLE_GRID } from "./CursorGrid";
+
+/** Main site-wide preset — clearly visible grid on dark. */
+const MAIN_GRID = {
+  cellSize: 56,
+  color: "#c084fc",
+  radius: 220,
+  holdTime: 350,
+  fadeDuration: 1200,
+  lineWidth: 1.6,
+  maxOpacity: 0.85,
+  fillOpacity: 0.12,
+  gridOpacity: 0.1,
+  cellRadius: 6,
+  clickPulse: true,
+  pulseSpeed: 560,
+};
 
 interface Pulse {
   x: number;
@@ -33,20 +48,7 @@ export default function GlobalCursorGrid() {
     const reduceMotion =
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
-    const p = {
-      cellSize: SUBTLE_GRID.cellSize ?? 72,
-      color: SUBTLE_GRID.color ?? "#ad5cff",
-      radius: SUBTLE_GRID.radius ?? 130,
-      holdTime: SUBTLE_GRID.holdTime ?? 250,
-      fadeDuration: SUBTLE_GRID.fadeDuration ?? 900,
-      lineWidth: SUBTLE_GRID.lineWidth ?? 1,
-      maxOpacity: SUBTLE_GRID.maxOpacity ?? 0.12,
-      fillOpacity: SUBTLE_GRID.fillOpacity ?? 0,
-      gridOpacity: SUBTLE_GRID.gridOpacity ?? 0.012,
-      cellRadius: SUBTLE_GRID.cellRadius ?? 6,
-      clickPulse: SUBTLE_GRID.clickPulse ?? true,
-      pulseSpeed: SUBTLE_GRID.pulseSpeed ?? 520,
-    };
+    const p = { ...MAIN_GRID };
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;

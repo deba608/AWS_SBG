@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowRight, ArrowUpRight, MapPin } from "lucide-react";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
-import CursorGrid, { SUBTLE_GRID } from "@/components/CursorGrid";
 import EventCard from "@/components/EventCard";
 import EventGroup from "@/components/EventGroup";
 import HeroVisual from "@/components/HeroVisual";
 import JoinCTA from "@/components/JoinCTA";
 import { upcomingEvents } from "@/data/events";
-import { SITE } from "@/lib/constants";
+import { SITE, STATS } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "AWS SBG SUIIT — Workshops, Hackathons & Student Community Day",
@@ -131,36 +131,110 @@ export default function HomePage() {
       />
       {/* HERO */}
       <section aria-labelledby="hero-heading">
-        <CursorGrid {...SUBTLE_GRID}>
-          <Container className="pb-12 pt-24 sm:pb-16 md:pb-24 md:pt-32">
-          <div className="grid items-center gap-10 sm:gap-12 lg:grid-cols-[1.05fr_0.95fr] [&>*]:min-w-0">
+        <Container className="pb-12 pt-24 sm:pb-16 md:pb-20 md:pt-32">
+          <div className="grid items-center gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-8 [&>*]:min-w-0">
             <div className="min-w-0">
-              <p className="text-sm text-faint">
-                {SITE.name}, <span className="md:hidden">{SITE.collegeShortName}</span><span className="hidden md:inline">{SITE.collegeName}</span>
-              </p>
+              <Link
+                href="/events/awsscd26"
+                className="group inline-flex max-w-full items-center gap-2.5 rounded-full border border-line bg-surface/80 py-1.5 pl-2 pr-3 text-[13px] leading-none backdrop-blur transition-colors hover:border-brand/50"
+              >
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-black">
+                  <span className="relative flex h-1.5 w-1.5" aria-hidden>
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-black/60" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-black" />
+                  </span>
+                  Oct 6–8
+                </span>
+                <span className="truncate text-fog transition-colors group-hover:text-cream">
+                  Student Community Day — passes open
+                </span>
+                <ArrowRight className="h-3.5 w-3.5 shrink-0 text-faint transition-transform group-hover:translate-x-0.5 group-hover:text-brand" aria-hidden />
+              </Link>
+
               <h1
                 id="hero-heading"
-                className="mt-4 max-w-xl text-4xl font-bold leading-[1.05] tracking-tight text-cream sm:text-5xl md:text-6xl lg:text-7xl"
+                className="mt-6 max-w-xl text-[2.75rem] font-bold leading-[0.98] tracking-[-0.03em] text-cream sm:text-6xl md:text-7xl"
               >
                 <span className="sr-only">AWS SBG SUIIT — AWS Student Builder Group: </span>
-                Build. Learn. Deploy. Together.
+                Where SUIIT students learn cloud{" "}
+                <span className="relative inline-block text-brand">
+                  by building.
+                  <svg
+                    viewBox="0 0 220 12"
+                    aria-hidden
+                    className="absolute -bottom-1 left-0 w-full text-brand/60"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M3 9 C 60 3, 160 3, 217 8"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </span>
               </h1>
-              <p className="mt-6 max-w-xl text-base leading-relaxed text-fog md:text-lg">
-                {SITE.description}
+
+              <p className="mt-6 max-w-lg text-base leading-relaxed text-fog md:text-lg">
+                A free, beginner-friendly crew at Burla running hands-on AWS,
+                GenAI &amp; DevOps workshops, hackathons, and meetups. No
+                experience needed — just show up and ship.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center [&>*]:w-full sm:[&>*]:w-auto">
                 <Button href={SITE.links.join} external>
                   Join the community
+                  <ArrowUpRight className="h-4 w-4" aria-hidden />
                 </Button>
-                <Button href="/events" variant="secondary">
-                  Explore events
+                <Button href="/passes" variant="secondary">
+                  Get SCD pass
                 </Button>
               </div>
+
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-faint">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="flex -space-x-1.5" aria-hidden>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full border border-ink bg-raised text-[9px] font-bold text-cream">PS</span>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full border border-ink bg-raised text-[9px] font-bold text-cream">MD</span>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full border border-ink bg-brand text-[9px] font-bold text-black">+</span>
+                  </span>
+                  500+ builders already in
+                </span>
+                <span aria-hidden className="h-1 w-1 rounded-full bg-line" />
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5" aria-hidden />
+                  SUIIT, Burla
+                </span>
+                <span aria-hidden className="h-1 w-1 rounded-full bg-line" />
+                <span>Free forever</span>
+              </div>
+
+              <dl className="mt-10 grid max-w-lg grid-cols-3 gap-6 border-t border-line pt-6">
+                {STATS.slice(0, 3).map((s) => (
+                  <div key={s.label} className="flex flex-col">
+                    <dt className="order-2 mt-1 text-[13px] text-faint">{s.label}</dt>
+                    <dd className="order-1 font-mono text-2xl font-semibold tracking-tight text-cream">
+                      {s.value}
+                      <span className="text-brand">{s.suffix}</span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </div>
             <HeroVisual />
           </div>
-          </Container>
-        </CursorGrid>
+          <p className="mt-14 hidden items-center gap-3 overflow-hidden font-mono text-[11px] uppercase tracking-[0.18em] text-faint/70 md:flex" aria-hidden>
+            <span>EC2</span><span className="text-line">/</span>
+            <span>Lambda</span><span className="text-line">/</span>
+            <span>S3</span><span className="text-line">/</span>
+            <span>Bedrock</span><span className="text-line">/</span>
+            <span>Amplify</span><span className="text-line">/</span>
+            <span className="text-faint">ap-south-1</span>
+            <span className="h-px flex-1 bg-line/60" />
+            <span>est. SUIIT — Burla</span>
+          </p>
+        </Container>
       </section>
 
       {/* ABOUT */}
