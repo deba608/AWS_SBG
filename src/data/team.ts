@@ -192,6 +192,12 @@ export const opsTeam: TeamMember[] = [
     bio: "Creates content and helps grow the community's online engagement.",
   },
   {
+    id: "priyambada-arya",
+    name: "Priyambada Arya",
+    role: "Visual Media Lead",
+    bio: "Owns the club's visual identity — posters, event creatives and brand assets.",
+  },
+  {
     id: "ashish-abhisek-panda",
     name: "Ashish Abhisek Panda",
     role: "PR Lead",
@@ -208,12 +214,6 @@ export const opsTeam: TeamMember[] = [
     name: "Preeti Priyadarshini",
     role: "PR Co-Lead",
     bio: "Assists with outreach communications and stakeholder engagement.",
-  },
-  {
-    id: "priyambada-arya",
-    name: "Priyambada Arya",
-    role: "Visual Media Lead",
-    bio: "Owns the club's visual identity — posters, event creatives and brand assets.",
   },
 ];
 
