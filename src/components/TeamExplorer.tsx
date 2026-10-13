@@ -452,11 +452,11 @@ function BuilderCard({
           <div className="p-2.5 sm:p-3.5">
             <h3
               title={member.name}
-              className="truncate text-[13px] font-semibold leading-snug text-cream drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-sm"
+              className="line-clamp-2 text-[15px] font-semibold leading-tight text-cream drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-base lg:text-[17px]"
             >
               {member.name}
             </h3>
-            <p className="mt-0.5 truncate text-[11px] font-medium text-brand drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-xs">
+            <p className="mt-0.5 truncate text-[13px] font-medium text-brand drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-sm">
               {member.role}
             </p>
 
