@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, MapPin } from "lucide-react";
+import { ArrowUpRight, MapPin } from "lucide-react";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
 import EventCard from "@/components/EventCard";
@@ -134,26 +134,9 @@ export default function HomePage() {
         <Container className="pb-12 pt-24 sm:pb-16 md:pb-20 md:pt-32">
           <div className="grid items-center gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-8 [&>*]:min-w-0">
             <div className="min-w-0">
-              <Link
-                href="/events/awsscd26"
-                className="group inline-flex max-w-full items-center gap-2.5 rounded-full border border-line bg-surface/80 py-1.5 pl-2 pr-3 text-[13px] leading-none backdrop-blur transition-colors hover:border-brand/50"
-              >
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-black">
-                  <span className="relative flex h-1.5 w-1.5" aria-hidden>
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-black/60" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-black" />
-                  </span>
-                  Oct 6–8
-                </span>
-                <span className="truncate text-fog transition-colors group-hover:text-cream">
-                  Student Community Day — passes open
-                </span>
-                <ArrowRight className="h-3.5 w-3.5 shrink-0 text-faint transition-transform group-hover:translate-x-0.5 group-hover:text-brand" aria-hidden />
-              </Link>
-
               <h1
                 id="hero-heading"
-                className="mt-6 max-w-xl text-[2.75rem] font-bold leading-[0.98] tracking-[-0.03em] text-cream sm:text-6xl md:text-7xl"
+                className="max-w-xl text-[2.75rem] font-bold leading-[0.98] tracking-[-0.03em] text-cream sm:text-6xl md:text-7xl"
               >
                 <span className="sr-only">AWS SBG SUIIT — AWS Student Builder Group: </span>
                 Where SUIIT students learn cloud{" "}
@@ -187,8 +170,8 @@ export default function HomePage() {
                   Join the community
                   <ArrowUpRight className="h-4 w-4" aria-hidden />
                 </Button>
-                <Button href="/passes" variant="secondary">
-                  Get SCD pass
+                <Button href="/events" variant="secondary">
+                  Explore events
                 </Button>
               </div>
 

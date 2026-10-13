@@ -54,18 +54,18 @@ interface Pulse {
   t0: number;
 }
 
-/** Whisper-quiet backdrop preset — negligible beneath text, brand-tinted. */
+/** Whisper-quiet backdrop preset — soft white, stays beneath text. */
 export const SUBTLE_GRID: Omit<CursorGridProps, "children" | "className"> = {
   cellSize: 72,
-  color: "#ad5cff",
+  color: "#f5f3ee",
   radius: 130,
   falloff: "smooth",
   holdTime: 250,
   fadeDuration: 900,
   lineWidth: 1,
-  maxOpacity: 0.12,
+  maxOpacity: 0.14,
   fillOpacity: 0,
-  gridOpacity: 0.012,
+  gridOpacity: 0.025,
   cellRadius: 6,
   clickPulse: true,
   pulseSpeed: 520,
@@ -348,7 +348,7 @@ export function CursorGrid({
 
   return (
     <div ref={containerRef} className={`cursor-grid${className ? ` ${className}` : ""}`}>
-      <canvas ref={canvasRef} className="cursor-grid__canvas" aria-hidden="true" />
+      <canvas ref={canvasRef} className="cursor-grid__canvas pointer-events-none" aria-hidden="true" />
       {children ? <div className="cursor-grid__content">{children}</div> : null}
     </div>
   );

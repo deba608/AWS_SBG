@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
-import CursorGrid from "@/components/CursorGrid";
 import Reveal from "@/components/Reveal";
 import TeamExplorer from "@/components/TeamExplorer";
 import { getTeamLists } from "@/lib/team-store";
@@ -45,23 +44,8 @@ export default async function TeamPage() {
       </div>
 
       <Container>
-        {/* Hero Section with cursor-reactive grid backdrop */}
-        <CursorGrid
-          className="mb-8 sm:mb-16"
-          cellSize={72}
-          color="#ad5cff"
-          radius={130}
-          falloff="smooth"
-          holdTime={250}
-          fadeDuration={900}
-          lineWidth={1}
-          maxOpacity={0.12}
-          fillOpacity={0}
-          gridOpacity={0.012}
-          cellRadius={6}
-          clickPulse
-          pulseSpeed={520}
-        >
+        {/* Hero Section */}
+        <div className="mb-8 sm:mb-16">
           <Reveal>
             <h1 className="text-balance text-3xl font-extrabold tracking-tight text-cream sm:text-4xl md:text-5xl lg:text-6xl">
               Meet the builders behind the community.
@@ -124,7 +108,7 @@ export default async function TeamPage() {
               </div>
             </div>
           </Reveal>
-        </CursorGrid>
+        </div>
 
         {/* Dynamic Interactive Team Explorer */}
         <Reveal delay={0.15}>

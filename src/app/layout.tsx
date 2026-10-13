@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import Footer from "@/components/Footer";
-import GlobalCursorGrid from "@/components/GlobalCursorGrid";
 import Navbar from "@/components/Navbar";
 import { SITE } from "@/lib/constants";
 import "./globals.css";
@@ -150,7 +149,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <GlobalCursorGrid />
         <Navbar />
         <main id="main" className="flex-1">
           {children}
