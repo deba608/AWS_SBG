@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
 import JoinCTA from "@/components/JoinCTA";
-import { pastEvents } from "@/data/events";
 import { SITE, STATS } from "@/lib/constants";
 
 export const metadata: Metadata = {
