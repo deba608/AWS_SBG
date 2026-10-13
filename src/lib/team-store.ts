@@ -35,7 +35,7 @@ interface TeamSubmissionStore {
 
 export const TEAM_SECTIONS = [
   { key: "leadership", title: "Leadership", roles: [...new Set(teamLeads.map((m) => m.role))] },
-  { key: "domain", title: "Domain leads", roles: [...new Set(domainLeads.map((m) => m.role))] },
+  { key: "domain", title: "Technical & Domain Leads", roles: [...new Set(domainLeads.map((m) => m.role))] },
   { key: "ops", title: "Events, PR & media", roles: [...new Set(opsTeam.map((m) => m.role))] },
   { key: "coordinators", title: "Co-ordinators", roles: [...new Set(coordinators.map((m) => m.role))] },
 ] as const;

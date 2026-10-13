@@ -26,7 +26,7 @@ interface RoleOption {
 
 const SECTION_TITLES: Record<string, string> = {
   leadership: "Leadership",
-  domain: "Domain leads",
+  domain: "Technical & Domain Leads",
   ops: "Events, PR & media",
   coordinators: "Co-ordinators",
 };

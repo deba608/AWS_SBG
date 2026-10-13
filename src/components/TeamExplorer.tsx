@@ -134,7 +134,7 @@ export default function TeamExplorer({
                   id="section-domain"
                   className="mt-1 text-xl font-bold tracking-tight text-cream sm:text-3xl"
                 >
-                  Technical Domain Leads
+                  Technical & Domain Leads
                 </h2>
               </div>
               <span className="shrink-0 text-xs font-mono text-faint">

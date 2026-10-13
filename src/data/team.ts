@@ -36,17 +36,16 @@ export const teamLeads: TeamMember[] = [
     lead: true,
     photo: "/team/debashish-pradhan.jpg",
   },
+];
+
+/** Technical & Domain leads */
+export const domainLeads: TeamMember[] = [
   {
     id: "abhash-dash",
     name: "Abhash Dash",
     role: "Tech Executive",
     bio: "Oversees technical initiatives, tooling and infrastructure for the club's projects.",
-    lead: true,
   },
-];
-
-/** Domain leads & co-leads */
-export const domainLeads: TeamMember[] = [
   // Web Dev
   {
     id: "satya-anurag-das",
@@ -168,16 +167,16 @@ export const opsTeam: TeamMember[] = [
     bio: "Plans and executes all club events, from workshops to flagship community days.",
   },
   {
-    id: "swaymshree-pankaj-nath",
-    name: "Swaymshree Pankaj Nath",
-    role: "Events Co-Lead",
-    bio: "Assists with event logistics, venue coordination and on-day execution.",
-  },
-  {
     id: "sairaj-dalabehera",
     name: "Sairaj Dalabehera",
     role: "Events Co-Lead",
     bio: "Supports event planning and helps coordinate speakers and schedules.",
+  },
+  {
+    id: "swaymshree-pankaj-nath",
+    name: "Swaymshree Pankaj Nath",
+    role: "Events Co-Lead",
+    bio: "Assists with event logistics, venue coordination and on-day execution.",
   },
   {
     id: "bibhuprasad-samal",
@@ -221,10 +220,10 @@ export const opsTeam: TeamMember[] = [
 /** Coordinators */
 export const coordinators: TeamMember[] = [
   {
-    id: "ankita-jena",
-    name: "Ankita Jena",
+    id: "debiprasad-mohanta",
+    name: "Debiprasad Mohanta",
     role: "Co-ordinator",
-    bio: "Coordinates cross-team activities and ensures smooth collaboration.",
+    bio: "Supports event coordination and inter-team communication.",
   },
   {
     id: "aurobind-bhuyan",
@@ -233,16 +232,16 @@ export const coordinators: TeamMember[] = [
     bio: "Helps coordinate between technical domains and club operations.",
   },
   {
-    id: "debiprasad-mohanta",
-    name: "Debiprasad Mohanta",
-    role: "Co-ordinator",
-    bio: "Supports event coordination and inter-team communication.",
-  },
-  {
     id: "sambit-maharana",
     name: "Sambit Maharana",
     role: "Co-ordinator",
     bio: "Assists with logistics, member onboarding and day-to-day club operations.",
+  },
+  {
+    id: "ankita-jena",
+    name: "Ankita Jena",
+    role: "Co-ordinator",
+    bio: "Coordinates cross-team activities and ensures smooth collaboration.",
   },
 ];
 

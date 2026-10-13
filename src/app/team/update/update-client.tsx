@@ -8,7 +8,7 @@ import { cn, initials } from "@/lib/utils";
 
 const SECTIONS = [
   { key: "leadership", title: "Leadership", names: teamLeads.map((m) => m.name) },
-  { key: "domain", title: "Domain leads", names: domainLeads.map((m) => m.name) },
+  { key: "domain", title: "Technical & Domain Leads", names: domainLeads.map((m) => m.name) },
   { key: "ops", title: "Events, PR & media", names: opsTeam.map((m) => m.name) },
   { key: "coordinators", title: "Co-ordinators", names: coordinators.map((m) => m.name) },
 ];
