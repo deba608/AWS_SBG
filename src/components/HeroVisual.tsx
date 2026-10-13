@@ -61,7 +61,7 @@ export default function HeroVisual() {
   return (
     <div className="relative mx-auto w-full max-w-[480px] pb-8 pt-10">
       <div aria-hidden className="glow-brand absolute -inset-8 -z-10" />
-      <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+      <p className="mb-3 pr-44 font-mono text-[11px] uppercase tracking-[0.18em] text-faint sm:pr-48">
         {"// last Saturday at SBG"}
       </p>
 
