@@ -79,16 +79,39 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-function boundOriginal(img: HTMLImageElement): Promise<Blob> {
-  const scale = Math.min(1, ORIGINAL_MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
-  const w = Math.max(1, Math.round(img.naturalWidth * scale));
-  const h = Math.max(1, Math.round(img.naturalHeight * scale));
+/**
+ * Decode an uploaded file for the cropper. Prefers createImageBitmap
+ * (reads more formats, honors EXIF orientation); falls back to <img>.
+ * Throws "Could not read that image." when neither can decode it.
+ */
+async function decodeFile(f: File): Promise<{ source: CanvasImageSource; w: number; h: number }> {
+  if (typeof createImageBitmap === "function") {
+    try {
+      const bmp = await createImageBitmap(f, { imageOrientation: "from-image" }).catch(() => createImageBitmap(f));
+      return { source: bmp, w: bmp.width, h: bmp.height };
+    } catch {
+      // fall through to <img> decode
+    }
+  }
+  const rawUrl = URL.createObjectURL(f);
+  try {
+    const img = await loadImage(rawUrl);
+    return { source: img, w: img.naturalWidth, h: img.naturalHeight };
+  } finally {
+    URL.revokeObjectURL(rawUrl);
+  }
+}
+
+function boundOriginal(source: CanvasImageSource, naturalW: number, naturalH: number): Promise<Blob> {
+  const scale = Math.min(1, ORIGINAL_MAX_SIDE / Math.max(naturalW, naturalH));
+  const w = Math.max(1, Math.round(naturalW * scale));
+  const h = Math.max(1, Math.round(naturalH * scale));
   const canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas unavailable in this browser.");
-  ctx.drawImage(img, 0, 0, w, h);
+  ctx.drawImage(source, 0, 0, w, h);
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error("Photo processing failed. Retry."))),
@@ -198,7 +221,9 @@ export default function UpdateClient() {
       setFile(null);
       return;
     }
-    if (!ACCEPTED_TYPES.includes(f.type)) {
+    // Some phones/share-sheets send an empty MIME type — fall back to extension.
+    const extOk = /\.(jpe?g|png|webp)$/i.test(f.name);
+    if (!ACCEPTED_TYPES.includes(f.type) && !extOk) {
       setErrors((e) => ({ ...e, photo: "Use a JPG, PNG or WebP photo." }));
       return;
     }
@@ -216,18 +241,15 @@ export default function UpdateClient() {
     // Build bounded full original first — editor opens on THAT, so full
     // photo (head included) comes before any crop.
     setPreparing(true);
-    const rawUrl = URL.createObjectURL(f);
-    void loadImage(rawUrl)
-      .then((img) => boundOriginal(img))
+    void decodeFile(f)
+      .then(({ source, w, h }) => boundOriginal(source, w, h))
       .then((blob) => {
-        URL.revokeObjectURL(rawUrl);
         const bounded = new File([blob], "original.jpg", { type: "image/jpeg" });
         setOriginalFile(bounded);
         setOriginalUrl(URL.createObjectURL(bounded));
         setEditorOpen(true);
       })
       .catch((err) => {
-        URL.revokeObjectURL(rawUrl);
         setErrors((e) => ({ ...e, photo: err instanceof Error ? err.message : "Could not read that image." }));
       })
       .finally(() => setPreparing(false));
@@ -467,7 +489,10 @@ export default function UpdateClient() {
           accept="image/jpeg,image/png,image/webp"
           className="sr-only"
           aria-label="Photo file"
-          onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+          onChange={(e) => {
+            pickFile(e.target.files?.[0] ?? null);
+            e.target.value = "";
+          }}
         />
         {errors.photo ? <p role="alert" className="mt-1.5 text-xs text-red-300">{errors.photo}</p> : null}
       </div>
