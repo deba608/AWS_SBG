@@ -58,10 +58,16 @@ export default function HeroVisual() {
   );
 
   return (
-    <div className="relative mx-auto w-full max-w-[480px]">
-      <div aria-hidden className="glow-brand absolute -inset-8 -z-10" />
-      <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
-      </p>
+    <div className="relative mx-auto w-full max-w-[520px]">
+      <div aria-hidden className="glow-brand absolute -inset-10 -z-10" />
+      <div
+        aria-hidden
+        className="bg-dots absolute -inset-10 -z-10 opacity-60 [mask-image:radial-gradient(ellipse_70%_70%_at_50%_40%,black_20%,transparent_75%)]"
+      />
+      <div
+        aria-hidden
+        className="absolute -inset-2 -z-10 rotate-1 rounded-3xl border border-brand/20 bg-gradient-to-br from-brand/10 via-transparent to-transparent"
+      />
 
       {reduce ? (
         terminal

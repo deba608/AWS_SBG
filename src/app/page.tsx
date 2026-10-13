@@ -3,23 +3,19 @@ import Link from "next/link";
 import { ArrowUpRight, MapPin } from "lucide-react";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
-import EventCard from "@/components/EventCard";
-import EventGroup from "@/components/EventGroup";
 import HeroVisual from "@/components/HeroVisual";
 import JoinCTA from "@/components/JoinCTA";
-import { upcomingEvents } from "@/data/events";
+import { pastEvents } from "@/data/events";
 import { SITE, STATS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "AWS SBG SUIIT — Workshops, Hackathons & Student Community Day",
+  title: "AWS SBG SUIIT — Workshops, Hackathons & Student Builders",
   description:
-    "AWS SBG — AWS Student Builder Group at SUIIT, Sambalpur. Free workshops, hackathons & AWS Student Community Day (AWS SCD) on cloud, AI/GenAI and DevOps.",
+    "AWS SBG — AWS Student Builder Group at SUIIT, Sambalpur. Free hands-on workshops, hackathons and meetups on cloud, AI/GenAI and DevOps.",
   keywords: [
     "AWS SBG",
     "AWS Student Builder Group",
     "AWS Student Builder Group SUIIT",
-    "AWS SCD",
-    "AWS Student Community Day",
     "SUIIT",
     "Sambalpur",
   ],
@@ -28,13 +24,13 @@ export const metadata: Metadata = {
     url: "/",
     title: "AWS SBG SUIIT — AWS Student Builder Group",
     description:
-      "Student-led AWS cloud community at SUIIT: free workshops, hackathons and AWS Student Community Day (AWS SCD) 2026. Beginner-friendly.",
+      "Student-led AWS cloud community at SUIIT: free workshops, hackathons and meetups. Beginner-friendly.",
   },
   twitter: {
     card: "summary_large_image",
     title: "AWS SBG SUIIT — AWS Student Builder Group",
     description:
-      "Student-led AWS cloud community at SUIIT: free workshops, hackathons and AWS Student Community Day (AWS SCD) 2026.",
+      "Student-led AWS cloud community at SUIIT: free workshops, hackathons and meetups. Beginner-friendly.",
   },
 };
 
@@ -44,24 +40,24 @@ const homeFaqs = [
     a: "AWS SBG (AWS Student Builder Group) at SUIIT is a student-led cloud community at Sambalpur University Institute of Information Technology, Burla. Members learn AWS, AI/GenAI and DevOps through free hands-on workshops, real projects and hackathons.",
   },
   {
-    q: "What is AWS SCD?",
-    a: "AWS SCD is the AWS Student Community Day — the flagship annual meetup organised by AWS SBG SUIIT. AWS SCD 2026 runs October 6–8 at SUIIT with the DecodeX Hackathon, Tech Parliament, Make-A-Bot competition, speaker sessions, lunch and certificates.",
+    q: "How do I join the community?",
+    a: "Hit the WhatsApp community link on this page and introduce yourself. No application, no fees — juniors to final-years, all branches welcome.",
   },
   {
-    q: "How do I join the AWS Student Builder Group?",
-    a: "Join the WhatsApp community linked on this page. For Community Day, get your free QR entry pass (valid only for Student Community Day on 8th October) — Hackathon, Tech Parliament and Make-A-Bot need separate registration. No prior cloud experience needed.",
+    q: "Do I need prior cloud experience?",
+    a: "No. Most members start from zero. Workshops assume no background, leads pair you with a buddy, and you learn by shipping small projects first.",
   },
   {
-    q: "Does the Community Day pass cover the Hackathon, Tech Parliament or Make-A-Bot?",
-    a: "No. The QR pass is valid only for Student Community Day on 8th October. Register DecodeX Hackathon teams at /hackathon on this website; Tech Parliament and Make-A-Bot via their Google Forms (links on the event cards, also shared by mail).",
+    q: "Is everything really free?",
+    a: "Yes. Workshops, meetups and hackathons are free for students — including AWS credits guidance and certificates where applicable.",
   },
   {
-    q: "Is AWS SBG free for students?",
-    a: "Yes. All AWS SBG workshops, meetups and the AWS Student Community Day are free for students, including lunch and participation certificates at the flagship event.",
+    q: "Where do events happen?",
+    a: "On campus at SUIIT, Burla, Sambalpur, Odisha — labs, seminar halls and the auditorium — with occasional online build sessions.",
   },
   {
-    q: "Where is AWS SCD 2026 held?",
-    a: "AWS Student Community Day SUIIT 2026 is held October 6–8 at the APJ Abdul Kalam Auditorium, SUIIT, Burla, Sambalpur, Odisha.",
+    q: "What will I actually do as a member?",
+    a: "Attend hands-on workshops, team up for hackathons, ship projects to AWS (Amplify, EC2, Lambda, Bedrock), and demo what you built to the community.",
   },
 ];
 
@@ -69,22 +65,22 @@ const about = [
   {
     title: "Learn",
     description:
-      "Hands-on workshops and guided learning paths, from cloud basics to certification prep.",
+      "Zero-to-deploy workshops on AWS, GenAI and DevOps — no prior experience assumed, every session ends with something running.",
   },
   {
     title: "Build",
     description:
-      "Work on real projects and solve practical problems with peers who ship.",
+      "Ship real projects on EC2, Lambda, Amplify and Bedrock with peers who review your work and unblock you fast.",
   },
   {
     title: "Connect",
     description:
-      "Meet students, developers and industry professionals at meetups and talks.",
+      "Hackathons, demo days and meetups where you meet builders, seniors and industry folks — not just audiences.",
   },
   {
     title: "Grow",
     description:
-      "Develop technical and professional skills together, then mentor the next batch.",
+      "Mentor the next batch, lead a domain, speak at a session. The community runs on members levelling up.",
   },
 ];
 
@@ -134,9 +130,12 @@ export default function HomePage() {
         <Container className="pb-12 pt-24 sm:pb-16 md:pb-20 md:pt-32">
           <div className="grid items-center gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-8 [&>*]:min-w-0">
             <div className="min-w-0">
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-faint">
+                AWS Student Builder Group — SUIIT, Burla
+              </p>
               <h1
                 id="hero-heading"
-                className="max-w-xl text-[2.75rem] font-bold leading-[0.98] tracking-[-0.03em] text-cream sm:text-6xl md:text-7xl"
+                className="mt-4 max-w-xl text-[2.75rem] font-bold leading-[0.98] tracking-[-0.03em] text-cream sm:text-6xl md:text-7xl"
               >
                 <span className="sr-only">AWS SBG SUIIT — AWS Student Builder Group: </span>
                 Where SUIIT students learn cloud{" "}
@@ -193,20 +192,20 @@ export default function HomePage() {
                 <span>Free forever</span>
               </div>
 
-              <dl className="mt-10 grid max-w-lg grid-cols-3 gap-6 border-t border-line pt-6">
-                {STATS.slice(0, 3).map((s) => (
-                  <div key={s.label} className="flex flex-col">
-                    <dt className="order-2 mt-1 text-[13px] text-faint">{s.label}</dt>
-                    <dd className="order-1 font-mono text-2xl font-semibold tracking-tight text-cream">
-                      {s.value}
-                      <span className="text-brand">{s.suffix}</span>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
             </div>
             <HeroVisual />
           </div>
+          <dl className="mt-14 grid grid-cols-2 gap-6 border-t border-line pt-6 sm:grid-cols-4">
+            {STATS.map((s) => (
+              <div key={s.label} className="flex flex-col">
+                <dt className="order-2 mt-1 text-[13px] text-faint">{s.label}</dt>
+                <dd className="order-1 font-mono text-2xl font-semibold tracking-tight text-cream md:text-3xl">
+                  {s.value}
+                  <span className="text-brand">{s.suffix}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
           <p className="mt-14 hidden items-center gap-3 overflow-hidden font-mono text-[11px] uppercase tracking-[0.18em] text-faint/70 md:flex" aria-hidden>
             <span>EC2</span><span className="text-line">/</span>
             <span>Lambda</span><span className="text-line">/</span>
@@ -259,26 +258,32 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* UPCOMING */}
-      <section aria-labelledby="upcoming-heading" className="border-t border-line py-12 sm:py-16 lg:py-24">
+      {/* SHIPPED */}
+      <section aria-labelledby="shipped-heading" className="border-t border-line py-12 sm:py-16 lg:py-24">
         <Container>
           <QuietHeading
-            id="upcoming-heading"
-            label="Upcoming"
-            title="Upcoming events"
-            description="Hands-on sessions, hackathons, and discussions on the calendar. Join one and ship something."
+            id="shipped-heading"
+            label="Proof"
+            title="What members already shipped"
+            description="Real sessions, real deploys. This is what showing up looks like."
           />
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {upcomingEvents
-              .filter((event) => !event.parentId)
-              .map((event) => {
-                const sessions = upcomingEvents.filter((e) => e.parentId === event.id);
-                return sessions.length > 0 ? (
-                  <EventGroup key={event.id} parent={event} sessions={sessions} compact />
-                ) : (
-                  <EventCard key={event.id} event={event} compact />
-                );
-              })}
+            {pastEvents.map((event) => (
+              <article
+                key={event.id}
+                className="flex flex-col rounded-2xl border border-line bg-surface p-6 transition-colors hover:border-brand/40"
+              >
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-faint">
+                  {event.date}
+                </p>
+                <h3 className="mt-2 text-lg font-semibold tracking-tight text-cream">
+                  {event.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-fog">
+                  {event.summary}
+                </p>
+              </article>
+            ))}
           </div>
           <p className="mt-8">
             <Link
@@ -297,8 +302,8 @@ export default function HomePage() {
           <QuietHeading
             id="faq-heading"
             label="FAQ"
-            title="AWS SBG & AWS SCD, explained"
-            description="What the community is, what Community Day covers, and how to join."
+            title="Questions, answered"
+            description="What the community is, how joining works, and what to expect."
           />
           <div className="grid max-w-3xl gap-3">
             {homeFaqs.map((f) => (
