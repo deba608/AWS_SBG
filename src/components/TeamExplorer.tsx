@@ -117,7 +117,7 @@ export default function TeamExplorer({
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
               {teamLeads.map((member, i) => (
                 <BuilderCard
                   key={member.id}

@@ -18,19 +18,12 @@ const socials = [
 
 const communityLinks = [
   {
-    label: "AWS Student Community Day (AWS SCD) — Oct 6–8",
-    href: "/events/awsscd26",
-    external: false,
-    highlight: true,
-  },
-  {
     label: "Join WhatsApp community",
     href: SITE.links.join,
     external: true,
-    highlight: false,
   },
-  { label: "Upcoming events", href: "/events", external: false, highlight: false },
-  { label: "Meet the team", href: "/team", external: false, highlight: false },
+  { label: "Upcoming events", href: "/events", external: false },
+  { label: "Meet the team", href: "/team", external: false },
 ] as const;
 
 export default function Footer() {
@@ -110,13 +103,8 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className={`inline-flex min-h-[44px] items-center gap-1.5 transition-colors hover:text-brand ${
-                      link.highlight ? "font-semibold text-brand" : "text-fog"
-                    }`}
+                    className="inline-flex min-h-[44px] items-center gap-1.5 text-fog transition-colors hover:text-brand"
                   >
-                    {link.highlight ? (
-                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" aria-hidden />
-                    ) : null}
                     {link.label}
                   </Link>
                 </li>

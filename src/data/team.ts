@@ -91,6 +91,13 @@ export const domainLeads: TeamMember[] = [
     role: "Cloud Co-Lead",
     bio: "Supports cloud learning paths and helps members get hands-on with AWS services.",
   },
+  // Data Analysis
+  {
+    id: "jayprakash-muduli",
+    name: "Jayprakash Muduli",
+    role: "Data Analysis Lead",
+    bio: "Leads data workshops and community analytics initiatives.",
+  },
   // Cybersecurity
   {
     id: "aditya-padhihari",
@@ -122,13 +129,6 @@ export const domainLeads: TeamMember[] = [
     name: "Ritika Kukreja",
     role: "Android Co-Lead",
     bio: "Co-leads Android sessions and supports mobile app development projects.",
-  },
-  // Data Analysis
-  {
-    id: "jayprakash-muduli",
-    name: "Jayprakash Muduli",
-    role: "Data Analysis Co-Lead",
-    bio: "Assists with data workshops and community analytics initiatives.",
   },
   // IoT
   {
