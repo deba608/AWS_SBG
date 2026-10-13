@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, MapPin } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
-import HeroVisual from "@/components/HeroVisual";
 import JoinCTA from "@/components/JoinCTA";
 import { pastEvents } from "@/data/events";
 import { SITE, STATS } from "@/lib/constants";
@@ -128,43 +127,27 @@ export default function HomePage() {
       {/* HERO */}
       <section aria-labelledby="hero-heading">
         <Container className="pb-12 pt-24 sm:pb-16 md:pb-20 md:pt-32">
-          <div className="grid items-center gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-8 [&>*]:min-w-0">
+          <div className="mx-auto max-w-3xl text-center">
             <div className="min-w-0">
-              <p className="font-mono text-xs uppercase tracking-[0.2em] text-faint">
-                AWS Student Builder Group — SUIIT, Burla
-              </p>
               <h1
                 id="hero-heading"
-                className="mt-4 max-w-xl text-[2.75rem] font-bold leading-[0.98] tracking-[-0.03em] text-cream sm:text-6xl md:text-7xl"
+                className="mx-auto max-w-3xl text-[2.75rem] font-bold leading-[0.98] tracking-[-0.03em] text-cream sm:text-6xl md:text-7xl"
               >
                 <span className="sr-only">AWS SBG SUIIT — AWS Student Builder Group: </span>
-                Where SUIIT students learn cloud{" "}
-                <span className="relative inline-block text-brand">
-                  by building.
-                  <svg
-                    viewBox="0 0 220 12"
-                    aria-hidden
-                    className="absolute -bottom-1 left-0 w-full text-brand/60"
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      d="M3 9 C 60 3, 160 3, 217 8"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                <span className="block overflow-hidden pb-1" aria-hidden>
+                  <span className="animate-hero-rise block">AWS Student</span>
+                </span>
+                <span className="block overflow-hidden pb-2" aria-hidden>
+                  <span className="animate-hero-rise text-gradient-animated block [animation-delay:140ms]">
+                    Builder Group
+                  </span>
+                </span>
+                <span className="block overflow-hidden pb-1" aria-hidden>
+                  <span className="animate-hero-rise block [animation-delay:280ms]">SUIIT</span>
                 </span>
               </h1>
 
-              <p className="mt-6 max-w-lg text-base leading-relaxed text-fog md:text-lg">
-                A free, beginner-friendly crew at Burla running hands-on AWS,
-                GenAI &amp; DevOps workshops, hackathons, and meetups. No
-                experience needed — just show up and ship.
-              </p>
-
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center [&>*]:w-full sm:[&>*]:w-auto">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center [&>*]:w-full sm:[&>*]:w-auto">
                 <Button href={SITE.links.join} external>
                   Join the community
                   <ArrowUpRight className="h-4 w-4" aria-hidden />
@@ -174,26 +157,21 @@ export default function HomePage() {
                 </Button>
               </div>
 
-              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-faint">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="flex -space-x-1.5" aria-hidden>
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full border border-ink bg-raised text-[9px] font-bold text-cream">PS</span>
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full border border-ink bg-raised text-[9px] font-bold text-cream">MD</span>
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full border border-ink bg-brand text-[9px] font-bold text-black">+</span>
-                  </span>
-                  500+ builders already in
-                </span>
-                <span aria-hidden className="h-1 w-1 rounded-full bg-line" />
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" aria-hidden />
-                  SUIIT, Burla
-                </span>
-                <span aria-hidden className="h-1 w-1 rounded-full bg-line" />
-                <span>Free forever</span>
-              </div>
-
-            </div>
-            <HeroVisual />
+          </div>
+          </div>
+          <div className="mt-10 flex flex-col gap-2 overflow-hidden rounded-2xl border border-line bg-coal/80 px-5 py-4 font-mono text-[13px] leading-relaxed sm:flex-row sm:items-center sm:gap-4">
+            <p className="shrink-0 text-[11px] uppercase tracking-[0.2em] text-faint">
+              From a recent build session
+            </p>
+            <p className="min-w-0 flex-1 truncate text-fog">
+              <span className="text-faint">$</span>{" "}
+              <span className="text-cream">sam deploy --region ap-south-1</span>
+              {"  "}→ campusconnect-prod live in 42s
+            </p>
+            <p className="inline-flex shrink-0 items-center gap-1.5 text-emerald-300">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden />
+              live
+            </p>
           </div>
           <dl className="mt-14 grid grid-cols-2 gap-6 border-t border-line pt-6 sm:grid-cols-4">
             {STATS.map((s) => (
@@ -255,44 +233,6 @@ export default function HomePage() {
               </div>
             ))}
           </dl>
-        </Container>
-      </section>
-
-      {/* SHIPPED */}
-      <section aria-labelledby="shipped-heading" className="border-t border-line py-12 sm:py-16 lg:py-24">
-        <Container>
-          <QuietHeading
-            id="shipped-heading"
-            label="Proof"
-            title="What members already shipped"
-            description="Real sessions, real deploys. This is what showing up looks like."
-          />
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {pastEvents.map((event) => (
-              <article
-                key={event.id}
-                className="flex flex-col rounded-2xl border border-line bg-surface p-6 transition-colors hover:border-brand/40"
-              >
-                <p className="font-mono text-xs uppercase tracking-[0.18em] text-faint">
-                  {event.date}
-                </p>
-                <h3 className="mt-2 text-lg font-semibold tracking-tight text-cream">
-                  {event.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-fog">
-                  {event.summary}
-                </p>
-              </article>
-            ))}
-          </div>
-          <p className="mt-8">
-            <Link
-              href="/events"
-              className="inline-flex min-h-[44px] items-center text-sm font-medium text-fog underline decoration-line underline-offset-4 transition-colors hover:text-cream hover:decoration-brand"
-            >
-              View all events
-            </Link>
-          </p>
         </Container>
       </section>
 

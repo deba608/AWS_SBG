@@ -2,27 +2,19 @@
 
 import { useEffect, useRef } from "react";
 
-/** Minimal backdrop — small cells, touch-like ripple on hover/click. */
+/** Minimal backdrop — soft hover glow only. No rings, no trails. */
 const MAIN_GRID = {
   cellSize: 48,
   color: "#f5f3ee",
-  radius: 160,
-  holdTime: 200,
-  fadeDuration: 700,
+  radius: 120,
+  holdTime: 120,
+  fadeDuration: 500,
   lineWidth: 1,
-  maxOpacity: 0.18,
+  maxOpacity: 0.14,
   fillOpacity: 0,
   gridOpacity: 0,
   cellRadius: 5,
-  clickPulse: true,
-  pulseSpeed: 560,
 };
-
-interface Pulse {
-  x: number;
-  y: number;
-  t0: number;
-}
 
 const hexToRgb = (hex: string): [number, number, number] => {
   const h = hex.replace("#", "");
@@ -62,7 +54,6 @@ export default function GlobalCursorGrid() {
     let touched = new Float64Array(0);
     let w = 0;
     let h = 0;
-    const pulses: Pulse[] = [];
     let raf = 0;
     let running = false;
     let lastFrame = 0;
@@ -135,33 +126,7 @@ export default function GlobalCursorGrid() {
         ctx.stroke();
       }
 
-      for (let pi = pulses.length - 1; pi >= 0; pi--) {
-        const pulse = pulses[pi];
-        const age = (now - pulse.t0) / 1000;
-        const ringR = age * p.pulseSpeed;
-        if (ringR > Math.hypot(w, h)) {
-          pulses.splice(pi, 1);
-          continue;
-        }
-        const band = p.cellSize;
-        const minCol = Math.max(0, Math.floor((pulse.x - ringR - band - offX) / p.cellSize));
-        const maxCol = Math.min(cols - 1, Math.floor((pulse.x + ringR + band - offX) / p.cellSize));
-        const minRow = Math.max(0, Math.floor((pulse.y - ringR - band - offY) / p.cellSize));
-        const maxRow = Math.min(rows - 1, Math.floor((pulse.y + ringR + band - offY) / p.cellSize));
-        for (let cRow = minRow; cRow <= maxRow; cRow++) {
-          for (let cCol = minCol; cCol <= maxCol; cCol++) {
-            const i = cRow * cols + cCol;
-            const [cx, cy] = cellCenter(i);
-            const dist = Math.hypot(cx - pulse.x, cy - pulse.y);
-            if (Math.abs(dist - ringR) < band / 2 && p.maxOpacity > alphas[i]) {
-              alphas[i] = p.maxOpacity;
-              touched[i] = now;
-            }
-          }
-        }
-      }
-
-      let anyVisible = pulses.length > 0;
+      let anyVisible = false;
       const fadeStep = dt / Math.max(p.fadeDuration, 16);
       const half = p.cellSize / 2;
 
@@ -240,8 +205,9 @@ export default function GlobalCursorGrid() {
     };
 
     const onPointerDown = (e: PointerEvent) => {
-      if (reduceMotion || !p.clickPulse) return;
-      pulses.push({ x: e.clientX, y: e.clientY, t0: performance.now() });
+      if (reduceMotion) return;
+      // Minimal: light cells under the tap, same as hover. No wave.
+      energize(e.clientX, e.clientY);
       wake();
     };
 

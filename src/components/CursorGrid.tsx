@@ -67,7 +67,7 @@ export const SUBTLE_GRID: Omit<CursorGridProps, "children" | "className"> = {
   fillOpacity: 0,
   gridOpacity: 0.025,
   cellRadius: 6,
-  clickPulse: true,
+  clickPulse: false,
   pulseSpeed: 520,
 };
 
@@ -83,7 +83,7 @@ export function CursorGrid({
   fillOpacity = 0,
   gridOpacity = 0,
   cellRadius = 0,
-  clickPulse = true,
+  clickPulse = false,
   pulseSpeed = 600,
   className = "",
   children,

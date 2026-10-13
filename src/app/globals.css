@@ -299,6 +299,41 @@ pre {
   animation: check-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* Hero title: staggered line rise + slow gradient pan */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(110%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient-pan {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-hero-rise {
+  animation: hero-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.text-gradient-animated {
+  background: linear-gradient(100deg, #ad5cff, #f5f3ee 45%, #ad5cff);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-pan 6s ease-in-out infinite;
+}
+
 .marquee-mask {
   mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
 }
@@ -341,7 +376,9 @@ input:focus-visible,
   .animate-blink,
   .animate-marquee,
   .animate-pop-in,
-  .animate-check-pop {
+  .animate-check-pop,
+  .animate-hero-rise,
+  .text-gradient-animated {
     animation: none;
   }
 }
