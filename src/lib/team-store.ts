@@ -524,7 +524,9 @@ export async function getTeamLists(): Promise<{
     if (existing) {
       // Empty photoDataUrl = "no photo change" (static-only member edited
       // without a fresh crop) — never blank the live/static photo.
-      if (s.photoDataUrl) existing.photo = s.photoDataUrl;
+      // Path-style values (legacy records pointing at deleted files) are
+      // ignored so the static roster photo wins instead of a 404.
+      if (s.photoDataUrl?.startsWith("data:")) existing.photo = s.photoDataUrl;
       existing.role = s.role;
       if (s.linkedin) existing.linkedin = s.linkedin;
       if (s.github) existing.github = s.github;
