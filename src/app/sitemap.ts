@@ -25,12 +25,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${base}/passes`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
       url: `${base}/team`,
       lastModified,
       changeFrequency: "monthly",

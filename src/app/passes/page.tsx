@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   description:
     "Get your free QR entry pass for Student Community Day on 8th October — instant + emailed copy. Single-use, scanned at gate. Hackathon, Tech Parliament and Make-A-Bot need separate registration.",
   alternates: { canonical: "/passes" },
+  robots: { index: false, follow: false },
   openGraph: {
     url: "/passes",
     title: `Get Community Day Entry Pass · ${SITE.shortName}`,
