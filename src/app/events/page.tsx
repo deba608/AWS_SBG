@@ -17,13 +17,13 @@ export const metadata: Metadata = {
     url: "/events",
     title: `Events · ${SITE.shortName}`,
     description: `Hands-on workshops, talks from engineers, and hackathons — beginner-friendly and free for students.`,
-    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+    images: [{ url: "/events/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: `Events · ${SITE.shortName}`,
     description: `Hands-on workshops, talks from engineers, and hackathons — beginner-friendly and free for students.`,
-    images: [`${SITE.url}/opengraph-image`],
+    images: [`${SITE.url}/events/opengraph-image`],
   },
 };
 

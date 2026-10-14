@@ -13,14 +13,14 @@ export const metadata: Metadata = {
     title: `DecodeX Hackathon Team Registration · ${SITE.shortName}`,
     description:
       "Day 1, 6th October — register your team of exactly 4. ₹15,000 prize pool. Separate from the Community Day pass.",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "DecodeX Hackathon — AWS SBG SUIIT" }],
+    images: [{ url: "/hackathon/opengraph-image", width: 1200, height: 630, alt: "DecodeX Hackathon — AWS SBG SUIIT" }],
   },
   twitter: {
     card: "summary_large_image",
     title: `DecodeX Hackathon Team Registration · ${SITE.shortName}`,
     description:
       "Day 1, 6th October — register your team of exactly 4. ₹15,000 prize pool.",
-    images: [`${SITE.url}/opengraph-image`],
+    images: [`${SITE.url}/hackathon/opengraph-image`],
   },
 };
 
@@ -90,7 +90,7 @@ export default function HackathonPage() {
     endDate: "2026-10-06T17:00:00+05:30",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
-    image: [`${SITE.url}/opengraph-image`],
+    image: [`${SITE.url}/hackathon/opengraph-image`],
     location: {
       "@type": "Place",
       name: "APJ Abdul Kalam Auditorium, SUIIT",

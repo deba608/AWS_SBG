@@ -62,14 +62,14 @@ export const metadata: Metadata = {
     description:
       "Cloud, AI/GenAI + DevOps with AWS pros. Free for students — lunch + certificate. APJ Abdul Kalam Auditorium, SUIIT.",
     type: "website",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "AWS Student Community Day SUIIT 2026" }],
+    images: [{ url: "/events/awsscd26/opengraph-image", width: 1200, height: 630, alt: "AWS Student Community Day SUIIT 2026" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "AWS Student Community Day SUIIT 2026 — Oct 6–8",
     description:
       "Cloud, AI/GenAI + DevOps with AWS pros. Free for students — lunch + certificate.",
-    images: [`${SITE.url}/opengraph-image`],
+    images: [`${SITE.url}/events/awsscd26/opengraph-image`],
   },
 };
 
@@ -115,7 +115,7 @@ export default function CommunityDayPage() {
     endDate: COMMUNITY_DAY_META.endIso,
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
-    image: [`${SITE.url}/opengraph-image`],
+    image: [`${SITE.url}/events/awsscd26/opengraph-image`],
     location: {
       "@type": "Place",
       name: COMMUNITY_DAY_META.venueShort,

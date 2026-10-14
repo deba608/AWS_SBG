@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "daily",
       priority: 0.9,
-      images: [`${base}/opengraph-image`],
+      images: [`${base}/events/awsscd26/opengraph-image`],
     },
     {
       url: `${base}/events`,
@@ -29,6 +29,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "weekly",
       priority: 0.8,
+      images: [`${base}/hackathon/opengraph-image`],
     },
     {
       url: `${base}/team`,
