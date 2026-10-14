@@ -202,8 +202,8 @@ export default function HackathonPage() {
           <div className="mt-3 space-y-3">
             {judging.map((j) => (
               <div key={j.label}>
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="text-fog">{j.label}</span>
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+                  <span className="min-w-0 text-fog">{j.label}</span>
                   <span className="font-mono font-bold text-brand">{j.pct}%</span>
                 </div>
                 <div className="mt-1 h-2 overflow-hidden rounded-full bg-black/40" role="img" aria-label={`${j.label}: ${j.pct} percent`}>
@@ -242,7 +242,7 @@ export default function HackathonPage() {
 
         <div className="flex flex-col gap-2 rounded-2xl border border-line bg-surface p-4 text-sm text-fog sm:flex-row sm:items-center">
           <Phone className="h-4 w-4 shrink-0 text-brand" aria-hidden />
-          <p>
+          <p className="[overflow-wrap:anywhere]">
             <span className="font-semibold text-cream">Contact:</span> Manas Ranjan Dikshit ·{" "}
             <a href="tel:+919337978805" className="font-medium text-brand underline decoration-brand/50 underline-offset-4 hover:decoration-cream">+91 93379 78805</a>
             {" · "}

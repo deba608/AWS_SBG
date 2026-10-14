@@ -249,7 +249,7 @@ export default function TeamExplorer({
                 type="button"
                 onClick={() => setPreviewMember(null)}
                 aria-label="Close photo preview"
-                className="absolute right-4 top-4 rounded-full bg-coal/80 p-2 text-fog hover:text-cream transition-colors border border-line/60"
+                className="absolute right-4 top-4 rounded-full bg-coal/80 p-3 text-fog hover:text-cream transition-colors border border-line/60"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -458,7 +458,7 @@ function BuilderCard({
             }}
             aria-label={`Edit ${member.name}`}
             title="Edit member (admin)"
-            className="absolute right-2.5 top-2.5 inline-flex h-9 w-9 items-center justify-center rounded-full border border-brand/50 bg-black/70 text-brand backdrop-blur-sm transition-colors hover:bg-brand hover:text-black"
+            className="absolute right-2.5 top-2.5 inline-flex h-10 w-10 items-center justify-center rounded-full border border-brand/50 bg-black/70 text-brand backdrop-blur-sm transition-colors hover:bg-brand hover:text-black"
           >
             <Pencil className="h-4 w-4" aria-hidden />
           </button>

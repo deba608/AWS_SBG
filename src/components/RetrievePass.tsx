@@ -121,14 +121,14 @@ export default function RetrievePass() {
             type="button"
             onClick={resendEmail}
             disabled={resend === "busy" || resend === "sent"}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-line px-5 py-2 text-sm font-semibold text-cream hover:border-brand/60 disabled:opacity-60"
+            className="inline-flex max-w-full items-center justify-center gap-2 rounded-full border border-line px-5 py-2 text-sm font-semibold text-cream hover:border-brand/60 disabled:opacity-60 min-h-[44px]"
           >
             {resend === "busy" ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             ) : (
               <Mail className="h-4 w-4" aria-hidden />
             )}
-            {resend === "sent" ? `Pass emailed to ${user.email}` : resend === "failed" ? "Resend failed — try again" : `Resend pass to ${user.email}`}
+            {resend === "sent" ? <span className="min-w-0 [overflow-wrap:anywhere]">{`Pass emailed to ${user.email}`}</span> : resend === "failed" ? "Resend failed — try again" : <span className="min-w-0 [overflow-wrap:anywhere]">{`Resend pass to ${user.email}`}</span>}
           </button>
           {passes.map((p) => (
             <PassCard

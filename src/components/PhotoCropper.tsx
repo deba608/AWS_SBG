@@ -411,7 +411,7 @@ export default function PhotoCropper({
             step={0.05}
             value={zoom}
             onChange={(e) => applyZoom(Number(e.target.value))}
-            className="min-h-[44px] w-full accent-purple-500"
+            className="min-h-[44px] w-full min-w-0 flex-1 accent-purple-500"
           />
           <button
             type="button"
