@@ -13,6 +13,48 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /**
+ * Resolve any crop source (data URL, blob URL, site path) into something
+ * <img> can always display. Direct load first; on failure re-encode via
+ * createImageBitmap + canvas to plain JPEG (fixes CMYK / odd-header /
+ * orientation cases for manual admin re-crops of stored photos).
+ */
+async function resolveCropSrc(src: string): Promise<{ url: string; revoke: () => void }> {
+  try {
+    await loadImage(src);
+    return { url: src, revoke: () => {} };
+  } catch {
+    // fall through to normalize
+  }
+  const res = await fetch(src).catch(() => null);
+  if (!res || !res.ok) throw new Error("Could not read that image.");
+  const blob = await res.blob().catch(() => null);
+  if (!blob) throw new Error("Could not read that image.");
+  let bmp: ImageBitmap | null = null;
+  if (typeof createImageBitmap === "function") {
+    try {
+      bmp = await createImageBitmap(blob, { imageOrientation: "from-image" }).catch(() => createImageBitmap(blob));
+    } catch {
+      bmp = null;
+    }
+  }
+  if (!bmp) throw new Error("Could not read that image.");
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = bmp.width;
+    canvas.height = bmp.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not read that image.");
+    ctx.drawImage(bmp, 0, 0);
+    const jpeg = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+    if (!jpeg) throw new Error("Could not read that image.");
+    const url = URL.createObjectURL(jpeg);
+    return { url, revoke: () => URL.revokeObjectURL(url) };
+  } finally {
+    bmp.close();
+  }
+}
+
+/**
  * Reusable square-crop editor popup. Google-Photos style: the frame is always
  * fully filled (cover) — drag/arrows to reposition, pinch/slider to zoom.
  * onSave receives the processed 800x800 JPEG blob.
@@ -114,6 +156,7 @@ export default function PhotoCropper({
   const [zoom, setZoom] = useState(1);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [nat, setNat] = useState<{ w: number; h: number } | null>(null);
+  const [decSrc, setDecSrc] = useState<string>(src);
   const [boxW, setBoxW] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -148,23 +191,35 @@ export default function PhotoCropper({
 
   useEffect(() => {
     let live = true;
+    let revoke = () => {};
     // New photo → drop stale size/pos at once so clamp can't use old aspect.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setNat(null);
+    setDecSrc(src);
     setZoom(1);
     setPos({ x: 0, y: 0 });
     setError("");
-    void loadImage(src)
+    void resolveCropSrc(src)
+      .then(({ url, revoke: rv }) => {
+        if (!live) {
+          rv();
+          return;
+        }
+        revoke = rv;
+        setDecSrc(url);
+        return loadImage(url);
+      })
       .then((img) => {
-        if (!live) return;
+        if (!live || !img) return;
         setNat({ w: img.naturalWidth, h: img.naturalHeight });
         // Google-style: open frame-filling (cover), centered. Drag to frame face.
       })
       .catch(() => {
-        if (live) setError("Could not read that image.");
+        if (live) setError("Could not read that image — re-export as JPG (sRGB) and retry.");
       });
     return () => {
       live = false;
+      revoke();
     };
   }, [src]);
 
@@ -319,7 +374,7 @@ export default function PhotoCropper({
     setSaving(true);
     setError("");
     try {
-      const img = await loadImage(src);
+      const img = await loadImage(decSrc);
       const blob = await exportSquareJpeg(img, {
         natW: img.naturalWidth,
         natH: img.naturalHeight,
@@ -383,7 +438,7 @@ export default function PhotoCropper({
           {geo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={src}
+              src={decSrc}
               alt="Crop preview"
               draggable={false}
               className="absolute top-0 left-0 max-w-none select-none"
@@ -455,7 +510,7 @@ export default function PhotoCropper({
           <button
             type="button"
             onClick={save}
-            disabled={saving}
+            disabled={saving || !nat}
             className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-bold text-black hover:bg-brandhover disabled:opacity-60"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Check className="h-4 w-4" aria-hidden />}

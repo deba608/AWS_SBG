@@ -417,12 +417,29 @@ export default function TeamAdminClient() {
         </>
       )}
       {cropFor ? (
-        <PhotoCropper
-          src={cropFor.originalDataUrl ?? cropFor.photoDataUrl}
-          title={`Crop — ${cropFor.name}`}
-          onClose={() => setCropFor(null)}
-          onSave={saveCrop}
-        />
+        (cropFor.originalDataUrl || cropFor.photoDataUrl) ? (
+          <PhotoCropper
+            src={(cropFor.originalDataUrl || cropFor.photoDataUrl) as string}
+            title={`Crop — ${cropFor.name}`}
+            onClose={() => setCropFor(null)}
+            onSave={saveCrop}
+          />
+        ) : (
+          <div role="alert" className="rank-card p-6 text-center text-sm text-fog">
+            No photo stored for {cropFor.name} — ask them to submit one via
+            <span className="font-mono text-cream"> /team/update </span>
+            first, then crop.
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => setCropFor(null)}
+                className="inline-flex min-h-[44px] items-center rounded-full border border-line px-5 py-2 text-xs text-fog hover:text-cream"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )
       ) : null}
     </div>
   );
