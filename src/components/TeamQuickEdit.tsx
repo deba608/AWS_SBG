@@ -178,9 +178,18 @@ export default function TeamQuickEdit({
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
-      if (cropObjectUrl.current) URL.revokeObjectURL(cropObjectUrl.current);
+      // Never revoke the crop blob here — this cleanup also runs when the
+      // parent re-renders (new onClose identity), which killed the live
+      // object URL mid-crop. Revoke belongs to unmount only (below).
     };
   }, [cropSrc, onClose]);
+
+  // Unmount-only: release the crop object URL. Empty deps on purpose.
+  useEffect(() => {
+    return () => {
+      if (cropObjectUrl.current) URL.revokeObjectURL(cropObjectUrl.current);
+    };
+  }, []);
 
   async function onFile(file: File | undefined) {
     if (!file) return;

@@ -216,7 +216,11 @@ export default function PhotoCropper({
       })
       .catch(() => {
         if (live) {
-          setError("Couldn't load this photo for cropping. Upload it again as a JPG.");
+          setError(
+            src.startsWith("blob:")
+              ? "The selected photo expired. Close and choose the file again."
+              : "Couldn't load this photo for cropping. Upload it again as a JPG.",
+          );
           console.warn("[cropper] decode failed", { len: src.length, head: src.slice(0, 48) });
         }
       });
