@@ -33,25 +33,59 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-/** Bounded pre-crop original so admin can re-crop from scratch later. */
-async function boundOriginal(dataUrl: string): Promise<string> {
-  const img = await loadImage(dataUrl);
-  const scale = Math.min(1, ORIGINAL_MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
-  const w = Math.max(1, Math.round(img.naturalWidth * scale));
-  const h = Math.max(1, Math.round(img.naturalHeight * scale));
+/**
+ * Decode an uploaded file for the cropper. Prefers createImageBitmap
+ * (reads more formats, honors EXIF orientation); falls back to <img>.
+ * Throws "Could not read that image." when neither can decode it.
+ */
+async function decodeFile(f: File): Promise<{
+  source: CanvasImageSource;
+  w: number;
+  h: number;
+  close: () => void;
+}> {
+  if (typeof createImageBitmap === "function") {
+    try {
+      const bmp = await createImageBitmap(f, { imageOrientation: "from-image" }).catch(() => createImageBitmap(f));
+      return { source: bmp, w: bmp.width, h: bmp.height, close: () => bmp.close() };
+    } catch {
+      // fall through to <img> decode
+    }
+  }
+  const rawUrl = URL.createObjectURL(f);
+  try {
+    const img = await loadImage(rawUrl);
+    return { source: img, w: img.naturalWidth, h: img.naturalHeight, close: () => {} };
+  } finally {
+    URL.revokeObjectURL(rawUrl);
+  }
+}
+
+/**
+ * Bounded JPEG blob from a decoded source. Re-encoding to plain JPG also
+ * normalizes files <img> can't read (CMYK, odd headers) into something the
+ * cropper always opens.
+ */
+function sourceToJpegBlob(
+  source: CanvasImageSource,
+  naturalW: number,
+  naturalH: number,
+): Promise<Blob> {
+  const scale = Math.min(1, ORIGINAL_MAX_SIDE / Math.max(naturalW, naturalH));
+  const w = Math.max(1, Math.round(naturalW * scale));
+  const h = Math.max(1, Math.round(naturalH * scale));
   const canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas unavailable in this browser.");
-  ctx.drawImage(img, 0, 0, w, h);
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
-  if (!blob) throw new Error("Photo processing failed. Retry.");
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error("Could not read cropped photo."));
-    reader.readAsDataURL(blob);
+  ctx.drawImage(source, 0, 0, w, h);
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Photo processing failed. Retry."))),
+      "image/jpeg",
+      0.82,
+    );
   });
 }
 
@@ -123,17 +157,27 @@ export default function TeamQuickEdit({
       return;
     }
     try {
-      // Original first (bounded) so re-crop stays possible, then open cropper.
-      const rawUrl = URL.createObjectURL(file);
-      const bounded = await boundOriginal(rawUrl);
-      URL.revokeObjectURL(rawUrl);
-      setOriginalUpload(bounded);
-      if (cropObjectUrl.current) URL.revokeObjectURL(cropObjectUrl.current);
-      const url = URL.createObjectURL(file);
-      cropObjectUrl.current = url;
-      setCropSrc(url);
+      // Decode via createImageBitmap first (<img> alone can't read CMYK or
+      // odd-header files), then feed the cropper a fresh JPEG blob so its
+      // preview/export can never fail to load.
+      const { source, w, h, close } = await decodeFile(file);
+      try {
+        const bounded = await sourceToJpegBlob(source, w, h);
+        setOriginalUpload(await blobToDataUrl(bounded));
+        if (cropObjectUrl.current) URL.revokeObjectURL(cropObjectUrl.current);
+        const url = URL.createObjectURL(bounded);
+        cropObjectUrl.current = url;
+        setCropSrc(url);
+      } finally {
+        close();
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not read that image.");
+      const msg = err instanceof Error ? err.message : "Could not read that image.";
+      setError(
+        msg === "Could not read that image."
+          ? "Could not read that image — re-export as JPG (sRGB) and retry."
+          : msg,
+      );
     }
   }
 
