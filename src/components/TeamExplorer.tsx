@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
@@ -358,30 +358,9 @@ function BuilderCard({
 }) {
   const [imgFailed, setImgFailed] = useState(false);
   const [peek, setPeek] = useState(false);
-  const cardRef = useRef<HTMLElement | null>(null);
   const showPhoto = Boolean(member.photo) && !imgFailed;
   const isDataUrl = member.photo?.startsWith("data:") ?? false;
   const hasLinks = Boolean(member.linkedin || member.github || member.email);
-
-  // Touch devices have no hover — auto-play the color + reveal effect
-  // when the card scrolls into view, so it isn't tap-only.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!window.matchMedia("(hover: none)").matches) return;
-    const el = cardRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setPeek(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
 
   function handlePhotoActivate(e: React.SyntheticEvent) {
     if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches && !peek) {
@@ -394,7 +373,6 @@ function BuilderCard({
 
   return (
     <article
-      ref={cardRef}
       data-peek={peek}
       className={cn(
         "rank-card group relative min-w-0 touch-manipulation overflow-hidden transition-all duration-300",

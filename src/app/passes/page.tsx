@@ -7,19 +7,20 @@ export const metadata: Metadata = {
   title: "Community Day Pass (8th Oct) — Free QR Entry Pass",
   description:
     "Get your free QR entry pass for Student Community Day on 8th October — instant + emailed copy. Single-use, scanned at gate. Hackathon, Tech Parliament and Make-A-Bot need separate registration.",
-  alternates: { canonical: "/passes" },
   robots: { index: false, follow: false },
   openGraph: {
     url: "/passes",
     title: `Get Community Day Entry Pass · ${SITE.shortName}`,
     description:
       "Pass valid only for 8th October Community Day — QR generates instantly, shows here, and emails to you.",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: `Get Community Day Entry Pass · ${SITE.shortName}`,
     description:
       "Pass valid only for 8th October Community Day — QR generates instantly, shows here, and emails to you.",
+    images: [`${SITE.url}/opengraph-image`],
   },
 };
 

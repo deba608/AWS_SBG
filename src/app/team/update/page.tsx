@@ -7,7 +7,6 @@ export const metadata: Metadata = {
   title: "Request profile update — AWS SBG",
   description: "Team members: pick your name, upload a square photo and add LinkedIn, GitHub and email links for admin approval.",
   robots: { index: false, follow: false },
-  alternates: { canonical: "/team/update" },
 };
 
 export default function TeamUpdatePage() {

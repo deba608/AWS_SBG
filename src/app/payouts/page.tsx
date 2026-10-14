@@ -1,16 +1,24 @@
 import type { Metadata } from "next";
 import { BadgeIndianRupee } from "lucide-react";
+import { SITE } from "@/lib/constants";
 import PayoutsClient from "./payouts-client";
 
 export const metadata: Metadata = {
   title: "Winner Payouts — Submit Payment Details",
   description:
     "Winners only: submit UPI ID or bank account details so organizers can transfer prize money.",
-  alternates: { canonical: "/payouts" },
+  robots: { index: false, follow: false },
   openGraph: {
     url: "/payouts",
     title: "Winner Payouts — Payment Details",
     description: "Winners submit UPI / bank details for prize transfer.",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Winner Payouts — Payment Details",
+    description: "Winners submit UPI / bank details for prize transfer.",
+    images: [`${SITE.url}/opengraph-image`],
   },
 };
 
