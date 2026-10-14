@@ -26,10 +26,41 @@ interface LiveMember {
   email: string | null;
 }
 
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+const HEIC_TYPES = ["image/heic", "image/heif", "image/heic-sequence", "image/heif-sequence"];
 const MAX_BYTES = 5 * 1024 * 1024;
 /** Downscale full photo to ~1280px JPEG so admin can re-crop from scratch later. */
 const ORIGINAL_MAX_SIDE = 1280;
+
+/** iPhones often send HEIC (sometimes .jpg-renamed) — detect via MIME, ext, or ftyp brand. */
+async function isHeic(file: File): Promise<boolean> {
+  if (HEIC_TYPES.includes((file.type || "").toLowerCase())) return true;
+  if (/\.(heic|heif)$/i.test(file.name)) return true;
+  try {
+    const head = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+    if (head.length >= 12 && head[4] === 0x66 && head[5] === 0x74 && head[6] === 0x79 && head[7] === 0x70) {
+      const brand = String.fromCharCode(head[8], head[9], head[10], head[11]);
+      return ["heic", "heix", "hevc", "hevx", "heim", "heis", "hevm", "hevt", "mif1", "msf1"].includes(brand);
+    }
+  } catch {
+    // fall through — decode attempt reports the real error
+  }
+  return false;
+}
+
+/** Convert HEIC uploads to JPEG in-browser; passes everything else through untouched. */
+async function coerceToJpegFile(file: File): Promise<File> {
+  if (!(await isHeic(file))) return file;
+  try {
+    const { default: heic2any } = await import("heic2any");
+    const out = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+    const blob = (Array.isArray(out) ? out[0] : out) as Blob;
+    const base = file.name.replace(/\.(heic|heif)$/i, "") || "photo";
+    return new File([blob], `${base}.jpg`, { type: "image/jpeg" });
+  } catch {
+    throw new Error("Could not convert that HEIC photo — re-export as JPG and retry.");
+  }
+}
 
 function withHttps(v: string): string {
   const t = v.trim();
@@ -222,9 +253,9 @@ export default function UpdateClient() {
       return;
     }
     // Some phones/share-sheets send an empty MIME type — fall back to extension.
-    const extOk = /\.(jpe?g|png|webp)$/i.test(f.name);
+    const extOk = /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name);
     if (!ACCEPTED_TYPES.includes(f.type) && !extOk) {
-      setErrors((e) => ({ ...e, photo: "Use a JPG, PNG or WebP photo." }));
+      setErrors((e) => ({ ...e, photo: "Use a JPG, PNG, WebP or HEIC photo." }));
       return;
     }
     if (f.size > MAX_BYTES) {
@@ -241,7 +272,9 @@ export default function UpdateClient() {
     // Build bounded full original first — editor opens on THAT, so full
     // photo (head included) comes before any crop.
     setPreparing(true);
-    void decodeFile(f)
+    const picked = f;
+    void coerceToJpegFile(picked)
+      .then((work) => decodeFile(work))
       .then(({ source, w, h }) => boundOriginal(source, w, h))
       .then((blob) => {
         const bounded = new File([blob], "original.jpg", { type: "image/jpeg" });
@@ -250,7 +283,12 @@ export default function UpdateClient() {
         setEditorOpen(true);
       })
       .catch((err) => {
-        setErrors((e) => ({ ...e, photo: err instanceof Error ? err.message : "Could not read that image." }));
+        const facts = `${picked.name || "photo"}, ${picked.type || "unknown type"}, ${Math.max(1, Math.round(picked.size / 1024))}KB`;
+        const msg = err instanceof Error ? err.message : "Could not read that image.";
+        setErrors((e) => ({
+          ...e,
+          photo: msg === "Could not read that image." ? `Could not read that upload (${facts}) — re-export as JPG (sRGB) and retry.` : msg,
+        }));
       })
       .finally(() => setPreparing(false));
   }
@@ -486,7 +524,7 @@ export default function UpdateClient() {
         <input
           ref={inputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
           className="sr-only"
           aria-label="Photo file"
           onChange={(e) => {

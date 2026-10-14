@@ -241,113 +241,23 @@ export function OgCard({
           </div>
         </div>
 
-        {/* Right showcase */}
+        {/* Right logo */}
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             width: 336,
-            height: 486,
             marginLeft: 48,
-            borderRadius: 32,
-            border: "1px solid rgba(255,255,255,0.14)",
-            backgroundImage:
-              "linear-gradient(180deg, #181e27 0%, #0f1317 100%)",
-            padding: "36px 28px",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 208,
-              height: 208,
-              marginTop: 0,
-              borderRadius: 52,
-              border: "2px solid rgba(173,92,255,0.55)",
-              backgroundColor: "#000000",
-              boxShadow: "0 0 80px rgba(173,92,255,0.35)",
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={logo}
-              alt=""
-              width={156}
-              height={156}
-              style={{ borderRadius: 24 }}
-            />
-          </div>
-          <div
-            style={{
-              width: 220,
-              height: 1,
-              marginTop: 28,
-              backgroundColor: "rgba(255,255,255,0.12)",
-            }}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={logo}
+            alt=""
+            width={300}
+            height={300}
           />
-          <div
-            style={{ display: "flex", alignItems: "center", marginTop: 24 }}
-          >
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                letterSpacing: 2,
-                color: "#ffd9a0",
-                border: "1px solid rgba(255,153,0,0.45)",
-                backgroundColor: "rgba(255,153,0,0.12)",
-                borderRadius: 999,
-                padding: "8px 18px",
-              }}
-            >
-              CLOUD
-            </div>
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                letterSpacing: 2,
-                color: "#d8b4fe",
-                border: "1px solid rgba(173,92,255,0.45)",
-                backgroundColor: "rgba(173,92,255,0.12)",
-                borderRadius: 999,
-                padding: "8px 18px",
-                marginLeft: 12,
-              }}
-            >
-              AI
-            </div>
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                letterSpacing: 2,
-                color: "#a8b0bb",
-                border: "1px solid rgba(255,255,255,0.2)",
-                backgroundColor: "rgba(255,255,255,0.06)",
-                borderRadius: 999,
-                padding: "8px 18px",
-                marginLeft: 12,
-              }}
-            >
-              DEVOPS
-            </div>
-          </div>
-          <div
-            style={{
-              fontSize: 19,
-              color: "#5c6672",
-              letterSpacing: 1,
-              marginTop: 22,
-              whiteSpace: "nowrap",
-            }}
-          >
-            500+ BUILDERS · SUIIT BURLA
-          </div>
         </div>
       </div>
 

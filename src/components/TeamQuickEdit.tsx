@@ -20,9 +20,44 @@ const SECTION_TITLES: Record<string, string> = {
   coordinators: "Co-ordinators",
 };
 
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+const HEIC_TYPES = ["image/heic", "image/heif", "image/heic-sequence", "image/heif-sequence"];
 const MAX_BYTES = 5 * 1024 * 1024;
 const ORIGINAL_MAX_SIDE = 1280;
+
+/** iPhones often send HEIC (sometimes .jpg-renamed) — detect via MIME, ext, or ftyp brand. */
+async function isHeic(file: File): Promise<boolean> {
+  if (HEIC_TYPES.includes((file.type || "").toLowerCase())) return true;
+  if (/\.(heic|heif)$/i.test(file.name)) return true;
+  try {
+    const head = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+    if (head.length >= 12 && head[4] === 0x66 && head[5] === 0x74 && head[6] === 0x79 && head[7] === 0x70) {
+      const brand = String.fromCharCode(head[8], head[9], head[10], head[11]);
+      return ["heic", "heix", "hevc", "hevx", "heim", "heis", "hevm", "hevt", "mif1", "msf1"].includes(brand);
+    }
+  } catch {
+    // fall through — decode attempt reports the real error
+  }
+  return false;
+}
+
+/** Convert HEIC uploads to JPEG in-browser; passes everything else through untouched. */
+async function coerceToJpegFile(file: File): Promise<File> {
+  if (!(await isHeic(file))) return file;
+  try {
+    const { default: heic2any } = await import("heic2any");
+    const out = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+    const blob = (Array.isArray(out) ? out[0] : out) as Blob;
+    const base = file.name.replace(/\.(heic|heif)$/i, "") || "photo";
+    return new File([blob], `${base}.jpg`, { type: "image/jpeg" });
+  } catch {
+    throw new Error("Could not convert that HEIC photo — re-export as JPG and retry.");
+  }
+}
+
+function fileFacts(f: File): string {
+  return `${f.name || "photo"}, ${f.type || "unknown type"}, ${Math.max(1, Math.round(f.size / 1024))}KB`;
+}
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -148,8 +183,8 @@ export default function TeamQuickEdit({
   async function onFile(file: File | undefined) {
     if (!file) return;
     setError("");
-    if (!ACCEPTED_TYPES.includes(file.type)) {
-      setError("Upload a JPG, PNG or WebP photo.");
+    if (!ACCEPTED_TYPES.includes(file.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)) {
+      setError("Upload a JPG, PNG, WebP or HEIC photo.");
       return;
     }
     if (file.size > MAX_BYTES) {
@@ -157,10 +192,12 @@ export default function TeamQuickEdit({
       return;
     }
     try {
-      // Decode via createImageBitmap first (<img> alone can't read CMYK or
-      // odd-header files), then feed the cropper a fresh JPEG blob so its
+      // HEIC (iPhone) can't be decoded by browsers — convert first. Then
+      // decode via createImageBitmap (<img> alone can't read CMYK or
+      // odd-header files), and feed the cropper a fresh JPEG blob so its
       // preview/export can never fail to load.
-      const { source, w, h, close } = await decodeFile(file);
+      const work = await coerceToJpegFile(file);
+      const { source, w, h, close } = await decodeFile(work);
       try {
         const bounded = await sourceToJpegBlob(source, w, h);
         setOriginalUpload(await blobToDataUrl(bounded));
@@ -175,7 +212,7 @@ export default function TeamQuickEdit({
       const msg = err instanceof Error ? err.message : "Could not read that image.";
       setError(
         msg === "Could not read that image."
-          ? "Could not read that image — re-export as JPG (sRGB) and retry."
+          ? `Could not read that upload (${fileFacts(file)}) — re-export as JPG (sRGB) and retry.`
           : msg,
       );
     }
@@ -290,7 +327,7 @@ export default function TeamQuickEdit({
         <input
           ref={fileRef}
           type="file"
-          accept={ACCEPTED_TYPES.join(",")}
+          accept={[...ACCEPTED_TYPES, ".heic", ".heif"].join(",")}
           className="hidden"
           aria-hidden
           tabIndex={-1}

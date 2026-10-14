@@ -215,7 +215,7 @@ export default function PhotoCropper({
         // Google-style: open frame-filling (cover), centered. Drag to frame face.
       })
       .catch(() => {
-        if (live) setError("Could not read that image — re-export as JPG (sRGB) and retry.");
+        if (live) setError("Could not read that photo in the cropper — upload it again or re-export as JPG (sRGB).");
       });
     return () => {
       live = false;
