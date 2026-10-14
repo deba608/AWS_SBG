@@ -12,7 +12,7 @@ export default async function OgImage() {
       <OgCard
         logo={logo}
         eyebrow="AWS STUDENT BUILDER GROUP · SUIIT"
-        title="Build. Learn. Deploy. Together."
+        title="AWS Student Builder Group"
         subtitle="Workshops · Hackathons · Community Day 2026"
       />
     ),
