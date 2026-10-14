@@ -29,251 +29,102 @@ export function OgCard({
         width: "1200px",
         height: "630px",
         display: "flex",
-        position: "relative",
-        overflow: "hidden",
-        backgroundColor: "#0b0e11",
+        flexDirection: "column",
+        justifyContent: "center",
+        backgroundColor: "#ffffff",
         fontFamily: "sans-serif",
+        padding: "72px 88px",
       }}
     >
-      {/* Glow orbs */}
+      {/* Brand row */}
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logo}
+          alt=""
+          width={56}
+          height={56}
+          style={{ borderRadius: 12 }}
+        />
+        <div
+          style={{
+            fontSize: 26,
+            fontWeight: 700,
+            color: "#111418",
+            letterSpacing: 1,
+            marginLeft: 18,
+          }}
+        >
+          AWS Student Builder Group
+        </div>
+        <div
+          style={{
+            fontSize: 26,
+            color: "#8a94a0",
+            marginLeft: 14,
+          }}
+        >
+          · SUIIT
+        </div>
+      </div>
+
+      {/* Eyebrow */}
       <div
         style={{
-          position: "absolute",
-          top: "-260px",
-          right: "-140px",
-          width: "680px",
-          height: "680px",
-          display: "flex",
-          backgroundImage:
-            "radial-gradient(circle, rgba(173,92,255,0.32) 0%, rgba(173,92,255,0.08) 45%, transparent 70%)",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: "-300px",
-          left: "-120px",
-          width: "720px",
-          height: "520px",
-          display: "flex",
-          backgroundImage:
-            "radial-gradient(circle, rgba(255,153,0,0.14) 0%, transparent 70%)",
-        }}
-      />
-      {/* Giant watermark */}
-      <div
-        style={{
-          position: "absolute",
-          right: "24px",
-          bottom: "-86px",
-          display: "flex",
-          fontSize: 300,
-          fontWeight: 800,
-          letterSpacing: -12,
-          color: "rgba(255,255,255,0.045)",
-          lineHeight: 1,
+          fontSize: 24,
+          fontWeight: 700,
+          color: "#7c3aed",
+          letterSpacing: 3,
+          marginTop: 44,
+          whiteSpace: "nowrap",
         }}
       >
-        AWS
+        {eyebrow}
       </div>
-      {/* Hairline frame */}
-      <div
-        style={{
-          position: "absolute",
-          top: "20px",
-          left: "20px",
-          right: "20px",
-          bottom: "20px",
-          display: "flex",
-          border: "1px solid rgba(255,255,255,0.12)",
-          borderRadius: "28px",
-        }}
-      />
 
-      {/* Content */}
+      {/* Title */}
+      <div
+        style={{
+          fontSize: 76,
+          fontWeight: 700,
+          lineHeight: 1.08,
+          letterSpacing: -1,
+          color: "#111418",
+          marginTop: 16,
+        }}
+      >
+        {title}
+      </div>
+
+      {/* Subtitle */}
+      <div
+        style={{
+          fontSize: 30,
+          lineHeight: 1.4,
+          color: "#5b6470",
+          marginTop: 16,
+        }}
+      >
+        {subtitle}
+      </div>
+
+      {/* Footer */}
       <div
         style={{
           display: "flex",
-          flexDirection: "row",
           alignItems: "center",
-          width: "1200px",
-          height: "630px",
-          padding: "64px 72px",
+          marginTop: 44,
+          paddingTop: 26,
+          borderTop: "1px solid #e3e6ea",
         }}
       >
-        {/* Left */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            width: "700px",
-          }}
-        >
-          {/* Brand row */}
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={logo}
-              alt=""
-              width={52}
-              height={52}
-              style={{ borderRadius: 12 }}
-            />
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                marginLeft: 16,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 24,
-                  fontWeight: 700,
-                  color: "#f5f3ee",
-                  letterSpacing: 3,
-                }}
-              >
-                AWS SBG
-              </div>
-              <div style={{ fontSize: 19, color: "#6b7480", letterSpacing: 2 }}>
-                SUIIT · SAMBALPUR UNIVERSITY
-              </div>
-            </div>
-          </div>
-
-          {/* Eyebrow pill */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              alignSelf: "flex-start",
-              marginTop: 28,
-              padding: "10px 22px",
-              borderRadius: 999,
-              border: "1px solid rgba(173,92,255,0.5)",
-              backgroundColor: "rgba(173,92,255,0.12)",
-            }}
-          >
-            <div
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: 6,
-                backgroundColor: "#ad5cff",
-              }}
-            />
-            <div
-              style={{
-                fontSize: 25,
-                fontWeight: 700,
-                color: "#d8b4fe",
-                letterSpacing: 2,
-                marginLeft: 12,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {eyebrow}
-            </div>
-          </div>
-
-          {/* Title */}
-          <div
-            style={{
-              fontSize: 82,
-              fontWeight: 800,
-              lineHeight: 1.0,
-              letterSpacing: -2,
-              color: "#f5f3ee",
-              marginTop: 24,
-            }}
-          >
-            {title}
-          </div>
-
-          {/* Accent bar */}
-          <div
-            style={{
-              width: 128,
-              height: 8,
-              borderRadius: 4,
-              marginTop: 24,
-              backgroundImage:
-                "linear-gradient(90deg, #ad5cff 0%, #7c3aed 45%, #ff9900 100%)",
-            }}
-          />
-
-          {/* Subtitle */}
-          <div
-            style={{
-              fontSize: 30,
-              lineHeight: 1.35,
-              color: "#a8b0bb",
-              marginTop: 18,
-            }}
-          >
-            {subtitle}
-          </div>
-
-          {/* Footer */}
-          <div
-            style={{ display: "flex", alignItems: "center", marginTop: 30 }}
-          >
-            <div
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: "#ff9900",
-              }}
-            />
-            <div
-              style={{ fontSize: 24, color: "#f5f3ee", marginLeft: 12 }}
-            >
-              awssbgsuiit.in
-            </div>
-            <div
-              style={{ fontSize: 24, color: "#5c6672", marginLeft: 16 }}
-            >
-              Free · Hands-on · Community
-            </div>
-          </div>
+        <div style={{ fontSize: 24, fontWeight: 700, color: "#111418" }}>
+          awssbgsuiit.in
         </div>
-
-        {/* Right logo */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 336,
-            marginLeft: 48,
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={logo}
-            alt=""
-            width={300}
-            height={300}
-          />
+        <div style={{ fontSize: 24, color: "#8a94a0", marginLeft: 16 }}>
+          Sambalpur University Institute of Information Technology
         </div>
       </div>
-
-      {/* Bottom brand bar */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 8,
-          display: "flex",
-          backgroundImage:
-            "linear-gradient(90deg, #ad5cff 0%, #7c3aed 45%, #ff9900 100%)",
-        }}
-      />
     </div>
   );
 }

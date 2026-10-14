@@ -459,7 +459,7 @@ export default function UpdateClient() {
                 .join(" · ") || "No photo or links yet"}
             </p>
             {livePending ? (
-              <p className="mt-0.5 text-brand">Pending request exists — submitting replaces it.</p>
+              <p className="mt-0.5 text-fog">Pending request exists — submitting replaces it.</p>
             ) : (
               <p className="mt-0.5 text-faint">Links below are prefilled — change only what&apos;s new.</p>
             )}
@@ -469,7 +469,7 @@ export default function UpdateClient() {
 
       <div>
         <span className="mb-1.5 block text-sm font-medium text-cream">
-          Photo{photoOptional ? "" : " *"} — {photoOptional ? "keep live photo or upload new" : "crop popup opens on upload"}
+          Photo{photoOptional ? "" : " *"}
         </span>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
           <div className="w-full max-w-52 shrink-0">
@@ -489,16 +489,16 @@ export default function UpdateClient() {
                   className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center text-xs text-faint hover:text-cream"
                 >
                   <ImagePlus className="h-6 w-6" aria-hidden />
-                  Tap to upload — full photo opens first
+                  Tap to upload
                 </button>
               )}
             </div>
           </div>
           <div className="min-w-0 flex-1 text-xs leading-relaxed text-fog">
-            <p>Perfect format: <span className="font-semibold text-cream">square 800×800 JPG</span>.</p>
-            <p className="mt-1">Upload opens crop popup — drag to move position, slider to zoom, then Use this crop.</p>
+            <p>Square JPG, 800 × 800.</p>
+            <p className="mt-1">After upload, drag to position and use the slider to zoom.</p>
             {photoOptional ? (
-              <p className="mt-1 text-brand">You have a live photo — skip upload to keep it, or upload to replace it.</p>
+              <p className="mt-1">Live photo on file. Upload only to replace it.</p>
             ) : null}
             <div className="mt-2 flex flex-wrap gap-2">
               <button
@@ -512,7 +512,7 @@ export default function UpdateClient() {
                 <button
                   type="button"
                   onClick={() => setEditorOpen(true)}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-brand/60 bg-brand/10 px-4 py-2 text-xs font-semibold text-cream hover:bg-brand/20"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-line px-4 py-2 text-xs font-semibold text-fog hover:text-cream"
                 >
                   <Crop className="h-3.5 w-3.5" aria-hidden />
                   Re-crop

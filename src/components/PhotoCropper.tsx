@@ -215,7 +215,10 @@ export default function PhotoCropper({
         // Google-style: open frame-filling (cover), centered. Drag to frame face.
       })
       .catch(() => {
-        if (live) setError("Couldn't load this photo for cropping. Upload it again as a JPG.");
+        if (live) {
+          setError("Couldn't load this photo for cropping. Upload it again as a JPG.");
+          console.warn("[cropper] decode failed", { len: src.length, head: src.slice(0, 48) });
+        }
       });
     return () => {
       live = false;
