@@ -260,23 +260,12 @@ export function OgCard({
         >
           <div
             style={{
-              fontSize: 19,
-              fontWeight: 700,
-              color: "#6b7480",
-              letterSpacing: 2,
-              whiteSpace: "nowrap",
-            }}
-          >
-            LEARN · BUILD · DEPLOY
-          </div>
-          <div
-            style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               width: 208,
               height: 208,
-              marginTop: 24,
+              marginTop: 0,
               borderRadius: 52,
               border: "2px solid rgba(173,92,255,0.55)",
               backgroundColor: "#000000",
