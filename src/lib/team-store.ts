@@ -281,6 +281,14 @@ export async function setSubmissionStatus(id: string, status: SubmissionStatus):
     if (!sub) throw new Error("Submission not found.");
     sub.status = status;
     sub.reviewedAt = new Date().toISOString();
+    // On approve, retire older approved rows for same member so re-uploads
+    // replace stale photo instead of stacking duplicates (oldest won).
+    if (status === "approved") {
+      const norm = (v: string) => v.trim().toLowerCase();
+      store.submissions = store.submissions.filter(
+        (s) => s.id === sub.id || norm(s.name) !== norm(sub.name) || s.status !== "approved",
+      );
+    }
     await writeStore(store);
     return { ...sub };
   });
@@ -455,6 +463,11 @@ export async function adminUpsertMember(input: AdminUpsertInput): Promise<TeamSu
       existing.email = normalizeEmail(input.email);
       existing.status = "approved";
       existing.reviewedAt = new Date().toISOString();
+      // Collapse stale approved duplicates so only newest row drives /team.
+      // Pending requests are left alone — they are the member update queue.
+      store.submissions = store.submissions.filter(
+        (s) => s.id === existing.id || norm(s.name) !== norm(name) || s.status !== "approved",
+      );
       await writeStore(store);
       return { ...existing };
     }
@@ -518,7 +531,18 @@ export async function getTeamLists(): Promise<{
     coordinators: coords,
   };
   const norm = (v: string) => v.trim().toLowerCase();
-  for (const s of approved) {
+  // Dedupe: multiple approved rows per name exist (re-uploads, admin edits).
+  // Store order is newest-first, but loop overwrite made oldest win — keep
+  // newest per name so re-uploads go live instead of showing stale photo.
+  const seen = new Set<string>();
+  const latest: typeof approved = [];
+  for (const s of [...approved].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))) {
+    const k = norm(s.name);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    latest.push(s);
+  }
+  for (const s of latest) {
     const all = [...leads, ...domain, ...ops, ...coords];
     const existing = all.find((m) => norm(m.name) === norm(s.name));
     if (existing) {
