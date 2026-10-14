@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
@@ -358,9 +358,30 @@ function BuilderCard({
 }) {
   const [imgFailed, setImgFailed] = useState(false);
   const [peek, setPeek] = useState(false);
+  const cardRef = useRef<HTMLElement | null>(null);
   const showPhoto = Boolean(member.photo) && !imgFailed;
   const isDataUrl = member.photo?.startsWith("data:") ?? false;
   const hasLinks = Boolean(member.linkedin || member.github || member.email);
+
+  // Touch devices have no hover — auto-play the color + reveal effect
+  // when the card scrolls into view, so it isn't tap-only.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!window.matchMedia("(hover: none)").matches) return;
+    const el = cardRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setPeek(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   function handlePhotoActivate(e: React.SyntheticEvent) {
     if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches && !peek) {
@@ -373,6 +394,7 @@ function BuilderCard({
 
   return (
     <article
+      ref={cardRef}
       data-peek={peek}
       className={cn(
         "rank-card group relative min-w-0 touch-manipulation overflow-hidden transition-all duration-300",
@@ -403,7 +425,7 @@ function BuilderCard({
                 loading={priority ? "eager" : "lazy"}
                 decoding="async"
                 onError={() => setImgFailed(true)}
-                className={cn("h-full w-full object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0", peek && "scale-[1.02] grayscale-0 sm:scale-[1.04]")}
+                className={cn("h-full w-full object-cover transition-all duration-500", peek ? "scale-[1.02] grayscale-0 sm:scale-[1.04]" : "grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0")}
               />
             ) : (
               <Image
@@ -415,7 +437,7 @@ function BuilderCard({
                 loading={priority ? "eager" : "lazy"}
                 fetchPriority={priority ? "high" : "low"}
                 onError={() => setImgFailed(true)}
-                className={cn("object-cover transition-all duration-500 sm:grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0", peek && "scale-[1.02] grayscale-0 sm:scale-[1.04]")}
+                className={cn("object-cover transition-all duration-500", peek ? "scale-[1.02] grayscale-0 sm:scale-[1.04]" : "grayscale sm:group-hover:scale-[1.04] sm:group-hover:grayscale-0 sm:group-focus-within:scale-[1.04] sm:group-focus-within:grayscale-0")}
               />
             )}
           </button>
@@ -463,13 +485,14 @@ function BuilderCard({
             {/* Rising detail: links only */}
             <div
               className={cn(
-                "grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out",
-                "sm:group-hover:grid-rows-[1fr] sm:group-hover:opacity-100 sm:group-focus-within:grid-rows-[1fr] sm:group-focus-within:opacity-100",
-                peek && "grid-rows-[1fr] opacity-100"
+                "grid transition-all duration-300 ease-out",
+                peek
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0 sm:group-hover:grid-rows-[1fr] sm:group-hover:opacity-100 sm:group-focus-within:grid-rows-[1fr] sm:group-focus-within:opacity-100"
               )}
             >
               <div className="min-h-0 overflow-hidden">
-                <div className={cn("translate-y-3 transition-transform duration-300 ease-out sm:group-hover:translate-y-0 sm:group-focus-within:translate-y-0", peek && "translate-y-0")}>
+                <div className={cn("transition-transform duration-300 ease-out", peek ? "translate-y-0" : "translate-y-3 sm:group-hover:translate-y-0 sm:group-focus-within:translate-y-0")}>
                   <div className="mt-2 flex items-center gap-1">
                     {hasLinks ? (
                       <div className="flex items-center gap-1">
@@ -521,9 +544,8 @@ function BuilderCard({
           <div
             aria-hidden
             className={cn(
-              "h-0.5 w-full origin-left scale-x-0 bg-brand transition-transform duration-300",
-              "sm:group-hover:scale-x-100 sm:group-focus-within:scale-x-100",
-              peek && "scale-x-100"
+              "h-0.5 w-full origin-left bg-brand transition-transform duration-300",
+              peek ? "scale-x-100" : "scale-x-0 sm:group-hover:scale-x-100 sm:group-focus-within:scale-x-100"
             )}
           />
         </div>
