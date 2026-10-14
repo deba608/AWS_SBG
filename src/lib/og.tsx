@@ -260,13 +260,14 @@ export function OgCard({
         >
           <div
             style={{
-              fontSize: 20,
+              fontSize: 19,
               fontWeight: 700,
               color: "#6b7480",
-              letterSpacing: 3,
+              letterSpacing: 2,
+              whiteSpace: "nowrap",
             }}
           >
-            LEARN → BUILD → DEPLOY
+            LEARN · BUILD · DEPLOY
           </div>
           <div
             style={{
@@ -349,10 +350,11 @@ export function OgCard({
           </div>
           <div
             style={{
-              fontSize: 20,
+              fontSize: 19,
               color: "#5c6672",
-              letterSpacing: 2,
+              letterSpacing: 1,
               marginTop: 22,
+              whiteSpace: "nowrap",
             }}
           >
             500+ BUILDERS · SUIIT BURLA
