@@ -36,6 +36,9 @@ export default function TeamExplorer({
   adminMode = false,
 }: TeamExplorerProps) {
   const [previewMember, setPreviewMember] = useState<TeamMember | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  // Single-open spotlight: only the tapped card plays color + reveal,
+  // the rest stay B&W. Tapping another card resets the old one.
   const [adminList, setAdminList] = useState<AdminList | null>(null);
   const [editing, setEditing] = useState<TeamMember | null>(null);
   const [isAdmin, setIsAdmin] = useState(adminMode);
@@ -124,6 +127,8 @@ export default function TeamExplorer({
                   member={member}
                   isLead
                   priority={i < 4}
+                  peek={activeId === member.id}
+                  onPeek={() => setActiveId(member.id)}
                   onPhotoClick={() => member.photo && setPreviewMember(member)}
                   onEdit={editFor(member)}
                 />
@@ -155,6 +160,8 @@ export default function TeamExplorer({
                 <BuilderCard
                   key={member.id}
                   member={member}
+                  peek={activeId === member.id}
+                  onPeek={() => setActiveId(member.id)}
                   onPhotoClick={() => member.photo && setPreviewMember(member)}
                   onEdit={editFor(member)}
                 />
@@ -186,6 +193,8 @@ export default function TeamExplorer({
                 <BuilderCard
                   key={member.id}
                   member={member}
+                  peek={activeId === member.id}
+                  onPeek={() => setActiveId(member.id)}
                   onPhotoClick={() => member.photo && setPreviewMember(member)}
                   onEdit={editFor(member)}
                 />
@@ -217,6 +226,8 @@ export default function TeamExplorer({
                 <BuilderCard
                   key={member.id}
                   member={member}
+                  peek={activeId === member.id}
+                  onPeek={() => setActiveId(member.id)}
                   onPhotoClick={() => member.photo && setPreviewMember(member)}
                   onEdit={editFor(member)}
                 />
@@ -348,17 +359,20 @@ function BuilderCard({
   member,
   isLead = false,
   priority = false,
+  peek = false,
+  onPeek,
   onPhotoClick,
   onEdit,
 }: {
   member: TeamMember;
   isLead?: boolean;
   priority?: boolean;
+  peek?: boolean;
+  onPeek?: () => void;
   onPhotoClick: () => void;
   onEdit?: () => void;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
-  const [peek, setPeek] = useState(false);
   const showPhoto = Boolean(member.photo) && !imgFailed;
   const isDataUrl = member.photo?.startsWith("data:") ?? false;
   const hasLinks = Boolean(member.linkedin || member.github || member.email);
@@ -366,7 +380,7 @@ function BuilderCard({
   function handlePhotoActivate(e: React.SyntheticEvent) {
     if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches && !peek) {
       e.preventDefault();
-      setPeek(true);
+      onPeek?.();
       return;
     }
     onPhotoClick();
