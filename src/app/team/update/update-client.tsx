@@ -58,7 +58,7 @@ async function coerceToJpegFile(file: File): Promise<File> {
     const base = file.name.replace(/\.(heic|heif)$/i, "") || "photo";
     return new File([blob], `${base}.jpg`, { type: "image/jpeg" });
   } catch {
-    throw new Error("Could not convert that HEIC photo — re-export as JPG and retry.");
+    throw new Error("Couldn't convert this HEIC photo. Save it as a JPG and try again.");
   }
 }
 
@@ -255,11 +255,11 @@ export default function UpdateClient() {
     // Some phones/share-sheets send an empty MIME type — fall back to extension.
     const extOk = /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name);
     if (!ACCEPTED_TYPES.includes(f.type) && !extOk) {
-      setErrors((e) => ({ ...e, photo: "Use a JPG, PNG, WebP or HEIC photo." }));
+      setErrors((e) => ({ ...e, photo: "Upload a JPG, PNG, WebP, or HEIC file." }));
       return;
     }
     if (f.size > MAX_BYTES) {
-      setErrors((e) => ({ ...e, photo: "Photo too large (max 5MB)." }));
+      setErrors((e) => ({ ...e, photo: "File must be under 5 MB." }));
       return;
     }
     setErrors((e) => ({ ...e, photo: undefined }));
@@ -283,11 +283,12 @@ export default function UpdateClient() {
         setEditorOpen(true);
       })
       .catch((err) => {
-        const facts = `${picked.name || "photo"}, ${picked.type || "unknown type"}, ${Math.max(1, Math.round(picked.size / 1024))}KB`;
+        const kb = Math.max(1, Math.round(picked.size / 1024));
+        const facts = `${picked.name || "photo"} (${picked.type || "unknown type"}, ${picked.size >= 1024 * 1024 ? `${(picked.size / (1024 * 1024)).toFixed(1)} MB` : `${kb} KB`})`;
         const msg = err instanceof Error ? err.message : "Could not read that image.";
         setErrors((e) => ({
           ...e,
-          photo: msg === "Could not read that image." ? `Could not read that upload (${facts}) — re-export as JPG (sRGB) and retry.` : msg,
+          photo: msg === "Could not read that image." ? `Couldn't open ${facts}. Upload a JPG, PNG, or WebP file.` : msg,
         }));
       })
       .finally(() => setPreparing(false));
@@ -367,11 +368,11 @@ export default function UpdateClient() {
         <h2 className="text-lg font-bold text-cream">{wasUpdated ? "Pending request updated" : "Submitted for review"}</h2>
         <p className="mx-auto max-w-prose text-sm leading-relaxed text-fog">
           {wasUpdated
-            ? "Your earlier pending request was replaced with this one — admin reviews a single row per member."
-            : sentPhoto
-              ? "Admin will approve your photo and it appears on the team page instantly after approval."
-              : "Admin will approve your links and they appear on the team page instantly after approval."}
-          {linksSameNote ? " Links match what's already live, so only the photo changes." : null}
+              ? "Your earlier pending request was replaced with this one."
+              : sentPhoto
+                ? "Your photo will appear on the team page after approval."
+                : "Your links will appear on the team page after approval."}
+          {linksSameNote ? " Links are unchanged, so only the photo updates." : null}
         </p>
         <button
           type="button"
@@ -394,7 +395,7 @@ export default function UpdateClient() {
         <li className={cn("rounded-full border px-3 py-1", photoDone ? "border-green-400/60 text-green-300" : "border-line text-fog")}>
           {photoDone ? "✓ " : "2 "} Photo{photoOptional ? " (optional)" : ""}
         </li>
-        <li className={cn("rounded-full border px-3 py-1", stepLinks > 0 ? "border-brand/60 text-cream" : "border-line text-fog")}>
+        <li className={cn("rounded-full border px-3 py-1", stepLinks > 0 ? "border-line text-cream" : "border-line text-fog")}>
           3 Links{stepLinks > 0 ? ` · ${stepLinks}` : " (optional)"}
         </li>
         <li className="ml-auto text-faint">{doneCount}/2 required done</li>
@@ -409,7 +410,7 @@ export default function UpdateClient() {
           onChange={(e) => pickName(e.target.value)}
           aria-invalid={Boolean(errors.name)}
           className={cn(
-            "min-h-[44px] w-full rounded-xl border bg-surface px-3 py-3 text-base text-cream focus:outline-none focus:ring-2 focus:ring-brand sm:text-sm",
+            "min-h-[44px] w-full rounded-xl border bg-surface px-3 py-3 text-base text-cream focus:outline-none focus:ring-2 focus:ring-neutral-400 sm:text-sm",
             errors.name ? "border-red-400/70" : "border-line",
           )}
         >

@@ -210,7 +210,7 @@ export default function TeamAdminClient() {
                 </div>
                 {detailsDraft?.id === s.id ? (
                   <div className="space-y-2 rounded-xl border border-line p-3">
-                    <p className="text-xs text-faint">Edits on approved rows go live on /team instantly.</p>
+                    <p className="text-xs text-faint">Changes go live on save.</p>
                     <label className="block text-xs text-fog">
                       Name
                       <input
@@ -306,7 +306,7 @@ export default function TeamAdminClient() {
                   type="button"
                   disabled={actingId === s.id}
                   onClick={() => setCropFor(s)}
-                  className="mt-2 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-brand/60 bg-brand/10 px-4 py-2 text-xs font-semibold text-cream hover:bg-brand/20 disabled:opacity-60"
+                  className="mt-2 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-line px-4 py-2 text-xs font-semibold text-fog hover:text-cream disabled:opacity-60"
                 >
                   <Crop className="h-3.5 w-3.5" aria-hidden /> Adjust crop / move
                 </button>
@@ -370,7 +370,7 @@ export default function TeamAdminClient() {
       ) : (
         <>
           <section aria-labelledby="team-requests">
-            <h2 id="team-requests" className="font-mono text-xs uppercase tracking-widest text-brand">{"// requests"}</h2>
+            <h2 id="team-requests" className="font-mono text-xs uppercase tracking-widest text-fog">{"// requests"}</h2>
             {requests.length === 0 ? (
               <div className="rank-card mt-2 p-6 text-center text-sm text-fog">
                 No open requests. Share <span className="font-mono text-cream">/team/update</span> with members.
@@ -386,7 +386,7 @@ export default function TeamAdminClient() {
 
           <section aria-labelledby="team-members">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 id="team-members" className="font-mono text-xs uppercase tracking-widest text-brand">{"// members"}</h2>
+              <h2 id="team-members" className="font-mono text-xs uppercase tracking-widest text-fog">{"// members"}</h2>
               <span className="flex-1" aria-hidden />
               {(["approved", "rejected", "all"] as Filter[]).map((f) => (
                 <button
@@ -395,7 +395,7 @@ export default function TeamAdminClient() {
                   onClick={() => setFilter(f)}
                   className={cn(
                     "inline-flex min-h-[44px] items-center rounded-full border px-4 py-2 text-xs font-bold capitalize",
-                    filter === f ? "border-brand/60 bg-brand/10 text-cream" : "border-line text-fog hover:text-cream",
+                    filter === f ? "border-line bg-white/10 text-cream" : "border-line text-fog hover:text-cream",
                   )}
                 >
                   {f} · {f === "all" ? counts.approved + counts.rejected : counts[f]}
@@ -426,9 +426,9 @@ export default function TeamAdminClient() {
           />
         ) : (
           <div role="alert" className="rank-card p-6 text-center text-sm text-fog">
-            No photo stored for {cropFor.name} — ask them to submit one via
+            No photo on file for {cropFor.name}. Ask them to submit one from
             <span className="font-mono text-cream"> /team/update </span>
-            first, then crop.
+            first.
             <div className="mt-3">
               <button
                 type="button"

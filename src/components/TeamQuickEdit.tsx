@@ -51,12 +51,14 @@ async function coerceToJpegFile(file: File): Promise<File> {
     const base = file.name.replace(/\.(heic|heif)$/i, "") || "photo";
     return new File([blob], `${base}.jpg`, { type: "image/jpeg" });
   } catch {
-    throw new Error("Could not convert that HEIC photo — re-export as JPG and retry.");
+    throw new Error("Couldn't convert this HEIC photo. Save it as a JPG and try again.");
   }
 }
 
 function fileFacts(f: File): string {
-  return `${f.name || "photo"}, ${f.type || "unknown type"}, ${Math.max(1, Math.round(f.size / 1024))}KB`;
+  const mb = f.size / (1024 * 1024);
+  const size = mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.max(1, Math.round(f.size / 1024))} KB`;
+  return `${f.name || "photo"} (${f.type || "unknown type"}, ${size})`;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -184,11 +186,11 @@ export default function TeamQuickEdit({
     if (!file) return;
     setError("");
     if (!ACCEPTED_TYPES.includes(file.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)) {
-      setError("Upload a JPG, PNG, WebP or HEIC photo.");
+      setError("Upload a JPG, PNG, WebP, or HEIC file.");
       return;
     }
     if (file.size > MAX_BYTES) {
-      setError("Photo must be under 5MB.");
+      setError("File must be under 5 MB.");
       return;
     }
     try {
@@ -212,7 +214,7 @@ export default function TeamQuickEdit({
       const msg = err instanceof Error ? err.message : "Could not read that image.";
       setError(
         msg === "Could not read that image."
-          ? `Could not read that upload (${fileFacts(file)}) — re-export as JPG (sRGB) and retry.`
+          ? `Couldn't open ${fileFacts(file)}. Upload a JPG, PNG, or WebP file.`
           : msg,
       );
     }
@@ -293,7 +295,7 @@ export default function TeamQuickEdit({
           </button>
         </div>
         <p className="mt-1 text-xs leading-relaxed text-fog">
-          Saves to the approved record — live on /team instantly.
+          Changes go live when saved.
         </p>
 
         <div className="mt-3 flex items-center gap-3">
@@ -301,7 +303,7 @@ export default function TeamQuickEdit({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={preview} alt={name} className="h-20 w-20 shrink-0 rounded-xl border border-line object-cover" />
           ) : (
-            <div aria-hidden className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-brand/20 text-xl font-bold text-cream">
+            <div aria-hidden className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border border-line bg-white/5 text-xl font-bold text-cream">
               {initials(name)}
             </div>
           )}
@@ -317,7 +319,7 @@ export default function TeamQuickEdit({
               <button
                 type="button"
                 onClick={openRecrop}
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-brand/60 bg-brand/10 px-4 py-2 text-xs font-semibold text-cream hover:bg-brand/20"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-line px-4 py-2 text-xs font-semibold text-fog hover:text-cream"
               >
                 <Crop className="h-4 w-4" aria-hidden /> Adjust crop
               </button>

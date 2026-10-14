@@ -215,7 +215,7 @@ export default function PhotoCropper({
         // Google-style: open frame-filling (cover), centered. Drag to frame face.
       })
       .catch(() => {
-        if (live) setError("Could not read that photo in the cropper — upload it again or re-export as JPG (sRGB).");
+        if (live) setError("Couldn't load this photo for cropping. Upload it again as a JPG.");
       });
     return () => {
       live = false;
@@ -427,7 +427,7 @@ export default function PhotoCropper({
           </button>
         </div>
         <p className="mt-1 text-xs leading-relaxed text-fog">
-          Drag with finger to move · pinch with 2 fingers to zoom · arrows nudge · frame stays full, square 800×800 output.
+          Drag to position. Slider or pinch to zoom. Output is a square JPG.
         </p>
         <div
           ref={boxRef}
@@ -466,7 +466,7 @@ export default function PhotoCropper({
             step={0.05}
             value={zoom}
             onChange={(e) => applyZoom(Number(e.target.value))}
-            className="min-h-[44px] w-full min-w-0 flex-1 accent-purple-500"
+            className="min-h-[44px] w-full min-w-0 flex-1 accent-zinc-200"
           />
           <button
             type="button"
