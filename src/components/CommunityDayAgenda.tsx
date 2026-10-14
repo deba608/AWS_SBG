@@ -152,6 +152,7 @@ export default function CommunityDayAgenda() {
                                 width={28}
                                 height={28}
                                 loading="lazy"
+                                decoding="async"
                                 className="h-7 w-7 rounded-full border border-line object-cover"
                               />
                               {p.name}
@@ -168,6 +169,7 @@ export default function CommunityDayAgenda() {
                                 width={28}
                                 height={28}
                                 loading="lazy"
+                                decoding="async"
                                 className="h-7 w-7 rounded-full border border-line object-cover"
                               />
                               {p.name}

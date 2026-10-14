@@ -13,6 +13,14 @@ export const metadata: Metadata = {
     title: `DecodeX Hackathon Team Registration · ${SITE.shortName}`,
     description:
       "Day 1, 6th October — register your team of exactly 4. ₹15,000 prize pool. Separate from the Community Day pass.",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "DecodeX Hackathon — AWS SBG SUIIT" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `DecodeX Hackathon Team Registration · ${SITE.shortName}`,
+    description:
+      "Day 1, 6th October — register your team of exactly 4. ₹15,000 prize pool.",
+    images: [`${SITE.url}/opengraph-image`],
   },
 };
 
@@ -74,8 +82,37 @@ const checklist = [
 ];
 
 export default function HackathonPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: "DecodeX Hackathon — AWS SBG SUIIT",
+    startDate: "2026-10-06T08:45:00+05:30",
+    endDate: "2026-10-06T17:00:00+05:30",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    eventStatus: "https://schema.org/EventScheduled",
+    image: [`${SITE.url}/opengraph-image`],
+    location: {
+      "@type": "Place",
+      name: "APJ Abdul Kalam Auditorium, SUIIT",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "APJ Abdul Kalam Auditorium, SUIIT, Burla",
+        addressLocality: "Sambalpur",
+        addressRegion: "Odisha",
+        addressCountry: "IN",
+      },
+    },
+    organizer: { "@type": "Organization", name: SITE.name, url: SITE.url },
+    offers: { "@type": "Offer", price: "0", priceCurrency: "INR", availability: "https://schema.org/InStock" },
+    description:
+      "DecodeX Hackathon on Day 1, 6th October 2026 at SUIIT: teams of exactly 4, ₹15,000 prize pool. Separate from the Community Day pass.",
+  };
   return (
     <div className="mx-auto w-full max-w-3xl px-5 pt-24 pb-12 sm:px-6 md:pt-32">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <p className="text-xs font-mono tracking-widest text-brand uppercase">
         {"// decodex hackathon · day 1"}
       </p>

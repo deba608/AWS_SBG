@@ -11,11 +11,9 @@ export const SITE = {
   links: {
     join: "https://chat.whatsapp.com/E8TfpRLRko5DBvhgtAYJpm",
     linkedin: "https://www.linkedin.com/company/aws-sbg-suiit",
-    discord: "https://discord.gg",
     whatsapp: "https://chat.whatsapp.com/E8TfpRLRko5DBvhgtAYJpm",
     instagram: "https://www.instagram.com/awssbg_suiit",
     email: "mailto:awssbg@suiit.ac.in",
-    eventDefault: "https://meetup.com",
     eventCommunityDay:
       "https://meetu.ps/e/Qgc6f/1fcHtj/i?utm_source=sbg-site&utm_medium=event-page&utm_campaign=scd-2026",
   },

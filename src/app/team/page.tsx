@@ -19,11 +19,13 @@ export const metadata: Metadata = {
     url: "/team",
     title: `Team · ${SITE.shortName}`,
     description: `Meet the student builders running AWS SBG — the ${SITE.name} at ${SITE.collegeName}.`,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: `Team · ${SITE.shortName}`,
     description: `Meet the student builders running AWS SBG — the ${SITE.name} at ${SITE.collegeName}.`,
+    images: [`${SITE.url}/opengraph-image`],
   },
 };
 
@@ -48,7 +50,7 @@ export default async function TeamPage() {
         <div className="mb-8 sm:mb-16">
           <Reveal>
             <h1 className="text-balance text-3xl font-extrabold tracking-tight text-cream sm:text-4xl md:text-5xl lg:text-6xl">
-              Meet the builders behind the community.
+              <span className="sr-only">AWS SBG SUIIT Team — </span>Meet the builders behind the community.
             </h1>
           </Reveal>
 

@@ -260,6 +260,7 @@ export default function TeamExplorer({
                   <img
                     src={previewMember.photo}
                     alt={previewMember.name}
+                    decoding="async"
                     className="h-full w-full object-cover"
                   />
                 ) : (

@@ -134,7 +134,7 @@ const siteJsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${plexSans.variable} ${plexMono.variable} h-full`} suppressHydrationWarning>
+    <html lang="en-IN" className={`${plexSans.variable} ${plexMono.variable} h-full`} suppressHydrationWarning>
       <body className="flex min-h-full flex-col bg-ink font-sans text-cream antialiased" suppressHydrationWarning>
         <script
           type="application/ld+json"

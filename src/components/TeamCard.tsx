@@ -41,6 +41,7 @@ export default function TeamCard({ member }: { member: TeamMember }) {
               src={member.photo as string}
               alt={member.name}
               loading="lazy"
+              decoding="async"
               onError={() => setFailed(true)}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
             />
@@ -114,6 +115,7 @@ export default function TeamCard({ member }: { member: TeamMember }) {
             <img
               src={member.photo as string}
               alt={member.name}
+              decoding="async"
               className="max-h-[70dvh] w-auto max-w-full rounded-2xl border border-line object-contain shadow-[0_24px_64px_rgba(0,0,0,0.5)]"
             />
             <p className="mt-3 text-center text-sm font-semibold text-cream">
