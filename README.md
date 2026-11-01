@@ -71,16 +71,6 @@ Team submissions live in Redis (Upstash key `sbg:team-submissions:v1`) with a **
 
 ---
 
-## 🏆 DecodeX Hackathon (Day 1 — 6 Oct 2026)
-
-**`/hackathon`** — Team registration portal. Exactly 4 members (leader + 3 teammates), one student one team. Tracks: Hardware / Software / Both. ₹15,000 prize pool (1st ₹7,000 · 2nd ₹5,000 · 3rd ₹3,000).
-
-- **Admin**: `/admin/hackathon` — list, edit, delete teams.
-- **Payouts**: `/payouts` — winners submit UPI/bank details for prize transfer. Admin: `/admin/payouts`.
-- Data: Upstash key `sbg:hackathon:v1`; local backup `.data-hackathon/hackathon.json`.
-
----
-
 ## 🍱 Food Tokens & Daywise
 
 - `/admin/food-tokens` — Upload registration Excel (or pull live list), preview and print food tokens (10–15 per A4), works offline (Ctrl+P).
@@ -99,10 +89,7 @@ Team submissions live in Redis (Upstash key `sbg:team-submissions:v1`) with a **
 | `/admin` | Dashboard: stats, search, CSV export (needs `ADMIN_PASS`) |
 | `/admin/scan` | Gate scanner: camera + manual verify/burn |
 | `/admin/team` | Team request review + live profile management |
-| `/admin/hackathon` | Hackathon team list / edit / delete |
-| `/admin/payouts` | Winner payout records |
 | `/admin/food-tokens` | Food token upload + print |
-| `/payouts` | Winners: submit UPI/bank for prize transfer |
 | `/api/health` | Prod diagnostics (disk, redis, mail, expiry) |
 
 ---
