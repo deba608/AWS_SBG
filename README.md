@@ -2,8 +2,6 @@
 
 Student-led developer community platform for the AWS Student Builder Group at Sambalpur University Institute of Information Technology (SUIIT).
 
-> Learn → Build → Deploy → Connect
-
 [![Live Site](https://img.shields.io/badge/Live_Site-awssbgsuiit.in-AD5CFF?style=for-the-badge&logo=vercel&logoColor=white)](https://awssbgsuiit.in/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
