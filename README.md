@@ -1,7 +1,8 @@
 # AWS Student Builder Group — SUIIT
 
-> A dark-first developer community platform: **Learn → Build → Deploy → Connect**  
-> Built for the AWS Student Builder Group at Sambalpur University Institute of Information Technology (SUIIT).
+Student-led developer community platform for the AWS Student Builder Group at Sambalpur University Institute of Information Technology (SUIIT).
+
+> Learn → Build → Deploy → Connect
 
 [![Live Site](https://img.shields.io/badge/Live_Site-awssbgsuiit.vercel.app-AD5CFF?style=for-the-badge&logo=vercel&logoColor=white)](https://awssbgsuiit.vercel.app/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
@@ -12,27 +13,11 @@
 
 ## 🌐 Live Website
 
-The production deployment is live on Vercel:  
-👉 **[https://awssbgsuiit.vercel.app/](https://awssbgsuiit.vercel.app/)**
+Production on Vercel: **[https://awssbgsuiit.vercel.app/](https://awssbgsuiit.vercel.app/)**
 
 ---
 
-## 🚀 Flagship Event
-
-### **AWS Student Community Day SUIIT 2026**
-- **Date & Time**: 6–8 October 2026 · 9:00 AM – 5:30 PM IST (3 days)
-- **Venue**: APJ Abdul Kalam Auditorium, SUIIT, Burla
-- **Audience**: 300+ expected student builders, developers, and cloud enthusiasts
-- **Program**: Day 1 DecodeX Hackathon · Day 2 Tech Parliament + Make-A-Bot Competition · Day 3 Speaker/Podcast + prizes
-- **Perks**: Lunch + certificates for pass holders (no swag)
-- **Event Page**: [`/events/awsscd26`](https://awssbgsuiit.vercel.app/events/awsscd26)
-- **Registration**: on-site QR entry pass — no Meetup. One `@suiit.ac.in` mail + roll number = one pass.
-
-> Event details (schedule, speaker lineup, FAQs) are managed in [`src/data/community-day.ts`](src/data/community-day.ts). Event cards in [`src/data/events.ts`](src/data/events.ts).
-
----
-
-## 🎟️ Pass System (registration → gate)
+## 🎟️ Pass System (registration → gate entry)
 
 **Flow**: form (full name, roll no, SUIIT mail, gender M/F, food Veg/Non-veg) → instant QR entry pass shown + PNG download + emailed → gate scan burns (single-use).
 
@@ -74,18 +59,53 @@ ADMIN_PASS=<gate-password>
 
 ---
 
+## 👥 Team Directory & Member Submissions
+
+**`/team`** — Community leadership and core team member profiles, merged from static roster [`src/data/team.ts`](src/data/team.ts) plus admin-approved member submissions.
+
+**`/team/update`** — Member self-update form (photo crop + links). Creates a pending request; admin reviews on `/admin/team`.
+
+**`/admin/team`** — Review pending requests, approve/reject, edit links, re-crop photos. Approved records show on `/team` instantly.
+
+### Permanent team-record storage
+
+Team submissions live in Redis (Upstash key `sbg:team-submissions:v1`) with a **permanent local file backup** at `.data-team/team-submissions.json`. Every write hits both Redis and the local file; reads fall back to the local file if Redis is empty/flushed, so records survive a Redis reset. `.data-team/` is gitignored and never committed.
+
+---
+
+## 🏆 DecodeX Hackathon (Day 1 — 6 Oct 2026)
+
+**`/hackathon`** — Team registration portal. Exactly 4 members (leader + 3 teammates), one student one team. Tracks: Hardware / Software / Both. ₹15,000 prize pool (1st ₹7,000 · 2nd ₹5,000 · 3rd ₹3,000).
+
+- **Admin**: `/admin/hackathon` — list, edit, delete teams.
+- **Payouts**: `/payouts` — winners submit UPI/bank details for prize transfer. Admin: `/admin/payouts`.
+- Data: Upstash key `sbg:hackathon:v1`; local backup `.data-hackathon/hackathon.json`.
+
+---
+
+## 🍱 Food Tokens & Daywise
+
+- `/admin/food-tokens` — Upload registration Excel (or pull live list), preview and print food tokens (10–15 per A4), works offline (Ctrl+P).
+- `/api/admin/daywise` — Daywise registration breakdown for lunch headcount.
+
+---
+
 ## 🗺️ Routes
 
 | Route | Description |
 |---|---|
-| `/` | Landing page featuring hero, mission statement, what we do, and quick join actions |
-| `/events` | Community Day spotlight, upcoming events, and past workshop recaps |
-| `/events/awsscd26` | Dedicated flagship event landing page with live countdown, speaker lineup, schedule, and registration modal |
+| `/` | Landing: hero, mission, what we do, quick join actions |
 | `/passes` | Self-serve QR entry pass form |
-| `/admin` | Organizer dashboard (stats, search, export) — `ADMIN_PASS` |
-| `/admin/scan` | Gate scanner (camera + manual verify/burn) |
+| `/team` | Community leadership & core team profiles |
+| `/team/update` | Member update request (photo crop + links) |
+| `/admin` | Dashboard: stats, search, CSV export (needs `ADMIN_PASS`) |
+| `/admin/scan` | Gate scanner: camera + manual verify/burn |
+| `/admin/team` | Team request review + live profile management |
+| `/admin/hackathon` | Hackathon team list / edit / delete |
+| `/admin/payouts` | Winner payout records |
+| `/admin/food-tokens` | Food token upload + print |
+| `/payouts` | Winners: submit UPI/bank for prize transfer |
 | `/api/health` | Prod diagnostics (disk, redis, mail, expiry) |
-| `/team` | Community leadership and core team member profiles |
 
 ---
 
@@ -95,7 +115,8 @@ ADMIN_PASS=<gate-password>
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **Icons**: [Lucide React](https://lucide.dev/)
+- **Icons**: [Lucide React](https://www.lucide.dev/)
+- **Storage**: Upstash Redis + local JSON file backup
 - **Deployment**: [Vercel](https://vercel.com/)
 
 ---
@@ -104,24 +125,27 @@ ADMIN_PASS=<gate-password>
 
 ### Prerequisites
 
-- Node.js (v18.18+ or v20+ recommended)
+- Node.js (v18.18+ or v20+)
 - npm / yarn / pnpm
 
 ### Getting Started
 
 ```bash
-# 1. Clone the repository
+# 1. Clone
 git clone https://github.com/deba608/AWS_SBG.git
 cd AWS_SBG
 
-# 2. Install dependencies
+# 2. Install
 npm install
 
-# 3. Start local development server
+# 3. Copy env and fill in secrets
+cp .env.local.example .env.local   # if available, else create .env.local manually
+
+# 4. Run dev server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to view the result.
+Open [http://localhost:3000](http://localhost:3000).
 
 ### Available Scripts
 
@@ -137,10 +161,9 @@ npm start       # Start production server locally
 ## ⚙️ Configuration & Customization
 
 - **Site metadata & links**: [`src/lib/constants.ts`](src/lib/constants.ts) (college name, leads, social handles, links)
-- **Community Day content**: [`src/data/community-day.ts`](src/data/community-day.ts) (speakers, agenda, perks, FAQs)
-- **Team members**: [`src/data/team.ts`](src/data/team.ts)
-- **Events**: [`src/data/events.ts`](src/data/events.ts)
-- **Theme & Brand Colors**: Electric Violet / Purple (`#AD5CFF`) sampled from [`public/logo.png`](public/logo.png)
+- **Team members (static)**: [`src/data/team.ts`](src/data/team.ts)
+- **Contact validation**: [`src/lib/validate-contact.ts`](src/lib/validate-contact.ts)
+- **Theme / brand color**: Electric Violet / Purple (`#AD5CFF`) from [`public/logo.png`](public/logo.png)
 
 ---
 

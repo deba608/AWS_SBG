@@ -75,9 +75,12 @@ async function readStore(): Promise<TeamSubmissionStore> {
   const redis = getRedis();
   if (redis) {
     try {
-      return parseStore(await redis.get(REDIS_KEY));
+      const parsed = parseStore(await redis.get(REDIS_KEY));
+      // Redis is source of truth when it has data; fall back to local backup
+      // when Redis was flushed / reset (empty store) so records survive.
+      if (parsed.submissions.length > 0) return parsed;
     } catch {
-      return emptyStore();
+      // fall through to local backup
     }
   }
   try {
@@ -87,16 +90,23 @@ async function readStore(): Promise<TeamSubmissionStore> {
   }
 }
 
-async function writeStore(store: TeamSubmissionStore): Promise<void> {
-  const redis = getRedis();
-  if (redis) {
-    await redis.set(REDIS_KEY, JSON.stringify(store));
-    return;
-  }
+/** Permanent local backup so team records survive Redis flushes / resets. */
+async function writeLocalBackup(store: TeamSubmissionStore): Promise<void> {
   await fs.mkdir(path.dirname(FILE), { recursive: true });
   const tmp = `${FILE}.${process.pid}.tmp`;
   await fs.writeFile(tmp, JSON.stringify(store, null, 2), "utf8");
   await fs.rename(tmp, FILE);
+}
+
+async function writeStore(store: TeamSubmissionStore): Promise<void> {
+  const redis = getRedis();
+  if (redis) {
+    try {
+      await redis.set(REDIS_KEY, JSON.stringify(store));
+    } catch {}
+  }
+  // always keep a local permanent backup
+  await writeLocalBackup(store);
 }
 
 let writeQueue: Promise<unknown> = Promise.resolve();

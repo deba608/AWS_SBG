@@ -36,6 +36,9 @@ yarn-error.log*
 # passes local store (P1)
 /.data-passes/
 
+# team submissions permanent backup (never commit)
+/.data-team/
+
 # vercel
 .vercel
 
@@ -43,6 +46,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# demo QR output holds live pass tokens — never commit
+# demo QR output holds live pass tokens ï¿½ never commit
 public/demo-qrs/
 
