@@ -4,7 +4,7 @@ Student-led developer community platform for the AWS Student Builder Group at Sa
 
 > Learn → Build → Deploy → Connect
 
-[![Live Site](https://img.shields.io/badge/Live_Site-awssbgsuiit.vercel.app-AD5CFF?style=for-the-badge&logo=vercel&logoColor=white)](https://awssbgsuiit.vercel.app/)
+[![Live Site](https://img.shields.io/badge/Live_Site-awssbgsuiit.in-AD5CFF?style=for-the-badge&logo=vercel&logoColor=white)](https://awssbgsuiit.in/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
@@ -13,7 +13,7 @@ Student-led developer community platform for the AWS Student Builder Group at Sa
 
 ## 🌐 Live Website
 
-Production on Vercel: **[https://awssbgsuiit.vercel.app/](https://awssbgsuiit.vercel.app/)**
+Production: **[https://awssbgsuiit.in/](https://awssbgsuiit.in/)**
 
 ---
 
@@ -169,7 +169,7 @@ npm start       # Start production server locally
 
 ## 📬 Community & Contact
 
-- **Website**: [awssbgsuiit.vercel.app](https://awssbgsuiit.vercel.app/)
+- **Website**: [awssbgsuiit.in](https://awssbgsuiit.in/)
 - **WhatsApp Community**: [Join Community](https://chat.whatsapp.com/E8TfpRLRko5DBvhgtAYJpm)
 - **LinkedIn**: [AWS SBG SUIIT](https://www.linkedin.com/company/aws-sbg-suiit)
 - **Instagram**: [@awssbg_suiit](https://www.instagram.com/awssbg_suiit)
